@@ -67,7 +67,7 @@ $result = $videoSources->fetchAll(PDO::FETCH_ASSOC);
 var_dump($result);
 
 
-foreach ($result as $k => $v)
+foreach ($result[0] as $k => $v)
 {
     print "k is $k\n";
     print "v is $v\n";
