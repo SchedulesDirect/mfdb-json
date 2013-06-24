@@ -108,23 +108,19 @@ function getRandhash($username, $password, $baseurl, $api)
     $res["request"] = array("username" => $username, "password" => $password);
     $res["api"] = $api;
 
-    $pg = "$baseurl/handleRequest.php";
+    $opts = array('http' =>
+                  array(
+                      'method'  => 'POST',
+                      'header'  => 'Content-type: application/x-www-form-urlencoded',
+                      'content' => json_encode($res)
+                  )
+    );
 
-    $params = array("http" => array(
-        "method" => 'POST',
-        "content" => json_encode($res)
-    ));
+    $context = stream_context_create($opts);
 
-    $ctx = stream_context_create($params);
-    $fp = @fopen($pg, "rb", false, $ctx);
-    if (!$fp) {
-        throw new Exception("Problem with $pg, $php_errormsg");
-    }
-    $response = @stream_get_contents($fp);
-    if ($response === false) {
-        throw new Exception("Problem reading data from $pg, $php_errormsg");
-    }
-    return $response;
+    $r1 = rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
+    print "response from schedulesdirect: $r1\n";
+
 }
 
 ?>
