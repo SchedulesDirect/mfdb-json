@@ -1,3 +1,5 @@
+#!/usr/bin/php
+
 <?php
 /*
  * This file is a grabber which downloads data from Schedules Direct's JSON service.
