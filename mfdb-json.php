@@ -145,8 +145,11 @@ function getStatus($rh, $api)
         }
     }
 
-    print "headends:\n\n";
-    var_dump($he);
+    // print "headends:\n\n";
+    // var_dump($he);
+
+    print "Used server: " . $res["serverID"] . "\n";
+    print "Last data refresh: " . $res["lastDataUpdate"] . "\n";
 
 
 
