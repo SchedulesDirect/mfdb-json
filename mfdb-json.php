@@ -97,7 +97,10 @@ $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
 print "Logging into Schedules Direct.\n";
 $randHash = getRandhash($username, $password, $baseurl, $api);
 
-print "randhash is: $randHash\n";
+if ($randHash != "ERROR")
+{
+    print "randhash is: $randHash\n";
+}
 
 
 function getRandhash($username, $password, $baseurl, $api)
@@ -119,7 +122,7 @@ function getRandhash($username, $password, $baseurl, $api)
     ));
 
     $response = rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
-    // print "response from schedulesdirect: $r1\n";
+
     $res = array();
     $res = json_decode($response, true);
 
@@ -130,7 +133,13 @@ function getRandhash($username, $password, $baseurl, $api)
         exit;
     }
 
-    var_dump($res);
+    if ($res["response"] == "OK")
+    {
+        return $res["randhash"];
+    }
+
+    print "Response from schedulesdirect: $response\n";
+    return "ERROR";
 }
 
 ?>
