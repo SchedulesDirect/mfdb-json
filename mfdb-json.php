@@ -15,9 +15,9 @@ $password = "mythtv";
 $host = "localhost";
 $db = "mythconverg";
 
-$longoptions = array("beta::","help::","host::","user::","password::");
+$longoptions = array("beta::", "help::", "host::", "user::", "password::");
 
-$options = getopt("", $longoptions);
+$options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
 {
     switch ($k)
@@ -26,6 +26,7 @@ foreach ($options as $k => $v)
             $isBeta == TRUE;
             break;
         case "help":
+        case "h":
             print "The following options are available:\n";
             print "--beta\n";
             print "--help (this text)\n";
@@ -62,7 +63,10 @@ $videoSources = $dbh->prepare("SELECT * FROM videosource");
 $videoSources->execute();
 $result = $videoSources->fetchAll(PDO::FETCH_ASSOC);
 
-foreach($result as $k=>$v)
+var_dump($result);
+
+
+foreach ($result as $k => $v)
 {
     print "k is $k\n";
     print "v is $v\n";
