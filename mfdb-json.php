@@ -108,11 +108,14 @@ function getRandhash($username, $password, $baseurl, $api)
     $res["request"] = array("username" => $username, "password" => $password);
     $res["api"] = $api;
 
+    $fields = array("request" => json_encode($res));
+    $data = http_build_query($fields);
+
     $opts = array('http' =>
                   array(
                       'method'  => 'POST',
                       'header'  => 'Content-type: application/x-www-form-urlencoded',
-                      'content' => json_encode($res)
+                      'content' => $data
                   )
     );
 
