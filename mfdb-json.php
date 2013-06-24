@@ -116,7 +116,9 @@ function getStatus($rh, $api)
 
     $response = sendRequest(json_encode($res));
 
-    var_dump($response);
+    $res = array();
+    $res = json_decode($response);
+    var_dump($res);
 }
 
 function getRandhash($username, $password, $baseurl, $api)
