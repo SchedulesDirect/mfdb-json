@@ -108,22 +108,29 @@ function getRandhash($username, $password, $baseurl, $api)
     $res["request"] = array("username" => $username, "password" => $password);
     $res["api"] = $api;
 
-    $fields = array("request" => json_encode($res));
-    $data = http_build_query($fields);
+    $data = http_build_query(array("request" => json_encode($res)));
 
-    $opts = array('http' =>
-                  array(
-                      'method'  => 'POST',
-                      'header'  => 'Content-type: application/x-www-form-urlencoded',
-                      'content' => $data
-                  )
-    );
+    $context = stream_context_create(array('http' =>
+                                           array(
+                                               'method'  => 'POST',
+                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                               'content' => $data
+                                           )
+    ));
 
-    $context = stream_context_create($opts);
+    $response = rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
+    // print "response from schedulesdirect: $r1\n";
+    $res = array();
+    $res = json_decode($response, true);
 
-    $r1 = rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
-    print "response from schedulesdirect: $r1\n";
+    if (json_last_error() != 0)
+    {
+        print "JSON decode error:\n";
+        var_dump($response);
+        exit;
+    }
 
+    var_dump($res);
 }
 
 ?>
