@@ -60,17 +60,13 @@ try
     exit;
 }
 
-$videoSources = $dbh->prepare("SELECT * FROM videosource");
+$videoSources = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
 $videoSources->execute();
 $result = $videoSources->fetchAll(PDO::FETCH_ASSOC);
 
-var_dump($result);
-
-
 foreach ($result[0] as $k => $v)
 {
-    print "k is $k\n";
-    print "v is $v\n";
+    print "k is $k\tv is $v\n";
 }
 
 ?>
