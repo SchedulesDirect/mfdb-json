@@ -15,7 +15,7 @@ $password = "mythtv";
 $host = "localhost";
 $db = "mythconverg";
 
-$longoptions = array("beta::","host::","user::","password::");
+$longoptions = array("beta::","help::","host::","user::","password::");
 
 $options = getopt("", $longoptions);
 foreach ($options as $k => $v)
@@ -25,6 +25,13 @@ foreach ($options as $k => $v)
         case "beta":
             $isBeta == TRUE;
             break;
+        case "help":
+            print "The following options are available:\n";
+            print "--beta\n";
+            print "--help (this text)\n";
+            print "--host=\texample: --host=192.168.10.10\n";
+            print "--user=\tUsername to connect as\n";
+            print "--password=\tPassword to access database.\n";
         case "host":
             $host = $v;
             break;
