@@ -60,13 +60,21 @@ try
     exit;
 }
 
-$videoSources = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
-$videoSources->execute();
-$result = $videoSources->fetchAll(PDO::FETCH_ASSOC);
+$stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
+$stmt->execute();
+$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($result[0] as $k => $v)
 {
     print "k is $k\tv is $v\n";
 }
+
+print "Retrieving list of channels.\n";
+$stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE");
+$stmt->execute();
+$result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+var_dump($result);
+
 
 ?>
