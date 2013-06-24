@@ -103,7 +103,6 @@ if ($randHash != "ERROR")
 }
 
 
-
 function getStatus($rh, $api)
 {
     print "Status messages from Schedules Direct:";
@@ -119,9 +118,9 @@ function getStatus($rh, $api)
     $res = json_decode($response, true);
 
     $am = array();
+    $he = array();
 
-    var_dump($res);
-
+    // var_dump($res);
 
 
     foreach ($res as $k => $v)
@@ -131,16 +130,25 @@ function getStatus($rh, $api)
             case "account":
                 foreach ($v["messages"] as $a)
                 {
-                    $am[$a["msgID"]] = array("date"=>$a["date"], "message"=>$a["message"]);
+                    $am[$a["msgID"]] = array("date" => $a["date"], "message" => $a["message"]);
                 }
                 $expires = $v["expires"];
                 $maxHeadends = $v["maxHeadends"];
                 $nextConnectTime = $v["nextSuggestedConnectTime"];
                 break;
             case "headend":
+                foreach ($v as $hk => $hv)
+                {
+                    $he[$hv["ID"]] = $hv["modified"];
+                }
                 break;
         }
     }
+
+    print "headends:\n\n";
+    var_dump($he);
+
+
 
 }
 
@@ -170,6 +178,7 @@ function getRandhash($username, $password, $baseurl, $api)
     }
 
     print "Response from schedulesdirect: $response\n";
+
     return "ERROR";
 }
 
