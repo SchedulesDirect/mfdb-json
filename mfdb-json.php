@@ -118,20 +118,29 @@ function getStatus($rh, $api)
     $res = array();
     $res = json_decode($response, true);
 
+    $am = array();
+
+    var_dump($res);
+
+
+
     foreach ($res as $k => $v)
     {
         switch ($k)
         {
             case "account":
-                foreach ($v["messages"] as $accountMessages)
+                foreach ($v["messages"] as $a)
                 {
-                    var_dump($accountMessages);
+                    $am[$a["msgID"]] = array("date"=>$a["date"], "message"=>$a["message"]);
                 }
+                $expires = $v["expires"];
+                $maxHeadends = $v["maxHeadends"];
+                $nextConnectTime = $v["nextSuggestedConnectTime"];
+                break;
+            case "headend":
+                break;
         }
     }
-
-
-
 
 }
 
