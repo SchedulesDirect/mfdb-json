@@ -12,7 +12,7 @@ $todayDate = $date->format("Y-m-d");
 
 $user = "mythtv";
 $password = "mythtv";
-$host = "192.168.10.10";
+$host = "localhost";
 $db = "mythconverg";
 
 $longoptions = array("beta::","host::","user::","password::");
