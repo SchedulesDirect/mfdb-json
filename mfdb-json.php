@@ -102,6 +102,23 @@ if ($randHash != "ERROR")
     print "randhash is: $randHash\n";
 }
 
+getStatus($randHash, $api);
+
+
+function getStatus($rh, $api)
+{
+    print "Status messages from Schedules Direct:";
+    $res = array();
+    $res["action"] = "get";
+    $res["object"] = "status";
+    $res["randhash"] = $rh;
+    $res["api"] = $api;
+
+    $response = sendRequest(json_encode($res));
+
+    var_dump($response);
+}
+
 
 function getRandhash($username, $password, $baseurl, $api)
 {
@@ -111,17 +128,7 @@ function getRandhash($username, $password, $baseurl, $api)
     $res["request"] = array("username" => $username, "password" => $password);
     $res["api"] = $api;
 
-    $data = http_build_query(array("request" => json_encode($res)));
-
-    $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'content' => $data
-                                           )
-    ));
-
-    $response = rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
+    $response = sendRequest(json_encode($res));
 
     $res = array();
     $res = json_decode($response, true);
@@ -140,6 +147,21 @@ function getRandhash($username, $password, $baseurl, $api)
 
     print "Response from schedulesdirect: $response\n";
     return "ERROR";
+}
+
+function sendRequest($jsonText)
+{
+    $data = http_build_query(array("request" => json_encode($jsonText)));
+
+    $context = stream_context_create(array('http' =>
+                                           array(
+                                               'method'  => 'POST',
+                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                               'content' => $data
+                                           )
+    ));
+
+    return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
 }
 
 ?>
