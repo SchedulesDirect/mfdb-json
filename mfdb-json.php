@@ -60,6 +60,15 @@ try
     exit;
 }
 
+if ($isBeta)
+{
+    # Test server. Things may be broken there.
+    $baseurl = "http://23.21.174.111";
+    print "Using beta server.\n";
+    # API must match server version.
+    $api = 20130512;
+}
+
 $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
 $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -67,6 +76,17 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 foreach ($result[0] as $k => $v)
 {
     print "k is $k\tv is $v\n";
+    switch ($k)
+    {
+        case
+        "userid":
+            $username = $v;
+            break;
+        case
+        "password":
+            $password = sha1($v);
+            break;
+    }
 }
 
 print "Retrieving list of channels.\n";
@@ -74,7 +94,24 @@ $stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE"
 $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-var_dump($result);
+print "Logging into Schedules Direct.\n";
+$randHash = getRandhash($username, $password, $api);
 
+
+function getRandhash($username, $password, $api)
+{
+    $res = array();
+    $res["action"] = "get";
+    $res["object"] = "randhash";
+    $res["request"] = array("username" => $username, "password" => $password);
+    $res["api"] = $api;
+
+    $a = json_encode($res);
+
+    print "json is\n$a\n\n";
+
+
+
+}
 
 ?>
