@@ -25,6 +25,15 @@ foreach ($options as $k => $v)
         case "beta":
             $isBeta == TRUE;
             break;
+        case "host":
+            $host = $v;
+            break;
+        case "user":
+            $user = $v;
+            break;
+        case "password":
+            $password = $v;
+            break;
     }
 }
 
@@ -42,5 +51,14 @@ try
     exit;
 }
 
+$videoSources = $dbh->prepare("SELECT * FROM videosource");
+$videoSources->execute();
+$result = $videoSources->fetchAll(PDO::FETCH_ASSOC);
+
+foreach($result as $k=>$v)
+{
+    print "k is $k\n";
+    print "v is $v\n";
+}
 
 ?>
