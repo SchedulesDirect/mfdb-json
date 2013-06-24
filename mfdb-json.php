@@ -119,7 +119,6 @@ function getStatus($rh, $api)
     var_dump($response);
 }
 
-
 function getRandhash($username, $password, $baseurl, $api)
 {
     $res = array();
@@ -151,7 +150,7 @@ function getRandhash($username, $password, $baseurl, $api)
 
 function sendRequest($jsonText)
 {
-    $data = http_build_query(array("request" => json_encode($jsonText)));
+    $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
                                            array(
