@@ -116,7 +116,7 @@ function getStatus($rh, $api)
     $response = sendRequest(json_encode($res));
 
     $res = array();
-    $res = json_decode($response);
+    $res = json_decode($response, true);
 
     foreach ($res as $k => $v)
     {
