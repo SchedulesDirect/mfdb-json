@@ -30,9 +30,10 @@ foreach ($options as $k => $v)
             print "The following options are available:\n";
             print "--beta\n";
             print "--help (this text)\n";
-            print "--host=\texample: --host=192.168.10.10\n";
-            print "--user=\tUsername to connect as\n";
+            print "--host=\t\texample: --host=192.168.10.10\n";
+            print "--user=\t\tUsername to connect as\n";
             print "--password=\tPassword to access database.\n";
+            exit;
         case "host":
             $host = $v;
             break;
