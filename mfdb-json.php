@@ -92,7 +92,7 @@ foreach ($result[0] as $k => $v)
 print "Retrieving list of channels.\n";
 $stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE");
 $stmt->execute();
-$result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+$stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 print "Logging into Schedules Direct.\n";
 $randHash = getRandhash($username, $password, $baseurl, $api);
@@ -100,8 +100,26 @@ $randHash = getRandhash($username, $password, $baseurl, $api);
 if ($randHash != "ERROR")
 {
     getStatus($randHash, $api);
+    getSchedules($randHash, $stationIDs);
 }
 
+function getSchedules($rh, array $stationIDs)
+{
+    print "Sending schedule request.\n";
+    $res = array();
+    $res["action"] = "get";
+    $res["object"] = "schedules";
+    $res["randhash"] = $rh;
+    $res["api"] = $api;
+    $res["request"] = $stationIDs;
+
+    $response = sendRequest(json_encode($res));
+
+    $res = array();
+    $res = json_decode($response, true);
+
+    var_dump($res);
+}
 
 function getStatus($rh, $api)
 {
@@ -152,7 +170,6 @@ function getStatus($rh, $api)
     print "Last data refresh: " . $res["lastDataUpdate"] . "\n";
 
 
-
 }
 
 function getRandhash($username, $password, $baseurl, $api)
@@ -190,11 +207,11 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'content' => $data
-                                           )
+    array(
+        'method' => 'POST',
+        'header' => 'Content-type: application/x-www-form-urlencoded',
+        'content' => $data
+    )
     ));
 
     return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
