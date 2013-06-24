@@ -99,10 +99,9 @@ $randHash = getRandhash($username, $password, $baseurl, $api);
 
 if ($randHash != "ERROR")
 {
-    print "randhash is: $randHash\n";
+    getStatus($randHash, $api);
 }
 
-getStatus($randHash, $api);
 
 
 function getStatus($rh, $api)
@@ -118,7 +117,22 @@ function getStatus($rh, $api)
 
     $res = array();
     $res = json_decode($response);
-    var_dump($res);
+
+    foreach ($res as $k => $v)
+    {
+        switch ($k)
+        {
+            case "account":
+                foreach ($v["messages"] as $accountMessages)
+                {
+                    var_dump($accountMessages);
+                }
+        }
+    }
+
+
+
+
 }
 
 function getRandhash($username, $password, $baseurl, $api)
