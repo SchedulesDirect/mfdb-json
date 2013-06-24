@@ -95,10 +95,12 @@ $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 print "Logging into Schedules Direct.\n";
-$randHash = getRandhash($username, $password, $api);
+$randHash = getRandhash($username, $password, $baseurl, $api);
+
+print "randhash is: $randHash\n";
 
 
-function getRandhash($username, $password, $api)
+function getRandhash($username, $password, $baseurl, $api)
 {
     $res = array();
     $res["action"] = "get";
@@ -106,12 +108,23 @@ function getRandhash($username, $password, $api)
     $res["request"] = array("username" => $username, "password" => $password);
     $res["api"] = $api;
 
-    $a = json_encode($res);
+    $pg = "$baseurl/handleRequest.php";
 
-    print "json is\n$a\n\n";
+    $params = array("http" => array(
+        "method" => 'POST',
+        "content" => json_encode($res)
+    ));
 
-
-
+    $ctx = stream_context_create($params);
+    $fp = @fopen($pg, "rb", false, $ctx);
+    if (!$fp) {
+        throw new Exception("Problem with $pg, $php_errormsg");
+    }
+    $response = @stream_get_contents($fp);
+    if ($response === false) {
+        throw new Exception("Problem reading data from $pg, $php_errormsg");
+    }
+    return $response;
 }
 
 ?>
