@@ -96,7 +96,6 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($result[0] as $k => $v)
 {
-    print "k is $k\tv is $v\n";
     switch ($k)
     {
         case
