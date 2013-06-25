@@ -359,7 +359,7 @@ function dbInit($dbh)
   `md5` char(22) NOT NULL,
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`row`),
-  UNIQUE KEY `pid-MD5` (`prog_id`,`md5`)
+  UNIQUE KEY `pid-MD5` (`programID`,`md5`)
   )
   ENGINE = InnoDB DEFAULT CHARSET=utf8");
 
