@@ -167,9 +167,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
 
     $insertStack = array();
     $replaceStack = array();
+    $retrieveStack = array();
 
     foreach ($programCache as $k => $v)
     {
+        $str = "($k,$v),";
         if (array_key_exists($k, $dbProgramCache))
         {
             /*
@@ -178,7 +180,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
              */
             if ($dbProgramCache[$k] != $v)
             {
-                $replaceStack[] = $k;
+                $retrieveStack[] = $k;
+                $replaceStack[] = $str;
             }
         }
         else
@@ -186,7 +189,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             /*
              * The programID wasn't in the database, so we'll need to get it.
              */
-            $insertStack[] = $k;
+            $retrieveStack[] = $k;
+            $insertStack[] = $str;
         }
     }
 
@@ -204,7 +208,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
     $res["object"] = "programs";
     $res["randhash"] = $rh;
     $res["api"] = $api;
-    $res["request"] = array_merge($insertStack, $replaceStack);
+    $res["request"] = $retrieveStack;
 
     $response = sendRequest(json_encode($res));
 
@@ -225,17 +229,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         {
             $zipArchive->extractTo("$tempdir");
             $zipArchive->close();
-            foreach (glob("$tempdir/*.json.txt") as $f)
-            {
-                $a = json_decode(file_get_contents($f), true);
-                $pid = $a["programID"];
-                $md5 = $a["md5"];
-
-                foreach ($a["program"] as $v)
-                {
-                    $programCache[$v["programID"]] = $v["md5"];
-                }
-            }
         }
         else
         {
@@ -244,9 +237,124 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         }
     }
 
+    if (count($insertStack))
+    {
+        print "Inserting new MD5s into cache.\n";
+        $base = "INSERT INTO programMD5Cache(programID,md5) VALUES ";
+        $chunk = 1000;
+        commitToDb($dbh, $insertStack, $base, $chunk, true, true);
+    }
 
+    if (count($replaceStack))
+    {
+        print "Updating MD5s in cache.\n";
+        $base = "REPLACE INTO programMD5Cache(programID,md5) VALUES ";
+        $chunk = 1000;
+        commitToDb($dbh, $replaceStack, $base, $chunk, true, true);
+    }
+}
+
+function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
+{
+/*
+ * If the "chunk" is too big, then things get slow, and you run into other issues, like max size of the packet
+ * that mysql will swallow. Better safe than sorry, and once things are running there aren't massive numbers of
+ * added program IDs.
+ */
+
+    $numRows = count($stack);
+
+    if ($numRows == 0)
+    {
+        return;
+    }
+
+    $str = "";
+    $counter = 0;
+    $loop = 0;
+    $numLoops = intval($numRows / $chunk);
+
+    if ($verbose)
+    {
+        print "Chunk:$chunk\n $numRows\n";
+    }
+
+    if ($useTransaction)
+    {
+        $dbh->beginTransaction();
+    }
+
+    foreach ($stack as $value)
+    {
+        $counter++;
+        $str .= $value;
+
+        if ($counter % $chunk == 0)
+        {
+            $loop++;
+            $str = rtrim($str, ","); // Get rid of the last comma.
+            print "Loop: $loop of $numLoops\r";
+
+            try
+            {
+                $count = $dbh->exec("$base$str");
+            } catch (Exception $e)
+            {
+                print "Exception: " . $e->getMessage();
+            }
+
+            if ($count === FALSE)
+            {
+                print_r($dbh->errorInfo(), true);
+                print "line:\n\n$base$str\n";
+                exit;
+            }
+            $str = "";
+            if ($useTransaction)
+            {
+                $dbh->commit();
+                $dbh->beginTransaction();
+            }
+        }
+    }
+
+    print "\n";
+
+    // Remainder
+    $str = rtrim($str, ","); // Get rid of the last comma.
+
+    $count = $dbh->exec("$base$str");
+    if ($count === FALSE)
+    {
+        print_r($dbh->errorInfo(), true);
+    }
+
+    if ($verbose)
+    {
+        print "Done inserting.\n";
+    }
+    if ($useTransaction)
+    {
+        $dbh->commit();
+    }
+}
+
+function holder()
+{
+    foreach (glob("$tempdir/*.json.txt") as $f)
+    {
+        $a = json_decode(file_get_contents($f), true);
+        $pid = $a["programID"];
+        $md5 = $a["md5"];
+
+        foreach ($a["program"] as $v)
+        {
+            $programCache[$v["programID"]] = $v["md5"];
+        }
+    }
 
 }
+
 
 function parseScheduleFile(array $sched)
 {
