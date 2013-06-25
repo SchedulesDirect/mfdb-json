@@ -403,7 +403,7 @@ function addHeadendsToSchedulesDirect($rh)
 
     foreach ($res["data"] as $v)
     {
-        print "headend: " . $v["headend"] . " name: " . $v["name"] . " location:" . $v["location"] . "\n";
+        print "headend: " . $v["headend"] . "\nname: " . $v["name"] . " location:" . $v["location"] . "\n\n";
     }
 
 
