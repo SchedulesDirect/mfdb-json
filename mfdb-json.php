@@ -338,9 +338,6 @@ function setup($dbh)
                 }
             }
 
-            // Temp to trigger the "else" code path.
-            $he=array();
-
             if (count($he))
             {
                 print "A to add a new sourceid in MythTV\n";
@@ -432,7 +429,6 @@ function addHeadendsToSchedulesDirect($rh)
         print "Press ENTER to continue.\n";
         $a = fgets(STDIN);
     }
-
 }
 
 
@@ -552,7 +548,6 @@ function parseScheduleFile(array $sched)
 
 function getStatus($rh, $api)
 {
-    print "Status messages from Schedules Direct:\n";
     $res = array();
     $res["action"] = "get";
     $res["object"] = "status";
@@ -564,6 +559,8 @@ function getStatus($rh, $api)
 
 function printStatus($json)
 {
+    print "Status messages from Schedules Direct:\n";
+
     $res = array();
     $res = json_decode($json, true);
 
