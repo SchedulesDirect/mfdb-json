@@ -169,13 +169,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
     $replaceStack = array();
 
     /*
-     * The "insert" and "replace" arrays will hold the strings that we're going to build in order to do a multi-line
-     * insert.
-     */
-    $insert = array();
-    $replace = array();
-
-    /*
      * An array to hold the programIDs that we need to request from the server.
      */
     $retrieveStack = array();
@@ -251,13 +244,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
                                  "json"      => file_get_contents("$tempdir/$progID.json.txt")));
-            /*$str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
-            $insert[] = $str;
-            if (strlen($str) > 4095)
-            {
-                $maxString = $str;
-                $maxLength = strlen($str);
-            } */
         }
 
         $stmt = $dbh->prepare("REPLACE INTO programCache(programID,md5,json) VALUES (:programID,:md5,:json)");
@@ -265,31 +251,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
                                  "json"      => file_get_contents("$tempdir/$progID.json.txt")));
-            /*$str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
-            $replace[] = $str;
-            if (strlen($str) > 4095)
-            {
-                $maxLength = strlen($str);
-                $maxString = $str;
-            } */
         }
-
-    }
-
-    if (count($insert))
-    {
-        print "Inserting new programs into cache.\n";
-        $base = "INSERT INTO programCache(programID,md5,json) VALUES ";
-        $chunk = 500;
-        commitToDb($dbh, $insert, $base, $chunk, true, true);
-    }
-
-    if (count($replace))
-    {
-        print "Updating MD5s in cache.\n";
-        $base = "REPLACE INTO programCache(programID,md5,json) VALUES ";
-        $chunk = 500;
-        commitToDb($dbh, $replace, $base, $chunk, true, true);
     }
 }
 
