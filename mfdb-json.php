@@ -171,7 +171,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
 
     foreach ($programCache as $k => $v)
     {
-        $str = "($k,$v),";
+        $str = "('" . $k . "','" . $v . "'),";
         if (array_key_exists($k, $dbProgramCache))
         {
             /*
@@ -256,11 +256,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
 
 function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
 {
-/*
- * If the "chunk" is too big, then things get slow, and you run into other issues, like max size of the packet
- * that mysql will swallow. Better safe than sorry, and once things are running there aren't massive numbers of
- * added program IDs.
- */
+    /*
+     * If the "chunk" is too big, then things get slow, and you run into other issues, like max size of the packet
+     * that mysql will swallow. Better safe than sorry, and once things are running there aren't massive numbers of
+     * added program IDs.
+     */
 
     $numRows = count($stack);
 
@@ -460,12 +460,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-    array(
-        'method' => 'POST',
-        'header' => 'Content-type: application/x-www-form-urlencoded',
-        'timeout' => 480,
-        'content' => $data
-    )
+                                           array(
+                                               'method'  => 'POST',
+                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                               'timeout' => 480,
+                                               'content' => $data
+                                           )
     ));
 
     return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
