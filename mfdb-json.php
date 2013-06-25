@@ -272,7 +272,7 @@ function sendRequest($jsonText)
 
 function tempdir()
 {
-    $tempfile = tempnam(sys_get_temp_dir(), "");
+    $tempfile = tempnam(sys_get_temp_dir(), "mfdb");
     if (file_exists($tempfile))
     {
         unlink($tempfile);
