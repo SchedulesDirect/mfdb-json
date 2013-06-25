@@ -6,6 +6,10 @@
  */
 
 $isBeta = TRUE;
+$doInit = FALSE;
+$debug = TRUE;
+$doSetup = FALSE;
+
 date_default_timezone_set("America/Chicago");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
@@ -14,9 +18,8 @@ $user = "mythtv";
 $password = "mythtv";
 $host = "localhost";
 $db = "mythconverg";
-$doInit = FALSE;
 
-$longoptions = array("beta::", "help::", "host::", "init::", "user::", "password::");
+$longoptions = array("beta::", "debug::", "help::", "host::", "init::", "password::", "setup::", "user::");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -24,7 +27,10 @@ foreach ($options as $k => $v)
     switch ($k)
     {
         case "beta":
-            $isBeta == TRUE;
+            $isBeta = TRUE;
+            break;
+        case "debug":
+            $debug = TRUE;
             break;
         case "help":
         case "h":
@@ -40,11 +46,15 @@ foreach ($options as $k => $v)
             break;
         case "init":
             $doInit = TRUE;
-        case "user":
-            $user = $v;
-            break;
         case "password":
             $password = $v;
+            break;
+        case "setup":
+            $doSetup = TRUE;
+            setup($dbh);
+            break;
+        case "user":
+            $user = $v;
             break;
     }
 }
@@ -107,10 +117,10 @@ $randHash = getRandhash($username, $password, $baseurl, $api);
 if ($randHash != "ERROR")
 {
     getStatus($randHash, $api);
-    getSchedules($dbh, $randHash, $api, $stationIDs);
+    getSchedules($dbh, $randHash, $api, $stationIDs, $debug);
 }
 
-function getSchedules($dbh, $rh, $api, array $stationIDs)
+function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 {
     $programCache = array();
     $dbProgramCache = array();
@@ -244,6 +254,10 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
                                  "json"      => file_get_contents("$tempdir/$progID.json.txt")));
+            if ($debug == FALSE)
+            {
+                unlink("$tempdir/$progID.json.txt");
+            }
         }
 
         $stmt = $dbh->prepare("REPLACE INTO programCache(programID,md5,json) VALUES (:programID,:md5,:json)");
@@ -251,9 +265,55 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
                                  "json"      => file_get_contents("$tempdir/$progID.json.txt")));
+            if ($debug == FALSE)
+            {
+                unlink("$tempdir/$progID.json.txt");
+            }
+        }
+
+        if ($debug == FALSE)
+        {
+            unlink("$tempdir/serverID.txt");
+            rmdir("$tempdir");
         }
     }
+
+    /*
+     * Now that we've grabbed the program details for all the programs that we need to schedule, get to work.
+     */
+
+
 }
+
+function setup($dbh)
+{
+    $done = FALSE;
+
+    print "\n\nThis setup is destructive. Press Enter to continue, CTRL-C to quit.\n";
+    $a = fgets(STDIN);
+
+    $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($result as $k => $v)
+    {
+        print "k is $k\tv is $v\n";
+
+        print "\n\n";
+        var_dump($v);
+        print "\n\n";
+
+
+
+    }
+//    while ($done == FALSE)
+    {
+
+    }
+
+}
+
 
 function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
 {
