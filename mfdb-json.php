@@ -452,7 +452,7 @@ function getStatus($rh, $api)
     $res["randhash"] = $rh;
     $res["api"] = $api;
 
-    $response = sendRequest(json_encode($res));
+    return sendRequest(json_encode($res));
 }
 
 function printStatus($json)
