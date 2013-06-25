@@ -292,9 +292,6 @@ function setup($dbh)
 {
     $done = FALSE;
 
-    print "\n\nThis setup is destructive. Press Enter to continue, CTRL-C to quit.\n";
-    $a = fgets(STDIN);
-
     while ($done == FALSE)
     {
         $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
@@ -312,17 +309,17 @@ function setup($dbh)
                 $username = $v["userid"];
                 print "lineupid: " . $v["lineupid"] . "\n";
                 print "password: " . $v["password"] . "\n\n";
-                $password = sha1($v["password"]);
+                $password = $v["password"];
             }
         }
         else
         {
             $username = readline("Schedules Direct username:");
-            $password = sha1(readline("Schedules Direct password:"));
+            $password = readline("Schedules Direct password:");
         }
 
         print "Checking existing lineups at Schedules Direct.\n";
-        $randHash = getRandhash($username, $password, "http://23.21.174.111", "20130512");
+        $randHash = getRandhash($username, sha1($password), "http://23.21.174.111", "20130512");
 
         if ($randHash != "ERROR")
         {
@@ -385,6 +382,7 @@ function setup($dbh)
 function addHeadendsToSchedulesDirect($username, $password)
 {
     $res = array();
+    $password = sha1($password);
 
     print "Enter your 5-digit zip code for U.S.\n";
     print "Enter your 6-character postal code for Canada.\n";
