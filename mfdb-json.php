@@ -246,36 +246,32 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             exit;
         }
 
-        $maxLength = 0;
-        $maxString = "";
-
-        foreach ($insertStack as $progID => $md5)
+        $stmt = $dbh->prepare("INSERT INTO programCache(programID,md5,json) VALUES (:programID,:md5,:json)");
+        foreach ($insertStack as $progID => $v)
         {
-            $str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
+            $stmt->execute(array("programID" => $progID, "md5" => $v,
+                                 "json"      => file_get_contents("$tempdir/$progID.json.txt")));
+            /*$str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
             $insert[] = $str;
             if (strlen($str) > 4095)
             {
                 $maxString = $str;
                 $maxLength = strlen($str);
-            }
+            } */
         }
 
-        foreach ($replaceStack as $progID => $md5)
+        $stmt = $dbh->prepare("REPLACE INTO programCache(programID,md5,json) VALUES (:programID,:md5,:json)");
+        foreach ($replaceStack as $progID => $v)
         {
-            $str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
+            $stmt->execute(array("programID" => $progID, "md5" => $v,
+                                 "json"      => file_get_contents("$tempdir/$progID.json.txt")));
+            /*$str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
             $replace[] = $str;
             if (strlen($str) > 4095)
             {
                 $maxLength = strlen($str);
                 $maxString = $str;
-            }
-        }
-
-        if ($maxLength)
-        {
-            print "Max string length was: $maxLength\n";
-            print "String was: $maxString\n";
-            exit;
+            } */
         }
 
     }
