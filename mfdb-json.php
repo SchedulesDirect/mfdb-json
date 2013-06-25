@@ -325,6 +325,8 @@ function setup($dbh)
         {
             $res = array();
             $res = json_decode(getStatus($randHash, "20130512"), true);
+            $he = array();
+
             foreach ($res as $k => $v)
             {
                 if ($k == "headend")
