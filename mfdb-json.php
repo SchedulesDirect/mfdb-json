@@ -106,6 +106,7 @@ if ($randHash != "ERROR")
 function getSchedules($rh, $api, array $stationIDs)
 {
     $programCache = array();
+    $dbProgramCache = array();
 
     print "Sending schedule request.\n";
     $res = array();
@@ -151,9 +152,74 @@ function getSchedules($rh, $api, array $stationIDs)
         }
     }
 
-    var_dump($programCache);
-    print "There are " . count($programCache) . "programIDs in the schedule.\n";
+    print "There are " . count($programCache) . " programIDs in the upcoming schedule.\n";
+    print "Retrieving existing MD5 values.\n";
 
+    $stmt = $dbh->prepare("SELECT programID,md5 FROM programMD5Cache");
+    $stmt->execute();
+    $dbProgramCache = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
+
+    $insertStack = array();
+    $replaceStack = array();
+
+    foreach ($programCache as $k => $v)
+    {
+        if (array_key_exists($k, $dbProgramCache))
+        {
+            /*
+             * First we'll check if the key (the programID) exists in the database already, and if yes, does it have
+             * the same md5 value as the one that we downloaded?
+             */
+            if ($dbProgramCache[$k] != $v)
+            {
+                $replaceStack[] = $k;
+            }
+        }
+        else
+        {
+            /*
+             * The programID wasn't in the database, so we'll need to get it.
+             */
+            $insertStack[] = $k;
+        }
+    }
+
+    /*
+     * Now we've got an array of programIDs that we need to download, either because we didn't have them,
+     * or they have different md5's.
+     */
+
+    print "Need to download " . count($insertStack) . " new programs.\n";
+    print "Need to download " . count($replaceStack) . "updated programs.\n";
+
+    print "Sending program request.\n";
+    $res = array();
+    $res["action"] = "get";
+    $res["object"] = "programs";
+    $res["randhash"] = $rh;
+    $res["api"] = $api;
+    $res["request"] = array_merge($insertStack, $replaceStack);
+
+    $response = sendRequest(json_encode($res));
+
+    $res = array();
+    $res = json_decode($response, true);
+    if ($res["response"] == "OK")
+    {
+        $tempdir = tempdir();
+
+        $filename = $res["filename"];
+        $url = $res["URL"];
+        file_put_contents("$tempdir/$filename", file_get_contents($url));
+
+        $zipArchive = new ZipArchive();
+        $result = $zipArchive->open("$tempdir/$filename");
+        if ($result === TRUE)
+        {
+            $zipArchive->extractTo("$tempdir");
+            $zipArchive->close();
+        }
+    }
 }
 
 function parseScheduleFile(array $sched)
@@ -286,7 +352,15 @@ function tempdir()
 
 function init($dbh)
 {
-    $stmt = $dbh->prepare("CREATE TABLE programMD5Cache ()");
+    $stmt = $dbh->prepare("CREATE TABLE programMD5Cache (`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `programID` char(14) NOT NULL DEFAULT '',
+  `md5` char(22) NOT NULL,
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`row`),
+  UNIQUE KEY `pid-MD5` (`prog_id`,`md5`)
+  )
+  ENGINE = InnoDB DEFAULT CHARSET=utf8
+)");
 }
 
 ?>
