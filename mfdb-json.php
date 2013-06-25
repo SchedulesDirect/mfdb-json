@@ -137,7 +137,11 @@ function getSchedules($rh, $api, array $stationIDs)
             foreach (glob("$tempdir/sched*") as $f)
             {
                 $a = json_decode(file_get_contents($f), true);
-                $programCache = array_merge($programCache, parseScheduleFile($a));
+
+                foreach ($a["programs"] as $v)
+                {
+                    $programCache[$v["programID"]] = $v["md5"];
+                }
             }
         }
         else
@@ -147,7 +151,6 @@ function getSchedules($rh, $api, array $stationIDs)
         }
     }
 
-    $programCache = array_unique($programCache);
     var_dump($programCache);
     print "There are " . count($programCache) . "programIDs in the schedule.\n";
 
