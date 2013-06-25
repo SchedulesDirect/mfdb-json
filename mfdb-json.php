@@ -427,8 +427,8 @@ function addHeadendsToSchedulesDirect($rh)
     }
     else
     {
-        print "Received error response from server:\n";
-        print $res["message"] . "\n";
+        print "\n\n-----\nERROR:Received error response from server:\n";
+        print $res["message"] . "\n\n-----";
     }
 
 }
