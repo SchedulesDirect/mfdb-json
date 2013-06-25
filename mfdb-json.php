@@ -158,15 +158,14 @@ function parseScheduleFile(array $sched)
 
     $pID = array();
 
-    foreach ($sched["programs"] as $k => $v)
+    foreach ($sched["programs"] as $v)
     {
-        print "k is\n" . var_dump($k);
-        print "\nv is \n" . var_dump($v);
-        $a = fgets(STDIN);
-        // $pID[$k["programID"]] =
+        $pID[$v["programID"]] = $v["md5"];
     }
 
-
+var_dump($pID);
+    $a   = fgets(STDIN);
+    return $a;
 }
 
 
