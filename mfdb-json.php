@@ -37,6 +37,9 @@ foreach ($options as $k => $v)
         case "host":
             $host = $v;
             break;
+        case "init":
+            dbInit($dbh);
+            break;
         case "user":
             $user = $v;
             break;
@@ -138,11 +141,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             foreach (glob("$tempdir/sched*") as $f)
             {
                 $a = json_decode(file_get_contents($f), true);
-                print "\n\n";
-                var_dump($a);
-                print "\n\n";
-                $t = fgets(STDIN);
-
                 foreach ($a["programs"] as $v)
                 {
                     $programCache[$v["programID"]] = $v["md5"];
@@ -354,7 +352,7 @@ function tempdir()
     }
 }
 
-function init($dbh)
+function dbInit($dbh)
 {
     $stmt = $dbh->prepare("CREATE TABLE programMD5Cache (`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `programID` char(14) NOT NULL DEFAULT '',
@@ -365,6 +363,8 @@ function init($dbh)
   )
   ENGINE = InnoDB DEFAULT CHARSET=utf8
 )");
+
+    $stmt->execute();
 }
 
 ?>
