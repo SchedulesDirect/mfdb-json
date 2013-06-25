@@ -51,7 +51,6 @@ foreach ($options as $k => $v)
             break;
         case "setup":
             $doSetup = TRUE;
-            setup($dbh);
             break;
         case "user":
             $user = $v;
@@ -75,6 +74,11 @@ try
 if ($doInit)
 {
     dbInit($dbh);
+}
+
+if ($doSetup)
+{
+    setup($dbh);
 }
 
 if ($isBeta)
