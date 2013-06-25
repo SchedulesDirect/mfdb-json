@@ -145,6 +145,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             foreach (glob("$tempdir/sched*") as $f)
             {
                 $a = json_decode(file_get_contents($f), true);
+                print "Checking file $f\n";
                 foreach ($a["programs"] as $v)
                 {
                     $programCache[$v["programID"]] = $v["md5"];
@@ -196,7 +197,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
      */
 
     print "Need to download " . count($insertStack) . " new programs.\n";
-    print "Need to download " . count($replaceStack) . "updated programs.\n";
+    print "Need to download " . count($replaceStack) . " updated programs.\n";
 
     print "Sending program request.\n";
     $res = array();
@@ -210,6 +211,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
 
     $res = array();
     $res = json_decode($response, true);
+
+    var_dump($res);
+
+
+
     if ($res["response"] == "OK")
     {
         $tempdir = tempdir();
