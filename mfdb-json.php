@@ -399,11 +399,15 @@ function addHeadendsToSchedulesDirect($rh)
     $res["api"] = "20130512";
     $res["request"] = "PC:$response";
 
-    $r = sendRequest(json_encode($res));
+    $res = json_decode(sendRequest(json_encode($res)), true);
 
-    print "response is \n\n";
-    var_dump($r);
-    print "\n\n";
+    foreach ($res["data"] as $v)
+    {
+        print "headend: " . $v["headend"] . " name: " . $v["name"] . " location:" . $v["location"] . "\n";
+    }
+
+
+
     $a = fgets(STDIN);
 
 }
