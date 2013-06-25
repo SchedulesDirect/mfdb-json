@@ -624,7 +624,8 @@ function printStatus($dbh, $json)
             print "ID: $id\t\tLast modified:$modified\n";
             $stmt->execute(array("he"=>$id));
             $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            if ($result[0] < $modified)
+
+            if ((count($result) == 0) OR ($result[0] < $modified))
             {
                 print "Newer lineup exists at Schedules Direct; last modified " . $result[0] . "\n";
             }
