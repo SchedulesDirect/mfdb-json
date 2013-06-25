@@ -345,6 +345,7 @@ function sendRequest($jsonText)
     array(
         'method' => 'POST',
         'header' => 'Content-type: application/x-www-form-urlencoded',
+        'timeout' => 480,
         'content' => $data
     )
     ));
