@@ -14,20 +14,7 @@ $user = "mythtv";
 $password = "mythtv";
 $host = "localhost";
 $db = "mythconverg";
-
-print "Attempting to connect to database.\n";
-
-try
-{
-    $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $password,
-        array(PDO::ATTR_PERSISTENT => true));
-    $dbh->exec("SET CHARACTER SET utf8");
-    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-} catch (PDOException $e)
-{
-    print "Exception with PDO: " . $e->getMessage() . "\n";
-    exit;
-}
+$doInit = FALSE;
 
 $longoptions = array("beta::", "help::", "host::", "init::", "user::", "password::");
 
@@ -52,8 +39,7 @@ foreach ($options as $k => $v)
             $host = $v;
             break;
         case "init":
-            dbInit($dbh);
-            break;
+            $doInit = TRUE;
         case "user":
             $user = $v;
             break;
@@ -61,6 +47,24 @@ foreach ($options as $k => $v)
             $password = $v;
             break;
     }
+}
+
+print "Attempting to connect to database.\n";
+try
+{
+    $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $password,
+        array(PDO::ATTR_PERSISTENT => true));
+    $dbh->exec("SET CHARACTER SET utf8");
+    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+} catch (PDOException $e)
+{
+    print "Exception with PDO: " . $e->getMessage() . "\n";
+    exit;
+}
+
+if ($doInit)
+{
+    dbInit($dbh);
 }
 
 if ($isBeta)
