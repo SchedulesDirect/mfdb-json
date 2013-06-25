@@ -185,7 +185,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
              */
             if ($dbProgramCache[$progID] != $md5)
             {
-                $insertStack[$progID] = $md5;
+                $replaceStack[$progID] = $md5;
             }
         }
         else
@@ -193,7 +193,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             /*
              * The programID wasn't in the database, so we'll need to get it.
              */
-            $replaceStack[$progID] = $md5;
+            $insertStack[$progID] = $md5;
         }
     }
 
@@ -241,6 +241,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             print "FATAL: Could not open .zip file while extracting programIDs.\n";
             exit;
         }
+
+        print "Check directory: $tempdir\n";
+        $tt=fgets(STDIN);
 
         foreach ($insertStack as $progID => $md5)
         {
