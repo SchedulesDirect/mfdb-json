@@ -228,8 +228,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             foreach (glob("$tempdir/*.json.txt") as $f)
             {
                 $a = json_decode(file_get_contents($f), true);
-                var_dump($a);
-                $tt=fgets(STDIN);
+                $pid = $a["programID"];
+                $md5 = $a["md5"];
+
                 foreach ($a["program"] as $v)
                 {
                     $programCache[$v["programID"]] = $v["md5"];
