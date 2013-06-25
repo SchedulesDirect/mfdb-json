@@ -361,8 +361,7 @@ function dbInit($dbh)
   PRIMARY KEY (`row`),
   UNIQUE KEY `pid-MD5` (`prog_id`,`md5`)
   )
-  ENGINE = InnoDB DEFAULT CHARSET=utf8
-)");
+  ENGINE = InnoDB DEFAULT CHARSET=utf8");
 
     $stmt->execute();
 }
