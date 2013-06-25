@@ -310,7 +310,7 @@ function setup($dbh)
             $username = $v["userid"];
             print "lineupid: " . $v["lineupid"] . "\n";
             print "password: " . $v["password"] . "\n\n";
-            $password = $v["password"];
+            $password = sha1($v["password"]);
         }
     }
 
