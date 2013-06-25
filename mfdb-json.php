@@ -119,8 +119,7 @@ $randHash = getRandhash($username, $password, $baseurl, $api);
 
 if ($randHash != "ERROR")
 {
-    $response = getStatus($randHash, $api);
-    printStatus($response);
+    printStatus(getStatus($randHash, $api));
     getSchedules($dbh, $randHash, $api, $stationIDs, $debug);
 }
 
@@ -175,7 +174,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     print "There are " . count($programCache) . " programIDs in the upcoming schedule.\n";
     print "Retrieving existing MD5 values.\n";
 
-    $stmt = $dbh->prepare("SELECT programID,md5 FROM programCache");
+    $stmt = $dbh->prepare("SELECT programID,md5 FROM SDprogramCache");
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
 
@@ -253,7 +252,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             exit;
         }
 
-        $stmt = $dbh->prepare("INSERT INTO programCache(programID,md5,json) VALUES (:programID,:md5,:json)");
+        $stmt = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
         foreach ($insertStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
@@ -264,7 +263,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             }
         }
 
-        $stmt = $dbh->prepare("REPLACE INTO programCache(programID,md5,json) VALUES (:programID,:md5,:json)");
+        $stmt = $dbh->prepare("REPLACE INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
         foreach ($replaceStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
@@ -361,6 +360,12 @@ function setup($dbh)
                         $he = readline("Headend:>");
                         $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
                         $stmt->execute(array("he" => $he, "sid" => $sid));
+                        /*
+                         * Download the lineups
+                         */
+                        /*
+                         * Create the channel table.
+                         */
                         break;
                     case "Q":
                     default:
@@ -431,6 +436,20 @@ function addHeadendsToSchedulesDirect($rh)
     }
 }
 
+function getLineup($rh, $he)
+{
+    print "Retrieving lineup from Schedules Direct.\n";
+
+    $res = array();
+    $res["action"] = "get";
+    $res["object"] = "lineups";
+    $res["randhash"] = $rh;
+    $res["api"] = "20130512";
+    $res["request"] = $he;
+
+    return sendRequest(json_encode($res), true);
+
+}
 
 function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
 {
@@ -597,11 +616,18 @@ function printStatus($json)
 
     if (count($he))
     {
+        $stmt = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
         print "The following headends are in your account:\n";
 
         foreach ($he as $id => $modified)
         {
             print "ID: $id\t\tLast modified:$modified\n";
+            $stmt->execute(array("he"=>$id));
+            $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            if ($result[0] < $modified)
+            {
+                print "Newer lineup exists at Schedules Direct; last modified " . $result[0] . "\n";
+            }
         }
         print "\n";
     }
