@@ -120,10 +120,25 @@ function getSchedules($rh, $api, array $stationIDs)
 
     if ($res["response"] == "OK")
     {
+        $tempdir = tempdir();
+
         $filename = $res["filename"];
         $url = $res["URL"];
-        file_put_contents($filename,file_get_contents($url));
+        file_put_contents("$tempdir/$filename", file_get_contents($url));
+
+        $zipArchive = new ZipArchive();
+        $result = $zipArchive->open("$tempdir/$filename");
+        if ($result === TRUE) {
+            $zipArchive ->extractTo("$tempdir");
+            $zipArchive ->close();
+            // Do something else on success
+        } else {
+            // Do something on error
+        }
+
     }
+
+
 }
 
 function getStatus($rh, $api)
@@ -221,6 +236,20 @@ function sendRequest($jsonText)
     ));
 
     return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
+}
+
+function tempdir($dir = false)
+{
+    $tempfile = tempnam(sys_get_temp_dir(), '');
+    if (file_exists($tempfile))
+    {
+        unlink($tempfile);
+    }
+    mkdir($tempfile);
+    if (is_dir($tempfile))
+    {
+        return $tempfile;
+    }
 }
 
 ?>
