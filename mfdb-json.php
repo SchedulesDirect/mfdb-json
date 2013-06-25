@@ -120,7 +120,8 @@ $randHash = getRandhash($username, $password, $baseurl, $api);
 
 if ($randHash != "ERROR")
 {
-    getStatus($randHash, $api);
+    $response = getStatus($randHash, $api);
+    printStatus($response);
     getSchedules($dbh, $randHash, $api, $stationIDs, $debug);
 }
 
@@ -285,8 +286,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     /*
      * Now that we've grabbed the program details for all the programs that we need to schedule, get to work.
      */
-
-
 }
 
 function setup($dbh)
@@ -308,17 +307,27 @@ function setup($dbh)
             print "sourceid: " . $v["sourceid"] . "\n";
             print "name: " . $v["name"] . "\n";
             print "userid: " . $v["userid"] . "\n";
+            $username = $v["userid"];
             print "lineupid: " . $v["lineupid"] . "\n";
             print "password: " . $v["password"] . "\n\n";
+            $password = $v["password"];
         }
     }
+
     while ($done == FALSE)
     {
-        $a = fgets(STDIN);
+        print "Checking existing lineups at Schedules Direct.\n";
+        $randHash = getRandhash($username, $password, "http://23.21.174.111", "20130512");
+
+        if ($randHash != "ERROR")
+        {
+            $response = getStatus($randHash, "20130512");
+
+
+        }
+
     }
-
 }
-
 
 function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
 {
@@ -444,15 +453,15 @@ function getStatus($rh, $api)
     $res["api"] = $api;
 
     $response = sendRequest(json_encode($res));
+}
 
+function printStatus($json)
+{
     $res = array();
-    $res = json_decode($response, true);
+    $res = json_decode($json, true);
 
     $am = array();
     $he = array();
-
-    // var_dump($res);
-
 
     foreach ($res as $k => $v)
     {
@@ -468,7 +477,7 @@ function getStatus($rh, $api)
                 $nextConnectTime = $v["nextSuggestedConnectTime"];
                 break;
             case "headend":
-                foreach ($v as $hk => $hv)
+                foreach ($v as $hv)
                 {
                     $he[$hv["ID"]] = $hv["modified"];
                 }
@@ -476,14 +485,24 @@ function getStatus($rh, $api)
         }
     }
 
-    // print "headends:\n\n";
-    // var_dump($he);
-
-    print "Used server: " . $res["serverID"] . "\n";
+    print "Server: " . $res["serverID"] . "\n";
     print "Last data refresh: " . $res["lastDataUpdate"] . "\n";
+    print "Account expires: $expires\n";
+    print "Max number of headends for your account: $maxHeadends\n";
+    print "Next suggested connect time: $nextConnectTime\n";
+
+    if (count($he))
+    {
+        print "The following headends are in your account:\n";
+
+        foreach ($he as $id => $modified)
+        {
+            print "ID: $id\t\tLast modified:$modified\n";
+        }
+        print "\n";
+    }
 
     print "\n";
-
 }
 
 function getRandhash($username, $password, $baseurl, $api)
