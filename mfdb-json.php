@@ -300,20 +300,21 @@ function setup($dbh)
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($result as $k => $v)
+    if (count($result))
     {
-        print "k is $k\tv is $v\n";
-
-        print "\n\n";
-        var_dump($v);
-        print "\n\n";
-
-
-
+        print "Existing sources:\n";
+        foreach ($result as $v)
+        {
+            print "sourceid: " . $v["sourceid"] . "\n";
+            print "name: " . $v["name"] . "\n";
+            print "userid: " . $v["userid"] . "\n";
+            print "lineupid: " . $v["lineupid"] . "\n";
+            print "password: " . $v["password"] . "\n\n";
+        }
     }
-//    while ($done == FALSE)
+    while ($done == FALSE)
     {
-
+        $a = fgets(STDIN);
     }
 
 }
