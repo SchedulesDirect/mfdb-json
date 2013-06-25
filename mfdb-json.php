@@ -105,6 +105,8 @@ if ($randHash != "ERROR")
 
 function getSchedules($rh, $api, array $stationIDs)
 {
+    $programCache = array();
+
     print "Sending schedule request.\n";
     $res = array();
     $res["action"] = "get";
@@ -135,8 +137,7 @@ function getSchedules($rh, $api, array $stationIDs)
             foreach (glob("$tempdir/sched*") as $f)
             {
                 $a = json_decode(file_get_contents($f), true);
-                var_dump($a);
-                $b = fgets(STDIN);
+                $programCache = array_merge($programCache, parseScheduleFile($a));
             }
         }
         else
@@ -148,6 +149,26 @@ function getSchedules($rh, $api, array $stationIDs)
 
 
 }
+
+function parseScheduleFile(array $sched)
+{
+    /*
+     * This function takes an array and pulls out the programIDs and the md5
+     */
+
+    $pID = array();
+
+    foreach ($sched["programs"] as $k => $v)
+    {
+        print "k is\n" . var_dump($k);
+        print "\nv is \n" . var_dump($v);
+        $a = fgets(STDIN);
+        // $pID[$k["programID"]] =
+    }
+
+
+}
+
 
 function getStatus($rh, $api)
 {
