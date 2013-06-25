@@ -119,7 +119,7 @@ $randHash = getRandhash($username, $password, $baseurl, $api);
 
 if ($randHash != "ERROR")
 {
-    printStatus(getStatus($randHash, $api));
+    printStatus(getStatus($randHash, $api), $dbh);
     getSchedules($dbh, $randHash, $api, $stationIDs, $debug);
 }
 
@@ -576,7 +576,7 @@ function getStatus($rh, $api)
     return sendRequest(json_encode($res));
 }
 
-function printStatus($json)
+function printStatus($dbh, $json)
 {
     print "Status messages from Schedules Direct:\n";
 
