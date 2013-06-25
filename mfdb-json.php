@@ -385,18 +385,18 @@ function setup($dbh)
 
 function addHeadendsToSchedulesDirect($rh)
 {
-    $res = array();
-
-    print "Enter your 5-digit zip code for U.S.\n";
+    print "\n\nNo headends are configured in your Schedules Direct account.\n";
+        print "Enter your 5-digit zip code for U.S.\n";
     print "Enter your 6-character postal code for Canada.\n";
     print "Two-character ISO3166 code for international.\n";
 
     $response = readline(">");
 
+    $res = array();
     $res["action"] = "get";
     $res["object"] = "headends";
     $res["randhash"] = $rh;
-    $res["api"] = $api;
+    $res["api"] = "20130512";
     $res["request"] = "PC:$response";
 
     $r = sendRequest(json_encode($res));
