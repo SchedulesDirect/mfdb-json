@@ -321,13 +321,61 @@ function setup($dbh)
 
         if ($randHash != "ERROR")
         {
-            $response = getStatus($randHash, "20130512");
+            $res = array();
+            $res = json_decode(getStatus($randHash, "20130512"), true);
+            foreach ($res as $k => $v)
+            {
+                if ($k == "headend")
+                {
+                    foreach ($v as $hv)
+                    {
+                        $he[$hv["ID"]] = 1;
+                        print "Headend: " . $hv["ID"] . "\n";
+                    }
+                }
+            }
 
+            if (count($he))
+            {
+                print "A to add a new sourceid in MythTV.\n";
+                print "L to Link an existing sourceid to an existing headend at SD\n";
+                print "Q to Quit";
+                $response = readline(">");
 
+                print "response is \n\n";
+                var_dump($response);
+                print "\n\n";
+                $a = fgets(STDIN);
+            }
+            else
+            {
+                /*
+                 * User has no headends defined in their SD account.
+                 */
+                addHeadendsToSchedulesDirect($username, $password);
+            }
         }
 
     }
 }
+
+function addHeadendsToSchedulesDirect($username, $password)
+{
+    $res = array();
+
+    print "Enter your 5-digit zip code for U.S.\n";
+    print "Enter your 6-character postal code for Canada.\n";
+    print "Enter two-character country code for international.\n";
+
+    $response = readline(">");
+
+    print "response is \n\n";
+    var_dump($response);
+    print "\n\n";
+    $a = fgets(STDIN);
+
+}
+
 
 function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
 {
