@@ -295,27 +295,32 @@ function setup($dbh)
     print "\n\nThis setup is destructive. Press Enter to continue, CTRL-C to quit.\n";
     $a = fgets(STDIN);
 
-    $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if (count($result))
-    {
-        print "Existing sources:\n";
-        foreach ($result as $v)
-        {
-            print "sourceid: " . $v["sourceid"] . "\n";
-            print "name: " . $v["name"] . "\n";
-            print "userid: " . $v["userid"] . "\n";
-            $username = $v["userid"];
-            print "lineupid: " . $v["lineupid"] . "\n";
-            print "password: " . $v["password"] . "\n\n";
-            $password = sha1($v["password"]);
-        }
-    }
-
     while ($done == FALSE)
     {
+        $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (count($result))
+        {
+            print "Existing sources:\n";
+            foreach ($result as $v)
+            {
+                print "sourceid: " . $v["sourceid"] . "\n";
+                print "name: " . $v["name"] . "\n";
+                print "userid: " . $v["userid"] . "\n";
+                $username = $v["userid"];
+                print "lineupid: " . $v["lineupid"] . "\n";
+                print "password: " . $v["password"] . "\n\n";
+                $password = sha1($v["password"]);
+            }
+        }
+        else
+        {
+            $username = readline("Schedules Direct username:");
+            $password = sha1(readline("Schedules Direct password:"));
+        }
+
         print "Checking existing lineups at Schedules Direct.\n";
         $randHash = getRandhash($username, $password, "http://23.21.174.111", "20130512");
 
@@ -339,13 +344,31 @@ function setup($dbh)
             {
                 print "A to add a new sourceid in MythTV.\n";
                 print "L to Link an existing sourceid to an existing headend at SD\n";
-                print "Q to Quit";
-                $response = readline(">");
+                print "Q to Quit\n";
+                $response = strtoupper(readline(">"));
 
-                print "response is \n\n";
-                var_dump($response);
-                print "\n\n";
-                $a = fgets(STDIN);
+                switch ($response)
+                {
+                    case "A":
+                        print "Adding new sourceid\n\n";
+                        $newName = readline("Source name:>");
+                        $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
+                        VALUES(:name,:userid,:password)");
+                        $stmt->execute(array("name" => $newName, "userid" => $username,
+                                             "password" => $password));
+                        break;
+                    case "L":
+                        print "Linking Schedules Direct headend to sourceid\n\n";
+                        $sid = readline("Source id:>");
+                        $he = readline("Headend:>");
+                        $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
+                        $stmt->execute(array("he"=>$he, "sid"=>$sid));
+                        break;
+                    case "Q":
+                    default:
+                        $done = TRUE;
+                        break;
+                }
             }
             else
             {
