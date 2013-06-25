@@ -147,6 +147,9 @@ function getSchedules($rh, $api, array $stationIDs)
         }
     }
 
+    $programCache = array_unique($programCache);
+    var_dump($programCache);
+    print "There are " . count($programCache) . "programIDs in the schedule.\n";
 
 }
 
@@ -163,9 +166,7 @@ function parseScheduleFile(array $sched)
         $pID[$v["programID"]] = $v["md5"];
     }
 
-var_dump($pID);
-    $a   = fgets(STDIN);
-    return $a;
+    return $pID;
 }
 
 
@@ -266,9 +267,9 @@ function sendRequest($jsonText)
     return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
 }
 
-function tempdir($dir = false)
+function tempdir()
 {
-    $tempfile = tempnam(sys_get_temp_dir(), '');
+    $tempfile = tempnam(sys_get_temp_dir(), "");
     if (file_exists($tempfile))
     {
         unlink($tempfile);
@@ -278,6 +279,11 @@ function tempdir($dir = false)
     {
         return $tempfile;
     }
+}
+
+function init($dbh)
+{
+    $stmt = $dbh->prepare("CREATE TABLE programMD5Cache ()");
 }
 
 ?>
