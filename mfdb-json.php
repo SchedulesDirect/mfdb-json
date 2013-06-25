@@ -100,10 +100,10 @@ $randHash = getRandhash($username, $password, $baseurl, $api);
 if ($randHash != "ERROR")
 {
     getStatus($randHash, $api);
-    getSchedules($randHash, $stationIDs);
+    getSchedules($randHash, $api, $stationIDs);
 }
 
-function getSchedules($rh, array $stationIDs)
+function getSchedules($rh, $api, array $stationIDs)
 {
     print "Sending schedule request.\n";
     $res = array();
