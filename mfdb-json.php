@@ -351,7 +351,7 @@ function setup($dbh)
                         $newName = readline("Source name:>");
                         $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
                         VALUES(:name,:userid,:password)");
-                        $stmt->execute(array("name" => $newName, "userid" => $username,
+                        $stmt->execute(array("name"     => $newName, "userid" => $username,
                                              "password" => $password));
                         break;
                     case "L":
@@ -359,7 +359,7 @@ function setup($dbh)
                         $sid = readline("Source id:>");
                         $he = readline("Headend:>");
                         $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
-                        $stmt->execute(array("he"=>$he, "sid"=>$sid));
+                        $stmt->execute(array("he" => $he, "sid" => $sid));
                         break;
                     case "Q":
                     default:
@@ -372,26 +372,33 @@ function setup($dbh)
                 /*
                  * User has no headends defined in their SD account.
                  */
-                addHeadendsToSchedulesDirect($username, $password);
+                addHeadendsToSchedulesDirect($randHash);
             }
         }
 
     }
 }
 
-function addHeadendsToSchedulesDirect($username, $password)
+function addHeadendsToSchedulesDirect($rh)
 {
     $res = array();
-    $password = sha1($password);
 
     print "Enter your 5-digit zip code for U.S.\n";
     print "Enter your 6-character postal code for Canada.\n";
-    print "Enter two-character country code for international.\n";
+    print "Two-character ISO3166 code for international.\n";
 
     $response = readline(">");
 
+    $res["action"] = "get";
+    $res["object"] = "headends";
+    $res["randhash"] = $rh;
+    $res["api"] = $api;
+    $res["request"] = "PC:$response";
+
+    $r = sendRequest(json_encode($res));
+
     print "response is \n\n";
-    var_dump($response);
+    var_dump($r);
     print "\n\n";
     $a = fgets(STDIN);
 
