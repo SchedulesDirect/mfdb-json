@@ -161,27 +161,31 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
     print "There are " . count($programCache) . " programIDs in the upcoming schedule.\n";
     print "Retrieving existing MD5 values.\n";
 
-    $stmt = $dbh->prepare("SELECT programID,md5 FROM programMD5Cache");
+    $stmt = $dbh->prepare("SELECT programID,md5 FROM programCache");
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
 
     $insertStack = array();
     $replaceStack = array();
-    $retrieveStack = array();
 
-    foreach ($programCache as $k => $v)
+    /*
+     * The "insert" and "replace" arrays will hold the strings that we're going to build in order to do a multi-line
+     * insert.
+     */
+    $insert = array();
+    $replace = array();
+
+    foreach ($programCache as $progID => $md5)
     {
-        $str = "('" . $k . "','" . $v . "'),";
-        if (array_key_exists($k, $dbProgramCache))
+        if (array_key_exists($progID, $dbProgramCache))
         {
             /*
              * First we'll check if the key (the programID) exists in the database already, and if yes, does it have
              * the same md5 value as the one that we downloaded?
              */
-            if ($dbProgramCache[$k] != $v)
+            if ($dbProgramCache[$progID] != $md5)
             {
-                $retrieveStack[] = $k;
-                $replaceStack[] = $str;
+                $insertStack[$progID] = $md5;
             }
         }
         else
@@ -189,8 +193,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             /*
              * The programID wasn't in the database, so we'll need to get it.
              */
-            $retrieveStack[] = $k;
-            $insertStack[] = $str;
+            $replaceStack[$progID] = $md5;
         }
     }
 
@@ -201,6 +204,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
 
     print "Need to download " . count($insertStack) . " new programs.\n";
     print "Need to download " . count($replaceStack) . " updated programs.\n";
+
+    $retrieveStack = array();
+    $retrieveStack = array_merge($insertStack, $replaceStack);
 
     print "Sending program request.\n";
     $res = array();
@@ -235,22 +241,47 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             print "FATAL: Could not open .zip file while extracting programIDs.\n";
             exit;
         }
+
+        foreach ($insertStack as $progID => $md5)
+        {
+            $str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
+            $insert[] = $str;
+            if (strlen($str) > 1024)
+            {
+                print "Insert stack string is greater than 1024: $str\n";
+                print "Consider changing chunk.\n";
+                exit;
+            }
+        }
+
+        foreach ($replaceStack as $progID => $md5)
+        {
+            $str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
+            $replace[] = $str;
+            if (strlen($str) > 1024)
+            {
+                print "Replace stack string is greater than 1024: $str\n";
+                print "Consider changing chunk.\n";
+                exit;
+            }
+        }
+
     }
 
-    if (count($insertStack))
+    if (count($insert))
     {
-        print "Inserting new MD5s into cache.\n";
-        $base = "INSERT INTO programMD5Cache(programID,md5) VALUES ";
-        $chunk = 1000;
-        commitToDb($dbh, $insertStack, $base, $chunk, true, true);
+        print "Inserting new programs into cache.\n";
+        $base = "INSERT INTO programCache(programID,md5,json) VALUES ";
+        $chunk = 500;
+        commitToDb($dbh, $insert, $base, $chunk, true, true);
     }
 
-    if (count($replaceStack))
+    if (count($replace))
     {
         print "Updating MD5s in cache.\n";
-        $base = "REPLACE INTO programMD5Cache(programID,md5) VALUES ";
-        $chunk = 1000;
-        commitToDb($dbh, $replaceStack, $base, $chunk, true, true);
+        $base = "REPLACE INTO programCache(programID,md5,json) VALUES ";
+        $chunk = 500;
+        commitToDb($dbh, $replace, $base, $chunk, true, true);
     }
 }
 
@@ -273,11 +304,6 @@ function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose
     $counter = 0;
     $loop = 0;
     $numLoops = intval($numRows / $chunk);
-
-    if ($verbose)
-    {
-        print "Chunk:$chunk\n $numRows\n";
-    }
 
     if ($useTransaction)
     {
