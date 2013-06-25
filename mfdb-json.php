@@ -121,7 +121,7 @@ function getSchedules($rh, $api, array $stationIDs)
     if ($res["response"] == "OK")
     {
         $filename = $res["filename"];
-        $url = $res["url"];
+        $url = $res["URL"];
         file_put_contents($filename,file_get_contents($url));
     }
 }
