@@ -253,7 +253,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         {
             $str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
             $insert[] = $str;
-            if (strlen($str) > 1024)
+            if (strlen($str) > 4095)
             {
                 $maxString = $str;
                 $maxLength = strlen($str);
@@ -264,7 +264,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         {
             $str = "('" . $progID . "','" . $md5 . "','" . file_get_contents("$tempdir/$progID.json.txt") . "'),";
             $replace[] = $str;
-            if (strlen($str) > 1024)
+            if (strlen($str) > 4095)
             {
                 $maxLength = strlen($str);
                 $maxString = $str;
