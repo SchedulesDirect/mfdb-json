@@ -175,6 +175,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
     $insert = array();
     $replace = array();
 
+    /*
+     * An array to hold the programIDs that we need to request from the server.
+     */
+    $retrieveStack = array();
+
     foreach ($programCache as $progID => $md5)
     {
         if (array_key_exists($progID, $dbProgramCache))
@@ -186,6 +191,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             if ($dbProgramCache[$progID] != $md5)
             {
                 $replaceStack[$progID] = $md5;
+                $retrieveStack[] = $progID;
             }
         }
         else
@@ -194,6 +200,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
              * The programID wasn't in the database, so we'll need to get it.
              */
             $insertStack[$progID] = $md5;
+            $retrieveStack[] = $progID;
         }
     }
 
@@ -204,9 +211,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
 
     print "Need to download " . count($insertStack) . " new programs.\n";
     print "Need to download " . count($replaceStack) . " updated programs.\n";
-
-    $retrieveStack = array();
-    $retrieveStack = array_merge($insertStack, $replaceStack);
 
     print "Sending program request.\n";
     $res = array();
@@ -243,7 +247,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         }
 
         print "Check directory: $tempdir\n";
-        $tt=fgets(STDIN);
+        $tt = fgets(STDIN);
 
         foreach ($insertStack as $progID => $md5)
         {
