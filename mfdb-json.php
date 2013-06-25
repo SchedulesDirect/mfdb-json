@@ -100,10 +100,10 @@ $randHash = getRandhash($username, $password, $baseurl, $api);
 if ($randHash != "ERROR")
 {
     getStatus($randHash, $api);
-    getSchedules($randHash, $api, $stationIDs);
+    getSchedules($dbh, $randHash, $api, $stationIDs);
 }
 
-function getSchedules($rh, $api, array $stationIDs)
+function getSchedules($dbh, $rh, $api, array $stationIDs)
 {
     $programCache = array();
     $dbProgramCache = array();
@@ -138,6 +138,10 @@ function getSchedules($rh, $api, array $stationIDs)
             foreach (glob("$tempdir/sched*") as $f)
             {
                 $a = json_decode(file_get_contents($f), true);
+                print "\n\n";
+                var_dump($a);
+                print "\n\n";
+                $t = fgets(STDIN);
 
                 foreach ($a["programs"] as $v)
                 {
