@@ -627,7 +627,12 @@ function printStatus($dbh, $json)
 
             if ((count($result) == 0) OR ($result[0] < $modified))
             {
-                print "Newer lineup exists at Schedules Direct; last modified " . $result[0] . "\n";
+                print "Newer lineup exists at Schedules Direct. Downloading.\n";
+                $res = getLineup($rh, $id);
+                print "res is \n\n";
+                var_dump($res);
+                print "\n\n";
+                $a=fgets(STDIN);
             }
         }
         print "\n";
