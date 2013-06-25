@@ -118,12 +118,17 @@ function getSchedules($rh, $api, array $stationIDs)
     $res = array();
     $res = json_decode($response, true);
 
-    var_dump($res);
+    if ($res["response"] == "OK")
+    {
+        $filename = $res["filename"];
+        $url = $res["url"];
+        file_put_contents($filename,file_get_contents($url));
+    }
 }
 
 function getStatus($rh, $api)
 {
-    print "Status messages from Schedules Direct:";
+    print "Status messages from Schedules Direct:\n";
     $res = array();
     $res["action"] = "get";
     $res["object"] = "status";
@@ -169,6 +174,7 @@ function getStatus($rh, $api)
     print "Used server: " . $res["serverID"] . "\n";
     print "Last data refresh: " . $res["lastDataUpdate"] . "\n";
 
+    print "\n";
 
 }
 
