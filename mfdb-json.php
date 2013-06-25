@@ -142,10 +142,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         {
             $zipArchive->extractTo("$tempdir");
             $zipArchive->close();
-            foreach (glob("$tempdir/sched*") as $f)
+            foreach (glob("$tempdir/sched_*.json.txt") as $f)
             {
                 $a = json_decode(file_get_contents($f), true);
-                print "Checking file $f\n";
                 foreach ($a["programs"] as $v)
                 {
                     $programCache[$v["programID"]] = $v["md5"];
@@ -208,6 +207,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
     $res["request"] = array_merge($insertStack, $replaceStack);
 
     $response = sendRequest(json_encode($res));
+
+    print "\n\nresponse is\n\n";
+
+    var_dump($response);
+
 
     $res = array();
     $res = json_decode($response, true);
