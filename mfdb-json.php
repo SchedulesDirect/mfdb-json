@@ -208,17 +208,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
 
     $response = sendRequest(json_encode($res));
 
-    print "\n\nresponse is\n\n";
-
-    var_dump($response);
-
-
     $res = array();
     $res = json_decode($response, true);
-
-    var_dump($res);
-
-
 
     if ($res["response"] == "OK")
     {
@@ -234,8 +225,26 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
         {
             $zipArchive->extractTo("$tempdir");
             $zipArchive->close();
+            foreach (glob("$tempdir/*.json.txt") as $f)
+            {
+                $a = json_decode(file_get_contents($f), true);
+                var_dump($a);
+                $tt=fgets(STDIN);
+                foreach ($a["program"] as $v)
+                {
+                    $programCache[$v["programID"]] = $v["md5"];
+                }
+            }
+        }
+        else
+        {
+            print "FATAL: Could not open .zip file while extracting programIDs.\n";
+            exit;
         }
     }
+
+
+
 }
 
 function parseScheduleFile(array $sched)
