@@ -338,9 +338,12 @@ function setup($dbh)
                 }
             }
 
+            // Temp to trigger the "else" code path.
+            $he=array();
+
             if (count($he))
             {
-                print "A to add a new sourceid in MythTV.\n";
+                print "A to add a new sourceid in MythTV\n";
                 print "L to Link an existing sourceid to an existing headend at SD\n";
                 print "Q to Quit\n";
                 $response = strtoupper(readline(">"));
