@@ -119,7 +119,7 @@ $randHash = getRandhash($username, $password, $baseurl, $api);
 
 if ($randHash != "ERROR")
 {
-    printStatus(getStatus($randHash, $api), $dbh);
+    printStatus($dbh, getStatus($randHash, $api));
     getSchedules($dbh, $randHash, $api, $stationIDs, $debug);
 }
 
