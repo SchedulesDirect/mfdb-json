@@ -246,8 +246,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             exit;
         }
 
-        print "Check directory: $tempdir\n";
-        $tt = fgets(STDIN);
+        $maxLength = 0;
+        $maxString = "";
 
         foreach ($insertStack as $progID => $md5)
         {
@@ -255,9 +255,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             $insert[] = $str;
             if (strlen($str) > 1024)
             {
-                print "Insert stack string is greater than 1024: $str\n";
-                print "Consider changing chunk.\n";
-                exit;
+                $maxString = $str;
+                $maxLength = strlen($str);
             }
         }
 
@@ -267,10 +266,16 @@ function getSchedules($dbh, $rh, $api, array $stationIDs)
             $replace[] = $str;
             if (strlen($str) > 1024)
             {
-                print "Replace stack string is greater than 1024: $str\n";
-                print "Consider changing chunk.\n";
-                exit;
+                $maxLength = strlen($str);
+                $maxString = $str;
             }
+        }
+
+        if ($maxLength)
+        {
+            print "Max string length was: $maxLength\n";
+            print "String was: $maxString\n";
+            exit;
         }
 
     }
