@@ -15,7 +15,7 @@ $password = "mythtv";
 $host = "localhost";
 $db = "mythconverg";
 
-$longoptions = array("beta::", "help::", "host::", "user::", "password::");
+$longoptions = array("beta::", "help::", "host::", "init::", "user::", "password::");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -128,14 +128,22 @@ function getSchedules($rh, $api, array $stationIDs)
 
         $zipArchive = new ZipArchive();
         $result = $zipArchive->open("$tempdir/$filename");
-        if ($result === TRUE) {
-            $zipArchive ->extractTo("$tempdir");
-            $zipArchive ->close();
-            // Do something else on success
-        } else {
-            // Do something on error
+        if ($result === TRUE)
+        {
+            $zipArchive->extractTo("$tempdir");
+            $zipArchive->close();
+            foreach (glob("$tempdir/sched*") as $f)
+            {
+                $a = json_decode(file_get_contents($f), true);
+                var_dump($a);
+                $b = fgets(STDIN);
+            }
         }
-
+        else
+        {
+            print "FATAL: Could not open zip file.\n";
+            exit;
+        }
     }
 
 
