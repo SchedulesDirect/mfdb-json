@@ -421,10 +421,15 @@ function addHeadendsToSchedulesDirect($rh)
 
     $res = json_decode(sendRequest(json_encode($res)), true);
 
-    print "res is \n\n";
-    var_dump($res);
-    print "\n\n";
-    $a = fgets(STDIN);
+    if ($res["response"] == "OK")
+    {
+        print "Successfully added headend.\n";
+    }
+    else
+    {
+        print "Received error response from server:\n";
+        print $res["message"] . "\n";
+    }
 
 }
 
