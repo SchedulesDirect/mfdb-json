@@ -428,7 +428,9 @@ function addHeadendsToSchedulesDirect($rh)
     else
     {
         print "\n\n-----\nERROR:Received error response from server:\n";
-        print $res["message"] . "\n\n-----";
+        print $res["message"] . "\n\n-----\n";
+        print "Press ENTER to continue.\n";
+        $a = fgets(STDIN);
     }
 
 }
