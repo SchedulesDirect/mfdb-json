@@ -406,8 +406,24 @@ function addHeadendsToSchedulesDirect($rh)
         print "headend: " . $v["headend"] . "\nname: " . $v["name"] . " location:" . $v["location"] . "\n\n";
     }
 
+    $he = readline("Headend to add>");
+    if ($he == "")
+    {
+        return;
+    }
 
+    $res = array();
+    $res["action"] = "add";
+    $res["object"] = "headends";
+    $res["randhash"] = $rh;
+    $res["api"] = "20130512";
+    $res["request"] = $he;
 
+    $res = json_decode(sendRequest(json_encode($res)), true);
+
+    print "res is \n\n";
+    var_dump($res);
+    print "\n\n";
     $a = fgets(STDIN);
 
 }
