@@ -688,9 +688,14 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-    print "result is\n\n";
-    var_dump($result);
-    print "\n\n";
+    foreach ($result as $v)
+    {
+        list($headend, $device) = explode(":", $v);
+        print "headend:$headend device:$device\n";
+
+    }
+
+
     $tt=fgets(STDIN);
 }
 
