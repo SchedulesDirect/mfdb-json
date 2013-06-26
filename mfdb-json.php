@@ -672,23 +672,13 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     /*
      * First, store a copy of the data that we just downloaded into the cache for later.
      */
-    $stmt = $dbh->prepare("REPLACE INTO SDlineupCache(headend,modified,json) VALUES(:he,:modified,:json)");
+    $stmt = $dbh->prepare("REPLACE INTO SDlineupCache(headend,json) VALUES(:he,:json)");
     foreach (glob("$tempDir/*.json.txt") as $f)
     {
         $json = file_get_contents($f);
         $a = json_decode($json, true);
-
-        print "\n\nlineup is\n\n";
-        var_dump($a);
-        print "\n\n";
-        $tt=fgets(STDIN);
-
-
-
         $he = $a["headend"];
-        $modified = $a["metadata"]["modified"];
-
-        $stmt->execute(array("he" => $he, "modified" => $modified, "json" => $json));
+        $stmt->execute(array("he" => $he, "json" => $json));
     }
 
 }
