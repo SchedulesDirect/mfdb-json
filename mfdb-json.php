@@ -163,7 +163,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     $programCache[$v["programID"]] = $v["md5"];
                 }
             }
-        } else
+        }
+        else
         {
             print "FATAL: Could not open zip file.\n";
             exit;
@@ -198,7 +199,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $replaceStack[$progID] = $md5;
                 $retrieveStack[] = $progID;
             }
-        } else
+        }
+        else
         {
             /*
              * The programID wasn't in the database, so we'll need to get it.
@@ -243,7 +245,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         {
             $zipArchive->extractTo("$tempdir");
             $zipArchive->close();
-        } else
+        }
+        else
         {
             print "FATAL: Could not open .zip file while extracting programIDs.\n";
             exit;
@@ -306,7 +309,8 @@ function setup($dbh)
                 print "password: " . $v["password"] . "\n\n";
                 $password = $v["password"];
             }
-        } else
+        }
+        else
         {
             $username = readline("Schedules Direct username:");
             $password = readline("Schedules Direct password:");
@@ -368,7 +372,8 @@ function setup($dbh)
                         $done = TRUE;
                         break;
                 }
-            } else
+            }
+            else
             {
                 /*
                  * User has no headends defined in their SD account.
@@ -421,7 +426,8 @@ function addHeadendsToSchedulesDirect($rh)
     if ($res["response"] == "OK")
     {
         print "Successfully added headend.\n";
-    } else
+    }
+    else
     {
         print "\n\n-----\nERROR:Received error response from server:\n";
         print $res["message"] . "\n\n-----\n";
@@ -625,14 +631,41 @@ function printStatus($dbh, $rh, $json)
                 print "Newer lineup exists at Schedules Direct. Downloading.\n";
                 $retrieveLineups[] = $id;
             }
-
         }
 
-        $res = getLineup($rh, $retrieveLineups);
-        print "res is \n\n";
-        var_dump($res);
-        print "\n\n";
-        $a = fgets(STDIN);
+        $res = array();
+        $res = json_decode(getLineup($rh, $retrieveLineups), true);
+
+        if ($res["response"] == "OK")
+        {
+            $tempDir = tempdir();
+            $fileName = "$tempDir/lineups.json.zip";
+            file_put_contents($fileName, file_get_contents($res["URL"]));
+
+            $zipArchive = new ZipArchive();
+            $result = $zipArchive->open("$fileName");
+            if ($result === TRUE)
+            {
+                $zipArchive->extractTo("$tempDir");
+                $zipArchive->close();
+
+                foreach (glob("$tempDir/sched_*.json.txt") as $f)
+                {
+                    $a = json_decode(file_get_contents($f), true);
+                    foreach ($a["programs"] as $v)
+                    {
+                        $programCache[$v["programID"]] = $v["md5"];
+                    }
+                }
+            }
+            else
+            {
+                print "FATAL: Could not open zip file.\n";
+                exit;
+            }
+            print "tempdir is $tempDir\n";
+            $a = fgets(STDIN);
+        }
     }
     print "\n";
 
