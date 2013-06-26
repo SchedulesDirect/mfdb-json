@@ -732,8 +732,9 @@ function processLineups($dbh, $rh, array $retrieveLineups)
                 $jsonModified = $v1["modified"];
                 print "$headend:$device>json modified date is: $jsonModified\n";
             }
-
         }
+
+
 
 
         $tt = fgets(STDIN);
