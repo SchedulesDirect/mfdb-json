@@ -143,19 +143,19 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     if ($res["response"] == "OK")
     {
-        $tempdir = tempdir();
+        $tempDir = tempdir();
 
-        $filename = $res["filename"];
+        $fileName = $res["filename"];
         $url = $res["URL"];
-        file_put_contents("$tempdir/$filename", file_get_contents($url));
+        file_put_contents("$tempDir/$fileName", file_get_contents($url));
 
         $zipArchive = new ZipArchive();
-        $result = $zipArchive->open("$tempdir/$filename");
+        $result = $zipArchive->open("$tempDir/$fileName");
         if ($result === TRUE)
         {
-            $zipArchive->extractTo("$tempdir");
+            $zipArchive->extractTo("$tempDir");
             $zipArchive->close();
-            foreach (glob("$tempdir/sched_*.json.txt") as $f)
+            foreach (glob("$tempDir/sched_*.json.txt") as $f)
             {
                 $a = json_decode(file_get_contents($f), true);
                 foreach ($a["programs"] as $v)
@@ -233,17 +233,17 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     if ($res["response"] == "OK")
     {
-        $tempdir = tempdir();
+        $tempDir = tempdir();
 
-        $filename = $res["filename"];
+        $fileName = $res["filename"];
         $url = $res["URL"];
-        file_put_contents("$tempdir/$filename", file_get_contents($url));
+        file_put_contents("$tempDir/$fileName", file_get_contents($url));
 
         $zipArchive = new ZipArchive();
-        $result = $zipArchive->open("$tempdir/$filename");
+        $result = $zipArchive->open("$tempDir/$fileName");
         if ($result === TRUE)
         {
-            $zipArchive->extractTo("$tempdir");
+            $zipArchive->extractTo("$tempDir");
             $zipArchive->close();
         }
         else
@@ -256,10 +256,10 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($insertStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                "json" => file_get_contents("$tempdir/$progID.json.txt")));
+                "json" => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
             {
-                unlink("$tempdir/$progID.json.txt");
+                unlink("$tempDir/$progID.json.txt");
             }
         }
 
@@ -267,17 +267,17 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($replaceStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                "json" => file_get_contents("$tempdir/$progID.json.txt")));
+                "json" => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
             {
-                unlink("$tempdir/$progID.json.txt");
+                unlink("$tempDir/$progID.json.txt");
             }
         }
 
         if ($debug == FALSE)
         {
-            unlink("$tempdir/serverID.txt");
-            rmdir("$tempdir");
+            unlink("$tempDir/serverID.txt");
+            rmdir("$tempDir");
         }
     }
 
@@ -533,7 +533,7 @@ function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose
 
 function holder()
 {
-    foreach (glob("$tempdir/*.json.txt") as $f)
+    foreach (glob("$tempDir/*.json.txt") as $f)
     {
         $a = json_decode(file_get_contents($f), true);
         $pid = $a["programID"];
@@ -648,13 +648,20 @@ function printStatus($dbh, $rh, $json)
             {
                 $zipArchive->extractTo("$tempDir");
                 $zipArchive->close();
+                print "tempdir is $tempDir\n";
 
-                foreach (glob("$tempDir/sched_*.json.txt") as $f)
+                foreach (glob("$tempDir/*.json.txt") as $f)
                 {
                     $a = json_decode(file_get_contents($f), true);
-                    foreach ($a["programs"] as $v)
+
+                    print "lineup is \n\n";
+                    var_dump($a);
+                    print "\n\n";
+                    $a = fgets(STDIN);
+
+                    foreach ($a as $v)
                     {
-                        $programCache[$v["programID"]] = $v["md5"];
+                    //    $programCache[$v["programID"]] = $v["md5"];
                     }
                 }
             }
@@ -663,8 +670,6 @@ function printStatus($dbh, $rh, $json)
                 print "FATAL: Could not open zip file.\n";
                 exit;
             }
-            print "tempdir is $tempDir\n";
-            $a = fgets(STDIN);
         }
     }
     print "\n";
