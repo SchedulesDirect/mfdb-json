@@ -730,7 +730,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
             if ($v["device"] == $device)
             {
                 $jsonModified = $v["modified"];
-                print "json modified date is: $jsonModified\n";
+                print "$headend:$device>json modified date is: $jsonModified\n";
             }
 
         }
