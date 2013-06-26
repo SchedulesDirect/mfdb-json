@@ -688,14 +688,15 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($result as $sourceid => $v)
+    foreach ($result as $v)
     {
         $device = "";
+        $sourceid = $v["sourceid"];
         $lineupid = $v["lineupid"];
     /*    print "\n\nsourceid is \n\n";
-        var_dump($sourceid);*/
+        var_dump($sourceid);
         print "\n\nlineupid is \n\n";
-        var_dump($v);
+        var_dump($v);*/
         if (strpos($lineupid, ":"))
         {
             list($headend, $device) = explode(":", $retrieveLineups);
