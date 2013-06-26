@@ -690,13 +690,21 @@ function processLineups($dbh, $rh, array $retrieveLineups)
 
     foreach ($result as $v)
     {
-        list($headend, $device) = explode(":", $v);
+        $device = "";
+        if (strpos($v, ":"))
+        {
+            list($headend, $device) = explode(":", $v);
+        }
+        else
+        {
+            $headend = $v;
+        }
         print "headend:$headend device:$device\n";
 
     }
 
 
-    $tt=fgets(STDIN);
+    $tt = fgets(STDIN);
 }
 
 function getRandhash($username, $password, $baseurl, $api)
