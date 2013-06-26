@@ -163,8 +163,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     $programCache[$v["programID"]] = $v["md5"];
                 }
             }
-        }
-        else
+        } else
         {
             print "FATAL: Could not open zip file.\n";
             exit;
@@ -199,8 +198,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $replaceStack[$progID] = $md5;
                 $retrieveStack[] = $progID;
             }
-        }
-        else
+        } else
         {
             /*
              * The programID wasn't in the database, so we'll need to get it.
@@ -245,8 +243,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         {
             $zipArchive->extractTo("$tempDir");
             $zipArchive->close();
-        }
-        else
+        } else
         {
             print "FATAL: Could not open .zip file while extracting programIDs.\n";
             exit;
@@ -256,7 +253,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($insertStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                                 "json"      => file_get_contents("$tempDir/$progID.json.txt")));
+                "json" => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
             {
                 unlink("$tempDir/$progID.json.txt");
@@ -267,7 +264,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($replaceStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                                 "json"      => file_get_contents("$tempDir/$progID.json.txt")));
+                "json" => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
             {
                 unlink("$tempDir/$progID.json.txt");
@@ -309,8 +306,7 @@ function setup($dbh)
                 print "password: " . $v["password"] . "\n\n";
                 $password = $v["password"];
             }
-        }
-        else
+        } else
         {
             $username = readline("Schedules Direct username:");
             $password = readline("Schedules Direct password:");
@@ -351,8 +347,8 @@ function setup($dbh)
                         $newName = readline("Source name:>");
                         $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
                         VALUES(:name,:userid,:password)");
-                        $stmt->execute(array("name"     => $newName, "userid" => $username,
-                                             "password" => $password));
+                        $stmt->execute(array("name" => $newName, "userid" => $username,
+                            "password" => $password));
                         break;
                     case "L":
                         print "Linking Schedules Direct headend to sourceid\n\n";
@@ -372,8 +368,7 @@ function setup($dbh)
                         $done = TRUE;
                         break;
                 }
-            }
-            else
+            } else
             {
                 /*
                  * User has no headends defined in their SD account.
@@ -426,8 +421,7 @@ function addHeadendsToSchedulesDirect($rh)
     if ($res["response"] == "OK")
     {
         print "Successfully added headend.\n";
-    }
-    else
+    } else
     {
         print "\n\n-----\nERROR:Received error response from server:\n";
         print $res["message"] . "\n\n-----\n";
@@ -668,8 +662,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     {
         $zipArchive->extractTo("$tempDir");
         $zipArchive->close();
-    }
-    else
+    } else
     {
         print "FATAL: Could not open lineups zip file.\n";
         print "tempdir is $tempDir\n";
@@ -710,8 +703,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
                 $headend = $lineupid;
                 $device = "Antenna";
             }
-        }
-        else
+        } else
         {
             $headend = $lineupid;
             $device = "Analog";
@@ -730,14 +722,18 @@ function processLineups($dbh, $rh, array $retrieveLineups)
         $headend = $v["headend"];
         $device = $v["device"];
         $modified = $v["modified"];
-        $stmt->execute(array("he"=>$headend));
+        $stmt->execute(array("he" => $headend));
         $json = json_decode($stmt->fetchAll(PDO::FETCH_COLUMN)[0], true);
 
-        $jsonModified = $json["metadata"][$device]["modified"];
+        foreach ($json["metadata"] as $k => $v)
+        {
+            print "k is $k\tv is $v\n";
+        }
+        //$jsonModified = $json["metadata"][$device]["modified"];
 
-        print "json modified date is: $jsonModified\n";
+        //print "json modified date is: $jsonModified\n";
 
-        $tt=fgets(STDIN);
+        $tt = fgets(STDIN);
 
     }
     $tt = fgets(STDIN);
@@ -778,12 +774,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'timeout' => 480,
-                                               'content' => $data
-                                           )
+    array(
+        'method' => 'POST',
+        'header' => 'Content-type: application/x-www-form-urlencoded',
+        'timeout' => 480,
+        'content' => $data
+    )
     ));
 
     return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
