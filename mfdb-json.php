@@ -677,6 +677,14 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     {
         $json = file_get_contents($f);
         $a = json_decode($json, true);
+
+        print "\n\nlineup is\n\n";
+        var_dump($a);
+        print "\n\n";
+        $tt=fgets(STDIN);
+
+
+
         $he = $a["headend"];
         $modified = $a["metadata"]["modified"];
 
