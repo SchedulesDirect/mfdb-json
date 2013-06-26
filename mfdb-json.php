@@ -684,31 +684,34 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     /*
      * Get list of lineups that the user has and only worry about those.
      */
-    $stmt = $dbh->prepare("SELECT lineupid FROM videosource");
+    $stmt = $dbh->prepare("SELECT sourceid,lineupid FROM videosource");
     $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
 
-    foreach ($result as $v)
+    foreach ($result as $sourceid => $lineupid)
     {
         $device = "";
-        if (strpos($v, ":"))
+        if (strpos($lineupid, ":"))
         {
-            list($headend, $device) = explode(":", $v);
+            list($headend, $device) = explode(":", $retrieveLineups);
             if ($headend == "PC")
             {
-                $headend = $v;
+                $headend = $lineupid;
                 $device = "Antenna";
             }
         }
         else
         {
-            $headend = $v;
+            $headend = $lineupid;
             $device = "Analog";
         }
         print "headend:$headend device:$device\n";
-
     }
 
+    /*
+     * As the user if they want to whack the existing channel table.
+     * If yes, then delete any rows in the channel table for that particular sourceid
+     */
 
     $tt = fgets(STDIN);
 }
