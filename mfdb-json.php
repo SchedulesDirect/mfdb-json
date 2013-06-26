@@ -731,7 +731,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
         $device = $v["device"];
         $modified = $v["modified"];
         $stmt->execute(array("he"=>$headend));
-        $json = json_decode($stmt->fetchAll(PDO::FETCH_COLUMN), true);
+        $json = json_decode($stmt->fetchAll(PDO::FETCH_COLUMN)[0], true);
 
         print "json is \n\n";
         var_dump($json);
