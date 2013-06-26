@@ -735,6 +735,8 @@ function processLineups($dbh, $rh, array $retrieveLineups)
 
         $jsonModified = $json["metadata"][$device]["modified"];
 
+        print "json modified date is: $jsonModified\n";
+
         $tt=fgets(STDIN);
 
     }
