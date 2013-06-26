@@ -163,8 +163,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     $programCache[$v["programID"]] = $v["md5"];
                 }
             }
-        }
-        else
+        } else
         {
             print "FATAL: Could not open zip file.\n";
             exit;
@@ -199,8 +198,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $replaceStack[$progID] = $md5;
                 $retrieveStack[] = $progID;
             }
-        }
-        else
+        } else
         {
             /*
              * The programID wasn't in the database, so we'll need to get it.
@@ -245,8 +243,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         {
             $zipArchive->extractTo("$tempdir");
             $zipArchive->close();
-        }
-        else
+        } else
         {
             print "FATAL: Could not open .zip file while extracting programIDs.\n";
             exit;
@@ -256,7 +253,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($insertStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                                 "json"      => file_get_contents("$tempdir/$progID.json.txt")));
+                "json" => file_get_contents("$tempdir/$progID.json.txt")));
             if ($debug == FALSE)
             {
                 unlink("$tempdir/$progID.json.txt");
@@ -267,7 +264,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($replaceStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                                 "json"      => file_get_contents("$tempdir/$progID.json.txt")));
+                "json" => file_get_contents("$tempdir/$progID.json.txt")));
             if ($debug == FALSE)
             {
                 unlink("$tempdir/$progID.json.txt");
@@ -309,8 +306,7 @@ function setup($dbh)
                 print "password: " . $v["password"] . "\n\n";
                 $password = $v["password"];
             }
-        }
-        else
+        } else
         {
             $username = readline("Schedules Direct username:");
             $password = readline("Schedules Direct password:");
@@ -351,8 +347,8 @@ function setup($dbh)
                         $newName = readline("Source name:>");
                         $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
                         VALUES(:name,:userid,:password)");
-                        $stmt->execute(array("name"     => $newName, "userid" => $username,
-                                             "password" => $password));
+                        $stmt->execute(array("name" => $newName, "userid" => $username,
+                            "password" => $password));
                         break;
                     case "L":
                         print "Linking Schedules Direct headend to sourceid\n\n";
@@ -372,8 +368,7 @@ function setup($dbh)
                         $done = TRUE;
                         break;
                 }
-            }
-            else
+            } else
             {
                 /*
                  * User has no headends defined in their SD account.
@@ -388,7 +383,7 @@ function setup($dbh)
 function addHeadendsToSchedulesDirect($rh)
 {
     print "\n\nNo headends are configured in your Schedules Direct account.\n";
-        print "Enter your 5-digit zip code for U.S.\n";
+    print "Enter your 5-digit zip code for U.S.\n";
     print "Enter your 6-character postal code for Canada.\n";
     print "Two-character ISO3166 code for international.\n";
 
@@ -426,8 +421,7 @@ function addHeadendsToSchedulesDirect($rh)
     if ($res["response"] == "OK")
     {
         print "Successfully added headend.\n";
-    }
-    else
+    } else
     {
         print "\n\n-----\nERROR:Received error response from server:\n";
         print $res["message"] . "\n\n-----\n";
@@ -436,7 +430,7 @@ function addHeadendsToSchedulesDirect($rh)
     }
 }
 
-function getLineup($rh, $he)
+function getLineup($rh, array $he)
 {
     print "Retrieving lineup from Schedules Direct.\n";
 
@@ -619,26 +613,30 @@ function printStatus($dbh, $rh, $json)
         $stmt = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
         print "The following headends are in your account:\n";
 
+        $retrieveLineups = array();
         foreach ($he as $id => $modified)
         {
             print "ID: $id\t\tLast modified:$modified\n";
-            $stmt->execute(array("he"=>$id));
+            $stmt->execute(array("he" => $id));
             $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
             if ((count($result) == 0) OR ($result[0] < $modified))
             {
                 print "Newer lineup exists at Schedules Direct. Downloading.\n";
-                $res = getLineup($rh, $id);
-                print "res is \n\n";
-                var_dump($res);
-                print "\n\n";
-                $a=fgets(STDIN);
+                $retrieveLineups[] = $id;
             }
-        }
-        print "\n";
-    }
 
+        }
+        $res = getLineup($rh, $retrieveLineups);
+        print "res is \n\n";
+        var_dump($res);
+        print "\n\n";
+        $a=fgets(STDIN);
+    }
     print "\n";
+}
+
+print "\n";
 }
 
 function getRandhash($username, $password, $baseurl, $api)
@@ -676,12 +674,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'timeout' => 480,
-                                               'content' => $data
-                                           )
+    array(
+        'method' => 'POST',
+        'header' => 'Content-type: application/x-www-form-urlencoded',
+        'timeout' => 480,
+        'content' => $data
+    )
     ));
 
     return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
