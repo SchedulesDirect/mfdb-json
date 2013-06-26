@@ -702,7 +702,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
 
         if (strpos($lineupid, ":"))
         {
-            list($headend, $device) = explode(":", $retrieveLineups);
+            list($headend, $device) = explode(":", $lineupid);
             if ($headend == "PC")
             {
                 $headend = $lineupid;
