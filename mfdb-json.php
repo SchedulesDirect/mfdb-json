@@ -725,11 +725,11 @@ function processLineups($dbh, $rh, array $retrieveLineups)
         $stmt->execute(array("he" => $headend));
         $json = json_decode($stmt->fetchAll(PDO::FETCH_COLUMN)[0], true);
 
-        foreach ($json["metadata"] as $k => $v)
+        foreach ($json["metadata"] as $k1 => $v1)
         {
-            if ($v["device"] == $device)
+            if ($v1["device"] == $device)
             {
-                $jsonModified = $v["modified"];
+                $jsonModified = $v1["modified"];
                 print "$headend:$device>json modified date is: $jsonModified\n";
             }
 
