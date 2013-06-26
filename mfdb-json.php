@@ -698,7 +698,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
         var_dump($v);
         print "\n\n";
 
-        $tt=fgets(STDIN;)
+        $tt=fgets(STDIN);
 
         if (strpos($lineupid, ":"))
         {
