@@ -627,16 +627,15 @@ function printStatus($dbh, $rh, $json)
             }
 
         }
+
         $res = getLineup($rh, $retrieveLineups);
         print "res is \n\n";
         var_dump($res);
         print "\n\n";
-        $a=fgets(STDIN);
+        $a = fgets(STDIN);
     }
     print "\n";
-}
 
-print "\n";
 }
 
 function getRandhash($username, $password, $baseurl, $api)
