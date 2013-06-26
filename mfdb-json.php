@@ -727,11 +727,14 @@ function processLineups($dbh, $rh, array $retrieveLineups)
 
         foreach ($json["metadata"] as $k => $v)
         {
-            print "k is $k\tv is $v\n";
-        }
-        //$jsonModified = $json["metadata"][$device]["modified"];
+            if ($v["device"] == $device)
+            {
+                $jsonModified = $v["modified"];
+                print "json modified date is: $jsonModified\n";
+            }
 
-        //print "json modified date is: $jsonModified\n";
+        }
+
 
         $tt = fgets(STDIN);
 
