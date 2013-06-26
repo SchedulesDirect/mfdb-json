@@ -694,10 +694,16 @@ function processLineups($dbh, $rh, array $retrieveLineups)
         if (strpos($v, ":"))
         {
             list($headend, $device) = explode(":", $v);
+            if ($headend == "PC")
+            {
+                $headend = $v;
+                $device = "Antenna";
+            }
         }
         else
         {
             $headend = $v;
+            $device = "Analog";
         }
         print "headend:$headend device:$device\n";
 
