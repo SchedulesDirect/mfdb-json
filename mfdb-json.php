@@ -686,11 +686,12 @@ function processLineups($dbh, $rh, array $retrieveLineups)
      */
     $stmt = $dbh->prepare("SELECT sourceid,lineupid FROM videosource");
     $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
+    $result = $stmt->fetchAll(PDO::FETCH_GROUP);
 
-    foreach ($result as $sourceid => $lineupid)
+    foreach ($result as $sourceid => $v)
     {
         $device = "";
+        $lineupid = $v["lineupid"];
         print "\n\nsourceid is \n\n";
         var_dump($sourceid);
         print "\n\nlineupid is \n\n";
