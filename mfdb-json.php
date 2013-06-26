@@ -675,13 +675,23 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     $stmt = $dbh->prepare("REPLACE INTO SDlineupCache(headend,json) VALUES(:he,:json)");
     foreach (glob("$tempDir/*.json.txt") as $f)
     {
-        print "***DEBUG: file is $f\n";
         $json = file_get_contents($f);
         $a = json_decode($json, true);
         $he = $a["headend"];
         $stmt->execute(array("he" => $he, "json" => $json));
     }
 
+    /*
+     * Get list of lineups that the user has and only worry about those.
+     */
+    $stmt = $dbh->prepare("SELECT lineupid FROM videosource");
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    print "result is\n\n";
+    var_dump($result);
+    print "\n\n";
+    $tt=fgets(STDIN);
 }
 
 function getRandhash($username, $password, $baseurl, $api)
