@@ -686,7 +686,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
      */
     $stmt = $dbh->prepare("SELECT sourceid,lineupid FROM videosource");
     $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($result as $sourceid => $v)
     {
