@@ -448,7 +448,6 @@ function getLineup($rh, array $he)
     $res["request"] = $he;
 
     return sendRequest(json_encode($res), true);
-
 }
 
 function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
@@ -632,47 +631,57 @@ function printStatus($dbh, $rh, $json)
                 $retrieveLineups[] = $id;
             }
         }
-
-        $res = array();
-        $res = json_decode(getLineup($rh, $retrieveLineups), true);
-
-        if ($res["response"] == "OK")
-        {
-            $tempDir = tempdir();
-            $fileName = "$tempDir/lineups.json.zip";
-            file_put_contents($fileName, file_get_contents($res["URL"]));
-
-            $zipArchive = new ZipArchive();
-            $result = $zipArchive->open("$fileName");
-            if ($result === TRUE)
-            {
-                $zipArchive->extractTo("$tempDir");
-                $zipArchive->close();
-                print "tempdir is $tempDir\n";
-
-                foreach (glob("$tempDir/*.json.txt") as $f)
-                {
-                    $a = json_decode(file_get_contents($f), true);
-
-                    print "lineup is \n\n";
-                    var_dump($a);
-                    print "\n\n";
-                    $a = fgets(STDIN);
-
-                    foreach ($a as $v)
-                    {
-                    //    $programCache[$v["programID"]] = $v["md5"];
-                    }
-                }
-            }
-            else
-            {
-                print "FATAL: Could not open zip file.\n";
-                exit;
-            }
-        }
+        processLineups($dbh, $rh, $retrieveLineups);
     }
-    print "\n";
+}
+
+function processLineups($dbh, $rh, array $retrieveLineups)
+{
+    /*
+     * If we're here, that means that either the lineup has been updated, or it didn't exist at all.
+     */
+
+    $res = array();
+    $res = json_decode(getLineup($rh, $retrieveLineups), true);
+
+    if ($res["response"] != "OK")
+    {
+        print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
+        print $res["message"] . "\n\n-----\n";
+        exit;
+    }
+
+    $tempDir = tempdir();
+    $fileName = "$tempDir/lineups.json.zip";
+    file_put_contents($fileName, file_get_contents($res["URL"]));
+
+    $zipArchive = new ZipArchive();
+    $result = $zipArchive->open("$fileName");
+    if ($result === TRUE)
+    {
+        $zipArchive->extractTo("$tempDir");
+        $zipArchive->close();
+    }
+    else
+    {
+        print "FATAL: Could not open lineups zip file.\n";
+        print "tempdir is $tempDir\n";
+        exit;
+    }
+
+    /*
+     * First, store a copy of the data that we just downloaded into the cache for later.
+     */
+    $stmt = $dbh->prepare("REPLACE INTO SDlineupCache(headend,modified,json) VALUES(:he,:modified,:json)");
+    foreach (glob("$tempDir/*.json.txt") as $f)
+    {
+        $json = file_get_contents($f);
+        $a = json_decode($json, true);
+        $he = $a["headend"];
+        $modified = $a["metadata"]["modified"];
+
+        $stmt->execute(array("he" => $he, "modified" => $modified, "json" => $json));
+    }
 
 }
 
