@@ -675,6 +675,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     $stmt = $dbh->prepare("REPLACE INTO SDlineupCache(headend,json) VALUES(:he,:json)");
     foreach (glob("$tempDir/*.json.txt") as $f)
     {
+        print "***DEBUG: file is $f\n";
         $json = file_get_contents($f);
         $a = json_decode($json, true);
         $he = $a["headend"];
