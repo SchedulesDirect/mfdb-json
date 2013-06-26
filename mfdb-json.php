@@ -691,6 +691,10 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     foreach ($result as $sourceid => $lineupid)
     {
         $device = "";
+        print "\n\nsourceid is \n\n";
+        var_dump($sourceid);
+        print "\n\nlineupid is \n\n";
+        var_dump($lineupid);
         if (strpos($lineupid, ":"))
         {
             list($headend, $device) = explode(":", $retrieveLineups);
