@@ -627,11 +627,14 @@ function printStatus($dbh, $rh, $json)
 
             if ((count($result) == 0) OR ($result[0] < $modified))
             {
-                print "Newer lineup exists at Schedules Direct. Downloading.\n";
                 $retrieveLineups[] = $id;
             }
         }
-        processLineups($dbh, $rh, $retrieveLineups);
+
+        if (count($retrieveLineups))
+        {
+            processLineups($dbh, $rh, $retrieveLineups);
+        }
     }
 }
 
@@ -640,6 +643,8 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     /*
      * If we're here, that means that either the lineup has been updated, or it didn't exist at all.
      */
+
+    print "Downloading lineups from Schedules Direct.\n";
 
     $res = array();
     $res = json_decode(getLineup($rh, $retrieveLineups), true);
