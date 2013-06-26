@@ -621,7 +621,7 @@ function printStatus($dbh, $rh, $json)
         $retrieveLineups = array();
         foreach ($he as $id => $modified)
         {
-            print "ID: $id\t\tLast modified:$modified\n";
+            print "ID: $id\t\tSD Modified:$modified\n";
             $stmt->execute(array("he" => $id));
             $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -642,9 +642,11 @@ function processLineups($dbh, $rh, array $retrieveLineups)
 {
     /*
      * If we're here, that means that either the lineup has been updated, or it didn't exist at all.
+     * The overall group of lineups in a headend have a modified date based on the "max" of the modified dates
+     * of the lineups in the headend. But we may not be using that particular lineup, so dig deeper...
      */
 
-    print "Downloading lineups from Schedules Direct.\n";
+    print "Checking for updated lineups from Schedules Direct.\n";
 
     $res = array();
     $res = json_decode(getLineup($rh, $retrieveLineups), true);
@@ -689,7 +691,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     /*
      * Get list of lineups that the user has and only worry about those.
      */
-    $stmt = $dbh->prepare("SELECT sourceid,lineupid FROM videosource");
+    $stmt = $dbh->prepare("SELECT sourceid,lineupid,modified FROM videosource");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $lineup = array();
@@ -698,6 +700,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     {
         $device = "";
         $lineupid = $v["lineupid"];
+        $modified = $v["modified"];
 
         if (strpos($lineupid, ":"))
         {
@@ -713,15 +716,29 @@ function processLineups($dbh, $rh, array $retrieveLineups)
             $headend = $lineupid;
             $device = "Analog";
         }
-        $lineup[$v["sourceid"]] = array("headend" => $headend, "device" => $device);
-        print "headend:$headend device:$device\n";
+        $lineup[$v["sourceid"]] = array("headend" => $headend, "device" => $device, "modified" => $modified);
+        print "headend:$headend device:$device modified:$modified\n";
     }
 
     /*
-     * As the user if they want to whack the existing channel table.
-     * If yes, then delete any rows in the channel table for that particular sourceid
+     * Now we have to determine if the lineup that the user is actually using has been updated.
      */
 
+    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE headend=:he");
+    foreach ($lineup as $k => $v)
+    {
+        $headend = $v["headend"];
+        $device = $v["device"];
+        $modified = $v["modified"];
+        $stmt->execute(array("he"=>$headend));
+        $json = json_decode($stmt->fetchAll(PDO::FETCH_COLUMN), true);
+
+        print "json is \n\n";
+        var_dump($json);
+        print "\n\n";
+        $tt=fgets(STDIN);
+
+    }
     $tt = fgets(STDIN);
 }
 
