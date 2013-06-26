@@ -256,7 +256,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($insertStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                "json" => file_get_contents("$tempDir/$progID.json.txt")));
+                                 "json"      => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
             {
                 unlink("$tempDir/$progID.json.txt");
@@ -267,7 +267,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($replaceStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                "json" => file_get_contents("$tempDir/$progID.json.txt")));
+                                 "json"      => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
             {
                 unlink("$tempDir/$progID.json.txt");
@@ -351,8 +351,8 @@ function setup($dbh)
                         $newName = readline("Source name:>");
                         $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
                         VALUES(:name,:userid,:password)");
-                        $stmt->execute(array("name" => $newName, "userid" => $username,
-                            "password" => $password));
+                        $stmt->execute(array("name"     => $newName, "userid" => $username,
+                                             "password" => $password));
                         break;
                     case "L":
                         print "Linking Schedules Direct headend to sourceid\n\n";
@@ -687,11 +687,11 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     $stmt = $dbh->prepare("SELECT sourceid,lineupid FROM videosource");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $lineup = array();
 
     foreach ($result as $v)
     {
         $device = "";
-        $sourceid = $v["sourceid"];
         $lineupid = $v["lineupid"];
 
         if (strpos($lineupid, ":"))
@@ -708,6 +708,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
             $headend = $lineupid;
             $device = "Analog";
         }
+        $lineup[$v["sourceid"]] = array("headend" => $headend, "device" => $device);
         print "headend:$headend device:$device\n";
     }
 
@@ -754,12 +755,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-    array(
-        'method' => 'POST',
-        'header' => 'Content-type: application/x-www-form-urlencoded',
-        'timeout' => 480,
-        'content' => $data
-    )
+                                           array(
+                                               'method'  => 'POST',
+                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                               'timeout' => 480,
+                                               'content' => $data
+                                           )
     ));
 
     return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
