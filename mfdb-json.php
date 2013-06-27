@@ -821,6 +821,13 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
     {
         print "Adding QAM data.\n";
         $stmt = $dbh->prepare("UPDATE channel SET ");
+
+        print "\n\n";
+        var_dump($json["QAM"]);
+        print "\n\n";
+        $tt=fgets(STDIN);
+
+
         foreach ($json["QAM"] as $v)
         {
             $stationID = $v["stationID"];
