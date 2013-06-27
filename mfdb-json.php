@@ -817,6 +817,28 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
         $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
     }
 
+    if (isset($json["QAM"]))
+    {
+        print "Adding QAM data.\n";
+        $stmt = $dbh->prepare("UPDATE channel SET ");
+        foreach ($json["QAM"] as $v)
+        {
+            $stationID = $v["stationID"];
+            $qamType = $v["qamType"];
+            $qamProgram = $v["qamProgram"];
+            $qamFreq = $v["qamFreq"];
+            $channel = $v["channel"];
+            if (isset($v["virtualChannel"]))
+            {
+                $virtualChannel = $v["virtualChannel"];
+            } else
+            {
+                $virtualChannel = "";
+            }
+
+            print "$stationID $qamType $qamFreq $qamProgram $channel\n";
+        }
+    }
 
     print "***DEBUG: Exiting updateChannelTable.\n";
     $tt = fgets(STDIN);
