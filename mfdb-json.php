@@ -785,13 +785,19 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
             :atsc_major_chan,:atsc_minor_chan)");
     }
 
-    foreach ($json[$dev] as $k => $v)
+    foreach ($json[$dev]["map"] as $mapArray)
     {
-        print "k is $k v is $v\n";
+        print "stationid:" . $mapArray["stationID"] . " uhfVhf:" . $mapArray["uhfVhf"];
+        if (isset($mapArray["atscMajor"]))
+        {
+            print " atsc:" .$mapArray["atscMajor"] . "." . $mapArray["atscMinor"];
+        }
+        print "\n";
     }
 
-    $tt = fgets(STDIN);
 
+    $tt = fgets(STDIN);
+    print "***DEBUG: Exiting updateChannelTable.\n";
 }
 
 function getRandhash($username, $password, $baseurl, $api)
