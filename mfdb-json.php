@@ -793,7 +793,7 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
             $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => $channum,
-                "freqid" => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID));
+                "freqid" => $channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
         } else
         {
             $stmt = $dbh->prepare(
