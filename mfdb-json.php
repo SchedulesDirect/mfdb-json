@@ -816,7 +816,7 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
      */
 
     $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
-    foreach ($json[$dev]["stations"] as $stationArray)
+    foreach ($json["stations"] as $stationArray)
     {
         $stationID = $stationArray["stationID"];
         $name = $stationArray["name"];
