@@ -785,7 +785,7 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
             :atsc_major_chan,:atsc_minor_chan)");
     }
 
-    foreach ($json as $k => $v)
+    foreach ($json[$dev] as $k => $v)
     {
         print "k is $k v is $v\n";
     }
