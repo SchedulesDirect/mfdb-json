@@ -827,8 +827,10 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
         print "\n\n";
         $tt=fgets(STDIN);
 
+        $qamModified = $json["QAM"]["metadata"]["modified"];
+        print "qam modified:$qamModified\n";
 
-        foreach ($json["QAM"] as $v)
+        foreach ($json["QAM"]["map"] as $v)
         {
             $stationID = $v["stationID"];
             $qamType = $v["qamType"];
