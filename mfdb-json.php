@@ -738,13 +738,14 @@ function processLineups($dbh, $rh, array $retrieveLineups)
             if ($v1["device"] == $device)
             {
                 $jsonModified = $v1["modified"];
+                $transport = $v1["transport"];
                 print "$headend:$device local modified date:" . $lineup[$lineupid]["modified"] . "\n";
                 print "server modified date:$jsonModified\n";
                 print "Use new lineup?\n";
                 $updateDB = strtoupper(readline(">"));
                 if ($updateDB == "Y")
                 {
-                    updateChannelTable($dbh, $lineupid, $headend, $device, $json);
+                    updateChannelTable($dbh, $lineupid, $headend, $device, $transport, $json);
                 }
             }
         }
@@ -754,7 +755,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     $tt = fgets(STDIN);
 }
 
-function updateChannelTable($dbh, $sourceid, $he, $dev, array $json)
+function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
 {
     print "Updating channel table for sourceid:$sourceid\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
@@ -763,6 +764,33 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, array $json)
         $stmt->execute(array("sourceid" => $sourceid));
     }
 
+    /*
+     * If we start to do things like "IP" then we'll be inserting URLs, but this is fine for now.
+     */
+
+    if ($transport == "Cable")
+    {
+        $stmt = $dbh->prepare(
+            "INSERT INTO channel(chanid,channum,freqid,sourceid,callsign,name,xmltvid,serviceid,
+            mplexid,serviceid)
+            VALUES(:chanid,:channum,:freqid,:sourceid,:callsign,:name,:xmltvid,:serviceid,
+            :mplexid,:serviceid)");
+    }
+    else
+    {
+        $stmt = $dbh->prepare(
+            "INSERT INTO channel(chanid,channum,freqid,sourceid,callsign,name,xmltvid,
+            atsc_major_chan,atsc_minor_chan)
+            VALUES(:chanid,:channum,:freqid,:sourceid,:callsign,:name,:xmltvid,
+            :atsc_major_chan,:atsc_minor_chan)");
+    }
+
+    foreach ($json as $k => $v)
+    {
+        print "k is $k v is $v\n";
+    }
+
+    $tt = fgets(STDIN);
 
 }
 
