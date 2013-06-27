@@ -764,6 +764,30 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
         $stmt->execute(array("sourceid" => $sourceid));
     }
 
+    foreach ($json[$dev]["map"] as $mapArray)
+    {
+        $stationID = $mapArray["stationID"];
+
+        if ($transport == "Antenna")
+        {
+            $freqid = $mapArray["uhfVhf"];
+            if (isset($mapArray["atscMajor"]))
+            {
+                $atscMajor = $mapArray["atscMajor"];
+                $atscMinor = $mapArray["atscMinor"];
+            }
+            else
+            {
+                $atscMajor = 0;
+                $atscMinor = 0;
+            }
+        }
+        else
+        {
+            $channum = $mapArray["channel"];
+        }
+    }
+
     /*
      * If we start to do things like "IP" then we'll be inserting URLs, but this is fine for now.
      */
@@ -771,33 +795,37 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
     if ($transport == "Cable")
     {
         $stmt = $dbh->prepare(
-            "INSERT INTO channel(chanid,channum,freqid,sourceid,callsign,name,xmltvid,serviceid,
-            mplexid,serviceid)
-            VALUES(:chanid,:channum,:freqid,:sourceid,:callsign,:name,:xmltvid,:serviceid,
-            :mplexid,:serviceid)");
+            "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
+             VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
+
+        $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => $channum,
+                             "freqid" => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID));
     }
     else
     {
         $stmt = $dbh->prepare(
-            "INSERT INTO channel(chanid,channum,freqid,sourceid,callsign,name,xmltvid,
-            atsc_major_chan,atsc_minor_chan)
-            VALUES(:chanid,:channum,:freqid,:sourceid,:callsign,:name,:xmltvid,
-            :atsc_major_chan,:atsc_minor_chan)");
+            "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
+            VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
+        $stmt->execute(array("chanid"          => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
+                             "freqid"          => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
+                             "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
     }
 
-    foreach ($json[$dev]["map"] as $mapArray)
+    /*
+     * Now that we have basic information in the database, we can start filling in other things, like callsigns, etc.
+     */
+
+    $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
+    foreach ($json[$dev]["stations"] as $stationArray)
     {
-        print "stationid:" . $mapArray["stationID"] . " uhfVhf:" . $mapArray["uhfVhf"];
-        if (isset($mapArray["atscMajor"]))
-        {
-            print " atsc:" .$mapArray["atscMajor"] . "." . $mapArray["atscMinor"];
-        }
-        print "\n";
+        $stationID = $stationArray["stationID"];
+        $name = $stationArray["name"];
+        $callsign = $stationArray["callsign"];
+        $stmt->execute(array("name"=>$name, "callsign"=>$callsign, "stationID"=>$stationID));
     }
 
-
-    $tt = fgets(STDIN);
     print "***DEBUG: Exiting updateChannelTable.\n";
+    $tt = fgets(STDIN);
 }
 
 function getRandhash($username, $password, $baseurl, $api)
