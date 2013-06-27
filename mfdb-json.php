@@ -786,31 +786,29 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
         {
             $channum = $mapArray["channel"];
         }
+        /*
+         * If we start to do things like "IP" then we'll be inserting URLs, but this is fine for now.
+         */
+
+        if ($transport == "Cable")
+        {
+            $stmt = $dbh->prepare(
+                "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
+                 VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
+
+            $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => $channum,
+                                 "freqid" => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID));
+        }
+        else
+        {
+            $stmt = $dbh->prepare(
+                "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
+                VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
+            $stmt->execute(array("chanid"          => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
+                                 "freqid"          => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
+                                 "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
+        }
     }
-
-    /*
-     * If we start to do things like "IP" then we'll be inserting URLs, but this is fine for now.
-     */
-
-    if ($transport == "Cable")
-    {
-        $stmt = $dbh->prepare(
-            "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
-             VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
-
-        $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => $channum,
-                             "freqid" => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID));
-    }
-    else
-    {
-        $stmt = $dbh->prepare(
-            "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
-            VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
-        $stmt->execute(array("chanid"          => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
-                             "freqid"          => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
-                             "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
-    }
-
     /*
      * Now that we have basic information in the database, we can start filling in other things, like callsigns, etc.
      */
@@ -821,7 +819,7 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
         $stationID = $stationArray["stationID"];
         $name = $stationArray["name"];
         $callsign = $stationArray["callsign"];
-        $stmt->execute(array("name"=>$name, "callsign"=>$callsign, "stationID"=>$stationID));
+        $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
     }
 
     print "***DEBUG: Exiting updateChannelTable.\n";
