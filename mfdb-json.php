@@ -717,7 +717,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
      */
 
     $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE headend=:he");
-    foreach ($lineup as $k => $v)
+    foreach ($lineup as $lineupid => $v)
     {
         $headend = $v["headend"];
         $device = $v["device"];
@@ -725,23 +725,32 @@ function processLineups($dbh, $rh, array $retrieveLineups)
         $stmt->execute(array("he" => $headend));
         $json = json_decode($stmt->fetchAll(PDO::FETCH_COLUMN)[0], true);
 
-        foreach ($json["metadata"] as $k1 => $v1)
+        foreach ($json["metadata"] as $v1)
         {
             if ($v1["device"] == $device)
             {
                 $jsonModified = $v1["modified"];
-                print "$headend:$device>json modified date is: $jsonModified\n";
-                print "db modified is:" . $lineup[$k]["modified"] . "\n";
+                // print "$headend:$device>json modified date is: $jsonModified\n";
+                // print "db modified is:" . $lineup[$lineupid]["modified"] . "\n";
+                print "Headend $headend:$device has been updated. Update database?\n";
+                $updateDB = strtoupper(readline(">"));
+                if ($updateDB == "Y")
+                {
+                    updateChannelTable($dbh, $lineupid, $json);
+                }
             }
         }
 
 
-
-
-        $tt = fgets(STDIN);
-
     }
     $tt = fgets(STDIN);
+}
+
+function updateChannelTable($dbh, $lineupid, array $json)
+{
+    print "Updating channel table for sourceid:$lineupid\n";
+    $tt = fgets(STDIN);
+
 }
 
 function getRandhash($username, $password, $baseurl, $api)
