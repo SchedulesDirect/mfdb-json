@@ -738,7 +738,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
             if ($v1["device"] == $device)
             {
                 $jsonModified = $v1["modified"];
-                print "headend:$device local modified date:" . $lineup[$lineupid]["modified"] . "\n";
+                print "$headend:$device local modified date:" . $lineup[$lineupid]["modified"] . "\n";
                 print "server modified date:$jsonModified\n";
                 print "Use new lineup?\n";
                 $updateDB = strtoupper(readline(">"));
@@ -757,11 +757,6 @@ function processLineups($dbh, $rh, array $retrieveLineups)
 function updateChannelTable($dbh, $sourceid, $he, $dev, array $json)
 {
     print "Updating channel table for sourceid:$sourceid\n";
-    print "sourceid is\n\n";
-    var_dump($sourceid);
-    print "\n\n";
-    $tt = fgets(STDIN);
-    exit;
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
     if ($sourceid > 1)
     {
