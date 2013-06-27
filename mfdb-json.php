@@ -163,8 +163,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     $programCache[$v["programID"]] = $v["md5"];
                 }
             }
-        }
-        else
+        } else
         {
             print "FATAL: Could not open zip file.\n";
             exit;
@@ -199,8 +198,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $replaceStack[$progID] = $md5;
                 $retrieveStack[] = $progID;
             }
-        }
-        else
+        } else
         {
             /*
              * The programID wasn't in the database, so we'll need to get it.
@@ -245,8 +243,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         {
             $zipArchive->extractTo("$tempDir");
             $zipArchive->close();
-        }
-        else
+        } else
         {
             print "FATAL: Could not open .zip file while extracting programIDs.\n";
             exit;
@@ -256,7 +253,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($insertStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                                 "json"      => file_get_contents("$tempDir/$progID.json.txt")));
+                "json" => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
             {
                 unlink("$tempDir/$progID.json.txt");
@@ -267,7 +264,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($replaceStack as $progID => $v)
         {
             $stmt->execute(array("programID" => $progID, "md5" => $v,
-                                 "json"      => file_get_contents("$tempDir/$progID.json.txt")));
+                "json" => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
             {
                 unlink("$tempDir/$progID.json.txt");
@@ -309,8 +306,7 @@ function setup($dbh)
                 print "password: " . $v["password"] . "\n\n";
                 $password = $v["password"];
             }
-        }
-        else
+        } else
         {
             $username = readline("Schedules Direct username:");
             $password = readline("Schedules Direct password:");
@@ -351,8 +347,8 @@ function setup($dbh)
                         $newName = readline("Source name:>");
                         $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
                         VALUES(:name,:userid,:password)");
-                        $stmt->execute(array("name"     => $newName, "userid" => $username,
-                                             "password" => $password));
+                        $stmt->execute(array("name" => $newName, "userid" => $username,
+                            "password" => $password));
                         break;
                     case "L":
                         print "Linking Schedules Direct headend to sourceid\n\n";
@@ -372,8 +368,7 @@ function setup($dbh)
                         $done = TRUE;
                         break;
                 }
-            }
-            else
+            } else
             {
                 /*
                  * User has no headends defined in their SD account.
@@ -426,8 +421,7 @@ function addHeadendsToSchedulesDirect($rh)
     if ($res["response"] == "OK")
     {
         print "Successfully added headend.\n";
-    }
-    else
+    } else
     {
         print "\n\n-----\nERROR:Received error response from server:\n";
         print $res["message"] . "\n\n-----\n";
@@ -668,8 +662,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     {
         $zipArchive->extractTo("$tempDir");
         $zipArchive->close();
-    }
-    else
+    } else
     {
         print "FATAL: Could not open lineups zip file.\n";
         print "tempdir is $tempDir\n";
@@ -710,8 +703,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
                 $headend = $lineupid;
                 $device = "Antenna";
             }
-        }
-        else
+        } else
         {
             $headend = $lineupid;
             $device = "Analog";
@@ -746,6 +738,8 @@ function processLineups($dbh, $rh, array $retrieveLineups)
                 if ($updateDB == "Y")
                 {
                     updateChannelTable($dbh, $lineupid, $headend, $device, $transport, $json);
+                    $stmt = $dbh->prepare("UPDATE videosource SET modified=:modified WHERE sourceid=:sourceid");
+                    $stmt->execute(array("modified" => $jsonModified, "sourceid" => $lineupid));
                 }
             }
         }
@@ -775,14 +769,12 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
             {
                 $atscMajor = $mapArray["atscMajor"];
                 $atscMinor = $mapArray["atscMinor"];
-            }
-            else
+            } else
             {
                 $atscMajor = 0;
                 $atscMinor = 0;
             }
-        }
-        else
+        } else
         {
             $channum = $mapArray["channel"];
         }
@@ -797,16 +789,15 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
             $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => $channum,
-                                 "freqid" => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID));
-        }
-        else
+                "freqid" => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID));
+        } else
         {
             $stmt = $dbh->prepare(
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
                 VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
-            $stmt->execute(array("chanid"          => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
-                                 "freqid"          => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
-                                 "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
+            $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
+                "freqid" => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
+                "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
         }
     }
     /*
@@ -821,6 +812,7 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
         $callsign = $stationArray["callsign"];
         $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
     }
+
 
     print "***DEBUG: Exiting updateChannelTable.\n";
     $tt = fgets(STDIN);
@@ -861,12 +853,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'timeout' => 480,
-                                               'content' => $data
-                                           )
+    array(
+        'method' => 'POST',
+        'header' => 'Content-type: application/x-www-form-urlencoded',
+        'timeout' => 480,
+        'content' => $data
+    )
     ));
 
     return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
