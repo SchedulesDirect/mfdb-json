@@ -731,15 +731,19 @@ function processLineups($dbh, $rh, array $retrieveLineups)
             {
                 $jsonModified = $v1["modified"];
                 $transport = $v1["transport"];
+                // Eventually we won't print once coding is done.
                 print "$headend:$device local modified date:" . $lineup[$lineupid]["modified"] . "\n";
                 print "server modified date:$jsonModified\n";
-                print "Use new lineup?\n";
-                $updateDB = strtoupper(readline(">"));
-                if ($updateDB == "Y")
+                if ($jsonModified != $lineup[$lineupid]["modified"])
                 {
-                    updateChannelTable($dbh, $lineupid, $headend, $device, $transport, $json);
-                    $stmt = $dbh->prepare("UPDATE videosource SET modified=:modified WHERE sourceid=:sourceid");
-                    $stmt->execute(array("modified" => $jsonModified, "sourceid" => $lineupid));
+                    print "Use new lineup?\n";
+                    $updateDB = strtoupper(readline(">"));
+                    if ($updateDB == "Y")
+                    {
+                        updateChannelTable($dbh, $lineupid, $headend, $device, $transport, $json);
+                        $stmt = $dbh->prepare("UPDATE videosource SET modified=:modified WHERE sourceid=:sourceid");
+                        $stmt->execute(array("modified" => $jsonModified, "sourceid" => $lineupid));
+                    }
                 }
             }
         }
