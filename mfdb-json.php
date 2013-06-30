@@ -177,7 +177,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach($result as $v)
+    foreach ($result as $v)
     {
         $dbProgramCache[$v["programID"]] = $v["md5"];
     }
@@ -227,90 +227,97 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         print "Requesting more than 10000 programs. Please be patient.\n";
     }
 
-    print "Sending program request.\n";
-    $res = array();
-    $res["action"] = "get";
-    $res["object"] = "programs";
-    $res["randhash"] = $rh;
-    $res["api"] = $api;
-    $res["request"] = $retrieveStack;
-
-    $response = sendRequest(json_encode($res));
-
-    $res = array();
-    $res = json_decode($response, true);
-
-    if ($res["response"] == "OK")
+    if (count($insertStack) + count($replaceStack) > 0)
     {
-        print "Starting program cache insert.\n";
-        $tempDir = tempdir();
+        print "Requesting new and updated programs.\n";
+        $res = array();
+        $res["action"] = "get";
+        $res["object"] = "programs";
+        $res["randhash"] = $rh;
+        $res["api"] = $api;
+        $res["request"] = $retrieveStack;
 
-        $fileName = $res["filename"];
-        $url = $res["URL"];
-        file_put_contents("$tempDir/$fileName", file_get_contents($url));
+        $response = sendRequest(json_encode($res));
 
-        $zipArchive = new ZipArchive();
-        $result = $zipArchive->open("$tempDir/$fileName");
-        if ($result === TRUE)
+        $res = array();
+        $res = json_decode($response, true);
+
+        if ($res["response"] == "OK")
         {
-            $zipArchive->extractTo("$tempDir");
-            $zipArchive->close();
-        }
-        else
-        {
-            print "FATAL: Could not open .zip file while extracting programIDs.\n";
-            exit;
-        }
+            print "Starting program cache insert.\n";
+            $tempDir = tempdir();
 
-        $counter = 0;
-        print "Performing inserts.\n";
+            $fileName = $res["filename"];
+            $url = $res["URL"];
+            file_put_contents("$tempDir/$fileName", file_get_contents($url));
 
-        $stmt = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
-        foreach ($insertStack as $progID => $v)
-        {
-            $counter++;
-            if ($counter % 1000)
+            $zipArchive = new ZipArchive();
+            $result = $zipArchive->open("$tempDir/$fileName");
+            if ($result === TRUE)
             {
-                print "$counter / " . count($insertStack) . "             \r";
+                $zipArchive->extractTo("$tempDir");
+                $zipArchive->close();
             }
-            $stmt->execute(array("programID" => $progID, "md5" => $v,
-                "json" => file_get_contents("$tempDir/$progID.json.txt")));
+            else
+            {
+                print "FATAL: Could not open .zip file while extracting programIDs.\n";
+                exit;
+            }
+
+            $counter = 0;
+            print "Performing inserts.\n";
+
+            $stmt = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
+            foreach ($insertStack as $progID => $v)
+            {
+                $counter++;
+                if ($counter % 1000)
+                {
+                    print "$counter / " . count($insertStack) . "             \r";
+                }
+                $stmt->execute(array("programID" => $progID, "md5" => $v,
+                    "json" => file_get_contents("$tempDir/$progID.json.txt")));
+                if ($debug == FALSE)
+                {
+                    unlink("$tempDir/$progID.json.txt");
+                }
+            }
+
+            $counter = 0;
+            print "\nPerforming updates.\n";
+
+            $stmt = $dbh->prepare("REPLACE INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
+            foreach ($replaceStack as $progID => $v)
+            {
+                $counter++;
+                if ($counter % 1000)
+                {
+                    print "$counter / " . count($replaceStack) . "             \r";
+                }
+                $stmt->execute(array("programID" => $progID, "md5" => $v,
+                    "json" => file_get_contents("$tempDir/$progID.json.txt")));
+                if ($debug == FALSE)
+                {
+                    unlink("$tempDir/$progID.json.txt");
+                }
+            }
+
             if ($debug == FALSE)
             {
-                unlink("$tempDir/$progID.json.txt");
+                unlink("$tempDir/serverID.txt");
+                rmdir("$tempDir");
             }
         }
 
-        $counter = 0;
-        print "\nPerforming updates.\n";
-
-        $stmt = $dbh->prepare("REPLACE INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
-        foreach ($replaceStack as $progID => $v)
-        {
-            $counter++;
-            if ($counter % 1000)
-            {
-                print "$counter / " . count($replaceStack) . "             \r";
-            }
-            $stmt->execute(array("programID" => $progID, "md5" => $v,
-                "json" => file_get_contents("$tempDir/$progID.json.txt")));
-            if ($debug == FALSE)
-            {
-                unlink("$tempDir/$progID.json.txt");
-            }
-        }
-
-        if ($debug == FALSE)
-        {
-            unlink("$tempDir/serverID.txt");
-            rmdir("$tempDir");
-        }
+        print "Completed local database program updates.\n";
     }
 
-    print "Completed local database program updates.\n";
     /*
      * Now that we've grabbed the program details for all the programs that we need to schedule, get to work.
      */
+
+    print "Inserting schedules.\n";
+
 }
 
 function setup($dbh)
@@ -938,10 +945,10 @@ function getRandhash($username, $password, $baseurl, $api)
 
 function sendRequest($jsonText)
 {
-/*
- * Retrieving 42k program objects took 8 minutes. Once everything is in a steady state, you're not going to be
- * having that many objects that need to get pulled. Set timeout for 15 minutes.
- */
+    /*
+     * Retrieving 42k program objects took 8 minutes. Once everything is in a steady state, you're not going to be
+     * having that many objects that need to get pulled. Set timeout for 15 minutes.
+     */
 
     $data = http_build_query(array("request" => $jsonText));
 
