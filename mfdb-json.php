@@ -134,6 +134,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $res = array();
     $res = json_decode($response, true);
 
+    /*
+     * First we're going to load all the programIDs and md5's from the schedule files we just downloaded into
+     * an array called programCache
+     */
+
     if ($res["response"] == "OK")
     {
         $tempDir = tempdir();
@@ -168,9 +173,15 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     print "There are " . count($programCache) . " programIDs in the upcoming schedule.\n";
     print "Retrieving existing MD5 values.\n";
 
-    $stmt = $dbh->prepare("SELECT programID,md5 FROM SDprogramCache");
+    $stmt = $dbh->prepare("SELECT programID,md5 FROM SDprogramCache limit 10");
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
+
+    print "\n\n";
+    print var_dump($dbProgramCache);
+    print "\n\nEnter.";
+    $tt=fgets(STDIN);
+
 
     $insertStack = array();
     $replaceStack = array();
