@@ -163,7 +163,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     $programCache[$v["programID"]] = $v["md5"];
                 }
             }
-        } else
+        }
+        else
         {
             print "FATAL: Could not open zip file.\n";
             exit;
@@ -198,7 +199,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $replaceStack[$progID] = $md5;
                 $retrieveStack[] = $progID;
             }
-        } else
+        }
+        else
         {
             /*
              * The programID wasn't in the database, so we'll need to get it.
@@ -243,7 +245,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         {
             $zipArchive->extractTo("$tempDir");
             $zipArchive->close();
-        } else
+        }
+        else
         {
             print "FATAL: Could not open .zip file while extracting programIDs.\n";
             exit;
@@ -306,7 +309,8 @@ function setup($dbh)
                 print "password: " . $v["password"] . "\n\n";
                 $password = $v["password"];
             }
-        } else
+        }
+        else
         {
             $username = readline("Schedules Direct username:");
             $password = readline("Schedules Direct password:");
@@ -368,7 +372,8 @@ function setup($dbh)
                         $done = TRUE;
                         break;
                 }
-            } else
+            }
+            else
             {
                 /*
                  * User has no headends defined in their SD account.
@@ -421,7 +426,8 @@ function addHeadendsToSchedulesDirect($rh)
     if ($res["response"] == "OK")
     {
         print "Successfully added headend.\n";
-    } else
+    }
+    else
     {
         print "\n\n-----\nERROR:Received error response from server:\n";
         print $res["message"] . "\n\n-----\n";
@@ -662,7 +668,8 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     {
         $zipArchive->extractTo("$tempDir");
         $zipArchive->close();
-    } else
+    }
+    else
     {
         print "FATAL: Could not open lineups zip file.\n";
         print "tempdir is $tempDir\n";
@@ -703,7 +710,8 @@ function processLineups($dbh, $rh, array $retrieveLineups)
                 $headend = $lineupid;
                 $device = "Antenna";
             }
-        } else
+        }
+        else
         {
             $headend = $lineupid;
             $device = "Analog";
@@ -773,12 +781,14 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
             {
                 $atscMajor = $mapArray["atscMajor"];
                 $atscMinor = $mapArray["atscMinor"];
-            } else
+            }
+            else
             {
                 $atscMajor = 0;
                 $atscMinor = 0;
             }
-        } else
+        }
+        else
         {
             $channum = $mapArray["channel"];
         }
@@ -794,7 +804,8 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
 
             $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => $channum,
                 "freqid" => $channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
-        } else
+        }
+        else
         {
             $stmt = $dbh->prepare(
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
@@ -820,12 +831,16 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
     if (isset($json["QAM"]))
     {
         print "Adding QAM data.\n";
-        $stmt = $dbh->prepare("UPDATE channel SET ");
+        $dtvMultiplex = array();
+
+        $channelInsert =
+            $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
+        WHERE xmltvid=:stationID");
 
         print "\n\n";
         var_dump($json["QAM"]);
         print "\n\n";
-        $tt=fgets(STDIN);
+        $tt = fgets(STDIN);
 
         $qamModified = $json["QAM"]["metadata"]["modified"];
         print "qam modified:$qamModified\n";
@@ -840,12 +855,32 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
             if (isset($v["virtualChannel"]))
             {
                 $virtualChannel = $v["virtualChannel"];
-            } else
+            }
+            else
             {
                 $virtualChannel = "";
             }
 
             print "$stationID $qamType $qamFreq $qamProgram $channel\n";
+
+            /*
+             * Because multiple programs  may end up on a single frequency, we only want to insert once, but we want
+             * to track the mplexid assigned when we do the insert, because that might be used more than once.
+             */
+
+            if (!isset($dtvMultiplex[$qamFreq]))
+            {
+                $insertDTVMultiplex = $dbh->prepare
+                ("INSERT INTO dtv_multiplex
+                (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
+                VALUES
+                (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
+                $insertDTVMultiplex->execute(array("sourceid" => $sourceid, "freq" => $qamFreq));
+                $dtvMultiplex[$qamFreq] = $dbh->lastInsertId();
+            }
+
+            $channelInsert->execute(array("mplexid" => $dtvMultiplex[$qamFreq], "qamprogram" => $qamProgram,
+                "stationid" => $stationID));
         }
     }
 
