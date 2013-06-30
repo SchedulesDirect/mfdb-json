@@ -173,21 +173,14 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     print "There are " . count($programCache) . " programIDs in the upcoming schedule.\n";
     print "Retrieving existing MD5 values.\n";
 
-    $stmt = $dbh->prepare("SELECT programID,md5 FROM SDprogramCache limit 10");
+    $stmt = $dbh->prepare("SELECT programID,md5 FROM SDprogramCache");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 
     foreach($result as $v)
     {
         $dbProgramCache[$v["programID"]] = $v["md5"];
     }
-
-    print "\n\n";
-    print var_dump($dbProgramCache);
-    print "\n\nEnter.";
-    $tt=fgets(STDIN);
-
 
     $insertStack = array();
     $replaceStack = array();
