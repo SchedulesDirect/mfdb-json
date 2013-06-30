@@ -252,9 +252,17 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             exit;
         }
 
+        $counter = 0;
+        print "Performing inserts.\n";
+
         $stmt = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
         foreach ($insertStack as $progID => $v)
         {
+            $counter++;
+            if ($counter % 1000)
+            {
+                print "$counter / " . count($insertStack) . "             \r";
+            }
             $stmt->execute(array("programID" => $progID, "md5" => $v,
                 "json" => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
@@ -263,9 +271,17 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             }
         }
 
+        $counter = 0;
+        print "\nPerforming updates.\n";
+
         $stmt = $dbh->prepare("REPLACE INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
         foreach ($replaceStack as $progID => $v)
         {
+            $counter++;
+            if ($counter % 1000)
+            {
+                print "$counter / " . count($replaceStack) . "             \r";
+            }
             $stmt->execute(array("programID" => $progID, "md5" => $v,
                 "json" => file_get_contents("$tempDir/$progID.json.txt")));
             if ($debug == FALSE)
@@ -281,6 +297,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         }
     }
 
+    print "Completed local database program updates.\n";
     /*
      * Now that we've grabbed the program details for all the programs that we need to schedule, get to work.
      */
@@ -758,7 +775,6 @@ function processLineups($dbh, $rh, array $retrieveLineups)
 
 
     }
-    $tt = fgets(STDIN);
 }
 
 function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
