@@ -19,7 +19,7 @@ $password = "mythtv";
 $host = "localhost";
 $db = "mythconverg";
 
-$longoptions = array("beta::", "debug::", "help::", "host::", "init::", "password::", "setup::", "user::");
+$longoptions = array("beta::", "debug::", "help::", "host::", "password::", "setup::", "user::");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -44,8 +44,6 @@ foreach ($options as $k => $v)
         case "host":
             $host = $v;
             break;
-        case "init":
-            $doInit = TRUE;
         case "password":
             $password = $v;
             break;
@@ -69,11 +67,6 @@ try
 {
     print "Exception with PDO: " . $e->getMessage() . "\n";
     exit;
-}
-
-if ($doInit)
-{
-    dbInit($dbh);
 }
 
 if ($doSetup)
@@ -947,19 +940,4 @@ function tempdir()
         return $tempfile;
     }
 }
-
-function dbInit($dbh)
-{
-    $stmt = $dbh->prepare("CREATE TABLE programMD5Cache (`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `programID` char(14) NOT NULL DEFAULT '',
-  `md5` char(22) NOT NULL,
-  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`row`),
-  UNIQUE KEY `pid-MD5` (`programID`,`md5`)
-  )
-  ENGINE = InnoDB DEFAULT CHARSET=utf8");
-
-    $stmt->execute();
-}
-
 ?>
