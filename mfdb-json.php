@@ -175,7 +175,13 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     $stmt = $dbh->prepare("SELECT programID,md5 FROM SDprogramCache limit 10");
     $stmt->execute();
-    $dbProgramCache = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+    foreach($result as $v)
+    {
+        $dbProgramCache[$v["programID"]] = $v["md5"];
+    }
 
     print "\n\n";
     print var_dump($dbProgramCache);
