@@ -758,10 +758,7 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
 {
     print "Updating channel table for sourceid:$sourceid\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
-    if ($sourceid > 1)
-    {
-        $stmt->execute(array("sourceid" => $sourceid));
-    }
+    $stmt->execute(array("sourceid" => $sourceid));
 
     foreach ($json[$dev]["map"] as $mapArray)
     {
@@ -830,11 +827,6 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
             $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
         WHERE xmltvid=:stationID");
 
-        print "\n\n";
-        var_dump($json["QAM"]);
-        print "\n\n";
-        $tt = fgets(STDIN);
-
         $qamModified = $json["QAM"]["metadata"]["modified"];
         print "qam modified:$qamModified\n";
 
@@ -864,7 +856,7 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
             if (!isset($dtvMultiplex[$qamFreq]))
             {
                 $insertDTVMultiplex = $dbh->prepare
-                ("INSERT INTO dtv_multiplex
+                    ("INSERT INTO dtv_multiplex
                 (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
                 VALUES
                 (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
@@ -873,7 +865,7 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
             }
 
             $channelInsert->execute(array("mplexid" => $dtvMultiplex[$qamFreq], "qamprogram" => $qamProgram,
-                "stationid" => $stationID));
+                "stationID" => $stationID));
         }
     }
 
@@ -940,4 +932,5 @@ function tempdir()
         return $tempfile;
     }
 }
+
 ?>
