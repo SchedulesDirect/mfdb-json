@@ -150,6 +150,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             $zipArchive->close();
             foreach (glob("$tempDir/sched_*.json.txt") as $f)
             {
+                print "***DEBUG: Reading schedule $f\n";
                 $a = json_decode(file_get_contents($f), true);
                 foreach ($a["programs"] as $v)
                 {
@@ -211,6 +212,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     print "Need to download " . count($insertStack) . " new programs.\n";
     print "Need to download " . count($replaceStack) . " updated programs.\n";
 
+    if (count($insertStack) + count($replaceStack) > 10000)
+    {
+        print "Requesting more than 10000 programs. Please be patient.\n";
+    }
+
     print "Sending program request.\n";
     $res = array();
     $res["action"] = "get";
@@ -226,6 +232,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     if ($res["response"] == "OK")
     {
+        print "Starting program cache insert.\n";
         $tempDir = tempdir();
 
         $fileName = $res["filename"];
@@ -846,7 +853,7 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
                 $virtualChannel = "";
             }
 
-            print "$stationID $qamType $qamFreq $qamProgram $channel\n";
+            // print "$stationID $qamType $qamFreq $qamProgram $channel\n";
 
             /*
              * Because multiple programs  may end up on a single frequency, we only want to insert once, but we want
@@ -905,13 +912,18 @@ function getRandhash($username, $password, $baseurl, $api)
 
 function sendRequest($jsonText)
 {
+/*
+ * Retrieving 42k program objects took 8 minutes. Once everything is in a steady state, you're not going to be
+ * having that many objects that need to get pulled. Set timeout for 15 minutes.
+ */
+
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
     array(
         'method' => 'POST',
         'header' => 'Content-type: application/x-www-form-urlencoded',
-        'timeout' => 480,
+        'timeout' => 900,
         'content' => $data
     )
     ));
