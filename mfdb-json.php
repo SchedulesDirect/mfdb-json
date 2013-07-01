@@ -326,9 +326,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
             print "\n\n";
             print "k is $k v is $v\n";
-                var_dump($v);
+            var_dump($v);
             print "\n\nEnter.\n";
-            $tt=fgets(STDIN);
+            $tt = fgets(STDIN);
 
             $stationID = $v["stationID"];
         }
