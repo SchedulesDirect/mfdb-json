@@ -120,6 +120,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 {
     $programCache = array();
     $dbProgramCache = array();
+    $schedTempDir = tempdir();
 
     print "Sending schedule request.\n";
     $res = array();
@@ -141,19 +142,17 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     if ($res["response"] == "OK")
     {
-        $tempDir = tempdir();
-
         $fileName = $res["filename"];
         $url = $res["URL"];
-        file_put_contents("$tempDir/$fileName", file_get_contents($url));
+        file_put_contents("$schedTempDir/$fileName", file_get_contents($url));
 
         $zipArchive = new ZipArchive();
-        $result = $zipArchive->open("$tempDir/$fileName");
+        $result = $zipArchive->open("$schedTempDir/$fileName");
         if ($result === TRUE)
         {
-            $zipArchive->extractTo("$tempDir");
+            $zipArchive->extractTo("$schedTempDir");
             $zipArchive->close();
-            foreach (glob("$tempDir/sched_*.json.txt") as $f)
+            foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
                 print "***DEBUG: Reading schedule $f\n";
                 $a = json_decode(file_get_contents($f), true);
@@ -276,7 +275,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     print "$counter / " . count($insertStack) . "             \r";
                 }
                 $stmt->execute(array("programID" => $progID, "md5" => $v,
-                    "json" => file_get_contents("$tempDir/$progID.json.txt")));
+                                     "json"      => file_get_contents("$tempDir/$progID.json.txt")));
                 if ($debug == FALSE)
                 {
                     unlink("$tempDir/$progID.json.txt");
@@ -295,7 +294,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     print "$counter / " . count($replaceStack) . "             \r";
                 }
                 $stmt->execute(array("programID" => $progID, "md5" => $v,
-                    "json" => file_get_contents("$tempDir/$progID.json.txt")));
+                                     "json"      => file_get_contents("$tempDir/$progID.json.txt")));
                 if ($debug == FALSE)
                 {
                     unlink("$tempDir/$progID.json.txt");
@@ -317,6 +316,24 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
      */
 
     print "Inserting schedules.\n";
+
+    foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
+    {
+        print "***DEBUG: Reading schedule $f\n";
+        $a = json_decode(file_get_contents($f), true);
+        foreach ($a as $k => $v)
+        {
+
+            print "\n\n";
+            print "k is $k v is $v\n";
+                var_dump($v);
+            print "\n\nEnter.\n";
+            $tt=fgets(STDIN);
+
+            $stationID = $v["stationID"];
+        }
+    }
+
 
 }
 
@@ -385,8 +402,8 @@ function setup($dbh)
                         $newName = readline("Source name:>");
                         $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
                         VALUES(:name,:userid,:password)");
-                        $stmt->execute(array("name" => $newName, "userid" => $username,
-                            "password" => $password));
+                        $stmt->execute(array("name"     => $newName, "userid" => $username,
+                                             "password" => $password));
                         break;
                     case "L":
                         print "Linking Schedules Direct headend to sourceid\n\n";
@@ -833,16 +850,16 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
             $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => $channum,
-                "freqid" => $channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
+                                 "freqid" => $channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
         }
         else
         {
             $stmt = $dbh->prepare(
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
                 VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
-            $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
-                "freqid" => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
-                "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
+            $stmt->execute(array("chanid"          => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
+                                 "freqid"          => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
+                                 "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
         }
     }
     /*
@@ -904,8 +921,8 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
                 $dtvMultiplex[$qamFreq] = $dbh->lastInsertId();
             }
 
-            $channelInsert->execute(array("mplexid" => $dtvMultiplex[$qamFreq], "qamprogram" => $qamProgram,
-                "stationID" => $stationID));
+            $channelInsert->execute(array("mplexid"   => $dtvMultiplex[$qamFreq], "qamprogram" => $qamProgram,
+                                          "stationID" => $stationID));
         }
     }
 
@@ -953,12 +970,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-    array(
-        'method' => 'POST',
-        'header' => 'Content-type: application/x-www-form-urlencoded',
-        'timeout' => 900,
-        'content' => $data
-    )
+                                           array(
+                                               'method'  => 'POST',
+                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                               'timeout' => 900,
+                                               'content' => $data
+                                           )
     ));
 
     return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
