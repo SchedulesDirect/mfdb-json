@@ -317,7 +317,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     print "Inserting schedules.\n";
 
-    foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
+    foreach (glob("$schedTempDir/sched_[1-9]*.json.txt") as $f)
     {
         print "***DEBUG: Reading schedule $f\n";
         $a = json_decode(file_get_contents($f), true);
@@ -927,7 +927,6 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
     }
 
     print "***DEBUG: Exiting updateChannelTable.\n";
-    $tt = fgets(STDIN);
 }
 
 function getRandhash($username, $password, $baseurl, $api)
