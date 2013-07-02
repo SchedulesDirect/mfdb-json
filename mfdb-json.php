@@ -352,9 +352,15 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         $a = json_decode(file_get_contents($f), true);
         foreach ($a["programs"] as $v)
         {
+            print "\n\n";
+            var_dump($v);
+            print "\n\n";
+
+
+
             $programID = $v["programID"];
             $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
-            $endDate = $startDate;
+            $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
             $endDate->add(new DateInterval("PT" . $v["duration"] . "S"));
             $closedCaption = $v["cc"];
             $stereo = $v["stereo"];
