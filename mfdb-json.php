@@ -363,7 +363,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $hdtv = $v["hdtv"];
             }
 
-            print "p:$programID s:$startDate e:$endDate\n";
+            print "p:$programID s:" . $startDate->format("Y-m-d H:i:s") . " e:" . $endDate->format("Y-m-d H:i:s") ."\n";
 
             var_dump($startDate);
             print "\n\n";
