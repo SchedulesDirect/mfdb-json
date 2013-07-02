@@ -354,12 +354,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         $a = json_decode(file_get_contents($f), true);
         foreach ($a["programs"] as $v)
         {
-            print "\n\n";
-            var_dump($v);
-            print "\n\n";
-
-
-
             $programID = $v["programID"];
             $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
             $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
@@ -371,14 +365,10 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $hdtv = $v["hdtv"];
             }
 
-            print "p:$programID s:" . $startDate->format("Y-m-d H:i:s") . " e:" . $endDate->format("Y-m-d H:i:s") ."\n";
+            $starttime = $startDate->format("Y-m-d H:i:s");
+            $endtime = $endDate->format("Y-m-d H:i:s");
 
-            var_dump($startDate);
-            print "\n\n";
-            var_dump($endDate);
-            print "\n\n";
-
-
+            print "p:$programID s:$starttime e:$endtime\n";
             $tt = fgets(STDIN);
         }
     }
