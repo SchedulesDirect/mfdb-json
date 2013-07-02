@@ -10,9 +10,11 @@ $doInit = FALSE;
 $debug = TRUE;
 $doSetup = FALSE;
 
-date_default_timezone_set("America/Chicago");
+date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
+
+print "Time is now $todayDate\n";
 
 $user = "mythtv";
 $password = "mythtv";
