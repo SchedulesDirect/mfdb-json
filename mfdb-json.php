@@ -121,6 +121,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $programCache = array();
     $dbProgramCache = array();
     $schedTempDir = tempdir();
+    $chanData = array();
 
     print "Sending schedule request.\n";
     $res = array();
@@ -152,13 +153,21 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         {
             $zipArchive->extractTo("$schedTempDir");
             $zipArchive->close();
+            $stmt = $dbh->prepare("SELECT chanid,channum,sourceid FROM channel WHERE visible=1 AND
+                xmltvid=:stationid");
+
             foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
                 print "***DEBUG: Reading schedule $f\n";
                 $a = json_decode(file_get_contents($f), true);
+                $stationID = $a["stationID"];
+                $stmt->execute(array("stationid" => $stationID));
+                $r = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $chanData[$stationID] = $r;
+
                 foreach ($a["programs"] as $v)
                 {
-                    $programCache[$v["programID"]] = $v["md5"];
+                    $programCache[$v["programID"]] = array("md5" => $v["md5"], "json" => $v);
                 }
             }
         }
@@ -189,7 +198,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
      */
     $retrieveStack = array();
 
-    foreach ($programCache as $progID => $md5)
+    foreach ($programCache as $progID => $dataArray)
     {
         if (array_key_exists($progID, $dbProgramCache))
         {
@@ -197,9 +206,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
              * First we'll check if the key (the programID) exists in the database already, and if yes, does it have
              * the same md5 value as the one that we downloaded?
              */
-            if ($dbProgramCache[$progID] != $md5)
+            if ($dbProgramCache[$progID] != $dataArray["md5"])
             {
-                $replaceStack[$progID] = $md5;
+                $replaceStack[$progID] = $dataArray["md5"];
                 $retrieveStack[] = $progID;
             }
         }
@@ -208,7 +217,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             /*
              * The programID wasn't in the database, so we'll need to get it.
              */
-            $insertStack[$progID] = $md5;
+            $insertStack[$progID] = $dataArray["md5"];
             $retrieveStack[] = $progID;
         }
     }
@@ -317,21 +326,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     print "Inserting schedules.\n";
 
-    foreach (glob("$schedTempDir/sched_[1-9]*.json.txt") as $f)
-    {
-        print "***DEBUG: Reading schedule $f\n";
-        $a = json_decode(file_get_contents($f), true);
-        $stationID = $a["stationID"];
-        foreach ($a["programs"] as $k => $v)
-        {
-            print "\n\n";
-            print "k is $k v is $v\n";
-            var_dump($v);
-            print "\n\nEnter.\n";
-            $tt = fgets(STDIN);
-        }
-    }
-
+print "\n\n";
+    var_dump($chanData);
+    print "\n\n";
 
 }
 
