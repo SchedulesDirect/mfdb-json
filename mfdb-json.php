@@ -326,10 +326,21 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     print "Inserting schedules.\n";
 
-print "\n\n";
-    var_dump($chanData);
-    print "\n\n";
+    foreach ($chanData as $stationID => $row)
+    {
+        foreach ($row as $k => $value)
+        {
+            /*
+             * This inner loop is where we can actually access the variables; there may be multiple videosources
+             * which have the same xmltvid, so we may be inserting the value multiple times.
+             */
 
+            print "k is $k\n\n";
+            var_dump($value);
+            print "\n\nEnter\n";
+            $tt=fgets(STDIN);
+        }
+    }
 }
 
 function setup($dbh)
