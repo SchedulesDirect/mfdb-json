@@ -340,6 +340,10 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
              * which have the same xmltvid, so we may be inserting the value multiple times.
              */
 
+            print "\n\n";
+            var_dump($value);
+            print "\n\nEnter\n";
+            $tt=fgets(STDIN);
 
 
         }
