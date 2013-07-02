@@ -355,7 +355,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             $programID = $v["programID"];
             $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
             $endDate = $startDate;
-            $endDate->add("P" . $v["duration"] . "S");
+            $endDate->add(new DateInterval("P" . $v["duration"] . "S"));
             $closedCaption = $v["cc"];
             $stereo = $v["stereo"];
             if (isset($v["hdtv"]))
