@@ -321,16 +321,14 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     {
         print "***DEBUG: Reading schedule $f\n";
         $a = json_decode(file_get_contents($f), true);
-        foreach ($a as $k => $v)
+        $stationID = $a["stationID"];
+        foreach ($a["programs"] as $k => $v)
         {
-
             print "\n\n";
             print "k is $k v is $v\n";
             var_dump($v);
             print "\n\nEnter.\n";
             $tt = fgets(STDIN);
-
-            $stationID = $v["stationID"];
         }
     }
 
