@@ -346,17 +346,26 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         }
     }
 
-    foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
+    foreach (glob("$schedTempDir/sched_[0-9]*.json.txt") as $f)
     {
         print "***DEBUG: Reading schedule $f\n";
         $a = json_decode(file_get_contents($f), true);
-        foreach ($a["programs"] as $k => $v)
+        foreach ($a["programs"] as $v)
         {
-            print "k is $k v is $v\n";
-            $tt=fgets(STDIN);
+            $programID = $v["programID"];
+            $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
+            $endDate = new DateTime($startDate);
+            $endDate->add("P" . $v["duration"] . "S");
+            $closedCaption = $v["cc"];
+            $stereo = $v["stereo"];
+            if (isset($v["hdtv"]))
+            {
+                $hdtv = $v["hdtv"];
+            }
+
+            print "p:$programID s:$startDate e:$endDate\n";
+            $tt = fgets(STDIN);
         }
-
-
     }
 
 
