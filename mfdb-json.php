@@ -354,7 +354,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         {
             $programID = $v["programID"];
             $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
-            $endDate = new DateTime($startDate);
+            $endDate = $startDate;
             $endDate->add("P" . $v["duration"] . "S");
             $closedCaption = $v["cc"];
             $stereo = $v["stereo"];
@@ -364,6 +364,13 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             }
 
             print "p:$programID s:$startDate e:$endDate\n";
+
+            var_dump($startDate);
+            print "\n\n";
+            var_dump($endDate);
+            print "\n\n";
+
+
             $tt = fgets(STDIN);
         }
     }
