@@ -456,6 +456,24 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $colorcode = "";
             }
 
+            if (isset($jsonProgram["partNumber"]))
+            {
+                $partnumber = $jsonProgram["partNumber"];
+            }
+            else
+            {
+                $partnumber = 0;
+            }
+
+            if (isset($jsonProgram["numberOfParts"]))
+            {
+                $parttotal = $jsonProgram["numberOfParts"];
+            }
+            else
+            {
+                $parttotal = 0;
+            }
+
             $seriesid = substr($programID, 0, 10);
 
             if (isset($jsonProgram["originalAirDate"]))
@@ -482,7 +500,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
              * of this stationid there are across the multiple sources.
              */
 
-            if (substr($programID,0,2) == "SH")
+            if (substr($programID,-4) == "0000")
             {
                 $generic = true;
             }
