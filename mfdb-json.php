@@ -335,11 +335,19 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
 
+    $counter = 0;
+    $total = count($chanData);
     foreach ($chanData as $stationID => $row)
     {
         $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), true);
 
-        print "Reading $stationID\n";
+//        print "Reading $stationID\n";
+
+        $counter++;
+        if ($counter % 100 == 0)
+        {
+            print "Inserted $counter of $total stationIDs.                                         \r";
+        }
 
         foreach ($a["programs"] as $v)
         {
@@ -538,17 +546,10 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             foreach ($row as $value)
             {
                 /*
-                 * This inner loop is where we can actually access the variables; there may be multiple videosources
-                 * which have the same xmltvid, so we may be inserting the value multiple times.
+                 * There may be multiple videosources which have the same xmltvid,
+                 * so we may be inserting the value multiple times.
                  *
                  * $value is an array with "chanid", "channum" and "sourceid"
-                 */
-
-                /*
-                 * VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,
-    :stars,:previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,:seriesid,
-    :originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
-    :first,:last,:audioprop,:subtitletypes,:videoprop)"
                  */
 
                 $programInsert->execute(array(
@@ -579,47 +580,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     }
 
-}
+    print "Done inserting schedules.\n";
 
-function t()
-{
-    /*
-        channel:
-        chanid: 1296
-                  starttime: 2013-06-24 00:00:00
-                    endtime: 2013-06-24 01:00:00
-                      title: Catfish: The TV Show
-                   subtitle: Mike & Felicia
-                description: Mike meets Felicia on a dating website and experiences an instant connection.
-    category: Reality
-              category_type: series
-                    airdate: 0000
-                      stars: 0
-            previouslyshown: 1
-            title_pronounce:
-                     stereo: 1
-                  subtitled: 0
-                       hdtv: 1
-             closecaptioned: 0
-                 partnumber: 0
-                  parttotal: 0
-                   seriesid: EP01616968
-            originalairdate: 2013-02-18
-                   showtype: Series
-                  colorcode:
-    syndicatedepisodenumber: 112
-                  programid: EP016169680012
-                   manualid: 0
-                    generic: 0
-              listingsource: 2
-                      first: 1
-                       last: 0
-                  audioprop: STEREO
-              subtitletypes:
-                  videoprop: HDTV
-    */
 }
-
 
 function setup($dbh)
 {
