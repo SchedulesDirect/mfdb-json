@@ -333,25 +333,12 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     :originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop)");
 
+    $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
+
     foreach ($chanData as $stationID => $row)
     {
-        foreach ($row as $value)
-        {
-            /*
-             * This inner loop is where we can actually access the variables; there may be multiple videosources
-             * which have the same xmltvid, so we may be inserting the value multiple times.
-             *
-             * $value is an array with "chanid", "channum" and "sourceid"
-             */
+        $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), true);
 
-
-        }
-    }
-
-    foreach (glob("$schedTempDir/sched_[0-9]*.json.txt") as $f)
-    {
-        print "***DEBUG: Reading schedule $f\n";
-        $a = json_decode(file_get_contents($f), true);
         foreach ($a["programs"] as $v)
         {
             $programID = $v["programID"];
@@ -369,10 +356,45 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             $endtime = $endDate->format("Y-m-d H:i:s");
 
             print "p:$programID s:$starttime e:$endtime\n";
-            $tt = fgets(STDIN);
-        }
-    }
 
+            $getProgramDetails->execute(array("pid"=>$programID));
+            $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
+            $jsonProgram = json_decode($tempJsonProgram[0]);
+
+            print "\n\n";
+            var_dump($jsonProgram);
+            print "\n\nEnter";
+
+
+
+            $tt = fgets(STDIN);
+
+            /*
+             * This is where we'll actually perform the insert as many times as necessary based on how many copies
+             * of this stationid there are across the multiple sources.
+             */
+
+            foreach ($row as $value)
+            {
+                /*
+                 * This inner loop is where we can actually access the variables; there may be multiple videosources
+                 * which have the same xmltvid, so we may be inserting the value multiple times.
+                 *
+                 * $value is an array with "chanid", "channum" and "sourceid"
+                 */
+
+
+            }
+
+
+
+
+
+        }
+
+
+
+    }
 
 }
 
