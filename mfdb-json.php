@@ -344,45 +344,158 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         foreach ($a["programs"] as $v)
         {
             $programID = $v["programID"];
-            $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
-            $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
-            $endDate->add(new DateInterval("PT" . $v["duration"] . "S"));
-            $closedCaption = $v["cc"];
-            $stereo = $v["stereo"];
-            if (isset($v["hdtv"]))
-            {
-                $hdtv = $v["hdtv"];
-            }
-
-            $starttime = $startDate->format("Y-m-d H:i:s");
-            $endtime = $endDate->format("Y-m-d H:i:s");
-
-            print "p:$programID s:$starttime e:$endtime\n";
 
             $getProgramDetails->execute(array("pid" => $programID));
             $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
             $jsonProgram = json_decode($tempJsonProgram[0], true);
 
-            print "\n\n";
-            var_dump($jsonProgram);
-            print "\n\nEnter";
+            $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
+            $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
+            $endDate->add(new DateInterval("PT" . $v["duration"] . "S"));
+
+
+            $starttime = $startDate->format("Y-m-d H:i:s");
+            $endtime = $endDate->format("Y-m-d H:i:s");
+            $title = $jsonProgram["titles"]["title120"];
+            $subtitle = $jsonProgram["episodeTitle150"];
+            if (isset($jsonProgram["descriptions"]["description255"]))
+            {
+                /*
+                 * Schedules Direct can send descriptions of various lengths, but "255" will always exist if there
+                 * are any descriptions at all.
+                 */
+                $description = $jsonProgram["descriptions"]["description255"];
+            }
+            else
+            {
+                $description = "";
+            }
 
             if (isset($jsonProgram["genres"][0]))
             {
                 /*
-                 * Tribune can send multiple genres, but MythTV only uses one.
+                 * Schedules Direct can send multiple genres, but MythTV only uses one.
                  */
                 $category = $jsonProgram["genres"][0];
             }
+            else
+            {
+                $category = "";
+            }
 
-            print "Category:$category\n";
+            if (isset($jsonProgram["showType"]))
+            {
+                /*
+                 * Not sure why MythTV has this twice. In the program table, category_type is a lowercase version
+                 * of showtype?
+                 */
+                $category_type = $jsonProgram["showType"];
+                $showtype = $jsonProgram["showType"];
+            }
+            else
+            {
+                $category_type = "";
+                /*
+                 * May get reset later based on first two characters of programID.
+                 */
+            }
 
-            $tt = fgets(STDIN);
+            /*
+             * MythTV sets the airdate to "0000" for EP types, but sets it to the movie release date if it's a movie.
+             */
+            $airdate = "0000";
+            $stars = 0;
+
+            if (substr($programID, 0, 2) == "MV")
+            {
+                if (isset($jsonProgram["movie"]["year"]))
+                {
+                    $airdate = $jsonProgram["movie"]["year"];
+                    $category_type = "movie";
+                }
+                $numStars = substr_count($jsonProgram["movie"]["starRating"], "*");
+                $numPlus = substr_count($jsonProgram["movie"]["starRating"], "+");
+                $stars = ($numStars * .25) + ($numPlus * .125);
+            }
+
+            $isStereo = $v["stereo"];
+
+            if (isset($v["hasSubTitles"]))
+            {
+                $isSubtitled = true;
+            }
+            else
+            {
+                $isSubtitled = false;
+            }
+
+            if (isset($v["cc"]))
+            {
+                $isClosedCaption = true;
+            }
+            else
+            {
+                $isClosedCaption = false;
+            }
+
+            if (isset($v["hdtv"]))
+            {
+                $isHDTV = true;
+            }
+            else
+            {
+                $isHDTV = false;
+            }
+
+            if (isset($jsonProgram["colorCode"]))
+            {
+                $colorcode = $jsonProgram["colorCode"];
+            }
+            else
+            {
+                $colorcode = "";
+            }
+
+            $seriesid = substr($programID, 0, 10);
+
+            if (isset($jsonProgram["originalAirDate"]))
+            {
+                $originalairdate = $jsonProgram["originalAirDate"];
+            }
+            else
+            {
+                $originalairdate = "";
+            }
+
+            if (isset($jsonProgram["syndicatedEpisodeNumber"]))
+            {
+                $syndicatedepisodenumber = $jsonProgram["syndicatedEpisodeNumber"];
+            }
+            else
+            {
+                $syndicatedepisodenumber = "";
+            }
+
 
             /*
              * This is where we'll actually perform the insert as many times as necessary based on how many copies
              * of this stationid there are across the multiple sources.
              */
+
+            if (substr($programID,0,2) == "SH")
+            {
+                $generic = true;
+            }
+            else
+            {
+                $generic = false;
+            }
+
+            /*
+             * Not sure why MythTV has multiple places for certain values.
+             */
+            $audioprop = "";
+
 
             foreach ($row as $value)
             {
