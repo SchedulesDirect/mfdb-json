@@ -394,6 +394,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             else
             {
                 $category_type = "";
+                $showtype = "";
                 /*
                  * May get reset later based on first two characters of programID.
                  */
@@ -499,20 +500,28 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
              * of this stationid there are across the multiple sources.
              */
 
-            if (substr($programID,-4) == "0000")
+            if (substr($programID, -4) == "0000")
             {
-                $generic = true;
+                $isGeneric = true;
             }
             else
             {
-                $generic = false;
+                $isGeneric = false;
             }
 
             /*
              * Not sure why MythTV has multiple places for certain values.
              */
-            $audioprop = "";
 
+            /*
+             * Figure out how to calculate this.
+             */
+            $previouslyshown = 0;
+            $audioprop = "";
+            $videoprop = "";
+            $isFirst = false;
+            $isLast = false;
+            $subtitletypes = "";
 
             foreach ($row as $value)
             {
@@ -522,6 +531,32 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                  *
                  * $value is an array with "chanid", "channum" and "sourceid"
                  */
+
+                /*
+                 * VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,
+    :stars,:previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,:seriesid,
+    :originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
+    :first,:last,:audioprop,:subtitletypes,:videoprop)"
+                 */
+
+                $programInsert->execute(array(
+                    "chanid"                  => $value["chanid"], "starttime" => $starttime, "endtime" => $endtime,
+                    "title"                   => $title,
+                    "subtitle"                => $subtitle, "description" => $description, "category" => $category,
+                    "category_type"           => $category_type, "airdate" => $airdate, "stars" => $stars,
+                    "previouslyshown"         => $previouslyshown, "stereo" => $isStereo, "subtitled" => $isSubtitled,
+                    "hdtv"                    => $isHDTV,
+                    "closecaptioned"          => $isClosedCaption, "partnumber" => $partnumber,
+                    "parttotal"               => $parttotal,
+                    "seriesid"                => $seriesid,
+                    "originalairdate"         => $originalairdate, "showtype" => $showtype, "colorcode" => $colorcode,
+                    "syndicatedepisodenumber" => $syndicatedepisodenumber,
+                    "programid"               => $programID,
+                    "generic"                 => $isGeneric,
+                    "listingsource"           => $value["sourceid"],
+                    "first"                   => $isFirst, "last" => $isLast, "audioprop" => $audioprop,
+                    "subtitletypes"           => $subtitletypes, "videoprop" => $videoprop
+                ));
 
 
             }
