@@ -160,7 +160,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
             foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
-                print "***DEBUG: Reading schedule $f\n";
+                // print "***DEBUG: Reading schedule $f\n";
                 $a = json_decode(file_get_contents($f), true);
                 $stationID = $a["stationID"];
                 $stmt->execute(array("stationid" => $stationID));
