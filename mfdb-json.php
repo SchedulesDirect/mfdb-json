@@ -339,6 +339,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     {
         $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), true);
 
+        print "Reading $stationID\n";
+
         foreach ($a["programs"] as $v)
         {
             $programID = $v["programID"];
@@ -357,7 +359,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
             print "p:$programID s:$starttime e:$endtime\n";
 
-            $getProgramDetails->execute(array("pid"=>$programID));
+            $getProgramDetails->execute(array("pid" => $programID));
             $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
             $jsonProgram = json_decode($tempJsonProgram[0]);
 
@@ -365,7 +367,12 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             var_dump($jsonProgram);
             print "\n\nEnter";
 
+            if (isset($jsonProgram["genre"][0]))
+            {
+                $category = $jsonProgram["genre"][0];
+            }
 
+            print "Category:$category\n";
 
             $tt = fgets(STDIN);
 
@@ -387,11 +394,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             }
 
 
-
-
-
         }
-
 
 
     }
