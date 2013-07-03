@@ -353,7 +353,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
             $endDate->add(new DateInterval("PT" . $v["duration"] . "S"));
 
-
             $starttime = $startDate->format("Y-m-d H:i:s");
             $endtime = $endDate->format("Y-m-d H:i:s");
             $title = $jsonProgram["titles"]["title120"];
