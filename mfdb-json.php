@@ -429,7 +429,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
              * MythTV sets the airdate to "0000" for EP types, but sets it to the movie release date if it's a movie.
              */
             $airdate = "0000";
-            $stars = 0;
 
             if (substr($programID, 0, 2) == "MV")
             {
@@ -444,6 +443,10 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     $numPlus = substr_count($jsonProgram["movie"]["starRating"], "+");
                     $stars = ($numStars * .25) + ($numPlus * .125);
                 }
+            }
+            else
+            {
+                $stars = 0;
             }
 
             $isStereo = $v["stereo"];
