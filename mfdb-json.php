@@ -356,7 +356,16 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             $starttime = $startDate->format("Y-m-d H:i:s");
             $endtime = $endDate->format("Y-m-d H:i:s");
             $title = $jsonProgram["titles"]["title120"];
-            $subtitle = $jsonProgram["episodeTitle150"];
+
+            if (isset($jsonProgram["episodeTitle150"]))
+            {
+                $subtitle = $jsonProgram["episodeTitle150"];
+            }
+            else
+            {
+                $subtitle = "";
+            }
+
             if (isset($jsonProgram["descriptions"]["description255"]))
             {
                 /*
