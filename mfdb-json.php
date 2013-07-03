@@ -422,9 +422,12 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     $airdate = $jsonProgram["movie"]["year"];
                     $category_type = "movie";
                 }
-                $numStars = substr_count($jsonProgram["movie"]["starRating"], "*");
-                $numPlus = substr_count($jsonProgram["movie"]["starRating"], "+");
-                $stars = ($numStars * .25) + ($numPlus * .125);
+                if (isset($jsonProgram["movie"]["starRating"]))
+                {
+                    $numStars = substr_count($jsonProgram["movie"]["starRating"], "*");
+                    $numPlus = substr_count($jsonProgram["movie"]["starRating"], "+");
+                    $stars = ($numStars * .25) + ($numPlus * .125);
+                }
             }
 
             $isStereo = $v["stereo"];
