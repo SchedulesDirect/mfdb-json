@@ -339,6 +339,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
 
+    $insertProgramGenres = $dbh->prepare("INSERT INTO programgenres(chanid,starttime,relevance,genre)
+    VALUES(chanid,starttime,relevance,genre)");
+
     $counter = 0;
     $total = count($chanData);
     foreach ($chanData as $stationID => $row)
@@ -394,7 +397,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             if (isset($jsonProgram["genres"][0]))
             {
                 /*
-                 * Schedules Direct can send multiple genres, but MythTV only uses one.
+                 * Schedules Direct can send multiple genres, but MythTV only uses one in the program. The rest are
+                 * in the programgenres table.
                  */
                 $category = $jsonProgram["genres"][0];
             }
@@ -579,10 +583,26 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     foreach ($jsonProgram["castAndCrew"] as $credit)
                     {
                         list ($role, $name) = explode(":", $credit);
+                        $role = strtolower($role);
+
+                        if ($role == "executive producer")
+                        {
+                            $role = "executive_producer";
+                        }
+
                         $insertPerson->execute(array("name" => $name));
                         $personNumber = $dbh->lastInsertId();
                         $insertCredit->execute(array("person"    => $personNumber, "chanid" => $value["chanid"],
                                                      "starttime" => $starttime, "role" => $role));
+                    }
+                }
+
+                if (isset($jsonProgram["genres"]))
+                {
+                    foreach ($jsonProgram["genres"] as $relevance => $genre)
+                    {
+                        $insertProgramGenres->execute(array("chanid"    => $value["chanid"], "starttime" => $starttime,
+                                                            "relevance" => $relevance, "genre" => $genre));
                     }
                 }
             }
@@ -590,6 +610,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     }
 
     print "\n\nDone inserting schedules.\n";
+
 
 }
 
