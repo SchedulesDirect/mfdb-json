@@ -367,9 +367,12 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             var_dump($jsonProgram);
             print "\n\nEnter";
 
-            if (isset($jsonProgram["genre"][0]))
+            if (isset($jsonProgram["genres"][0]))
             {
-                $category = $jsonProgram["genre"][0];
+                /*
+                 * Tribune can send multiple genres, but MythTV only uses one.
+                 */
+                $category = $jsonProgram["genres"][0];
             }
 
             print "Category:$category\n";
