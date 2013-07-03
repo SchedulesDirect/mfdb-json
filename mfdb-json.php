@@ -333,6 +333,10 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     :originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop)");
 
+    $insertPerson = $dbh->prepare("INSERT IGNORE INTO people(name) VALUES(:name)");
+    $insertCredit = $dbh->prepare("INSERT IGNORE INTO credits(person,chanid,starttime,role)
+    VALUES(:person,:chanid,:starttime,:role)");
+
     $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
 
     $counter = 0;
@@ -514,7 +518,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $syndicatedepisodenumber = "";
             }
 
-
             /*
              * This is where we'll actually perform the insert as many times as necessary based on how many copies
              * of this stationid there are across the multiple sources.
@@ -571,16 +574,22 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     "subtitletypes"           => $subtitletypes, "videoprop" => $videoprop
                 ));
 
-
+                if (isset($jsonProgram["castAndCrew"]))
+                {
+                    foreach ($jsonProgram["castAndCrew"] as $credit)
+                    {
+                        list ($role, $name) = explode(":", $credit);
+                        $insertPerson->execute(array("name" => $name));
+                        $personNumber = $dbh->lastInsertId();
+                        $insertCredit->execute(array("person"    => $personNumber, "chanid" => $value["chanid"],
+                                                     "starttime" => $starttime, "role" => $role));
+                    }
+                }
             }
-
-
         }
-
-
     }
 
-    print "Done inserting schedules.\n";
+    print "\n\nDone inserting schedules.\n";
 
 }
 
