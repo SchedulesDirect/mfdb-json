@@ -361,7 +361,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
             $getProgramDetails->execute(array("pid" => $programID));
             $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
-            $jsonProgram = json_decode($tempJsonProgram[0]);
+            $jsonProgram = json_decode($tempJsonProgram[0], true);
 
             print "\n\n";
             var_dump($jsonProgram);
