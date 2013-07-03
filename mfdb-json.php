@@ -602,8 +602,15 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
                 if (isset($jsonProgram["genres"]))
                 {
+
+                    print "\n\n";
+                    var_dump($jsonProgram["genres"]);
+                    print "\n\nEnter";
+                    $tt=fgets(STDIN);
+
                     foreach ($jsonProgram["genres"] as $relevance => $genre)
                     {
+                        print "p:$programID rele:$relevance g:$genre\n";
                         $insertProgramGenres->execute(array("chanid"    => $value["chanid"], "starttime" => $starttime,
                                                             "relevance" => $relevance, "genre" => $genre));
                     }
