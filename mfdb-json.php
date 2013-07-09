@@ -160,7 +160,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
             foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
-                print "***DEBUG: Reading schedule $f\n";
+                // print "***DEBUG: Reading schedule $f\n";
                 $a = json_decode(file_get_contents($f), true);
                 $stationID = $a["stationID"];
                 $stmt->execute(array("stationid" => $stationID));
@@ -299,13 +299,16 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             $stmt = $dbh->prepare("REPLACE INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
             foreach ($replaceStack as $progID => $v)
             {
+                print "Updating: $progID\nPress enter.";
+                $yy=fgets(STDIN);
                 $counter++;
-                if ($counter % 1000)
+                if ($counter % 10)
                 {
                     print "$counter / " . count($replaceStack) . "             \r";
                 }
                 $stmt->execute(array("programID" => $progID, "md5" => $v,
                                      "json"      => file_get_contents("$tempDir/$progID.json.txt")));
+
                 if ($debug == FALSE)
                 {
                     unlink("$tempDir/$progID.json.txt");
