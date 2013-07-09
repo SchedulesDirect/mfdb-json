@@ -109,6 +109,14 @@ $stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE"
 $stmt->execute();
 $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
+print "dumping stationid's\n\n";
+var_dump($stationIDs);
+print "\n\n";
+$tt=fgets(STDIN);
+
+
+
+
 print "Logging into Schedules Direct.\n";
 $randHash = getRandhash($username, $password, $baseurl, $api);
 
