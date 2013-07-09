@@ -304,7 +304,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             $counter = 0;
             print "\nPerforming updates.\n";
 
-            $stmt = $dbh->prepare("REPLACE INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
+            // $stmt = $dbh->prepare("REPLACE INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
+            $stmt = $dbh->prepare("UPDATE SDprogramCache SET md5=:md5,json=:json WHERE programID=:programID");
             foreach ($replaceStack as $progID => $v)
             {
                 print "Updating: $progID\nPress enter.";
