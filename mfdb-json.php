@@ -232,6 +232,14 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     print "Need to download " . count($insertStack) . " new programs.\n";
     print "Need to download " . count($replaceStack) . " updated programs.\n";
 
+    print "\n\nreplaceStack is\n";
+    var_dump($replaceStack);
+    print "\n\n";
+    $jj=fgets(STDIN);
+
+
+
+
     if (count($insertStack) + count($replaceStack) > 10000)
     {
         print "Requesting more than 10000 programs. Please be patient.\n";
