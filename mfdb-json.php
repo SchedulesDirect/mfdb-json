@@ -331,9 +331,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     print "Inserting schedules.\n";
 
-    $s1 = $dbh->prepare("TRUNCATE program");
+    $s1 = $dbh->prepare("TRUNCATE p_rogram");
     $s1->execute();
-    $s1 = $dbh->prepare("TRUNCATE programgenres");
+    $s1 = $dbh->prepare("TRUNCATE p_rogramgenres");
     $s1->execute();
 
     $s1 = $dbh->prepare("CREATE TABLE p_rogram LIKE program");
@@ -619,17 +619,15 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
                 if (isset($jsonProgram["genres"]))
                 {
-
-                    print "\n\n";
-                    var_dump($jsonProgram["genres"]);
-                    print "\n\nEnter";
-                    $tt = fgets(STDIN);
+                    print "chanid: " . $value["chanid"] . "\n";
+                    print "starttime: $starttime\n";
 
                     foreach ($jsonProgram["genres"] as $relevance => $genre)
                     {
                         print "p:$programID rele:$relevance g:$genre\n";
                         $insertProgramGenres->execute(array("chanid"    => $value["chanid"], "starttime" => $starttime,
                                                             "relevance" => $relevance, "genre" => $genre));
+                        $tt = fgets(STDIN);
                     }
                 }
             }
