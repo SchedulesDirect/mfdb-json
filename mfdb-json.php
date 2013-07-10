@@ -371,7 +371,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
         $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), true);
 
-        print "Reading $stationID\n";
+        // print "Reading $stationID\n";
 
         $counter++;
         if ($counter % 100 == 0)
@@ -651,12 +651,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         }
     }
 
-    $stmt = $dbh->exec("RENAME TABLE program TO program.prev");
+    $stmt = $dbh->exec("RENAME TABLE program TO program_prev");
     $stmt = $dbh->exec("ALTER TABLE p_rogram RENAME program");
-    $stmt = $dbh->exec("RENAME TABLE programgenres TO programgenres.prev");
+    $stmt = $dbh->exec("RENAME TABLE programgenres TO programgenres_prev");
     $stmt = $dbh->exec("ALTER TABLE p_rogramgenres RENAME programgenres");
     print "\n\nDone inserting schedules.\n";
-
 
 }
 
