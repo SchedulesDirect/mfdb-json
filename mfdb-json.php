@@ -354,7 +354,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
 
     $insertProgramGenres = $dbh->prepare("INSERT INTO p_rogramgenres(chanid,starttime,relevance,genre)
-    VALUES(chanid,starttime,relevance,genre)");
+    VALUES(:chanid,:starttime,:relevance,:genre)");
 
     $counter = 0;
     $total = count($chanData);
