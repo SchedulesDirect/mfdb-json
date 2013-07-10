@@ -14,7 +14,7 @@ date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 
-print "Time is now $todayDate\n";
+// print "Time is now $todayDate\n";
 
 $user = "mythtv";
 $password = "mythtv";
@@ -82,6 +82,12 @@ if ($isBeta)
     $baseurl = "http://23.21.174.111";
     print "Using beta server.\n";
     # API must match server version.
+    $api = 20130709;
+}
+else
+{
+    $baseurl = "https://data2.schedulesdirect.org";
+    print "Using production server.\n";
     $api = 20130512;
 }
 
