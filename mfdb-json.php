@@ -331,6 +331,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     print "Inserting schedules.\n";
 
+    $s1 = $dbh->prepare("TRUNCATE program");
+    $s1->execute();
+    $s1 = $dbh->prepare("TRUNCATE programgenres");
+    $s1->execute();
+
     $programInsert = $dbh->prepare
         ("INSERT IGNORE INTO program(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
     previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,seriesid,originalairdate,showtype,
