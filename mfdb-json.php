@@ -361,9 +361,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     foreach ($chanData as $stationID => $row)
     {
 
-        print "row is\n\n";
+     /*   print "row is\n\n";
         var_dump($row);
-        print "\n\n";
+        print "\n\n"; */
 
         /*
          * Row is an array containing: chanid,channum,sourceid
@@ -577,13 +577,14 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             $isLast = false;
             $subtitletypes = "";
 
-            print "**2\n";
+            // print "**2\n";
 
             foreach ($row as $value)
             {
-                print "**3\n\n";
+               /* print "**3\n\n";
                 var_dump($value);
                 print "\n\n**4\n";
+               */
 
                 /*
                  * There may be multiple videosources which have the same xmltvid,
@@ -611,7 +612,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     "subtitletypes"           => $subtitletypes, "videoprop" => $videoprop
                 ));
 
-                print "**5\n";
+                // print "**5\n";
 
                 if (isset($jsonProgram["castAndCrew"]))
                 {
@@ -642,7 +643,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
                         $insertProgramGenres->execute(array("chanid"    => $value["chanid"], "starttime" => $starttime,
                                                             "relevance" => $relevance, "genre" => $genre));
-                        $tt = fgets(STDIN);
+                        // $tt = fgets(STDIN);
                     }
                 }
             }
@@ -651,7 +652,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     $stmt = $dbh->exec("RENAME TABLE program TO program.prev");
     $stmt = $dbh->exec("ALTER TABLE p_rogram RENAME program");
-
+    $stmt = $dbh->exec("RENAME TABLE programgenres TO programgenres.prev");
+    $stmt = $dbh->exec("ALTER TABLE p_rogramgenres RENAME programgenres");
     print "\n\nDone inserting schedules.\n";
 
 
