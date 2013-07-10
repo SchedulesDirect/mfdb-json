@@ -336,8 +336,13 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $s1 = $dbh->prepare("TRUNCATE programgenres");
     $s1->execute();
 
+    $s1 = $dbh->prepare("CREATE TEMPORARY TABLE p_rogram LIKE program");
+    $s1->execute();
+    $s1 = $dbh->prepare("CREATE TEMPORARY TABLE p_rogramgenres LIKE programgenres");
+    $s1->execute();
+
     $programInsert = $dbh->prepare
-        ("INSERT IGNORE INTO program(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
+        ("INSERT INTO p_rogram(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
     previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,seriesid,originalairdate,showtype,
     colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,audioprop,subtitletypes,videoprop)
     VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,
@@ -351,7 +356,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
 
-    $insertProgramGenres = $dbh->prepare("INSERT IGNORE INTO programgenres(chanid,starttime,relevance,genre)
+    $insertProgramGenres = $dbh->prepare("INSERT INTO p_rogramgenres(chanid,starttime,relevance,genre)
     VALUES(chanid,starttime,relevance,genre)");
 
     $counter = 0;
