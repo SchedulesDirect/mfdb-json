@@ -359,6 +359,15 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $total = count($chanData);
     foreach ($chanData as $stationID => $row)
     {
+
+        print "row is\n\n";
+        var_dump($row);
+        print "\n\n";
+
+        /*
+         * Row is an array containing: chanid,channum,sourceid
+         */
+
         $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), true);
 
         print "Reading $stationID\n";
