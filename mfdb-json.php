@@ -331,15 +331,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     print "Inserting schedules.\n";
 
-    $s1 = $dbh->prepare("TRUNCATE p_rogram");
-    $s1->execute();
-    $s1 = $dbh->prepare("TRUNCATE p_rogramgenres");
-    $s1->execute();
-
-    $s1 = $dbh->prepare("CREATE TABLE p_rogram LIKE program");
-    $s1->execute();
-    $s1 = $dbh->prepare("CREATE TABLE p_rogramgenres LIKE programgenres");
-    $s1->execute();
+    $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogram LIKE program");
+    $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogramgenres LIKE programgenres");
 
     $programInsert = $dbh->prepare
         ("INSERT INTO p_rogram(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
@@ -633,6 +626,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             }
         }
     }
+
+    $stmt = $dbh->exec("RENAME TABLE program TO program.prev");
+    $stmt = $dbh->exec("ALTER TABLE p_rogram RENAME program");
 
     print "\n\nDone inserting schedules.\n";
 
