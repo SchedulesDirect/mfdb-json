@@ -346,7 +346,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
 
-    $insertProgramGenres = $dbh->prepare("INSERT INTO programgenres(chanid,starttime,relevance,genre)
+    $insertProgramGenres = $dbh->prepare("INSERT IGNORE INTO programgenres(chanid,starttime,relevance,genre)
     VALUES(chanid,starttime,relevance,genre)");
 
     $counter = 0;
