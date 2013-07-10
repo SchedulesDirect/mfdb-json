@@ -335,8 +335,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     //$s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogramgenres LIKE programgenres");
 
 
-
-
     $programInsert = $dbh->prepare
         ("INSERT INTO p_rogram(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
     previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,seriesid,originalairdate,showtype,
@@ -380,6 +378,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
         foreach ($a["programs"] as $v)
         {
+            print "**1\n";
             $programID = $v["programID"];
 
             $getProgramDetails->execute(array("pid" => $programID));
@@ -575,8 +574,14 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             $isLast = false;
             $subtitletypes = "";
 
+            print "**2\n";
+
             foreach ($row as $value)
             {
+                print "**3\n\n";
+                var_dump($value);
+                print "\n\n**4\n";
+
                 /*
                  * There may be multiple videosources which have the same xmltvid,
                  * so we may be inserting the value multiple times.
