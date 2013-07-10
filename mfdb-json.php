@@ -381,7 +381,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
         foreach ($a["programs"] as $v)
         {
-            print "**1\n";
+            // print "**1\n";
             $programID = $v["programID"];
 
             $getProgramDetails->execute(array("pid" => $programID));
