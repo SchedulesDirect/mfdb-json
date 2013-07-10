@@ -336,9 +336,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $s1 = $dbh->prepare("TRUNCATE programgenres");
     $s1->execute();
 
-    $s1 = $dbh->prepare("CREATE TEMPORARY TABLE p_rogram LIKE program");
+    $s1 = $dbh->prepare("CREATE TABLE p_rogram LIKE program");
     $s1->execute();
-    $s1 = $dbh->prepare("CREATE TEMPORARY TABLE p_rogramgenres LIKE programgenres");
+    $s1 = $dbh->prepare("CREATE TABLE p_rogramgenres LIKE programgenres");
     $s1->execute();
 
     $programInsert = $dbh->prepare
