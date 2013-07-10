@@ -334,6 +334,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     //$s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogram LIKE program");
     //$s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogramgenres LIKE programgenres");
 
+    $s1 = $dbh->exec("TRUNCATE p_rogram");
+    $s1 = $dbh->exec("TRUNCATE p_rogramgenres");
+
 
     $programInsert = $dbh->prepare
         ("INSERT INTO p_rogram(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
@@ -607,6 +610,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     "first"                   => $isFirst, "last" => $isLast, "audioprop" => $audioprop,
                     "subtitletypes"           => $subtitletypes, "videoprop" => $videoprop
                 ));
+
+                print "**5\n";
 
                 if (isset($jsonProgram["castAndCrew"]))
                 {
