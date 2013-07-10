@@ -5,8 +5,7 @@
  * This file is a grabber which downloads data from Schedules Direct's JSON service.
  */
 
-$isBeta = TRUE;
-$doInit = FALSE;
+$isBeta = FALSE;
 $debug = TRUE;
 $doSetup = FALSE;
 
