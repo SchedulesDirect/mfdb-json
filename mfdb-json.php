@@ -332,7 +332,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     print "Inserting schedules.\n";
 
     $programInsert = $dbh->prepare
-        ("INSERT INTO program(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
+        ("INSERT IGNORE INTO program(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
     previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,seriesid,originalairdate,showtype,
     colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,audioprop,subtitletypes,videoprop)
     VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,
@@ -613,7 +613,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     print "\n\n";
                     var_dump($jsonProgram["genres"]);
                     print "\n\nEnter";
-                    $tt=fgets(STDIN);
+                    $tt = fgets(STDIN);
 
                     foreach ($jsonProgram["genres"] as $relevance => $genre)
                     {
