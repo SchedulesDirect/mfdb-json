@@ -369,7 +369,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $s1 = $dbh->prepare("SELECT name, person FROM people LIMIT 5");
     $s1->execute();
 
-    while ($row = $stmt->fetch(PDO::FETCH_NUM))
+    while ($row = $s1->fetch(PDO::FETCH_NUM))
     {
         $peopleArray[$row[0]] = $row[1];
     }
