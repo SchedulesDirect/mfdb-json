@@ -375,15 +375,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         $peopleArray[$row[0]] = $row[1];
     }
 
-    print "size of array is \n";
-    print strlen(serialize($peopleArray)) . "bytes.\n";
-
-    // $peopleArray = $s1->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
-    print "\n\n";
-    //var_dump($peopleArray);
-    print "\n\n";
-    //$tt = fgets(STDIN);
-
+    //print "size of array is \n";
+    //print strlen(serialize($peopleArray)) . " bytes.\n";
+    /*
+     * 53579 people is 1.7megs in memory.
+     */
 
     foreach ($chanData as $stationID => $row)
     {
