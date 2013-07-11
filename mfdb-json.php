@@ -72,7 +72,7 @@ try
 
 if ($doSetup)
 {
-    setup($dbh);
+    setup();
 }
 
 if ($isBeta)
@@ -123,7 +123,7 @@ $randHash = getRandhash($username, $password);
 if ($randHash != "ERROR")
 {
     printStatus(getStatus());
-    getSchedules($dbh, $stationIDs, $debug);
+    getSchedules($stationIDs, $debug);
 }
 
 print "\n\nGlobal. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n";
@@ -137,10 +137,10 @@ print $globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\n";
 
 print "Done.\n";
 
-function getSchedules($dbh, array $stationIDs, $debug)
+function getSchedules(array $stationIDs, $debug)
 {
+    global $dbh;
     global $api;
-    global $baseurl;
     global $randHash;
 
     $programCache = array();
@@ -730,8 +730,9 @@ function getSchedules($dbh, array $stationIDs, $debug)
 
 }
 
-function setup($dbh)
+function setup()
 {
+    global $dbh;
     $done = FALSE;
 
     while ($done == FALSE)
@@ -900,8 +901,10 @@ function getLineup(array $he)
     return sendRequest(json_encode($res), true);
 }
 
-function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
+function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
 {
+    global $dbh;
+
     /*
      * If the "chunk" is too big, then things get slow, and you run into other issues, like max size of the packet
      * that mysql will swallow. Better safe than sorry, and once things are running there aren't massive numbers of
@@ -1100,13 +1103,15 @@ function printStatus($json)
 
         if (count($retrieveLineups))
         {
-            processLineups($dbh, $retrieveLineups);
+            processLineups($retrieveLineups);
         }
     }
 }
 
-function processLineups($dbh, array $retrieveLineups)
+function processLineups(array $retrieveLineups)
 {
+    global $dbh;
+
     /*
      * If we're here, that means that either the lineup has been updated, or it didn't exist at all.
      * The overall group of lineups in a headend have a modified date based on the "max" of the modified dates
@@ -1215,7 +1220,7 @@ function processLineups($dbh, array $retrieveLineups)
                     $updateDB = strtoupper(readline(">"));
                     if ($updateDB == "Y")
                     {
-                        updateChannelTable($dbh, $lineupid, $headend, $device, $transport, $json);
+                        updateChannelTable($lineupid, $headend, $device, $transport, $json);
                         $stmt = $dbh->prepare("UPDATE videosource SET modified=:modified WHERE sourceid=:sourceid");
                         $stmt->execute(array("modified" => $jsonModified, "sourceid" => $lineupid));
                     }
@@ -1227,8 +1232,10 @@ function processLineups($dbh, array $retrieveLineups)
     }
 }
 
-function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
+function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
 {
+    global $dbh;
+
     print "Updating channel table for sourceid:$sourceid\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
     $stmt->execute(array("sourceid" => $sourceid));
