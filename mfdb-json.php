@@ -651,6 +651,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         }
     }
 
+    $stmt = $dbh->exec("DROP TABLE IF EXISTS program_prev, programgenres_prev");
     $stmt = $dbh->exec("RENAME TABLE program TO program_prev");
     $stmt = $dbh->exec("ALTER TABLE p_rogram RENAME program");
     $stmt = $dbh->exec("RENAME TABLE programgenres TO programgenres_prev");
