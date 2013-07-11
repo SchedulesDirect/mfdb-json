@@ -1046,7 +1046,7 @@ function printStatus($dbh, $rh, $json)
                 }
                 break;
             case "code":
-                if ($v = 401)
+                if ($v == 401)
                 {
                     /*
                      * Error notification - we're going to have to abort because the server didn't like what we sent.
