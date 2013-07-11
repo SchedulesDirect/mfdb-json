@@ -122,7 +122,7 @@ $randHash = getRandhash($username, $password);
 
 if ($randHash != "ERROR")
 {
-    printStatus($dbh, $randHash, getStatus($randHash, $api, $baseurl));
+    printStatus($dbh, $randHash, getStatus($randHash));
     getSchedules($dbh, $randHash, $api, $baseurl, $stationIDs, $debug);
 }
 
@@ -762,7 +762,7 @@ function setup($dbh)
         if ($randHash != "ERROR")
         {
             $res = array();
-            $res = json_decode(getStatus($randHash, "20130512"), true);
+            $res = json_decode(getStatus($randHash), true);
             $he = array();
 
             foreach ($res as $k => $v)
@@ -1004,15 +1004,16 @@ function parseScheduleFile(array $sched)
 }
 
 
-function getStatus($rh, $api, $baseurl)
+function getStatus($rh)
 {
     $res = array();
+    global $api;
     $res["action"] = "get";
     $res["object"] = "status";
     $res["randhash"] = $rh;
     $res["api"] = $api;
 
-    return sendRequest($baseurl, json_encode($res));
+    return sendRequest(json_encode($res));
 }
 
 function printStatus($dbh, $rh, $json)
