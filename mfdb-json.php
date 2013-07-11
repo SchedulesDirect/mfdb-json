@@ -334,7 +334,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogram LIKE program");
     $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogramgenres LIKE programgenres");
     $s1 = $dbh->exec("CREATE TEMPORARY TABLE c_redits LIKE credits");
-    $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_eople LIKE people");
+    // $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_eople LIKE people");
 
     // $s1 = $dbh->exec("TRUNCATE p_rogram");
     // $s1 = $dbh->exec("TRUNCATE p_rogramgenres");
@@ -349,8 +349,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     :originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop)");
 
-    $insertPerson = $dbh->prepare("INSERT IGNORE INTO people(name) VALUES(:name)");
-    $insertCredit = $dbh->prepare("INSERT IGNORE INTO credits(person,chanid,starttime,role)
+    $insertPerson = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
+    $insertCredit = $dbh->prepare("INSERT IGNORE INTO c_redits(person,chanid,starttime,role)
     VALUES(:person,:chanid,:starttime,:role)");
 
     $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
@@ -360,12 +360,26 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     $counter = 0;
     $total = count($chanData);
+
+    $peopleArray = array();
+    /*
+     * We're going to read in the people that are already in the database into an associative array with the name as
+     * the key, and the person number as the value.
+     */
+    $s1 = $dbh->exec("SELECT name, person FROM people LIMIT 5");
+    $peopleArray = $s1->fetchAll(PDO::FETCH_ASSOC|PDO::FETCH_GROUP);
+    print "\n\n";
+    var_dump($peopleArray);
+    print "\n\n";
+    $tt=fgets(STDIN);
+
+
     foreach ($chanData as $stationID => $row)
     {
 
-     /*   print "row is\n\n";
-        var_dump($row);
-        print "\n\n"; */
+        /*   print "row is\n\n";
+           var_dump($row);
+           print "\n\n"; */
 
         /*
          * Row is an array containing: chanid,channum,sourceid
@@ -583,10 +597,10 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
             foreach ($row as $value)
             {
-               /* print "**3\n\n";
-                var_dump($value);
-                print "\n\n**4\n";
-               */
+                /* print "**3\n\n";
+                 var_dump($value);
+                 print "\n\n**4\n";
+                */
 
                 /*
                  * There may be multiple videosources which have the same xmltvid,
@@ -627,9 +641,17 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                         {
                             $role = "executive_producer";
                         }
+                        if (array_key_exists($name, $peopleArray))
+                        {
+                            $personNumber = $peopleArray[$name];
+                        }
+                        else
+                        {
+                            $insertPerson->execute(array("name" => $name));
+                            $personNumber = $dbh->lastInsertId();
+                            $peopleArray[$name] = $personNumber;
+                        }
 
-                        $insertPerson->execute(array("name" => $name));
-                        $personNumber = $dbh->lastInsertId();
                         $insertCredit->execute(array("person"    => $personNumber, "chanid" => $value["chanid"],
                                                      "starttime" => $starttime, "role" => $role));
                     }
