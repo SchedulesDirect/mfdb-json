@@ -546,10 +546,12 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
             if (isset($v["hdtv"]))
             {
                 $isHDTV = true;
+                $videoprop = "HDTV";
             }
             else
             {
                 $isHDTV = false;
+                $videoprop = "";
             }
 
             if (isset($jsonProgram["colorCode"]))
@@ -628,12 +630,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
              */
             $previouslyshown = 0;
             $audioprop = "";
-            $videoprop = "";
             $isFirst = false;
             $isLast = false;
             $subtitletypes = "";
-
-            // print "**2\n";
 
             foreach ($row as $value)
             {
@@ -667,8 +666,6 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     "first"                   => $isFirst, "last" => $isLast, "audioprop" => $audioprop,
                     "subtitletypes"           => $subtitletypes, "videoprop" => $videoprop
                 ));
-
-                // print "**5\n";
 
                 if (isset($jsonProgram["castAndCrew"]))
                 {
@@ -707,14 +704,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 {
                     foreach ($jsonProgram["genres"] as $relevance => $genre)
                     {
-                        /*
-                        print "p:$programID rele:$relevance g:$genre\n";
-                        print "chanid: " . $value["chanid"] . "\n";
-                        print "starttime: $starttime\n";
-*/
                         $insertProgramGenres->execute(array("chanid"    => $value["chanid"], "starttime" => $starttime,
                                                             "relevance" => $relevance, "genre" => $genre));
-                        // $tt = fgets(STDIN);
                     }
                 }
             }
