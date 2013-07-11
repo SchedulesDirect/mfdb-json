@@ -118,12 +118,12 @@ $stmt->execute();
 $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 print "Logging into Schedules Direct.\n";
-$randHash = getRandhash($username, $password, $baseurl, $api);
+$randHash = getRandhash($username, $password);
 
 if ($randHash != "ERROR")
 {
-    printStatus($dbh, $randHash, getStatus($randHash, $api));
-    getSchedules($dbh, $randHash, $api, $stationIDs, $debug);
+    printStatus($dbh, $randHash, getStatus($randHash, $api, $baseurl));
+    getSchedules($dbh, $randHash, $api, $baseurl, $stationIDs, $debug);
 }
 
 print "\n\nGlobal. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n";
@@ -137,7 +137,7 @@ print $globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\n";
 
 print "Done.\n";
 
-function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
+function getSchedules($dbh, $rh, $api, $baseurl, array $stationIDs, $debug)
 {
     $programCache = array();
     $dbProgramCache = array();
@@ -152,7 +152,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $res["api"] = $api;
     $res["request"] = $stationIDs;
 
-    $response = sendRequest(json_encode($res));
+    $response = sendRequest($baseurl, json_encode($res));
 
     $res = array();
     $res = json_decode($response, true);
@@ -266,7 +266,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         $res["api"] = $api;
         $res["request"] = $retrieveStack;
 
-        $response = sendRequest(json_encode($res));
+        $response = sendRequest($baseurl, json_encode($res));
 
         $res = array();
         $res = json_decode($response, true);
@@ -757,7 +757,7 @@ function setup($dbh)
         }
 
         print "Checking existing lineups at Schedules Direct.\n";
-        $randHash = getRandhash($username, sha1($password), "http://23.21.174.111", "20130512");
+        $randHash = getRandhash($username, sha1($password));
 
         if ($randHash != "ERROR")
         {
@@ -841,7 +841,7 @@ function addHeadendsToSchedulesDirect($rh)
     $res["api"] = "20130512";
     $res["request"] = "PC:$response";
 
-    $res = json_decode(sendRequest(json_encode($res)), true);
+    $res = json_decode(sendRequest($baseurl, json_encode($res)), true);
 
     foreach ($res["data"] as $v)
     {
@@ -861,7 +861,7 @@ function addHeadendsToSchedulesDirect($rh)
     $res["api"] = "20130512";
     $res["request"] = $he;
 
-    $res = json_decode(sendRequest(json_encode($res)), true);
+    $res = json_decode(sendRequest($baseurl, json_encode($res)), true);
 
     if ($res["response"] == "OK")
     {
@@ -887,7 +887,7 @@ function getLineup($rh, array $he)
     $res["api"] = "20130512";
     $res["request"] = $he;
 
-    return sendRequest(json_encode($res), true);
+    return sendRequest($baseurl, json_encode($res), true);
 }
 
 function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
@@ -1004,7 +1004,7 @@ function parseScheduleFile(array $sched)
 }
 
 
-function getStatus($rh, $api)
+function getStatus($rh, $api, $baseurl)
 {
     $res = array();
     $res["action"] = "get";
@@ -1012,7 +1012,7 @@ function getStatus($rh, $api)
     $res["randhash"] = $rh;
     $res["api"] = $api;
 
-    return sendRequest(json_encode($res));
+    return sendRequest($baseurl, json_encode($res));
 }
 
 function printStatus($dbh, $rh, $json)
@@ -1318,8 +1318,9 @@ function updateChannelTable($dbh, $sourceid, $he, $dev, $transport, array $json)
     print "***DEBUG: Exiting updateChannelTable.\n";
 }
 
-function getRandhash($username, $password, $baseurl, $api)
+function getRandhash($username, $password)
 {
+    global $api;
     $res = array();
     $res["action"] = "get";
     $res["object"] = "randhash";
@@ -1355,6 +1356,8 @@ function sendRequest($jsonText)
      * having that many objects that need to get pulled. Set timeout for 15 minutes.
      */
 
+    global $baseurl;
+
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
@@ -1366,7 +1369,7 @@ function sendRequest($jsonText)
                                            )
     ));
 
-    return rtrim(file_get_contents("http://23.21.174.111/handleRequest.php", false, $context));
+    return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
 }
 
 function tempdir()
