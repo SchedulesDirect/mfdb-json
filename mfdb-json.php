@@ -122,7 +122,7 @@ $randHash = getRandhash($username, $password);
 
 if ($randHash != "ERROR")
 {
-    printStatus($dbh, getStatus());
+    printStatus(getStatus());
     getSchedules($dbh, $stationIDs, $debug);
 }
 
@@ -141,7 +141,7 @@ function getSchedules($dbh, array $stationIDs, $debug)
 {
     global $api;
     global $baseurl;
-    global $randhash;
+    global $randHash;
 
     $programCache = array();
     $dbProgramCache = array();
@@ -152,7 +152,7 @@ function getSchedules($dbh, array $stationIDs, $debug)
     $res = array();
     $res["action"] = "get";
     $res["object"] = "schedules";
-    $res["randhash"] = $randhash;
+    $res["randhash"] = $randHash;
     $res["api"] = $api;
     $res["request"] = $stationIDs;
 
@@ -266,7 +266,7 @@ function getSchedules($dbh, array $stationIDs, $debug)
         $res = array();
         $res["action"] = "get";
         $res["object"] = "programs";
-        $res["randhash"] = $randhash;
+        $res["randhash"] = $randHash;
         $res["api"] = $api;
         $res["request"] = $retrieveStack;
 
@@ -831,7 +831,7 @@ function setup($dbh)
 
 function addHeadendsToSchedulesDirect()
 {
-    global $randhash;
+    global $randHash;
     global $api;
 
     print "\n\nNo headends are configured in your Schedules Direct account.\n";
@@ -844,7 +844,7 @@ function addHeadendsToSchedulesDirect()
     $res = array();
     $res["action"] = "get";
     $res["object"] = "headends";
-    $res["randhash"] = $randhash;
+    $res["randhash"] = $randHash;
     $res["api"] = $api;
     $res["request"] = "PC:$response";
 
@@ -864,7 +864,7 @@ function addHeadendsToSchedulesDirect()
     $res = array();
     $res["action"] = "add";
     $res["object"] = "headends";
-    $res["randhash"] = $randhash;
+    $res["randhash"] = $randHash;
     $res["api"] = $api;
     $res["request"] = $he;
 
@@ -885,7 +885,7 @@ function addHeadendsToSchedulesDirect()
 
 function getLineup(array $he)
 {
-    global $randhash;
+    global $randHash;
     global $api;
 
     print "Retrieving lineup from Schedules Direct.\n";
@@ -893,7 +893,7 @@ function getLineup(array $he)
     $res = array();
     $res["action"] = "get";
     $res["object"] = "lineups";
-    $res["randhash"] = $randhash;
+    $res["randhash"] = $randHash;
     $res["api"] = $api;
     $res["request"] = $he;
 
@@ -1017,19 +1017,21 @@ function parseScheduleFile(array $sched)
 function getStatus()
 {
     global $api;
-    global $randhash;
+    global $randHash;
 
     $res = array();
     $res["action"] = "get";
     $res["object"] = "status";
-    $res["randhash"] = $randhash;
+    $res["randhash"] = $randHash;
     $res["api"] = $api;
 
     return sendRequest(json_encode($res));
 }
 
-function printStatus($dbh, $json)
+function printStatus($json)
 {
+    global $dbh;
+
     print "Status messages from Schedules Direct:\n";
 
     $res = array();
