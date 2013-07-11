@@ -1051,18 +1051,13 @@ function printStatus($dbh, $rh, $json)
                      * Error notification - we're going to have to abort because the server didn't like what we sent.
                      */
                     print "Received error response from server!\n";
-                    print "ServerID: " . $v["serverID"] . "\n";
-                    print "Message: " . $v["message"] . "\n";
-                    print "\nFATAL ERROR. Terminating execuation.\n";
+                    print "ServerID: " . $res["serverID"] . "\n";
+                    print "Message: " . $res["message"] . "\n";
+                    print "\nFATAL ERROR. Terminating execution.\n";
                     exit;
                 }
         }
     }
-
-    print "\n\n";
-    var_dump($res);
-    print "\n\n";
-    $tt=fgets(STDIN);
 
     print "Server: " . $res["serverID"] . "\n";
     print "Last data refresh: " . $res["lastDataUpdate"] . "\n";
