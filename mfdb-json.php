@@ -123,7 +123,7 @@ $randHash = getRandhash($username, $password);
 if ($randHash != "ERROR")
 {
     printStatus($dbh, $randHash, getStatus($randHash));
-    getSchedules($dbh, $randHash, $api, $baseurl, $stationIDs, $debug);
+    getSchedules($dbh, $randHash, $stationIDs, $debug);
 }
 
 print "\n\nGlobal. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n";
@@ -137,8 +137,12 @@ print $globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\n";
 
 print "Done.\n";
 
-function getSchedules($dbh, $rh, $api, $baseurl, array $stationIDs, $debug)
+function getSchedules($dbh, array $stationIDs, $debug)
 {
+    global $api;
+    global $baseurl;
+    global $randhash;
+
     $programCache = array();
     $dbProgramCache = array();
     $schedTempDir = tempdir();
@@ -148,11 +152,11 @@ function getSchedules($dbh, $rh, $api, $baseurl, array $stationIDs, $debug)
     $res = array();
     $res["action"] = "get";
     $res["object"] = "schedules";
-    $res["randhash"] = $rh;
+    $res["randhash"] = $randhash;
     $res["api"] = $api;
     $res["request"] = $stationIDs;
 
-    $response = sendRequest($baseurl, json_encode($res));
+    $response = sendRequest(json_encode($res));
 
     $res = array();
     $res = json_decode($response, true);
@@ -262,11 +266,11 @@ function getSchedules($dbh, $rh, $api, $baseurl, array $stationIDs, $debug)
         $res = array();
         $res["action"] = "get";
         $res["object"] = "programs";
-        $res["randhash"] = $rh;
+        $res["randhash"] = $randhash;
         $res["api"] = $api;
         $res["request"] = $retrieveStack;
 
-        $response = sendRequest($baseurl, json_encode($res));
+        $response = sendRequest(json_encode($res));
 
         $res = array();
         $res = json_decode($response, true);
@@ -825,8 +829,11 @@ function setup($dbh)
     }
 }
 
-function addHeadendsToSchedulesDirect($rh)
+function addHeadendsToSchedulesDirect()
 {
+    global $randhash;
+    global $api;
+
     print "\n\nNo headends are configured in your Schedules Direct account.\n";
     print "Enter your 5-digit zip code for U.S.\n";
     print "Enter your 6-character postal code for Canada.\n";
@@ -837,11 +844,11 @@ function addHeadendsToSchedulesDirect($rh)
     $res = array();
     $res["action"] = "get";
     $res["object"] = "headends";
-    $res["randhash"] = $rh;
-    $res["api"] = "20130512";
+    $res["randhash"] = $randhash;
+    $res["api"] = $api;
     $res["request"] = "PC:$response";
 
-    $res = json_decode(sendRequest($baseurl, json_encode($res)), true);
+    $res = json_decode(sendRequest(json_encode($res)), true);
 
     foreach ($res["data"] as $v)
     {
@@ -857,11 +864,11 @@ function addHeadendsToSchedulesDirect($rh)
     $res = array();
     $res["action"] = "add";
     $res["object"] = "headends";
-    $res["randhash"] = $rh;
-    $res["api"] = "20130512";
+    $res["randhash"] = $randhash;
+    $res["api"] = $api;
     $res["request"] = $he;
 
-    $res = json_decode(sendRequest($baseurl, json_encode($res)), true);
+    $res = json_decode(sendRequest(json_encode($res)), true);
 
     if ($res["response"] == "OK")
     {
@@ -876,18 +883,21 @@ function addHeadendsToSchedulesDirect($rh)
     }
 }
 
-function getLineup($rh, array $he)
+function getLineup(array $he)
 {
+    global $randhash;
+    global $api;
+
     print "Retrieving lineup from Schedules Direct.\n";
 
     $res = array();
     $res["action"] = "get";
     $res["object"] = "lineups";
-    $res["randhash"] = $rh;
-    $res["api"] = "20130512";
+    $res["randhash"] = $randhash;
+    $res["api"] = $api;
     $res["request"] = $he;
 
-    return sendRequest($baseurl, json_encode($res), true);
+    return sendRequest(json_encode($res), true);
 }
 
 function commitToDb($dbh, array $stack, $base, $chunk, $useTransaction, $verbose)
@@ -1004,19 +1014,21 @@ function parseScheduleFile(array $sched)
 }
 
 
-function getStatus($rh)
+function getStatus()
 {
-    $res = array();
     global $api;
+    global $randhash;
+
+    $res = array();
     $res["action"] = "get";
     $res["object"] = "status";
-    $res["randhash"] = $rh;
+    $res["randhash"] = $randhash;
     $res["api"] = $api;
 
     return sendRequest(json_encode($res));
 }
 
-function printStatus($dbh, $rh, $json)
+function printStatus($dbh, $json)
 {
     print "Status messages from Schedules Direct:\n";
 
@@ -1086,12 +1098,12 @@ function printStatus($dbh, $rh, $json)
 
         if (count($retrieveLineups))
         {
-            processLineups($dbh, $rh, $retrieveLineups);
+            processLineups($dbh, $retrieveLineups);
         }
     }
 }
 
-function processLineups($dbh, $rh, array $retrieveLineups)
+function processLineups($dbh, array $retrieveLineups)
 {
     /*
      * If we're here, that means that either the lineup has been updated, or it didn't exist at all.
@@ -1102,7 +1114,7 @@ function processLineups($dbh, $rh, array $retrieveLineups)
     print "Checking for updated lineups from Schedules Direct.\n";
 
     $res = array();
-    $res = json_decode(getLineup($rh, $retrieveLineups), true);
+    $res = json_decode(getLineup($retrieveLineups), true);
 
     if ($res["response"] != "OK")
     {
