@@ -1044,6 +1044,18 @@ function printStatus($dbh, $rh, $json)
                     $he[$hv["ID"]] = $hv["modified"];
                 }
                 break;
+            case "code":
+                if ($v = 401)
+                {
+                    /*
+                     * Error notification - we're going to have to abort because the server didn't like what we sent.
+                     */
+                    print "Received error response from server!\n";
+                    print "ServerID: " . $v["serverID"] . "\n";
+                    print "Message: " . $v["message"] . "\n";
+                    print "\nFATAL ERROR. Terminating execuation.\n";
+                    exit;
+                }
         }
     }
 
