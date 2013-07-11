@@ -1047,6 +1047,11 @@ function printStatus($dbh, $rh, $json)
         }
     }
 
+    print "\n\n";
+    var_dump($res);
+    print "\n\n";
+    $tt=fgets(STDIN);
+
     print "Server: " . $res["serverID"] . "\n";
     print "Last data refresh: " . $res["lastDataUpdate"] . "\n";
     print "Account expires: $expires\n";
