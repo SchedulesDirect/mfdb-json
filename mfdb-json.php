@@ -398,7 +398,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
      * 53579 people is 1.7megs in memory.
      */
 
-    print "Starting insert loop.\n";
+    print "Starting insert loop. $total station schedules to insert.\n";
     foreach ($chanData as $stationID => $row)
     {
 
