@@ -122,8 +122,8 @@ $randHash = getRandhash($username, $password);
 
 if ($randHash != "ERROR")
 {
-    printStatus($dbh, $randHash, getStatus($randHash));
-    getSchedules($dbh, $randHash, $stationIDs, $debug);
+    printStatus($dbh, getStatus());
+    getSchedules($dbh, $stationIDs, $debug);
 }
 
 print "\n\nGlobal. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n";
@@ -766,7 +766,7 @@ function setup($dbh)
         if ($randHash != "ERROR")
         {
             $res = array();
-            $res = json_decode(getStatus($randHash), true);
+            $res = json_decode(getStatus(), true);
             $he = array();
 
             foreach ($res as $k => $v)
