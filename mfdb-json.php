@@ -331,11 +331,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     print "Inserting schedules.\n";
 
-    //$s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogram LIKE program");
-    //$s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogramgenres LIKE programgenres");
+    $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogram LIKE program");
+    $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogramgenres LIKE programgenres");
 
-    $s1 = $dbh->exec("TRUNCATE p_rogram");
-    $s1 = $dbh->exec("TRUNCATE p_rogramgenres");
+    // $s1 = $dbh->exec("TRUNCATE p_rogram");
+    // $s1 = $dbh->exec("TRUNCATE p_rogramgenres");
 
 
     $programInsert = $dbh->prepare
