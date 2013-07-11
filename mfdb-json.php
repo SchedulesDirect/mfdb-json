@@ -345,9 +345,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     print "Inserting schedules.\n";
 
-    $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogram LIKE program");
-    $s1 = $dbh->exec("CREATE TEMPORARY TABLE p_rogramgenres LIKE programgenres");
-    $s1 = $dbh->exec("CREATE TEMPORARY TABLE c_redits LIKE credits");
+    $s1 = $dbh->exec("DROP TABLE IF EXISTS p_rogram, p_rogramgenres, c_redits");
+
+    $s1 = $dbh->exec("CREATE TABLE p_rogram LIKE program");
+    $s1 = $dbh->exec("CREATE TABLE p_rogramgenres LIKE programgenres");
+    $s1 = $dbh->exec("CREATE TABLE c_redits LIKE credits");
 
     $programInsert = $dbh->prepare
         ("INSERT INTO p_rogram(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
@@ -691,13 +693,13 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         }
     }
 
-    $stmt = $dbh->exec("DROP TABLE IF EXISTS program_prev, programgenres_prev, credits_prev, people_prev");
+    $stmt = $dbh->exec("DROP TABLE IF EXISTS program_prev, programgenres_prev, credits_prev");
     $stmt = $dbh->exec("RENAME TABLE program TO program_prev");
-    $stmt = $dbh->exec("ALTER TABLE p_rogram RENAME program");
+    $stmt = $dbh->exec("RENAME TABLE p_rogram TO program");
     $stmt = $dbh->exec("RENAME TABLE programgenres TO programgenres_prev");
-    $stmt = $dbh->exec("ALTER TABLE p_rogramgenres RENAME programgenres");
+    $stmt = $dbh->exec("RENAME TABLE p_rogramgenres TO programgenres");
     $stmt = $dbh->exec("RENAME TABLE credits TO credits_prev");
-    $stmt = $dbh->exec("ALTER TABLE c_redits RENAME credits");
+    $stmt = $dbh->exec("RENAME TABLE c_redits TO credits");
     print "\n\nDone inserting schedules.\n";
 
 }
