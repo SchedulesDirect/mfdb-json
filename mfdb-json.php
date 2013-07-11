@@ -366,7 +366,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
      * We're going to read in the people that are already in the database into an associative array with the name as
      * the key, and the person number as the value.
      */
-    $s1 = $dbh->prepare("SELECT name, person FROM people LIMIT 5");
+
+    $s1 = $dbh->prepare("SELECT name, person FROM people");
     $s1->execute();
 
     while ($row = $s1->fetch(PDO::FETCH_NUM))
@@ -374,11 +375,14 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         $peopleArray[$row[0]] = $row[1];
     }
 
+    print "size of array is \n";
+    print strlen(serialize($peopleArray)) . "bytes.\n";
+
     // $peopleArray = $s1->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
     print "\n\n";
-    var_dump($peopleArray);
+    //var_dump($peopleArray);
     print "\n\n";
-    $tt = fgets(STDIN);
+    //$tt = fgets(STDIN);
 
 
     foreach ($chanData as $stationID => $row)
