@@ -381,6 +381,12 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
      * 53579 people is 1.7megs in memory.
      */
 
+    print "\n\n";
+    print var_dump($peopleArray);
+    $tt=fgets(STDIN);
+
+
+
     foreach ($chanData as $stationID => $row)
     {
 
