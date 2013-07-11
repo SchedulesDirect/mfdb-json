@@ -368,7 +368,7 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
      */
     $s1 = $dbh->prepare("SELECT name, person FROM people LIMIT 5");
     $s1->execute();
-    $peopleArray = $s1->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
+    $peopleArray = $s1->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
     print "\n\n";
     var_dump($peopleArray);
     print "\n\n";
