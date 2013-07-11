@@ -345,11 +345,12 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
 
     print "Inserting schedules.\n";
 
-    $s1 = $dbh->exec("DROP TABLE IF EXISTS p_rogram, p_rogramgenres, c_redits");
+    $s1 = $dbh->exec("DROP TABLE IF EXISTS p_rogram, p_rogramgenres, p_rogramrating, c_redits");
 
     $s1 = $dbh->exec("CREATE TABLE p_rogram LIKE program");
     $s1 = $dbh->exec("CREATE TABLE p_rogramgenres LIKE programgenres");
     $s1 = $dbh->exec("CREATE TABLE c_redits LIKE credits");
+    $s1 = $dbh->exec("CREATE TABLE p_rogramrating LIKE programrating");
 
     $programInsert = $dbh->prepare
         ("INSERT INTO p_rogram(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
@@ -369,6 +370,9 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
     $insertProgramGenres = $dbh->prepare("INSERT INTO p_rogramgenres(chanid,starttime,relevance,genre)
     VALUES(:chanid,:starttime,:relevance,:genre)");
 
+    $insertProgramRating = $dbh->prepare("INSERT INTO p_rogramrating(chanid,starttime,system,rating)
+    VALUES(:chanid,:starttime,:system,:rating)");
+
     $counter = 0;
     $total = count($chanData);
 
@@ -377,6 +381,8 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
      * We're going to read in the people that are already in the database into an associative array with the name as
      * the key, and the person number as the value.
      */
+
+    print "Reading people table into memory.\n";
 
     $s1 = $dbh->prepare("SELECT name, person FROM people");
     $s1->execute();
@@ -404,6 +410,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
          */
 
         $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), true);
+        /*
+         * These are used to set MPAA or V-CHIP schemes.
+         */
+        $ratingSystem = "";
+        $rating = "";
 
         // print "Reading $stationID\n";
 
@@ -501,6 +512,11 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     $numPlus = substr_count($jsonProgram["movie"]["starRating"], "+");
                     $stars = ($numStars * .25) + ($numPlus * .125);
                 }
+                if (isset($jsonProgram["movie"]["mpaaRating"]))
+                {
+                    $rating = $jsonProgram["movie"]["mpaaRating"];
+                    $ratingSystem = "MPAA";
+                }
             }
             else
             {
@@ -597,6 +613,12 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                 $isGeneric = false;
             }
 
+            if (isset($v["tvRating"]))
+            {
+                $ratingSystem = "V-CHIP";
+                $rating = $v["tvRating"];
+            }
+
             /*
              * Not sure why MythTV has multiple places for certain values.
              */
@@ -675,6 +697,12 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
                     }
                 }
 
+                if ($rating != "")
+                {
+                    $insertProgramRating->execute(array("chanid" => $value["chanid"], "starttime" => $starttime,
+                                                        "system" => $ratingSystem, "rating" => $rating));
+                }
+
                 if (isset($jsonProgram["genres"]))
                 {
                     foreach ($jsonProgram["genres"] as $relevance => $genre)
@@ -693,11 +721,13 @@ function getSchedules($dbh, $rh, $api, array $stationIDs, $debug)
         }
     }
 
-    $stmt = $dbh->exec("DROP TABLE IF EXISTS program_prev, programgenres_prev, credits_prev");
+    $stmt = $dbh->exec("DROP TABLE IF EXISTS program_prev, programgenres_prev, programrating_prev, credits_prev");
     $stmt = $dbh->exec("RENAME TABLE program TO program_prev");
     $stmt = $dbh->exec("RENAME TABLE p_rogram TO program");
     $stmt = $dbh->exec("RENAME TABLE programgenres TO programgenres_prev");
     $stmt = $dbh->exec("RENAME TABLE p_rogramgenres TO programgenres");
+    $stmt = $dbh->exec("RENAME TABLE programrating TO programrating_prev");
+    $stmt = $dbh->exec("RENAME TABLE p_rogramrating TO programrating");
     $stmt = $dbh->exec("RENAME TABLE credits TO credits_prev");
     $stmt = $dbh->exec("RENAME TABLE c_redits TO credits");
     print "\n\nDone inserting schedules.\n";
