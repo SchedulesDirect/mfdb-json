@@ -606,10 +606,6 @@ function getSchedules(array $stationIDs, $debug)
                 $syndicatedepisodenumber = "";
             }
 
-            /*
-             * This is where we'll actually perform the insert as many times as necessary based on how many copies
-             * of this stationid there are across the multiple sources.
-             */
 
             if ( (substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV") )
             {
@@ -639,6 +635,10 @@ function getSchedules(array $stationIDs, $debug)
             $isLast = false;
             $subtitletypes = "";
 
+            /*
+             * This is where we'll actually perform the insert as many times as necessary based on how many copies
+             * of this stationid there are across the multiple sources.
+             */
             foreach ($row as $value)
             {
                 /* print "**3\n\n";
