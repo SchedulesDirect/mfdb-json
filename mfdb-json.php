@@ -611,7 +611,7 @@ function getSchedules(array $stationIDs, $debug)
              * of this stationid there are across the multiple sources.
              */
 
-            if (substr($programID, -4) == "0000")
+            if ( (substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV") )
             {
                 $isGeneric = true;
             }
