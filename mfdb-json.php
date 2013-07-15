@@ -1286,7 +1286,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
         {
             $stmt = $dbh->prepare(
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
-                VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,,:atsc_minor_chan)
+                VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)
                 ON DUPLICATE KEY UPDATE channum=:channum,freqid=:freqid,sourceid=:sourceid,xmltvid=:xmltvid,
                 atsc_major_chan=:atsc_major_chan,atsc_minor_chan=:atsc_minor_chan");
 
