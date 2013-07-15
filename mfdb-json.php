@@ -1291,7 +1291,16 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
                 ON DUPLICATE KEY UPDATE channum=:channum,freqid=:freqid,sourceid=:sourceid,xmltvid=:xmltvid,
                 atsc_major_chan=:atsc_major_chan,atsc_minor_chan=:atsc_minor_chan");
 
-            $stmt->execute(array("chanid"          => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
+            if ($atscMajor == 0)
+            {
+                $channum = (int)$freqid;
+            }
+            else
+            {
+                $channum = "$atscMajor.$atscMinor";
+            }
+
+            $stmt->execute(array("chanid"          => (int)($sourceid * 1000) + (int)$freqid, "channum" => $channum,
                                  "freqid"          => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
                                  "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
         }
