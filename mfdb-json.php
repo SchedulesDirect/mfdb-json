@@ -1283,8 +1283,8 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
-            $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => $channum,
-                                 "freqid" => $channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
+            $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => (int)$channum,
+                                 "freqid" => (int)$channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
         }
         else
         {
