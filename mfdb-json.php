@@ -61,7 +61,7 @@ print "Attempting to connect to database.\n";
 try
 {
     $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $password,
-        array(PDO::ATTR_PERSISTENT => true));
+        array(PDO::ATTR_PERSISTENT => TRUE));
     $dbh->exec("SET CHARACTER SET utf8");
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 } catch (PDOException $e)
@@ -159,7 +159,7 @@ function getSchedules(array $stationIDs, $debug)
     $response = sendRequest(json_encode($res));
 
     $res = array();
-    $res = json_decode($response, true);
+    $res = json_decode($response, TRUE);
 
     /*
      * First we're going to load all the programIDs and md5's from the schedule files we just downloaded into
@@ -184,7 +184,7 @@ function getSchedules(array $stationIDs, $debug)
             foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
                 // print "***DEBUG: Reading schedule $f\n";
-                $a = json_decode(file_get_contents($f), true);
+                $a = json_decode(file_get_contents($f), TRUE);
                 $stationID = $a["stationID"];
                 $stmt->execute(array("stationid" => $stationID));
                 $r = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -273,7 +273,7 @@ function getSchedules(array $stationIDs, $debug)
         $response = sendRequest(json_encode($res));
 
         $res = array();
-        $res = json_decode($response, true);
+        $res = json_decode($response, TRUE);
 
         if ($res["response"] == "OK")
         {
@@ -414,7 +414,7 @@ function getSchedules(array $stationIDs, $debug)
          * Row is an array containing: chanid,channum,sourceid
          */
 
-        $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), true);
+        $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), TRUE);
         /*
          * These are used to set MPAA or V-CHIP schemes.
          */
@@ -432,11 +432,15 @@ function getSchedules(array $stationIDs, $debug)
         foreach ($a["programs"] as $v)
         {
             // print "**1\n";
+            $isFirst = TRUE;
+            $isLast = TRUE;
+            $previouslyshown = TRUE;
+
             $programID = $v["programID"];
 
             $getProgramDetails->execute(array("pid" => $programID));
             $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
-            $jsonProgram = json_decode($tempJsonProgram[0], true);
+            $jsonProgram = json_decode($tempJsonProgram[0], TRUE);
 
             $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
             $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
@@ -532,30 +536,30 @@ function getSchedules(array $stationIDs, $debug)
 
             if (isset($v["hasSubTitles"]))
             {
-                $isSubtitled = true;
+                $isSubtitled = TRUE;
             }
             else
             {
-                $isSubtitled = false;
+                $isSubtitled = FALSE;
             }
 
             if (isset($v["cc"]))
             {
-                $isClosedCaption = true;
+                $isClosedCaption = TRUE;
             }
             else
             {
-                $isClosedCaption = false;
+                $isClosedCaption = FALSE;
             }
 
             if (isset($v["hdtv"]))
             {
-                $isHDTV = true;
+                $isHDTV = TRUE;
                 $videoprop = "HDTV";
             }
             else
             {
-                $isHDTV = false;
+                $isHDTV = FALSE;
                 $videoprop = "";
             }
 
@@ -609,17 +613,37 @@ function getSchedules(array $stationIDs, $debug)
 
             if ( (substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV") )
             {
-                $isGeneric = true;
+                $isGeneric = TRUE;
             }
             else
             {
-                $isGeneric = false;
+                $isGeneric = FALSE;
             }
 
             if (isset($v["tvRating"]))
             {
                 $ratingSystem = "V-CHIP";
                 $rating = $v["tvRating"];
+            }
+
+            if (isset($v["isPremiereOrFinale"]))
+            {
+                switch ($v["isPremiereOrFinale"])
+                {
+                    case "Series Premiere":
+                    case "Season Premiere":
+                        $isFirst = TRUE;
+                        break;
+                    case "Series Finale":
+                    case "Season Finale":
+                        $isLast = TRUE;
+                        break;
+                }
+            }
+
+            if (isset($v["new"]))
+            {
+                $previouslyshown = FALSE;
             }
 
             /*
@@ -629,10 +653,8 @@ function getSchedules(array $stationIDs, $debug)
             /*
              * Figure out how to calculate this.
              */
-            $previouslyshown = 0;
+
             $audioprop = "";
-            $isFirst = false;
-            $isLast = false;
             $subtitletypes = "";
 
             /*
@@ -767,7 +789,7 @@ function setup()
         if ($randHash != "ERROR")
         {
             $res = array();
-            $res = json_decode(getStatus(), true);
+            $res = json_decode(getStatus(), TRUE);
             $he = array();
 
             foreach ($res as $k => $v)
@@ -849,7 +871,7 @@ function addHeadendsToSchedulesDirect()
     $res["api"] = $api;
     $res["request"] = "PC:$response";
 
-    $res = json_decode(sendRequest(json_encode($res)), true);
+    $res = json_decode(sendRequest(json_encode($res)), TRUE);
 
     foreach ($res["data"] as $v)
     {
@@ -869,7 +891,7 @@ function addHeadendsToSchedulesDirect()
     $res["api"] = $api;
     $res["request"] = $he;
 
-    $res = json_decode(sendRequest(json_encode($res)), true);
+    $res = json_decode(sendRequest(json_encode($res)), TRUE);
 
     if ($res["response"] == "OK")
     {
@@ -898,7 +920,7 @@ function getLineup(array $he)
     $res["api"] = $api;
     $res["request"] = $he;
 
-    return sendRequest(json_encode($res), true);
+    return sendRequest(json_encode($res), TRUE);
 }
 
 function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
@@ -949,7 +971,7 @@ function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
 
             if ($count === FALSE)
             {
-                print_r($dbh->errorInfo(), true);
+                print_r($dbh->errorInfo(), TRUE);
                 print "line:\n\n$base$str\n";
                 exit;
             }
@@ -970,7 +992,7 @@ function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
     $count = $dbh->exec("$base$str");
     if ($count === FALSE)
     {
-        print_r($dbh->errorInfo(), true);
+        print_r($dbh->errorInfo(), TRUE);
     }
 
     if ($verbose)
@@ -987,7 +1009,7 @@ function holder()
 {
     foreach (glob("$tempDir/*.json.txt") as $f)
     {
-        $a = json_decode(file_get_contents($f), true);
+        $a = json_decode(file_get_contents($f), TRUE);
         $pid = $a["programID"];
         $md5 = $a["md5"];
 
@@ -1038,7 +1060,7 @@ function printStatus($json)
     print "Status messages from Schedules Direct:\n";
 
     $res = array();
-    $res = json_decode($json, true);
+    $res = json_decode($json, TRUE);
 
     $am = array();
     $he = array();
@@ -1127,7 +1149,7 @@ function processLineups(array $retrieveLineups)
     print "Checking for updated lineups from Schedules Direct.\n";
 
     $res = array();
-    $res = json_decode(getLineup($retrieveLineups), true);
+    $res = json_decode(getLineup($retrieveLineups), TRUE);
 
     if ($res["response"] != "OK")
     {
@@ -1161,7 +1183,7 @@ function processLineups(array $retrieveLineups)
     foreach (glob("$tempDir/*.json.txt") as $f)
     {
         $json = file_get_contents($f);
-        $a = json_decode($json, true);
+        $a = json_decode($json, TRUE);
         $he = $a["headend"];
         $stmt->execute(array("he" => $he, "json" => $json));
     }
@@ -1209,7 +1231,7 @@ function processLineups(array $retrieveLineups)
         $device = $v["device"];
         $modified = $v["modified"];
         $stmt->execute(array("he" => $headend));
-        $json = json_decode($stmt->fetchAll(PDO::FETCH_COLUMN)[0], true);
+        $json = json_decode($stmt->fetchAll(PDO::FETCH_COLUMN)[0], TRUE);
 
         foreach ($json["metadata"] as $v1)
         {
@@ -1370,7 +1392,7 @@ function getRandhash($username, $password)
     $response = sendRequest(json_encode($res));
 
     $res = array();
-    $res = json_decode($response, true);
+    $res = json_decode($response, TRUE);
 
     if (json_last_error() != 0)
     {
@@ -1409,7 +1431,7 @@ function sendRequest($jsonText)
                                            )
     ));
 
-    return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
+    return rtrim(file_get_contents("$baseurl/handleRequest.php", FALSE, $context));
 }
 
 function tempdir()
