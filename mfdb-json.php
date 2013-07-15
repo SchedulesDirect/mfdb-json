@@ -1166,8 +1166,10 @@ function processLineups(array $retrieveLineups)
     }
 
     /*
-     * Get list of lineups that the user has and only worry about those.
+     * Get list of lineups that the user has and only worry about those. (There may be more configured on the server
+     * side, but don't process everything, just the ones that the user has configured locally)
      */
+
     $stmt = $dbh->prepare("SELECT sourceid,lineupid,modified FROM videosource");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1265,7 +1267,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
         }
         else
         {
-            $channum = $mapArray["channel"];
+            $channum = (int)$mapArray["channel"];
         }
         /*
          * If we start to do things like "IP" then we'll be inserting URLs, but this is fine for now.
@@ -1277,8 +1279,8 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
-            $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => (int)$channum,
-                                 "freqid" => (int)$channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
+            $stmt->execute(array("chanid" => (int)($sourceid * 1000) + $channum, "channum" => $channum,
+                                 "freqid" => $channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
         }
         else
         {
