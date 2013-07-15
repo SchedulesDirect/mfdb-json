@@ -1234,8 +1234,9 @@ function processLineups(array $retrieveLineups)
                     if ($updateDB == "Y")
                     {
                         updateChannelTable($lineupid, $headend, $device, $transport, $json);
-                        $stmt = $dbh->prepare("UPDATE videosource SET modified=:modified WHERE sourceid=:sourceid");
-                        $stmt->execute(array("modified" => $jsonModified, "sourceid" => $lineupid));
+                        $updateChannel = $dbh->prepare("UPDATE videosource SET modified=:modified WHERE
+                        sourceid=:sourceid");
+                        $updateChannel->execute(array("modified" => $jsonModified, "sourceid" => $lineupid));
                     }
                 }
             }
