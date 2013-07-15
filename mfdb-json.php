@@ -610,7 +610,7 @@ function getSchedules(array $stationIDs, $debug)
                 $syndicatedepisodenumber = "";
             }
 
-            if ( (substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV") )
+            if ((substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV"))
             {
                 $isGeneric = TRUE;
             }
@@ -1286,7 +1286,10 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
         {
             $stmt = $dbh->prepare(
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
-                VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
+                VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,,:atsc_minor_chan)
+                ON DUPLICATE KEY UPDATE channum=:channum,freqid=:freqid,sourceid=:sourceid,xmltvid=:xmltvid,
+                atsc_major_chan=:atsc_major_chan,atsc_minor_chan=:atsc_minor_chan");
+
             $stmt->execute(array("chanid"          => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
                                  "freqid"          => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
                                  "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
