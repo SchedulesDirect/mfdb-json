@@ -1369,6 +1369,16 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
         }
     }
 
+    /*
+     * Set the startchan to a non-bogus value.
+     */
+
+    $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid ORDER BY CAST(channum AS SIGNED) LIMIT 1");
+    $stmt->execute(array("sourceid" => $sourceid));
+    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $startChan = $result[0];
+    $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
+    $setStartChannel->execute(array("sourceid" => $sourceid, "startChan" => $startChan));
     print "***DEBUG: Exiting updateChannelTable.\n";
 }
 
