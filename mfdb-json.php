@@ -432,7 +432,6 @@ function getSchedules(array $stationIDs, $debug)
 
         foreach ($a["programs"] as $v)
         {
-            // print "**1\n";
             $isFirst = TRUE;
             $isLast = TRUE;
             $previouslyshown = TRUE;
@@ -663,11 +662,6 @@ function getSchedules(array $stationIDs, $debug)
              */
             foreach ($row as $value)
             {
-                /* print "**3\n\n";
-                 var_dump($value);
-                 print "\n\n**4\n";
-                */
-
                 /*
                  * There may be multiple videosources which have the same xmltvid,
                  * so we may be inserting the value multiple times.
