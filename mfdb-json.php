@@ -1206,6 +1206,12 @@ function processLineups(array $retrieveLineups)
     $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE headend=:he");
     foreach ($lineup as $lineupid => $v)
     {
+        print "lineupid is $lineupid\n";
+        var_dump($v);
+        print "\n\n";
+        $tt=fgets(STDIN);
+
+
         $headend = $v["headend"];
         $device = $v["device"];
         $modified = $v["modified"];
