@@ -14,3 +14,4 @@ Features:
 - QAM tuning information.
 - program-specific language information. (A program that's being broadcast
   in Mandarin will have a Mandarin tag associated with it)
+- Additional downloaded metadata regarding programs relating to content advisories.
