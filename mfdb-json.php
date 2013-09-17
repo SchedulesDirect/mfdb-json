@@ -225,7 +225,7 @@ function getSchedules(array $stationIDs, $debug)
 
     foreach ($programCache as $progID => $dataArray)
     {
-        if (array_key_exists($progID, $dbProgramCache))
+        if (isset($dbProgramCache[$progID]))
         {
             /*
              * First we'll check if the key (the programID) exists in the database already, and if yes, does it have
