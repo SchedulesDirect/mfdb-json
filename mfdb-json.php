@@ -8,12 +8,12 @@
 $isBeta = FALSE;
 $debug = TRUE;
 $doSetup = FALSE;
+$quiet = FALSE;
 
 date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
-
-// print "Time is now $todayDate\n";
+$fh_log = fopen("$todayDate.log", "a");
 
 $user = "mythtv";
 $password = "mythtv";
@@ -57,7 +57,7 @@ foreach ($options as $k => $v)
     }
 }
 
-print "Attempting to connect to database.\n";
+printMSG("Attempting to connect to database.\n");
 try
 {
     $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $password,
@@ -66,7 +66,7 @@ try
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 } catch (PDOException $e)
 {
-    print "Exception with PDO: " . $e->getMessage() . "\n";
+    printMSG("Exception with PDO: " . $e->getMessage() . "\n");
     exit;
 }
 
@@ -79,14 +79,14 @@ if ($isBeta)
 {
     # Test server. Things may be broken there.
     $baseurl = "http://23.21.174.111";
-    print "Using beta server.\n";
+    printMSG("Using beta server.\n");
     # API must match server version.
     $api = 20130709;
 }
 else
 {
     $baseurl = "https://data2.schedulesdirect.org";
-    print "Using production server.\n";
+    printMSG("Using production server.\n");
     $api = 20130512;
 }
 
@@ -112,12 +112,12 @@ foreach ($result[0] as $k => $v)
 $globalStartTime = time();
 $globalStartDate = new DateTime();
 
-print "Retrieving list of channels.\n";
+printMSG("Retrieving list of channels.\n");
 $stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE");
 $stmt->execute();
 $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-print "Logging into Schedules Direct.\n";
+printMSG("Logging into Schedules Direct.\n");
 $randHash = getRandhash($username, $password);
 
 if ($randHash != "ERROR")
@@ -126,16 +126,16 @@ if ($randHash != "ERROR")
     getSchedules($stationIDs, $debug);
 }
 
-print "\n\nGlobal. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n";
-print "Global. End Time:" . date("Y-m-d H:i:s") . "\n";
+printMSG("\n\nGlobal. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
+printMSG("Global. End Time:" . date("Y-m-d H:i:s") . "\n");
 $globalSinceStart = $globalStartDate->diff(new DateTime());
 if ($globalSinceStart->h)
 {
-    print $globalSinceStart->h . " hour ";
+    printMSG($globalSinceStart->h . " hour ");
 }
-print $globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\n";
+printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\n");
 
-print "Done.\n";
+printMSG("Done.\n");
 
 function getSchedules(array $stationIDs, $debug)
 {
@@ -148,7 +148,7 @@ function getSchedules(array $stationIDs, $debug)
     $schedTempDir = tempdir();
     $chanData = array();
 
-    print "Sending schedule request.\n";
+    printMSG("Sending schedule request.\n");
     $res = array();
     $res["action"] = "get";
     $res["object"] = "schedules";
@@ -183,7 +183,7 @@ function getSchedules(array $stationIDs, $debug)
 
             foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
-                // print "***DEBUG: Reading schedule $f\n";
+                // printMSG("***DEBUG: Reading schedule $f\n");
                 $a = json_decode(file_get_contents($f), true);
                 $stationID = $a["stationID"];
                 $stmt->execute(array("stationid" => $stationID));
@@ -198,13 +198,13 @@ function getSchedules(array $stationIDs, $debug)
         }
         else
         {
-            print "FATAL: Could not open zip file.\n";
+            printMSG("FATAL: Could not open zip file.\n");
             exit;
         }
     }
 
-    print "There are " . count($programCache) . " programIDs in the upcoming schedule.\n";
-    print "Retrieving existing MD5 values.\n";
+    printMSG("There are " . count($programCache) . " programIDs in the upcoming schedule.\n");
+    printMSG("Retrieving existing MD5 values.\n");
 
     $stmt = $dbh->prepare("SELECT programID,md5 FROM SDprogramCache");
     $stmt->execute();
@@ -252,17 +252,17 @@ function getSchedules(array $stationIDs, $debug)
      * or they have different md5's.
      */
 
-    print "Need to download " . count($insertStack) . " new programs.\n";
-    print "Need to download " . count($replaceStack) . " updated programs.\n";
+    printMSG("Need to download " . count($insertStack) . " new programs.\n");
+    printMSG("Need to download " . count($replaceStack) . " updated programs.\n");
 
     if (count($insertStack) + count($replaceStack) > 10000)
     {
-        print "Requesting more than 10000 programs. Please be patient.\n";
+        printMSG("Requesting more than 10000 programs. Please be patient.\n");
     }
 
     if (count($insertStack) + count($replaceStack) > 0)
     {
-        print "Requesting new and updated programs.\n";
+        printMSG("Requesting new and updated programs.\n");
         $res = array();
         $res["action"] = "get";
         $res["object"] = "programs";
@@ -277,7 +277,7 @@ function getSchedules(array $stationIDs, $debug)
 
         if ($res["response"] == "OK")
         {
-            print "Starting program cache insert.\n";
+            printMSG("Starting program cache insert.\n");
             $tempDir = tempdir();
 
             $fileName = $res["filename"];
@@ -293,12 +293,12 @@ function getSchedules(array $stationIDs, $debug)
             }
             else
             {
-                print "FATAL: Could not open .zip file while extracting programIDs.\n";
+                printMSG("FATAL: Could not open .zip file while extracting programIDs.\n");
                 exit;
             }
 
             $counter = 0;
-            print "Performing inserts.\n";
+            printMSG("Performing inserts.\n");
 
             $stmt = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
             foreach ($insertStack as $progID => $v)
@@ -306,7 +306,7 @@ function getSchedules(array $stationIDs, $debug)
                 $counter++;
                 if ($counter % 1000)
                 {
-                    print "$counter / " . count($insertStack) . "             \r";
+                    printMSG("$counter / " . count($insertStack) . "             \r");
                 }
                 $stmt->execute(array("programID" => $progID, "md5" => $v,
                                      "json"      => file_get_contents("$tempDir/$progID.json.txt")));
@@ -317,7 +317,7 @@ function getSchedules(array $stationIDs, $debug)
             }
 
             $counter = 0;
-            print "\nPerforming updates.\n";
+            printMSG("\nPerforming updates.\n");
 
             // $stmt = $dbh->prepare("REPLACE INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
             $stmt = $dbh->prepare("UPDATE SDprogramCache SET md5=:md5,json=:json WHERE programID=:programID");
@@ -326,7 +326,7 @@ function getSchedules(array $stationIDs, $debug)
                 $counter++;
                 if ($counter % 10)
                 {
-                    print "$counter / " . count($replaceStack) . "             \r";
+                    printMSG("$counter / " . count($replaceStack) . "             \r");
                 }
                 $stmt->execute(array("programID" => $progID, "md5" => $v,
                                      "json"      => file_get_contents("$tempDir/$progID.json.txt")));
@@ -344,10 +344,10 @@ function getSchedules(array $stationIDs, $debug)
             }
         }
 
-        print "Completed local database program updates.\n";
+        printMSG("Completed local database program updates.\n");
     }
 
-    print "Inserting schedules.\n";
+    printMSG("Inserting schedules.\n");
 
     $s1 = $dbh->exec("DROP TABLE IF EXISTS p_rogram, p_rogramgenres, p_rogramrating, c_redits");
 
@@ -386,7 +386,7 @@ function getSchedules(array $stationIDs, $debug)
      * the key, and the person number as the value.
      */
 
-    print "Reading people table into memory.\n";
+    printMSG("Reading people table into memory.\n");
 
     $s1 = $dbh->prepare("SELECT name, person FROM people");
     $s1->execute();
@@ -396,19 +396,15 @@ function getSchedules(array $stationIDs, $debug)
         $peopleArray[$row[0]] = $row[1];
     }
 
-    //print "size of array is \n";
-    //print strlen(serialize($peopleArray)) . " bytes.\n";
+    //printMSG("size of array is \n");
+    //printMSG(strlen(serialize($peopleArray)) . " bytes.\n");
     /*
      * 53579 people is 1.7megs in memory.
      */
 
-    print "Starting insert loop. $total station schedules to insert.\n";
+    printMSG("Starting insert loop. $total station schedules to insert.\n");
     foreach ($chanData as $stationID => $row)
     {
-
-        /*   print "row is\n\n";
-           var_dump($row);
-           print "\n\n"; */
 
         /*
          * Row is an array containing: chanid,channum,sourceid
@@ -421,17 +417,16 @@ function getSchedules(array $stationIDs, $debug)
         $ratingSystem = "";
         $rating = "";
 
-        // print "Reading $stationID\n";
+        // printMSG("Reading $stationID\n");
 
         $counter++;
         if ($counter % 100 == 0)
         {
-            print "Inserted $counter of $total stationIDs.                                         \r";
+            printMSG("Inserted $counter of $total stationIDs.                                         \r");
         }
 
         foreach ($a["programs"] as $v)
         {
-            // print "**1\n";
             $programID = $v["programID"];
 
             $getProgramDetails->execute(array("pid" => $programID));
@@ -607,7 +602,7 @@ function getSchedules(array $stationIDs, $debug)
             }
 
 
-            if ( (substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV") )
+            if ((substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV"))
             {
                 $isGeneric = true;
             }
@@ -641,11 +636,6 @@ function getSchedules(array $stationIDs, $debug)
              */
             foreach ($row as $value)
             {
-                /* print "**3\n\n";
-                 var_dump($value);
-                 print "\n\n**4\n";
-                */
-
                 /*
                  * There may be multiple videosources which have the same xmltvid,
                  * so we may be inserting the value multiple times.
@@ -726,7 +716,7 @@ function getSchedules(array $stationIDs, $debug)
     $stmt = $dbh->exec("RENAME TABLE p_rogramrating TO programrating");
     $stmt = $dbh->exec("RENAME TABLE credits TO credits_prev");
     $stmt = $dbh->exec("RENAME TABLE c_redits TO credits");
-    print "\n\nDone inserting schedules.\n";
+    printMSG("\n\nDone inserting schedules.\n");
 
 }
 
@@ -743,15 +733,15 @@ function setup()
 
         if (count($result))
         {
-            print "Existing sources:\n";
+            printMSG("Existing sources:\n");
             foreach ($result as $v)
             {
-                print "sourceid: " . $v["sourceid"] . "\n";
-                print "name: " . $v["name"] . "\n";
-                print "userid: " . $v["userid"] . "\n";
+                printMSG("sourceid: " . $v["sourceid"] . "\n");
+                printMSG("name: " . $v["name"] . "\n");
+                printMSG("userid: " . $v["userid"] . "\n");
                 $username = $v["userid"];
-                print "lineupid: " . $v["lineupid"] . "\n";
-                print "password: " . $v["password"] . "\n\n";
+                printMSG("lineupid: " . $v["lineupid"] . "\n");
+                printMSG("password: " . $v["password"] . "\n\n");
                 $password = $v["password"];
             }
         }
@@ -761,7 +751,7 @@ function setup()
             $password = readline("Schedules Direct password:");
         }
 
-        print "Checking existing lineups at Schedules Direct.\n";
+        printMSG("Checking existing lineups at Schedules Direct.\n");
         $randHash = getRandhash($username, sha1($password));
 
         if ($randHash != "ERROR")
@@ -777,22 +767,22 @@ function setup()
                     foreach ($v as $hv)
                     {
                         $he[$hv["ID"]] = 1;
-                        print "Headend: " . $hv["ID"] . "\n";
+                        printMSG("Headend: " . $hv["ID"] . "\n");
                     }
                 }
             }
 
             if (count($he))
             {
-                print "A to add a new sourceid in MythTV\n";
-                print "L to Link an existing sourceid to an existing headend at SD\n";
-                print "Q to Quit\n";
+                printMSG("A to add a new sourceid in MythTV\n");
+                printMSG("L to Link an existing sourceid to an existing headend at SD\n");
+                printMSG("Q to Quit\n");
                 $response = strtoupper(readline(">"));
 
                 switch ($response)
                 {
                     case "A":
-                        print "Adding new sourceid\n\n";
+                        printMSG("Adding new sourceid\n\n");
                         $newName = readline("Source name:>");
                         $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
                         VALUES(:name,:userid,:password)");
@@ -800,7 +790,7 @@ function setup()
                                              "password" => $password));
                         break;
                     case "L":
-                        print "Linking Schedules Direct headend to sourceid\n\n";
+                        printMSG("Linking Schedules Direct headend to sourceid\n\n");
                         $sid = readline("Source id:>");
                         $he = readline("Headend:>");
                         $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
@@ -835,10 +825,10 @@ function addHeadendsToSchedulesDirect()
     global $randHash;
     global $api;
 
-    print "\n\nNo headends are configured in your Schedules Direct account.\n";
-    print "Enter your 5-digit zip code for U.S.\n";
-    print "Enter your 6-character postal code for Canada.\n";
-    print "Two-character ISO3166 code for international.\n";
+    printMSG("\n\nNo headends are configured in your Schedules Direct account.\n");
+    printMSG("Enter your 5-digit zip code for U.S.\n");
+    printMSG("Enter your 6-character postal code for Canada.\n");
+    printMSG("Two-character ISO3166 code for international.\n");
 
     $response = readline(">");
 
@@ -853,7 +843,7 @@ function addHeadendsToSchedulesDirect()
 
     foreach ($res["data"] as $v)
     {
-        print "headend: " . $v["headend"] . "\nname: " . $v["name"] . "(" . $v["location"] . ")\n\n";
+        printMSG("headend: " . $v["headend"] . "\nname: " . $v["name"] . "(" . $v["location"] . ")\n\n");
     }
 
     $he = readline("Headend to add>");
@@ -873,13 +863,13 @@ function addHeadendsToSchedulesDirect()
 
     if ($res["response"] == "OK")
     {
-        print "Successfully added headend.\n";
+        printMSG("Successfully added headend.\n");
     }
     else
     {
-        print "\n\n-----\nERROR:Received error response from server:\n";
-        print $res["message"] . "\n\n-----\n";
-        print "Press ENTER to continue.\n";
+        printMSG("\n\n-----\nERROR:Received error response from server:\n");
+        printMSG($res["message"] . "\n\n-----\n");
+        printMSG("Press ENTER to continue.\n");
         $a = fgets(STDIN);
     }
 }
@@ -889,7 +879,7 @@ function getLineup(array $he)
     global $randHash;
     global $api;
 
-    print "Retrieving lineup from Schedules Direct.\n";
+    printMSG("Retrieving lineup from Schedules Direct.\n");
 
     $res = array();
     $res["action"] = "get";
@@ -937,20 +927,20 @@ function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
         {
             $loop++;
             $str = rtrim($str, ","); // Get rid of the last comma.
-            print "Loop: $loop of $numLoops\r";
+            printMSG("Loop: $loop of $numLoops\r");
 
             try
             {
                 $count = $dbh->exec("$base$str");
             } catch (Exception $e)
             {
-                print "Exception: " . $e->getMessage();
+                printMSG("Exception: " . $e->getMessage());
             }
 
             if ($count === FALSE)
             {
                 print_r($dbh->errorInfo(), true);
-                print "line:\n\n$base$str\n";
+                printMSG("line:\n\n$base$str\n");
                 exit;
             }
             $str = "";
@@ -962,7 +952,7 @@ function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
         }
     }
 
-    print "\n";
+    printMSG("\n");
 
     // Remainder
     $str = rtrim($str, ","); // Get rid of the last comma.
@@ -975,7 +965,7 @@ function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
 
     if ($verbose)
     {
-        print "Done inserting.\n";
+        printMSG("Done inserting.\n");
     }
     if ($useTransaction)
     {
@@ -1035,7 +1025,7 @@ function printStatus($json)
 {
     global $dbh;
 
-    print "Status messages from Schedules Direct:\n";
+    printMSG("Status messages from Schedules Direct:\n");
 
     $res = array();
     $res = json_decode($json, true);
@@ -1068,36 +1058,36 @@ function printStatus($json)
                     /*
                      * Error notification - we're going to have to abort because the server didn't like what we sent.
                      */
-                    print "Received error response from server!\n";
-                    print "ServerID: " . $res["serverID"] . "\n";
-                    print "Message: " . $res["message"] . "\n";
-                    print "\nFATAL ERROR. Terminating execution.\n";
+                    printMSG("Received error response from server!\n");
+                    printMSG("ServerID: " . $res["serverID"] . "\n");
+                    printMSG("Message: " . $res["message"] . "\n");
+                    printMSG("\nFATAL ERROR. Terminating execution.\n");
                     exit;
                 }
         }
     }
 
-    print "Server: " . $res["serverID"] . "\n";
-    print "Last data refresh: " . $res["lastDataUpdate"] . "\n";
-    print "Account expires: $expires\n";
-    print "Max number of headends for your account: $maxHeadends\n";
-    print "Next suggested connect time: $nextConnectTime\n";
+    printMSG("Server: " . $res["serverID"] . "\n");
+    printMSG("Last data refresh: " . $res["lastDataUpdate"] . "\n");
+    printMSG("Account expires: $expires\n");
+    printMSG("Max number of headends for your account: $maxHeadends\n");
+    printMSG("Next suggested connect time: $nextConnectTime\n");
 
     if (count($he))
     {
         $stmt = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
-        print "The following headends are in your account:\n";
+        printMSG("The following headends are in your account:\n");
 
         $retrieveLineups = array();
         foreach ($he as $id => $modified)
         {
-            print "ID: $id\t\t";
+            printMSG("ID: $id\t\t");
             if (strlen($id) < 4)
             {
                 // We want the tabs to align.
-                print "\t";
+                printMSG("\t");
             }
-            print "SD Modified: $modified\n";
+            printMSG("SD Modified: $modified\n");
             $stmt->execute(array("he" => $id));
             $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -1124,15 +1114,15 @@ function processLineups(array $retrieveLineups)
      * of the lineups in the headend. But we may not be using that particular lineup, so dig deeper...
      */
 
-    print "Checking for updated lineups from Schedules Direct.\n";
+    printMSG("Checking for updated lineups from Schedules Direct.\n");
 
     $res = array();
     $res = json_decode(getLineup($retrieveLineups), true);
 
     if ($res["response"] != "OK")
     {
-        print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
-        print $res["message"] . "\n\n-----\n";
+        printMSG("\n\n-----\nERROR: Bad response from Schedules Direct.\n");
+        printMSG($res["message"] . "\n\n-----\n");
         exit;
     }
 
@@ -1149,8 +1139,8 @@ function processLineups(array $retrieveLineups)
     }
     else
     {
-        print "FATAL: Could not open lineups zip file.\n";
-        print "tempdir is $tempDir\n";
+        printMSG("FATAL: Could not open lineups zip file.\n");
+        printMSG("tempdir is $tempDir\n");
         exit;
     }
 
@@ -1195,7 +1185,7 @@ function processLineups(array $retrieveLineups)
             $device = "Analog";
         }
         $lineup[$v["sourceid"]] = array("headend" => $headend, "device" => $device, "modified" => $modified);
-        // print "headend:$headend device:$device modified:$modified\n";
+        // printMSG("headend:$headend device:$device modified:$modified\n");
     }
 
     /*
@@ -1218,11 +1208,11 @@ function processLineups(array $retrieveLineups)
                 $jsonModified = $v1["modified"];
                 $transport = $v1["transport"];
                 // Eventually we won't print once coding is done.
-                print "$headend:$device local modified date:" . $lineup[$lineupid]["modified"] . "\n";
-                print "server modified date:$jsonModified\n";
+                printMSG("$headend:$device local modified date:" . $lineup[$lineupid]["modified"] . "\n");
+                printMSG("server modified date:$jsonModified\n");
                 if ($jsonModified != $lineup[$lineupid]["modified"])
                 {
-                    print "Use new lineup?\n";
+                    printMSG("Use new lineup?\n");
                     $updateDB = strtoupper(readline(">"));
                     if ($updateDB == "Y")
                     {
@@ -1242,7 +1232,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
 {
     global $dbh;
 
-    print "Updating channel table for sourceid:$sourceid\n";
+    printMSG("Updating channel table for sourceid:$sourceid\n");
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
     $stmt->execute(array("sourceid" => $sourceid));
 
@@ -1306,7 +1296,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
 
     if (isset($json["QAM"]))
     {
-        print "Adding QAM data.\n";
+        printMSG("Adding QAM data.\n");
         $dtvMultiplex = array();
 
         $channelInsert =
@@ -1314,7 +1304,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
         WHERE xmltvid=:stationID");
 
         $qamModified = $json["QAM"]["metadata"]["modified"];
-        print "qam modified:$qamModified\n";
+        printMSG("qam modified:$qamModified\n");
 
         foreach ($json["QAM"]["map"] as $v)
         {
@@ -1332,7 +1322,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
                 $virtualChannel = "";
             }
 
-            // print "$stationID $qamType $qamFreq $qamProgram $channel\n";
+            // printMSG("$stationID $qamType $qamFreq $qamProgram $channel\n");
 
             /*
              * Because multiple programs  may end up on a single frequency, we only want to insert once, but we want
@@ -1355,7 +1345,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
         }
     }
 
-    print "***DEBUG: Exiting updateChannelTable.\n";
+    printMSG("***DEBUG: Exiting updateChannelTable.\n");
 }
 
 function getRandhash($username, $password)
@@ -1374,7 +1364,7 @@ function getRandhash($username, $password)
 
     if (json_last_error() != 0)
     {
-        print "JSON decode error:\n";
+        printMSG("JSON decode error:\n");
         var_dump($response);
         exit;
     }
@@ -1384,7 +1374,7 @@ function getRandhash($username, $password)
         return $res["randhash"];
     }
 
-    print "Response from schedulesdirect: $response\n";
+    printMSG("Response from schedulesdirect: $response\n");
 
     return "ERROR";
 }
@@ -1425,5 +1415,22 @@ function tempdir()
         return $tempfile;
     }
 }
+
+function printMSG($str)
+{
+    global $fh_log;
+    global $quiet;
+
+    $str = date("H:i:s") . ":$str";
+
+    if (!$quiet)
+    {
+        print "$str";
+    }
+
+    $str = str_replace("\r", "\n", $str);
+    fwrite($fh_log, $str);
+}
+
 
 ?>
