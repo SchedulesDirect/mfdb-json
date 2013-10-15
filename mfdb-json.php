@@ -15,6 +15,8 @@ $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 
+// print "Time is now $todayDate\n";
+
 $user = "mythtv";
 $password = "mythtv";
 $host = "localhost";
@@ -57,7 +59,7 @@ foreach ($options as $k => $v)
     }
 }
 
-printMSG("Attempting to connect to database.\n");
+print "Attempting to connect to database.\n";
 try
 {
     $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $password,
@@ -66,7 +68,7 @@ try
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 } catch (PDOException $e)
 {
-    printMSG("Exception with PDO: " . $e->getMessage() . "\n");
+    print "Exception with PDO: " . $e->getMessage() . "\n";
     exit;
 }
 
@@ -159,7 +161,7 @@ function getSchedules(array $stationIDs, $debug)
     $response = sendRequest(json_encode($res));
 
     $res = array();
-    $res = json_decode($response, true);
+    $res = json_decode($response, TRUE);
 
     /*
      * First we're going to load all the programIDs and md5's from the schedule files we just downloaded into
@@ -183,7 +185,7 @@ function getSchedules(array $stationIDs, $debug)
 
             foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
-                // printMSG("***DEBUG: Reading schedule $f\n");
+                // print "***DEBUG: Reading schedule $f\n";
                 $a = json_decode(file_get_contents($f), true);
                 $stationID = $a["stationID"];
                 $stmt->execute(array("stationid" => $stationID));
@@ -225,11 +227,12 @@ function getSchedules(array $stationIDs, $debug)
 
     foreach ($programCache as $progID => $dataArray)
     {
-        if (array_key_exists($progID, $dbProgramCache))
+        if (isset($dbProgramCache[$progID]))
         {
             /*
              * First we'll check if the key (the programID) exists in the database already, and if yes, does it have
-             * the same md5 value as the one that we downloaded?
+             * the same md5 value as the one that we downloaded? If the md5's are different, then we need to replace
+             * the existing cached program information with the new one.
              */
             if ($dbProgramCache[$progID] != $dataArray["md5"])
             {
@@ -248,8 +251,8 @@ function getSchedules(array $stationIDs, $debug)
     }
 
     /*
-     * Now we've got an array of programIDs that we need to download, either because we didn't have them,
-     * or they have different md5's.
+     * Now we've got an array of programIDs that we need to download in $retrieveStack,
+     * either because we didn't have them, or they have different md5's.
      */
 
     printMSG("Need to download " . count($insertStack) . " new programs.\n");
@@ -273,7 +276,7 @@ function getSchedules(array $stationIDs, $debug)
         $response = sendRequest(json_encode($res));
 
         $res = array();
-        $res = json_decode($response, true);
+        $res = json_decode($response, TRUE);
 
         if ($res["response"] == "OK")
         {
@@ -410,7 +413,8 @@ function getSchedules(array $stationIDs, $debug)
          * Row is an array containing: chanid,channum,sourceid
          */
 
-        $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), true);
+        $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), TRUE);
+
         /*
          * These are used to set MPAA or V-CHIP schemes.
          */
@@ -427,11 +431,15 @@ function getSchedules(array $stationIDs, $debug)
 
         foreach ($a["programs"] as $v)
         {
+            $isFirst = TRUE;
+            $isLast = TRUE;
+            $previouslyshown = TRUE;
+
             $programID = $v["programID"];
 
             $getProgramDetails->execute(array("pid" => $programID));
             $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
-            $jsonProgram = json_decode($tempJsonProgram[0], true);
+            $jsonProgram = json_decode($tempJsonProgram[0], TRUE);
 
             $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
             $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
@@ -527,30 +535,30 @@ function getSchedules(array $stationIDs, $debug)
 
             if (isset($v["hasSubTitles"]))
             {
-                $isSubtitled = true;
+                $isSubtitled = TRUE;
             }
             else
             {
-                $isSubtitled = false;
+                $isSubtitled = FALSE;
             }
 
             if (isset($v["cc"]))
             {
-                $isClosedCaption = true;
+                $isClosedCaption = TRUE;
             }
             else
             {
-                $isClosedCaption = false;
+                $isClosedCaption = FALSE;
             }
 
             if (isset($v["hdtv"]))
             {
-                $isHDTV = true;
+                $isHDTV = TRUE;
                 $videoprop = "HDTV";
             }
             else
             {
-                $isHDTV = false;
+                $isHDTV = FALSE;
                 $videoprop = "";
             }
 
@@ -603,18 +611,39 @@ function getSchedules(array $stationIDs, $debug)
 
 
             if ((substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV"))
+            if ((substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV"))
             {
-                $isGeneric = true;
+                $isGeneric = TRUE;
             }
             else
             {
-                $isGeneric = false;
+                $isGeneric = FALSE;
             }
 
             if (isset($v["tvRating"]))
             {
                 $ratingSystem = "V-CHIP";
                 $rating = $v["tvRating"];
+            }
+
+            if (isset($v["isPremiereOrFinale"]))
+            {
+                switch ($v["isPremiereOrFinale"])
+                {
+                    case "Series Premiere":
+                    case "Season Premiere":
+                        $isFirst = TRUE;
+                        break;
+                    case "Series Finale":
+                    case "Season Finale":
+                        $isLast = TRUE;
+                        break;
+                }
+            }
+
+            if (isset($v["new"]))
+            {
+                $previouslyshown = FALSE;
             }
 
             /*
@@ -624,10 +653,8 @@ function getSchedules(array $stationIDs, $debug)
             /*
              * Figure out how to calculate this.
              */
-            $previouslyshown = 0;
+
             $audioprop = "";
-            $isFirst = false;
-            $isLast = false;
             $subtitletypes = "";
 
             /*
@@ -941,6 +968,8 @@ function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
             {
                 print_r($dbh->errorInfo(), true);
                 printMSG("line:\n\n$base$str\n");
+                print_r($dbh->errorInfo(), TRUE);
+                print "line:\n\n$base$str\n";
                 exit;
             }
             $str = "";
@@ -1346,6 +1375,17 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
     }
 
     printMSG("***DEBUG: Exiting updateChannelTable.\n");
+    /*
+     * Set the startchan to a non-bogus value.
+     */
+
+    $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid ORDER BY CAST(channum AS SIGNED) LIMIT 1");
+    $stmt->execute(array("sourceid" => $sourceid));
+    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $startChan = $result[0];
+    $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
+    $setStartChannel->execute(array("sourceid" => $sourceid, "startChan" => $startChan));
+    print "***DEBUG: Exiting updateChannelTable.\n";
 }
 
 function getRandhash($username, $password)
