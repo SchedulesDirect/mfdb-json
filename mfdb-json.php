@@ -611,7 +611,6 @@ function getSchedules(array $stationIDs, $debug)
 
 
             if ((substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV"))
-            if ((substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV"))
             {
                 $isGeneric = TRUE;
             }
@@ -966,10 +965,8 @@ function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
 
             if ($count === FALSE)
             {
-                print_r($dbh->errorInfo(), true);
-                printMSG("line:\n\n$base$str\n");
                 print_r($dbh->errorInfo(), TRUE);
-                print "line:\n\n$base$str\n";
+                printMSG("line:\n\n$base$str\n");
                 exit;
             }
             $str = "";
