@@ -431,10 +431,6 @@ function getSchedules(array $stationIDs, $debug)
 
         foreach ($a["programs"] as $v)
         {
-            $isFirst = TRUE;
-            $isLast = TRUE;
-            $previouslyshown = TRUE;
-
             $programID = $v["programID"];
 
             $getProgramDetails->execute(array("pid" => $programID));
@@ -608,7 +604,6 @@ function getSchedules(array $stationIDs, $debug)
             {
                 $syndicatedepisodenumber = "";
             }
-
 
             if ((substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV"))
             {
