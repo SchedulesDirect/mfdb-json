@@ -274,15 +274,18 @@ function getSchedules(array $stationIDs, $debug)
             $stmt = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
+            $total = count($toRetrieve);
+
             foreach ($toRetrieve as $md5 => $pid)
             {
                 $counter++;
                 if ($counter % 1000)
                 {
-                    printMSG("$counter / " . count($insertStack) . "             \r");
+                    printMSG("$counter / $total             \r");
                 }
                 $stmt->execute(array("programID" => $pid, "md5" => $md5,
-                                     "json"      => file_get_contents("$tempDir/$progID.json.txt")));
+                                     "json"      => file_get_contents("$tempDir/$pid.json.txt")));
+
                 if ($debug == FALSE)
                 {
                     unlink("$tempDir/$progID.json.txt");
