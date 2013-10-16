@@ -358,7 +358,6 @@ function getSchedules(array $stationIDs, $debug)
     printMSG("Starting insert loop. $total station schedules to insert.\n");
     foreach ($chanData as $stationID => $row)
     {
-
         /*
          * Row is an array containing: chanid,channum,sourceid
          */
@@ -387,13 +386,6 @@ function getSchedules(array $stationIDs, $debug)
             $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
 
             $jsonProgram = json_decode($tempJsonProgram[0], TRUE);
-
-            $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
-            $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
-            $endDate->add(new DateInterval("PT" . $v["duration"] . "S"));
-
-            $starttime = $startDate->format("Y-m-d H:i:s");
-            $endtime = $endDate->format("Y-m-d H:i:s");
 
             if (isset($jsonProgram["titles"]["title120"]))
             {
@@ -637,6 +629,8 @@ function getSchedules(array $stationIDs, $debug)
                  */
 
                 $programInsert->execute(array(
+                    "programid"               => $programID,
+
                     "chanid"                  => $value["chanid"], "starttime" => $starttime, "endtime" => $endtime,
                     "title"                   => $title,
                     "subtitle"                => $subtitle, "description" => $description, "category" => $category,
@@ -648,7 +642,6 @@ function getSchedules(array $stationIDs, $debug)
                     "seriesid"                => $seriesid,
                     "originalairdate"         => $originalairdate, "showtype" => $showtype, "colorcode" => $colorcode,
                     "syndicatedepisodenumber" => $syndicatedepisodenumber,
-                    "programid"               => $programID,
                     "generic"                 => $isGeneric,
                     "listingsource"           => $value["sourceid"],
                     "first"                   => $isFirst, "last" => $isLast, "audioprop" => $audioprop,
