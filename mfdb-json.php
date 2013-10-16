@@ -367,6 +367,9 @@ function getSchedules(array $stationIDs, $debug)
 
         $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), TRUE);
 
+        var_dump($a);
+
+
         /*
          * These are used to set MPAA or V-CHIP schemes.
          */
