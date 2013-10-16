@@ -586,10 +586,19 @@ function getSchedules(array $stationIDs, $debug)
                         break;
                 }
             }
+            else
+            {
+                $isFirst = FALSE;
+                $isLast = FALSE;
+            }
 
             if (isset($v["new"]))
             {
                 $previouslyshown = FALSE;
+            }
+            else
+            {
+                $previouslyshown = TRUE;
             }
 
             /*
