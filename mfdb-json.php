@@ -143,7 +143,6 @@ function getSchedules(array $stationIDs, $debug)
     global $api;
     global $randHash;
 
-    $programCache = array();
     $dbProgramCache = array();
     $schedTempDir = tempdir();
     $chanData = array();
@@ -192,7 +191,6 @@ function getSchedules(array $stationIDs, $debug)
 
                 foreach ($a["programs"] as $v)
                 {
-                    $programCache[$v["programID"]] = array("md5" => $v["md5"], "json" => $v);
                     $serverScheduleMD5[$v["md5"]] = $v["programID"];
                 }
             }
@@ -204,7 +202,7 @@ function getSchedules(array $stationIDs, $debug)
         }
     }
 
-    printMSG("There are " . count($programCache) . " programIDs in the upcoming schedule.\n");
+    printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.\n");
     printMSG("Retrieving existing MD5 values.\n");
 
     $stmt = $dbh->prepare("SELECT programID,md5 FROM SDprogramCache");
@@ -367,9 +365,6 @@ function getSchedules(array $stationIDs, $debug)
 
         $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), TRUE);
 
-        var_dump($a);
-
-
         /*
          * These are used to set MPAA or V-CHIP schemes.
          */
@@ -408,7 +403,6 @@ function getSchedules(array $stationIDs, $debug)
             {
                 print "MAJOR ERROR: no title. station:$stationID program $programID";
                 var_dump($tempJsonProgram);
-
                 print "\n\n\n\n\n\n";
                 var_dump($jsonProgram);
                 exit;
@@ -672,7 +666,7 @@ function getSchedules(array $stationIDs, $debug)
                         {
                             $role = "executive_producer";
                         }
-                        if (array_key_exists($name, $peopleArray))
+                        if (isset($peopleArray[$name]))
                         {
                             $personNumber = $peopleArray[$name];
                         }
@@ -971,23 +965,6 @@ function commitToDb(array $stack, $base, $chunk, $useTransaction, $verbose)
         $dbh->commit();
     }
 }
-
-function holder()
-{
-    foreach (glob("$tempDir/*.json.txt") as $f)
-    {
-        $a = json_decode(file_get_contents($f), true);
-        $pid = $a["programID"];
-        $md5 = $a["md5"];
-
-        foreach ($a["program"] as $v)
-        {
-            $programCache[$v["programID"]] = $v["md5"];
-        }
-    }
-
-}
-
 
 function parseScheduleFile(array $sched)
 {
