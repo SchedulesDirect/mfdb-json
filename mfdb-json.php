@@ -403,7 +403,8 @@ function getSchedules(array $stationIDs, $debug)
             else
             {
                 print "MAJOR ERROR: no title.";
-                var_dump($v);
+                //var_dump($v);
+                var_dump($jsonProgram);
                 exit;
             }
 
