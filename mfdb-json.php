@@ -59,7 +59,7 @@ foreach ($options as $k => $v)
     }
 }
 
-print "Attempting to connect to database.\n";
+printMSG("Attempting to connect to database.\n");
 try
 {
     $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $password,
