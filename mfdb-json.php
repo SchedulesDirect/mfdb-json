@@ -391,10 +391,7 @@ function getSchedules(array $stationIDs, $debug)
             $getProgramDetails->execute(array("pid" => $programID));
             $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
 
-            var_dump($tempJsonProgram);
             $jsonProgram = json_decode($tempJsonProgram[0], TRUE);
-
-            var_dump($jsonProgram);
 
             $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
             $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
@@ -409,8 +406,10 @@ function getSchedules(array $stationIDs, $debug)
             }
             else
             {
-                print "MAJOR ERROR: no title.";
-                //var_dump($v);
+                print "MAJOR ERROR: no title. station:$stationID program $programID";
+                var_dump($tempJsonProgram);
+
+                print "\n\n\n\n\n\n";
                 var_dump($jsonProgram);
                 exit;
             }
