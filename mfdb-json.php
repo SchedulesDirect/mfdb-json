@@ -186,7 +186,7 @@ function getSchedules(array $stationIDs, $debug)
             foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
                 // print "***DEBUG: Reading schedule $f\n";
-                $a = json_decode(file_get_contents($f), true);
+                $a = json_decode(file_get_contents($f), TRUE);
                 $stationID = $a["stationID"];
                 $stmt->execute(array("stationid" => $stationID));
                 $r = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -195,6 +195,7 @@ function getSchedules(array $stationIDs, $debug)
                 foreach ($a["programs"] as $v)
                 {
                     $programCache[$v["programID"]] = array("md5" => $v["md5"], "json" => $v);
+                    $serverScheduleMD5[$v["md5"]] = $v["programID"];
                 }
             }
         }
@@ -214,11 +215,19 @@ function getSchedules(array $stationIDs, $debug)
 
     foreach ($result as $v)
     {
-        $dbProgramCache[$v["programID"]] = $v["md5"];
+        //$dbProgramCache[$v["programID"]] = $v["md5"];
+        $dbProgramCache[$v["md5"]] = $v["programID"];
     }
 
     $insertStack = array();
-    $replaceStack = array();
+
+    $toRetrieve = array();
+    $toRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
+
+    var_dump($toRetrieve);
+
+    $tt=fgets(STDIN);
+
 
     /*
      * An array to hold the programIDs that we need to request from the server.
