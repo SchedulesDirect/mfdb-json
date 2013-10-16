@@ -395,7 +395,17 @@ function getSchedules(array $stationIDs, $debug)
 
             $starttime = $startDate->format("Y-m-d H:i:s");
             $endtime = $endDate->format("Y-m-d H:i:s");
-            $title = $jsonProgram["titles"]["title120"];
+
+            if (isset($jsonProgram["titles"]["title120"]))
+            {
+                $title = $jsonProgram["titles"]["title120"];
+            }
+            else
+            {
+                print "MAJOR ERROR: no title.";
+                var_dump($v);
+                exit;
+            }
 
             if (isset($jsonProgram["episodeTitle150"]))
             {
