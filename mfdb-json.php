@@ -15,8 +15,6 @@ $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 
-// print "Time is now $todayDate\n";
-
 $user = "mythtv";
 $password = "mythtv";
 $host = "localhost";
@@ -215,64 +213,25 @@ function getSchedules(array $stationIDs, $debug)
 
     foreach ($result as $v)
     {
-        //$dbProgramCache[$v["programID"]] = $v["md5"];
         $dbProgramCache[$v["md5"]] = $v["programID"];
     }
-
-    $insertStack = array();
 
     $toRetrieve = array();
     $toRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
 
-    var_dump($toRetrieve);
-
-    $tt=fgets(STDIN);
-
-
     /*
-     * An array to hold the programIDs that we need to request from the server.
-     */
-    $retrieveStack = array();
-
-    foreach ($programCache as $progID => $dataArray)
-    {
-        if (isset($dbProgramCache[$progID]))
-        {
-            /*
-             * First we'll check if the key (the programID) exists in the database already, and if yes, does it have
-             * the same md5 value as the one that we downloaded? If the md5's are different, then we need to replace
-             * the existing cached program information with the new one.
-             */
-            if ($dbProgramCache[$progID] != $dataArray["md5"])
-            {
-                $replaceStack[$progID] = $dataArray["md5"];
-                $retrieveStack[] = $progID;
-            }
-        }
-        else
-        {
-            /*
-             * The programID wasn't in the database, so we'll need to get it.
-             */
-            $insertStack[$progID] = $dataArray["md5"];
-            $retrieveStack[] = $progID;
-        }
-    }
-
-    /*
-     * Now we've got an array of programIDs that we need to download in $retrieveStack,
+     * Now we've got an array of programIDs that we need to download in $toRetrieve,
      * either because we didn't have them, or they have different md5's.
      */
 
-    printMSG("Need to download " . count($insertStack) . " new programs.\n");
-    printMSG("Need to download " . count($replaceStack) . " updated programs.\n");
+    printMSG("Need to download " . count($toRetrieve) . " new or updated programs.\n");
 
-    if (count($insertStack) + count($replaceStack) > 10000)
+    if (count($toRetrieve) > 10000)
     {
         printMSG("Requesting more than 10000 programs. Please be patient.\n");
     }
 
-    if (count($insertStack) + count($replaceStack) > 0)
+    if (count($toRetrieve) > 0)
     {
         printMSG("Requesting new and updated programs.\n");
         $res = array();
@@ -280,7 +239,7 @@ function getSchedules(array $stationIDs, $debug)
         $res["object"] = "programs";
         $res["randhash"] = $randHash;
         $res["api"] = $api;
-        $res["request"] = $retrieveStack;
+        $res["request"] = $toRetrieve;
 
         $response = sendRequest(json_encode($res));
 
@@ -312,37 +271,18 @@ function getSchedules(array $stationIDs, $debug)
             $counter = 0;
             printMSG("Performing inserts.\n");
 
-            $stmt = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
-            foreach ($insertStack as $progID => $v)
+            $stmt = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
+            VALUES (:programID,:md5,:json)
+            ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
+            foreach ($toRetrieve as $md5 => $pid)
             {
                 $counter++;
                 if ($counter % 1000)
                 {
                     printMSG("$counter / " . count($insertStack) . "             \r");
                 }
-                $stmt->execute(array("programID" => $progID, "md5" => $v,
+                $stmt->execute(array("programID" => $pid, "md5" => $md5,
                                      "json"      => file_get_contents("$tempDir/$progID.json.txt")));
-                if ($debug == FALSE)
-                {
-                    unlink("$tempDir/$progID.json.txt");
-                }
-            }
-
-            $counter = 0;
-            printMSG("\nPerforming updates.\n");
-
-            // $stmt = $dbh->prepare("REPLACE INTO SDprogramCache(programID,md5,json) VALUES (:programID,:md5,:json)");
-            $stmt = $dbh->prepare("UPDATE SDprogramCache SET md5=:md5,json=:json WHERE programID=:programID");
-            foreach ($replaceStack as $progID => $v)
-            {
-                $counter++;
-                if ($counter % 10)
-                {
-                    printMSG("$counter / " . count($replaceStack) . "             \r");
-                }
-                $stmt->execute(array("programID" => $progID, "md5" => $v,
-                                     "json"      => file_get_contents("$tempDir/$progID.json.txt")));
-
                 if ($debug == FALSE)
                 {
                     unlink("$tempDir/$progID.json.txt");
