@@ -390,7 +390,15 @@ function getSchedules(array $stationIDs, $debug)
 
             $getProgramDetails->execute(array("pid" => $programID));
             $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
+
+            var_dump($tempJsonProgram);
+$tt=fgets(STDIN);
             $jsonProgram = json_decode($tempJsonProgram[0], TRUE);
+
+            var_dump($jsonProgram);
+            $tt=fgets(STDIN);
+
+
 
             $startDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
             $endDate = DateTime::createFromFormat("Y-m-d\TH:i:s\Z", $v["airDateTime"]);
