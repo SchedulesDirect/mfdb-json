@@ -288,7 +288,7 @@ function getSchedules(array $stationIDs, $debug)
 
                 if ($debug == FALSE)
                 {
-                    unlink("$tempDir/$progID.json.txt");
+                    unlink("$tempDir/$pid.json.txt");
                 }
             }
 
