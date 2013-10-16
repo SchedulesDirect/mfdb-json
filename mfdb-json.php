@@ -251,8 +251,6 @@ function getSchedules(array $stationIDs, $debug)
             printMSG("Starting program cache insert.\n");
             $tempDir = tempdir();
 
-            printMSG("tempdir is $tempDir\n");
-
             $fileName = $res["filename"];
             $url = $res["URL"];
             file_put_contents("$tempDir/$fileName", file_get_contents($url));
@@ -1417,6 +1415,7 @@ function tempdir()
     mkdir($tempfile);
     if (is_dir($tempfile))
     {
+        printMSG("tempdir is $tempfile\n");
         return $tempfile;
     }
 }
