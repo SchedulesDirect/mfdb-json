@@ -582,8 +582,6 @@ function getSchedules(array $stationIDs, $debug)
             if ($sap AND $sapLanguage == NULL)
             {
                 printMSG("*** Warning: $programID has SAP but no SAP language set.\n");
-                printMSG("Press ENTER.\n");
-                $tt = fgets(STDIN);
             }
 
             if (isset($v["programLanguage"]))
