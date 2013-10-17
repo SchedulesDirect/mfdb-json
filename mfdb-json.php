@@ -145,7 +145,7 @@ function getSchedules(array $stationIDs, $debug)
 
     $dbProgramCache = array();
     $schedTempDir = tempdir();
-    $chanData = array();
+    $downloadedStationIDs = array();
 
     printMSG("Sending schedule request.\n");
     $res = array();
@@ -177,17 +177,13 @@ function getSchedules(array $stationIDs, $debug)
         {
             $zipArchive->extractTo("$schedTempDir");
             $zipArchive->close();
-            $stmt = $dbh->prepare("SELECT chanid,channum,sourceid FROM channel WHERE visible=1 AND
-                xmltvid=:stationid");
 
             foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
                 // print "***DEBUG: Reading schedule $f\n";
                 $a = json_decode(file_get_contents($f), TRUE);
                 $stationID = $a["stationID"];
-                $stmt->execute(array("stationid" => $stationID));
-                $r = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                $chanData[$stationID] = $r;
+                $downloadedStationIDs[] = $stationID;
 
                 foreach ($a["programs"] as $v)
                 {
@@ -229,7 +225,7 @@ function getSchedules(array $stationIDs, $debug)
         printMSG("Requesting more than 10000 programs. Please be patient.\n");
     }
 
-    if (count($toRetrieve) > 0)
+    if (count($toRetrieve))
     {
         printMSG("Requesting new and updated programs.\n");
         $res = array();
@@ -298,77 +294,87 @@ function getSchedules(array $stationIDs, $debug)
         }
 
         printMSG("Completed local database program updates.\n");
+
+        /*
+         * TODO: This is where we need to process things like genres and such.
+         */
+        $insertPerson = $dbh->prepare("INSERT INTO peopleSD(personID,name) VALUES(:personID, :name)");
+        $insertCredit = $dbh->prepare("INSERT INTO credits(personID,programID,role)
+    VALUES(:personID,:pid,:role)");
+/*
+
+        if (isset($jsonProgram["castAndCrew"]))
+        {
+            foreach ($jsonProgram["castAndCrew"] as $credit)
+            {
+                list ($role, $name) = explode(":", $credit);
+                $role = strtolower($role);
+
+                if (isset($peopleArray[$name]))
+                {
+                    $personNumber = $peopleArray[$name];
+                }
+                else
+                {
+                    $insertPerson->execute(array("name" => $name));
+                    $personNumber = $dbh->lastInsertId();
+                    $peopleArray[$name] = $personNumber;
+                }
+
+                $insertCredit->execute(array("person"    => $personNumber, "chanid" => $value["chanid"],
+                                             "starttime" => $starttime, "role" => $role));
+            }
+        }
+
+        if ($rating != "")
+        {
+            $insertProgramRating->execute(array("chanid" => $value["chanid"], "starttime" => $starttime,
+                                                "system" => $ratingSystem, "rating" => $rating));
+        }
+
+        if (isset($jsonProgram["genres"]))
+        {
+            foreach ($jsonProgram["genres"] as $relevance => $genre)
+            {
+                $insertProgramGenres->execute(array("pid"       => $programID,
+                                                    "relevance" => $relevance, "genre" => $genre));
+            }
+        }
+        $insertProgramGenres = $dbh->prepare("INSERT INTO programgenresSD(programID,relevance,genre)
+    VALUES(:pid,:relevance,:genre)");
+
+        $insertProgramRating = $dbh->prepare("INSERT INTO programratingSD(programID,system,rating)
+    VALUES(:pid,:system,:rating)");
+
+        $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
+*/
+
     }
 
     printMSG("Inserting schedules.\n");
 
-    $s1 = $dbh->exec("DROP TABLE IF EXISTS p_rogram, p_rogramgenres, p_rogramrating, c_redits");
-
-    $s1 = $dbh->exec("CREATE TABLE p_rogram LIKE program");
-    $s1 = $dbh->exec("CREATE TABLE p_rogramgenres LIKE programgenres");
-    $s1 = $dbh->exec("CREATE TABLE c_redits LIKE credits");
-    $s1 = $dbh->exec("CREATE TABLE p_rogramrating LIKE programrating");
-
-    $programInsert = $dbh->prepare
-        ("INSERT INTO p_rogram(chanid,starttime,endtime,title,subtitle,description,category,category_type,airdate,stars,
-    previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,seriesid,originalairdate,showtype,
-    colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,audioprop,subtitletypes,videoprop)
-    VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,
-    :stars,:previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,:seriesid,
-    :originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
-    :first,:last,:audioprop,:subtitletypes,:videoprop)");
-
-    $insertPerson = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
-    $insertCredit = $dbh->prepare("INSERT IGNORE INTO c_redits(person,chanid,starttime,role)
-    VALUES(:person,:chanid,:starttime,:role)");
-
-    $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
-
-    $insertProgramGenres = $dbh->prepare("INSERT INTO p_rogramgenres(chanid,starttime,relevance,genre)
-    VALUES(:chanid,:starttime,:relevance,:genre)");
-
-    $insertProgramRating = $dbh->prepare("INSERT INTO p_rogramrating(chanid,starttime,system,rating)
-    VALUES(:chanid,:starttime,:system,:rating)");
 
     $counter = 0;
-    $total = count($chanData);
-
-    $peopleArray = array();
-    /*
-     * We're going to read in the people that are already in the database into an associative array with the name as
-     * the key, and the person number as the value.
-     */
-
-    printMSG("Reading people table into memory.\n");
-
-    $s1 = $dbh->prepare("SELECT name, person FROM people");
-    $s1->execute();
-
-    while ($row = $s1->fetch(PDO::FETCH_NUM))
-    {
-        $peopleArray[$row[0]] = $row[1];
-    }
-
-    //printMSG("size of array is \n");
-    //printMSG(strlen(serialize($peopleArray)) . " bytes.\n");
-    /*
-     * 53579 people is 1.7megs in memory.
-     */
+    $total = count($downloadedStationIDs);
 
     printMSG("Starting insert loop. $total station schedules to insert.\n");
-    foreach ($chanData as $stationID => $row)
+
+    $stmt = $dbh->exec("DROP TABLE IF EXISTS s_scheduleSD");
+    $stmt = $dbh->exec("CREATE TABLE s_scheduleSD LIKE scheduleSD");
+
+    $insertSchedule = $dbh->prepare("INSERT INTO s_scheduleSD(stationID,programID,md5,air_datetime,duration,
+    previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
+    dolby,dubbed,dubLanguage,subtitled,subtitleLanguage,sap,sapLanguage,programLanguage,tvRating,dialogRating,languageRating,
+    sexualContentRating,violenceRating,fvRating) 
+    
+    VALUES(:stationID,:programID,:md5,:air_datetime,:duration,
+    :previouslyshown,:closecaptioned,:partnumber,:parttotal,:first,:last,:dvs,:new,:educational,:hdtv,:3d,
+    :letterbox,:stereo,:dolby,:dubbed,:dubLanguage,:subtitled,:subtitleLanguage,:sap,:sapLanguage,:programLanguage,
+    :tvRating,:dialogRating,:languageRating,:sexualContentRating,:violenceRating,:fvRating)");
+
+    foreach ($downloadedStationIDs as $stationID)
     {
-        /*
-         * Row is an array containing: chanid,channum,sourceid
-         */
-
         $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), TRUE);
-
-        /*
-         * These are used to set MPAA or V-CHIP schemes.
-         */
-        $ratingSystem = "";
-        $rating = "";
 
         // printMSG("Reading $stationID\n");
 
@@ -381,116 +387,19 @@ function getSchedules(array $stationIDs, $debug)
         foreach ($a["programs"] as $v)
         {
             $programID = $v["programID"];
+            $md5 = $v["md5"];
+            $air_datetime = $v["air_datetime"];
+            $duration = $v["duration"];
 
-            $getProgramDetails->execute(array("pid" => $programID));
-            $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
-
-            $jsonProgram = json_decode($tempJsonProgram[0], TRUE);
-
-            if (isset($jsonProgram["titles"]["title120"]))
+            if (isset($v["new"]))
             {
-                $title = $jsonProgram["titles"]["title120"];
+                $isNew = TRUE;
+                $previouslyshown = FALSE;
             }
             else
             {
-                print "MAJOR ERROR: no title. station:$stationID program $programID";
-                var_dump($tempJsonProgram);
-                print "\n\n\n\n\n\n";
-                var_dump($jsonProgram);
-                exit;
-            }
-
-            if (isset($jsonProgram["episodeTitle150"]))
-            {
-                $subtitle = $jsonProgram["episodeTitle150"];
-            }
-            else
-            {
-                $subtitle = "";
-            }
-
-            if (isset($jsonProgram["descriptions"]["description255"]))
-            {
-                /*
-                 * Schedules Direct can send descriptions of various lengths, but "255" will always exist if there
-                 * are any descriptions at all.
-                 */
-                $description = $jsonProgram["descriptions"]["description255"];
-            }
-            else
-            {
-                $description = "";
-            }
-
-            if (isset($jsonProgram["genres"][0]))
-            {
-                /*
-                 * Schedules Direct can send multiple genres, but MythTV only uses one in the program. The rest are
-                 * in the programgenres table.
-                 */
-                $category = $jsonProgram["genres"][0];
-            }
-            else
-            {
-                $category = "";
-            }
-
-            if (isset($jsonProgram["showType"]))
-            {
-                /*
-                 * Not sure why MythTV has this twice. In the program table, category_type is a lowercase version
-                 * of showtype?
-                 */
-                $category_type = $jsonProgram["showType"];
-                $showtype = $jsonProgram["showType"];
-            }
-            else
-            {
-                $category_type = "";
-                $showtype = "";
-                /*
-                 * May get reset later based on first two characters of programID.
-                 */
-            }
-
-            /*
-             * MythTV sets the airdate to "0000" for EP types, but sets it to the movie release date if it's a movie.
-             */
-            $airdate = "0000";
-
-            if (substr($programID, 0, 2) == "MV")
-            {
-                if (isset($jsonProgram["movie"]["year"]))
-                {
-                    $airdate = $jsonProgram["movie"]["year"];
-                    $category_type = "movie";
-                }
-                if (isset($jsonProgram["movie"]["starRating"]))
-                {
-                    $numStars = substr_count($jsonProgram["movie"]["starRating"], "*");
-                    $numPlus = substr_count($jsonProgram["movie"]["starRating"], "+");
-                    $stars = ($numStars * .25) + ($numPlus * .125);
-                }
-                if (isset($jsonProgram["movie"]["mpaaRating"]))
-                {
-                    $rating = $jsonProgram["movie"]["mpaaRating"];
-                    $ratingSystem = "MPAA";
-                }
-            }
-            else
-            {
-                $stars = 0;
-            }
-
-            $isStereo = $v["stereo"];
-
-            if (isset($v["hasSubTitles"]))
-            {
-                $isSubtitled = TRUE;
-            }
-            else
-            {
-                $isSubtitled = FALSE;
+                $isNew = FALSE;
+                $previouslyshown = TRUE;
             }
 
             if (isset($v["cc"]))
@@ -502,77 +411,22 @@ function getSchedules(array $stationIDs, $debug)
                 $isClosedCaption = FALSE;
             }
 
-            if (isset($v["hdtv"]))
+            if (isset($v["partNumber"]))
             {
-                $isHDTV = TRUE;
-                $videoprop = "HDTV";
+                $partNumber = $v["partNumber"];
             }
             else
             {
-                $isHDTV = FALSE;
-                $videoprop = "";
+                $partNumber = 0;
             }
 
-            if (isset($jsonProgram["colorCode"]))
+            if (isset($v["numberOfParts"]))
             {
-                $colorcode = $jsonProgram["colorCode"];
+                $numberOfParts = $v["numberOfParts"];
             }
             else
             {
-                $colorcode = "";
-            }
-
-            if (isset($jsonProgram["partNumber"]))
-            {
-                $partnumber = $jsonProgram["partNumber"];
-            }
-            else
-            {
-                $partnumber = 0;
-            }
-
-            if (isset($jsonProgram["numberOfParts"]))
-            {
-                $parttotal = $jsonProgram["numberOfParts"];
-            }
-            else
-            {
-                $parttotal = 0;
-            }
-
-            $seriesid = substr($programID, 0, 10);
-
-            if (isset($jsonProgram["originalAirDate"]))
-            {
-                $originalairdate = $jsonProgram["originalAirDate"];
-            }
-            else
-            {
-                $originalairdate = "";
-            }
-
-            if (isset($jsonProgram["syndicatedEpisodeNumber"]))
-            {
-                $syndicatedepisodenumber = $jsonProgram["syndicatedEpisodeNumber"];
-            }
-            else
-            {
-                $syndicatedepisodenumber = "";
-            }
-
-            if ((substr($programID, -4) == "0000") AND (substr($programID, 0, 2) != "MV"))
-            {
-                $isGeneric = TRUE;
-            }
-            else
-            {
-                $isGeneric = FALSE;
-            }
-
-            if (isset($v["tvRating"]))
-            {
-                $ratingSystem = "V-CHIP";
-                $rating = $v["tvRating"];
+                $numberOfParts = 0;
             }
 
             if (isset($v["isPremiereOrFinale"]))
@@ -595,115 +449,242 @@ function getSchedules(array $stationIDs, $debug)
                 $isLast = FALSE;
             }
 
-            if (isset($v["new"]))
+            if (isset($v["dvs"]))
             {
-                $previouslyshown = FALSE;
+                $dvs = TRUE;
             }
             else
             {
-                $previouslyshown = TRUE;
+                $dvs = FALSE;
             }
 
-            /*
-             * Not sure why MythTV has multiple places for certain values.
-             */
-
-            /*
-             * Figure out how to calculate this.
-             */
-
-            $audioprop = "";
-            $subtitletypes = "";
-
-            /*
-             * This is where we'll actually perform the insert as many times as necessary based on how many copies
-             * of this stationid there are across the multiple sources.
-             */
-            foreach ($row as $value)
+            if (isset($v["educational"]))
             {
-                /*
-                 * There may be multiple videosources which have the same xmltvid,
-                 * so we may be inserting the value multiple times.
-                 *
-                 * $value is an array with "chanid", "channum" and "sourceid"
-                 */
-
-                $programInsert->execute(array(
-                    "programid"               => $programID,
-
-                    "chanid"                  => $value["chanid"], "starttime" => $starttime, "endtime" => $endtime,
-                    "title"                   => $title,
-                    "subtitle"                => $subtitle, "description" => $description, "category" => $category,
-                    "category_type"           => $category_type, "airdate" => $airdate, "stars" => $stars,
-                    "previouslyshown"         => $previouslyshown, "stereo" => $isStereo, "subtitled" => $isSubtitled,
-                    "hdtv"                    => $isHDTV,
-                    "closecaptioned"          => $isClosedCaption, "partnumber" => $partnumber,
-                    "parttotal"               => $parttotal,
-                    "seriesid"                => $seriesid,
-                    "originalairdate"         => $originalairdate, "showtype" => $showtype, "colorcode" => $colorcode,
-                    "syndicatedepisodenumber" => $syndicatedepisodenumber,
-                    "generic"                 => $isGeneric,
-                    "listingsource"           => $value["sourceid"],
-                    "first"                   => $isFirst, "last" => $isLast, "audioprop" => $audioprop,
-                    "subtitletypes"           => $subtitletypes, "videoprop" => $videoprop
-                ));
-
-                if (isset($jsonProgram["castAndCrew"]))
-                {
-                    foreach ($jsonProgram["castAndCrew"] as $credit)
-                    {
-                        list ($role, $name) = explode(":", $credit);
-                        $role = strtolower($role);
-
-                        if ($role == "executive producer")
-                        {
-                            $role = "executive_producer";
-                        }
-                        if (isset($peopleArray[$name]))
-                        {
-                            $personNumber = $peopleArray[$name];
-                        }
-                        else
-                        {
-                            $insertPerson->execute(array("name" => $name));
-                            $personNumber = $dbh->lastInsertId();
-                            $peopleArray[$name] = $personNumber;
-                        }
-
-                        $insertCredit->execute(array("person"    => $personNumber, "chanid" => $value["chanid"],
-                                                     "starttime" => $starttime, "role" => $role));
-                    }
-                }
-
-                if ($rating != "")
-                {
-                    $insertProgramRating->execute(array("chanid" => $value["chanid"], "starttime" => $starttime,
-                                                        "system" => $ratingSystem, "rating" => $rating));
-                }
-
-                if (isset($jsonProgram["genres"]))
-                {
-                    foreach ($jsonProgram["genres"] as $relevance => $genre)
-                    {
-                        $insertProgramGenres->execute(array("chanid"    => $value["chanid"], "starttime" => $starttime,
-                                                            "relevance" => $relevance, "genre" => $genre));
-                    }
-                }
+                $isEducational = TRUE;
             }
+            else
+            {
+                $isEducational = FALSE;
+            }
+
+            if (isset($v["hdtv"]))
+            {
+                $isHDTV = TRUE;
+            }
+            else
+            {
+                $isHDTV = FALSE;
+            }
+
+            if (isset($v["is3d"]))
+            {
+                $is3d = TRUE;
+            }
+            else
+            {
+                $is3d = FALSE;
+            }
+
+            if (isset($v["letterbox"]))
+            {
+                $isLetterboxed = TRUE;
+            }
+            else
+            {
+                $isLetterboxed = FALSE;
+            }
+
+            if (isset($v["stereo"]))
+            {
+                $isStereo = TRUE;
+            }
+            else
+            {
+                $isStereo = FALSE;
+            }
+
+            if (isset($v["dolby"]))
+            {
+                $dolby = $v["dolby"];
+            }
+            else
+            {
+                $dolby = NULL;
+            }
+
+            if (isset($v["dubbed"]))
+            {
+                $dubbed = TRUE;
+            }
+            else
+            {
+                $dubbed = FALSE;
+            }
+
+            if (isset($v["dubbedLanguage"]))
+            {
+                $dubbedLanguage = $v["dubbedLanguage"];
+            }
+            else
+            {
+                $dubbedLanguage = NULL;
+            }
+
+            if ($dubbed AND $dubbedLanguage == NULL)
+            {
+                printMSG("*** Warning: $programID has dub but no dubbed language set.\n");
+                printMSG("Press ENTER.\n");
+                $tt = fgets(STDIN);
+            }
+
+            if (isset($v["subtitled"]))
+            {
+                $isSubtitled = TRUE;
+            }
+            else
+            {
+                $isSubtitled = FALSE;
+            }
+
+            if (isset($v["subtitledLanguage"]))
+            {
+                $subtitledLanguage = $v["subtitledLanguage"];
+            }
+            else
+            {
+                $subtitledLanguage = NULL;
+            }
+            if ($isSubtitled AND $subtitledLanguage == NULL)
+            {
+                printMSG("*** Warning: $programID has subtitle but no subtitled language set.\n");
+                printMSG("Press ENTER.\n");
+                $tt = fgets(STDIN);
+            }
+
+            if (isset($v["sap"]))
+            {
+                $sap = TRUE;
+            }
+            else
+            {
+                $sap = FALSE;
+            }
+
+            if (isset($v["sapLanguage"]))
+            {
+                $sapLanguage = $v["sapLanguage"];
+            }
+            else
+            {
+                $sapLanguage = NULL;
+            }
+
+            if ($sap AND $sapLanguage == NULL)
+            {
+                printMSG("*** Warning: $programID has SAP but no SAP language set.\n");
+                printMSG("Press ENTER.\n");
+                $tt = fgets(STDIN);
+            }
+
+            if (isset($v["programLanguage"]))
+            {
+                $programLanguage = $v["programLanguage"];
+            }
+            else
+            {
+                $programLanguage = NULL;
+            }
+
+            if (isset($v["tvRating"]))
+            {
+                $ratingSystem = "V-CHIP";
+                $rating = $v["tvRating"];
+            }
+
+            if (isset($v["hasDialogRating"]))
+            {
+                $dialogRating = TRUE;
+            }
+            else
+            {
+                $dialogRating = FALSE;
+            }
+
+            if (isset($v["hasLanguageRating"]))
+            {
+                $languageRating = TRUE;
+            }
+            else
+            {
+                $languageRating = FALSE;
+            }
+
+            if (isset($v["hasSexRating"]))
+            {
+                $sexRating = TRUE;
+            }
+            else
+            {
+                $sexRating = FALSE;
+            }
+
+            if (isset($v["hasViolenceRating"]))
+            {
+                $violenceRating = TRUE;
+            }
+            else
+            {
+                $violenceRating = FALSE;
+            }
+
+            if (isset($v["hasFantasyViolenceRating"]))
+            {
+                $fvRating = TRUE;
+            }
+            else
+            {
+                $fvRating = FALSE;
+            }
+
+            $insertSchedule->execute(array(
+                "stationID"           => $stationID,
+                "programID"           => $programID,
+                "md5"                 => $md5,
+                "air_datetime"        => $air_datetime,
+                "duration"            => $duration,
+                "previouslyshown"     => $previouslyshown,
+                "closecaptioned"      => $isClosedCaption,
+                "partnumber"          => $partNumber,
+                "parttotal"           => $numberOfParts,
+                "first"               => $isFirst,
+                "last"                => $isLast,
+                "dvs"                 => $dvs,
+                "new"                 => $isNew,
+                "educational"         => $isEducational,
+                "hdtv"                => $isHDTV,
+                "3d"                  => $is3d,
+                "letterbox"           => $isLetterboxed,
+                "stereo"              => $isStereo,
+                "dolby"               => $dolby,
+                "dubbed"              => $dubbed,
+                "dubLanguage"         => $dubbedLanguage,
+                "subtitled"           => $isSubtitled,
+                "subtitleLanguage"    => $subtitledLanguage,
+                "sap"                 => $sap,
+                "sapLanguage"         => $sapLanguage,
+                "programLanguage"     => $programLanguage,
+                "tvRating"            => $rating,
+                "dialogRating"        => $dialogRating,
+                "languageRating"      => $languageRating,
+                "sexualContentRating" => $sexRating,
+                "violenceRating"      => $violenceRating,
+                "fvRating"            => $fvRating));
         }
     }
 
-    $stmt = $dbh->exec("DROP TABLE IF EXISTS program_prev, programgenres_prev, programrating_prev, credits_prev");
-    $stmt = $dbh->exec("RENAME TABLE program TO program_prev");
-    $stmt = $dbh->exec("RENAME TABLE p_rogram TO program");
-    $stmt = $dbh->exec("RENAME TABLE programgenres TO programgenres_prev");
-    $stmt = $dbh->exec("RENAME TABLE p_rogramgenres TO programgenres");
-    $stmt = $dbh->exec("RENAME TABLE programrating TO programrating_prev");
-    $stmt = $dbh->exec("RENAME TABLE p_rogramrating TO programrating");
-    $stmt = $dbh->exec("RENAME TABLE credits TO credits_prev");
-    $stmt = $dbh->exec("RENAME TABLE c_redits TO credits");
     printMSG("\n\nDone inserting schedules.\n");
-
+    $stmt = $dbh->exec("DROP TABLE scheduleSD");
+    $stmt = $dbh->exec("RENAME TABLE s_scheduleSD TO scheduleSD");
 }
 
 function setup()
@@ -1371,12 +1352,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'timeout' => 900,
-                                               'content' => $data
-                                           )
+                                               array(
+                                                   'method'  => 'POST',
+                                                   'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                                   'timeout' => 900,
+                                                   'content' => $data
+                                               )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
@@ -1393,6 +1374,7 @@ function tempdir()
     if (is_dir($tempfile))
     {
         printMSG("tempdir is $tempfile\n");
+
         return $tempfile;
     }
 }
@@ -1413,5 +1395,108 @@ function printMSG($str)
     fwrite($fh_log, $str);
 }
 
+function holder()
+{
+    $getProgramDetails->execute(array("pid" => $programID));
+    $tempJsonProgram = $getProgramDetails->fetchAll(PDO::FETCH_COLUMN);
+
+    $jsonProgram = json_decode($tempJsonProgram[0], TRUE);
+
+    if (isset($jsonProgram["titles"]["title120"]))
+    {
+        $title = $jsonProgram["titles"]["title120"];
+    }
+    else
+    {
+        print "MAJOR ERROR: no title. station:$stationID program $programID";
+        var_dump($tempJsonProgram);
+        print "\n\n\n\n\n\n";
+        var_dump($jsonProgram);
+        exit;
+    }
+
+    if (isset($jsonProgram["episodeTitle150"]))
+    {
+        $subtitle = $jsonProgram["episodeTitle150"];
+    }
+    else
+    {
+        $subtitle = "";
+    }
+
+    if (isset($jsonProgram["descriptions"]["description255"]))
+    {
+        /*
+         * Schedules Direct can send descriptions of various lengths, but "255" will always exist if there
+         * are any descriptions at all.
+         */
+        $description = $jsonProgram["descriptions"]["description255"];
+    }
+    else
+    {
+        $description = "";
+    }
+
+    if (isset($jsonProgram["genres"][0]))
+    {
+        /*
+         * Schedules Direct can send multiple genres, but MythTV only uses one in the program. The rest are
+         * in the programgenres table.
+         */
+        $category = $jsonProgram["genres"][0];
+    }
+    else
+    {
+        $category = "";
+    }
+
+    if (isset($jsonProgram["showType"]))
+    {
+        /*
+         * Not sure why MythTV has this twice. In the program table, category_type is a lowercase version
+         * of showtype?
+         */
+        $category_type = $jsonProgram["showType"];
+        $showtype = $jsonProgram["showType"];
+    }
+    else
+    {
+        $category_type = "";
+        $showtype = "";
+        /*
+         * May get reset later based on first two characters of programID.
+         */
+    }
+
+    /*
+     * MythTV sets the airdate to "0000" for EP types, but sets it to the movie release date if it's a movie.
+     */
+    $airdate = "0000";
+
+    if (substr($programID, 0, 2) == "MV")
+    {
+        if (isset($jsonProgram["movie"]["year"]))
+        {
+            $airdate = $jsonProgram["movie"]["year"];
+            $category_type = "movie";
+        }
+        if (isset($jsonProgram["movie"]["starRating"]))
+        {
+            $numStars = substr_count($jsonProgram["movie"]["starRating"], "*");
+            $numPlus = substr_count($jsonProgram["movie"]["starRating"], "+");
+            $stars = ($numStars * .25) + ($numPlus * .125);
+        }
+        if (isset($jsonProgram["movie"]["mpaaRating"]))
+        {
+            $rating = $jsonProgram["movie"]["mpaaRating"];
+            $ratingSystem = "MPAA";
+        }
+    }
+    else
+    {
+        $stars = 0;
+    }
+
+}
 
 ?>
