@@ -271,7 +271,7 @@ function getSchedules(array $stationIDs, $debug)
             $total = count($toRetrieve);
 
             $insertPerson = $dbh->prepare("INSERT INTO peopleSD(personID,name) VALUES(:personID, :name)
-        ON DUPLICATE KEY SET name=:name");
+        ON DUPLICATE KEY UPDATE name=:name");
 
             $insertCredit = $dbh->prepare("INSERT INTO creditsSD(personID,programID,role)
     VALUES(:personID,:pid,:role)");
