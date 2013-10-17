@@ -388,7 +388,7 @@ function getSchedules(array $stationIDs, $debug)
         {
             $programID = $v["programID"];
             $md5 = $v["md5"];
-            $air_datetime = $v["air_datetime"];
+            $air_datetime = $v["airDateTime"];
             $duration = $v["duration"];
 
             if (isset($v["new"]))
