@@ -277,7 +277,7 @@ function getSchedules(array $stationIDs, $debug)
     VALUES(:personID,:pid,:role)");
 
             $insertProgramGenres = $dbh->prepare("INSERT INTO programgenresSD(programID,relevance,genre)
-    VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY SET genre=:genre");
+    VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
 
 
             foreach ($toRetrieve as $md5 => $pid)
