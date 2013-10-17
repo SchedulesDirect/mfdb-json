@@ -399,6 +399,8 @@ function getSchedules(array $stationIDs, $debug)
             printMSG("Inserted $counter of $total stationIDs.                                         \r");
         }
 
+        $dbh->beginTransaction();
+
         foreach ($a["programs"] as $v)
         {
             $programID = $v["programID"];
@@ -689,6 +691,8 @@ function getSchedules(array $stationIDs, $debug)
                 "violenceRating"      => $violenceRating,
                 "fvRating"            => $fvRating));
         }
+
+        $dbh->commit();
     }
 
     printMSG("\n\nDone inserting schedules.\n");
