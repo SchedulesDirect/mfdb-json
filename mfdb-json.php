@@ -280,7 +280,7 @@ function getSchedules(array $stationIDs, $debug)
     VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
 
             $peopleCache = array();
-            $getPeople = $dbh->prepare("SELECT name,personIDFROM peopleSD");
+            $getPeople = $dbh->prepare("SELECT name,personID FROM peopleSD");
             $getPeople->execute();
 
             while ($row = $getPeople->fetch())
