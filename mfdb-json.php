@@ -283,6 +283,7 @@ function getSchedules(array $stationIDs, $debug)
             $getPeople = $dbh->prepare("SELECT name,personID FROM peopleSD");
             $getPeople->execute();
 
+
             while ($row = $getPeople->fetch())
             {
                 $peopleCache[$row[0]] = $row[1];
