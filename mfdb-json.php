@@ -285,7 +285,7 @@ function getSchedules(array $stationIDs, $debug)
 
             while ($row = $getPeople->fetch())
             {
-                $peopleCache[$row[0]] =$row[1];
+                $peopleCache[$row[0]] = $row[1];
             }
 
             foreach ($toRetrieve as $md5 => $pid)
