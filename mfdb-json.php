@@ -308,9 +308,6 @@ function getSchedules(array $stationIDs, $debug)
                     continue;
                 }
 
-                var_dump($jsonProgram);
-                $tt=fgets(STDIN);
-
                 if (isset($jsonProgram["castAndCrew"]))
                 {
                     foreach ($jsonProgram["castAndCrew"] as $credit)
