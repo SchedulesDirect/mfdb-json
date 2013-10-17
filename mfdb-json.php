@@ -533,8 +533,6 @@ function getSchedules(array $stationIDs, $debug)
             if ($dubbed AND $dubbedLanguage == NULL)
             {
                 printMSG("*** Warning: $programID has dub but no dubbed language set.\n");
-                printMSG("Press ENTER.\n");
-                $tt = fgets(STDIN);
             }
 
             if (isset($v["subtitled"]))
@@ -557,8 +555,6 @@ function getSchedules(array $stationIDs, $debug)
             if ($isSubtitled AND $subtitledLanguage == NULL)
             {
                 printMSG("*** Warning: $programID has subtitle but no subtitled language set.\n");
-                printMSG("Press ENTER.\n");
-                $tt = fgets(STDIN);
             }
 
             if (isset($v["sap"]))
