@@ -126,7 +126,7 @@ if ($randHash != "ERROR")
     getSchedules($stationIDs, $debug);
 }
 
-printMSG("\n\nGlobal. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
+printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
 printMSG("Global. End Time:" . date("Y-m-d H:i:s") . "\n");
 $globalSinceStart = $globalStartDate->diff(new DateTime());
 if ($globalSinceStart->h)
