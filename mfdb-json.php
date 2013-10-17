@@ -265,10 +265,20 @@ function getSchedules(array $stationIDs, $debug)
             $counter = 0;
             printMSG("Performing inserts.\n");
 
-            $stmt = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
+            $insertJSON = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
             $total = count($toRetrieve);
+
+            $insertPerson = $dbh->prepare("INSERT INTO peopleSD(personID,name) VALUES(:personID, :name)
+        ON DUPLICATE KEY SET name=:name");
+
+            $insertCredit = $dbh->prepare("INSERT INTO creditsSD(personID,programID,role)
+    VALUES(:personID,:pid,:role)");
+
+            $insertProgramGenres = $dbh->prepare("INSERT INTO programgenresSD(programID,relevance,genre)
+    VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY SET genre=:genre");
+
 
             foreach ($toRetrieve as $md5 => $pid)
             {
@@ -277,8 +287,54 @@ function getSchedules(array $stationIDs, $debug)
                 {
                     printMSG("$counter / $total             \r");
                 }
-                $stmt->execute(array("programID" => $pid, "md5" => $md5,
-                                     "json"      => file_get_contents("$tempDir/$pid.json.txt")));
+
+                $fileJSON = file_get_contents("$tempDir/$pid.json.txt");
+
+                if ($fileJSON === FALSE)
+                {
+                    printMSG("*** ERROR: Could not open file $tempDir/$pid.json.txt\n");
+                    continue;
+                }
+
+                $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
+                                           "json"      => $fileJSON));
+
+                $jsonProgram = json_decode($fileJSON, TRUE);
+
+                if (json_last_error())
+                {
+                    printMSG("*** ERROR: JSON decode error $tempDir/$pid.json.txt\n");
+                    printMSG("$fileJSON\n");
+                    continue;
+                }
+
+                var_dump($jsonProgram);
+                $tt=fgets(STDIN);
+
+                if (isset($jsonProgram["castAndCrew"]))
+                {
+                    foreach ($jsonProgram["castAndCrew"] as $credit)
+                    {
+                        list ($role, $name) = explode(":", $credit);
+                        $role = strtolower($role);
+
+                        $personID = mt_rand(1000, 1000000);
+
+                        $insertPerson->execute(array("personID" => $personID, "name" => $name));
+
+                        $insertCredit->execute(array("personID" => $personID, "pid" => $pid,
+                                                     "role"     => $role));
+                    }
+                }
+
+                if (isset($jsonProgram["genres"]))
+                {
+                    foreach ($jsonProgram["genres"] as $relevance => $genre)
+                    {
+                        $insertProgramGenres->execute(array("pid"       => $pid,
+                                                            "relevance" => $relevance, "genre" => $genre));
+                    }
+                }
 
                 if ($debug == FALSE)
                 {
@@ -294,61 +350,6 @@ function getSchedules(array $stationIDs, $debug)
         }
 
         printMSG("Completed local database program updates.\n");
-
-        /*
-         * TODO: This is where we need to process things like genres and such.
-         */
-        $insertPerson = $dbh->prepare("INSERT INTO peopleSD(personID,name) VALUES(:personID, :name)");
-        $insertCredit = $dbh->prepare("INSERT INTO credits(personID,programID,role)
-    VALUES(:personID,:pid,:role)");
-/*
-
-        if (isset($jsonProgram["castAndCrew"]))
-        {
-            foreach ($jsonProgram["castAndCrew"] as $credit)
-            {
-                list ($role, $name) = explode(":", $credit);
-                $role = strtolower($role);
-
-                if (isset($peopleArray[$name]))
-                {
-                    $personNumber = $peopleArray[$name];
-                }
-                else
-                {
-                    $insertPerson->execute(array("name" => $name));
-                    $personNumber = $dbh->lastInsertId();
-                    $peopleArray[$name] = $personNumber;
-                }
-
-                $insertCredit->execute(array("person"    => $personNumber, "chanid" => $value["chanid"],
-                                             "starttime" => $starttime, "role" => $role));
-            }
-        }
-
-        if ($rating != "")
-        {
-            $insertProgramRating->execute(array("chanid" => $value["chanid"], "starttime" => $starttime,
-                                                "system" => $ratingSystem, "rating" => $rating));
-        }
-
-        if (isset($jsonProgram["genres"]))
-        {
-            foreach ($jsonProgram["genres"] as $relevance => $genre)
-            {
-                $insertProgramGenres->execute(array("pid"       => $programID,
-                                                    "relevance" => $relevance, "genre" => $genre));
-            }
-        }
-        $insertProgramGenres = $dbh->prepare("INSERT INTO programgenresSD(programID,relevance,genre)
-    VALUES(:pid,:relevance,:genre)");
-
-        $insertProgramRating = $dbh->prepare("INSERT INTO programratingSD(programID,system,rating)
-    VALUES(:pid,:system,:rating)");
-
-        $getProgramDetails = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
-*/
-
     }
 
     printMSG("Inserting schedules.\n");
@@ -1346,12 +1347,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                               array(
-                                                   'method'  => 'POST',
-                                                   'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                                   'timeout' => 900,
-                                                   'content' => $data
-                                               )
+                                           array(
+                                               'method'  => 'POST',
+                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                               'timeout' => 900,
+                                               'content' => $data
+                                           )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
