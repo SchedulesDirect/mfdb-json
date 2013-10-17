@@ -279,6 +279,14 @@ function getSchedules(array $stationIDs, $debug)
             $insertProgramGenres = $dbh->prepare("INSERT INTO programgenresSD(programID,relevance,genre)
     VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
 
+            $peopleCache = array();
+            $getPeople = $dbh->prepare("SELECT name,personIDFROM peopleSD");
+            $getPeople->execute();
+
+            while ($row = $getPeople->fetch())
+            {
+                $peopleCache[$row[0]] =$row[1];
+            }
 
             foreach ($toRetrieve as $md5 => $pid)
             {
@@ -315,7 +323,15 @@ function getSchedules(array $stationIDs, $debug)
                         list ($role, $name) = explode(":", $credit);
                         $role = strtolower($role);
 
-                        $personID = mt_rand(1000, 1000000);
+                        if (isset($peopleCache[$name]))
+                        {
+                            $personID = $peopleCache[$name];
+                        }
+                        else
+                        {
+                            $personID = mt_rand(1000, 10000000);
+                            $peopleCache[$name] = $personID;
+                        }
 
                         $insertPerson->execute(array("personID" => $personID, "name" => $name));
 
