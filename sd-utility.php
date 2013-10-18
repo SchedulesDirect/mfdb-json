@@ -114,7 +114,8 @@ $randHash = getRandhash($username, $password);
 
 if ($randHash != "ERROR")
 {
-    printStatus(getStatus());
+    getStatus();
+    printStatus();
 }
 
 function setup()
@@ -313,13 +314,13 @@ function printStatus()
     printMSG("Max number of headends for your account: $maxHeadends\n");
     printMSG("Next suggested connect time: $nextConnectTime\n");
 
+    $getLocalModified = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
+    printMSG("The following headends are in your account:\n\n");
+
+    $he = getSchedulesDirectHeadends();
+
     if (count($he))
     {
-        $getLocalModified = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
-        printMSG("The following headends are in your account:\n\n");
-
-        $he = getSchedulesDirectHeadends();
-
         $retrieveLineups = array();
         foreach ($he as $id => $modified)
         {
@@ -335,7 +336,6 @@ function printStatus()
             $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
 
             var_dump($result);
-
 
 
             if ((count($result) == 0) OR ($result[0] < $modified))
@@ -726,9 +726,9 @@ function getSchedulesDirectHeadends()
         $schedulesDirectHeadends[$hv["ID"]] = $hv["modified"];
     }
 
-var_dump($schedulesDirectHeadends);
+    var_dump($schedulesDirectHeadends);
 
-exit;
+    exit;
 
 }
 
