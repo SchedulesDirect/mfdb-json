@@ -37,7 +37,7 @@ foreach ($options as $k => $v)
         case "h":
             print "The following options are available:\n";
             print "--beta\n";
-            print "--help (this text)\n";
+            print "--help\t(this text)\n";
             print "--host=\t\texample: --host=192.168.10.10\n";
             print "--user=\t\tUsername to connect as\n";
             print "--password=\tPassword to access database.\n";
