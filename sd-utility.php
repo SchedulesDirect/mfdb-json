@@ -1,14 +1,6 @@
 #!/usr/bin/php
 
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: rkulagowski
- * Date: 10/18/13
- * Time: 11:18 AM
- * To change this template use File | Settings | File Templates.
- */
-
 $isBeta = FALSE;
 $debug = TRUE;
 $doSetup = FALSE;
@@ -74,11 +66,6 @@ try
     exit;
 }
 
-if ($doSetup)
-{
-    setup();
-}
-
 if ($isBeta)
 {
     # Test server. Things may be broken there.
@@ -92,6 +79,11 @@ else
     $baseurl = "https://data2.schedulesdirect.org";
     printMSG("Using production server.\n");
     $api = 20130512;
+}
+
+if ($doSetup)
+{
+    setup();
 }
 
 $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
@@ -113,129 +105,90 @@ foreach ($result[0] as $k => $v)
     }
 }
 
-$globalStartTime = time();
-$globalStartDate = new DateTime();
-
-printMSG("Retrieving list of channels.\n");
-$stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE");
-$stmt->execute();
-$stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
 printMSG("Logging into Schedules Direct.\n");
 $randHash = getRandhash($username, $password);
 
 if ($randHash != "ERROR")
 {
     printStatus(getStatus());
-    getSchedules($stationIDs, $debug);
 }
-
-printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
-printMSG("Global. End Time:" . date("Y-m-d H:i:s") . "\n");
-$globalSinceStart = $globalStartDate->diff(new DateTime());
-if ($globalSinceStart->h)
-{
-    printMSG($globalSinceStart->h . " hour ");
-}
-printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\n");
-
-printMSG("Done.\n");
 
 function setup()
 {
     global $dbh;
-    $done = FALSE;
+    $username = readline("Schedules Direct username:");
+    $password = readline("Schedules Direct password:");
 
-    while ($done == FALSE)
+    printMSG("Checking existing lineups at Schedules Direct.\n");
+    $randHash = getRandhash($username, sha1($password));
+
+    if ($randHash != "ERROR")
     {
-        $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
-        $stmt->execute();
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $res = array();
+        $res = json_decode(getStatus(), true);
+        $he = array();
 
-        if (count($result))
+        foreach ($res as $k => $v)
         {
-            printMSG("Existing sources:\n");
-            foreach ($result as $v)
+            if ($k == "headend")
             {
-                printMSG("sourceid: " . $v["sourceid"] . "\n");
-                printMSG("name: " . $v["name"] . "\n");
-                printMSG("userid: " . $v["userid"] . "\n");
-                $username = $v["userid"];
-                printMSG("lineupid: " . $v["lineupid"] . "\n");
-                printMSG("password: " . $v["password"] . "\n\n");
-                $password = $v["password"];
+                foreach ($v as $hv)
+                {
+                    $he[$hv["ID"]] = 1;
+                    printMSG("Headend: " . $hv["ID"] . "\n");
+                }
+            }
+        }
+
+        if (count($he))
+        {
+            displayLocalVideoSource();
+
+            printMSG("A to add a new videosource to MythTV\n");
+            printMSG("L to Link a videosource to a headend at SD\n");
+            printMSG("Q to Quit\n");
+            $response = strtoupper(readline(">"));
+
+            switch ($response)
+            {
+                case "A":
+                    printMSG("Adding new videosource\n\n");
+                    $newName = readline("Name:>");
+                    $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
+                        VALUES(:name,:userid,:password)");
+                    $stmt->execute(array("name"     => $newName, "userid" => $username,
+                                         "password" => $password));
+                    break;
+                case "L":
+                    printMSG("Linking Schedules Direct headend to sourceid\n\n");
+                    $sid = readline("Source id:>");
+                    $he = readline("Headend:>");
+
+                    /*
+                     * TODO: Add a way to pull a specific lineup from the headend
+                     */
+
+                    $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
+                    $stmt->execute(array("he" => $he, "sid" => $sid));
+                    /*
+                     * Download the lineups
+                     */
+                    /*
+                     * Create the channel table.
+                     */
+                    break;
+                case "Q":
+                default:
+                    $done = TRUE;
+                    break;
             }
         }
         else
         {
-            $username = readline("Schedules Direct username:");
-            $password = readline("Schedules Direct password:");
-        }
-
-        printMSG("Checking existing lineups at Schedules Direct.\n");
-        $randHash = getRandhash($username, sha1($password));
-
-        if ($randHash != "ERROR")
-        {
-            $res = array();
-            $res = json_decode(getStatus(), true);
-            $he = array();
-
-            foreach ($res as $k => $v)
-            {
-                if ($k == "headend")
-                {
-                    foreach ($v as $hv)
-                    {
-                        $he[$hv["ID"]] = 1;
-                        printMSG("Headend: " . $hv["ID"] . "\n");
-                    }
-                }
-            }
-
-            if (count($he))
-            {
-                printMSG("A to add a new videosource to MythTV\n");
-                printMSG("L to Link an existing sourceid to an existing headend at SD\n");
-                printMSG("Q to Quit\n");
-                $response = strtoupper(readline(">"));
-
-                switch ($response)
-                {
-                    case "A":
-                        printMSG("Adding new sourceid\n\n");
-                        $newName = readline("Source name:>");
-                        $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
-                        VALUES(:name,:userid,:password)");
-                        $stmt->execute(array("name"     => $newName, "userid" => $username,
-                                             "password" => $password));
-                        break;
-                    case "L":
-                        printMSG("Linking Schedules Direct headend to sourceid\n\n");
-                        $sid = readline("Source id:>");
-                        $he = readline("Headend:>");
-                        $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
-                        $stmt->execute(array("he" => $he, "sid" => $sid));
-                        /*
-                         * Download the lineups
-                         */
-                        /*
-                         * Create the channel table.
-                         */
-                        break;
-                    case "Q":
-                    default:
-                        $done = TRUE;
-                        break;
-                }
-            }
-            else
-            {
-                /*
-                 * User has no headends defined in their SD account.
-                 */
-                addHeadendsToSchedulesDirect($randHash);
-            }
+            /*
+             * User has no headends defined in their SD account.
+             */
+            addHeadendsToSchedulesDirect($randHash);
         }
     }
 }
@@ -245,19 +198,20 @@ function addHeadendsToSchedulesDirect()
     global $randHash;
     global $api;
 
-    printMSG("\n\nNo headends are configured in your Schedules Direct account.\n");
+    printMSG("No headends are configured in your Schedules Direct account.\n");
+    printMSG("Two-character ISO3166 country code: (CA, US or ZZ");
+    $country = readline(">");
     printMSG("Enter your 5-digit zip code for U.S.\n");
-    printMSG("Enter your 6-character postal code for Canada.\n");
-    printMSG("Two-character ISO3166 code for international.\n");
+    printMSG("Enter leftmost 4-character postal code for Canada.\n");
 
-    $response = readline(">");
+    $postalcode = readline(">");
 
     $res = array();
     $res["action"] = "get";
     $res["object"] = "headends";
     $res["randhash"] = $randHash;
     $res["api"] = $api;
-    $res["request"] = "PC:$response";
+    $res["request"] = array("country" => $country, "postalcode" => "PC:$postalcode");
 
     $res = json_decode(sendRequest(json_encode($res)), true);
 
@@ -287,7 +241,7 @@ function addHeadendsToSchedulesDirect()
     }
     else
     {
-        printMSG("\n\n-----\nERROR:Received error response from server:\n");
+        printMSG("ERROR:Received error response from server:\n");
         printMSG($res["message"] . "\n\n-----\n");
         printMSG("Press ENTER to continue.\n");
         $a = fgets(STDIN);
@@ -763,6 +717,30 @@ function printMSG($str)
 
     $str = str_replace("\r", "\n", $str);
     fwrite($fh_log, $str);
+}
+
+function displayLocalVideoSource()
+{
+    global $dbh;
+
+    $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (count($result))
+    {
+        printMSG("Existing sources:\n");
+        foreach ($result as $v)
+        {
+            printMSG("sourceid: " . $v["sourceid"] . "\n");
+            printMSG("name: " . $v["name"] . "\n");
+            printMSG("userid: " . $v["userid"] . "\n");
+            $username = $v["userid"];
+            printMSG("lineupid: " . $v["lineupid"] . "\n");
+            printMSG("password: " . $v["password"] . "\n\n");
+            $password = $v["password"];
+        }
+    }
 }
 
 ?>
