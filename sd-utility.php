@@ -350,7 +350,7 @@ function printStatus($json)
     if (count($he))
     {
         $stmt = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
-        printMSG("The following headends are in your account:\n");
+        printMSG("The following headends are in your account:\n\n");
 
         $retrieveLineups = array();
         foreach ($he as $id => $modified)
@@ -361,7 +361,7 @@ function printStatus($json)
                 // We want the tabs to align.
                 $line .= "\t";
             }
-            $line .= "SD Modified: $modified\n";
+            $line .= "Last Updated: $modified\n";
             printMSG($line);
             $stmt->execute(array("he" => $id));
             $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
