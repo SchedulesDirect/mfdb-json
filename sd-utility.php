@@ -6,6 +6,7 @@ $debug = TRUE;
 $doSetup = FALSE;
 $quiet = FALSE;
 $schedulesDirectHeadends = array();
+$sdStatus = "";
 
 $headendToRefresh = array();
 
@@ -254,6 +255,7 @@ function getStatus()
 {
     global $api;
     global $randHash;
+    global $sdStatus;
 
     $res = array();
     $res["action"] = "get";
@@ -261,21 +263,18 @@ function getStatus()
     $res["randhash"] = $randHash;
     $res["api"] = $api;
 
-    $response = sendRequest(json_encode($res));
-
-    var_dump($response);
-    exit;
-
+    $sdStatus = sendRequest(json_encode($res));
 }
 
-function printStatus($json)
+function printStatus()
 {
     global $dbh;
+    global $sdStatus;
 
     printMSG("Status messages from Schedules Direct:\n");
 
     $res = array();
-    $res = json_decode($json, true);
+    $res = json_decode($sdStatus, TRUE);
 
     $am = array();
     $he = array();
@@ -293,14 +292,8 @@ function printStatus($json)
                 $maxHeadends = $v["maxHeadends"];
                 $nextConnectTime = $v["nextSuggestedConnectTime"];
                 break;
-            case "headend":
-                foreach ($v as $hv)
-                {
-                    $he[$hv["ID"]] = $hv["modified"];
-                }
-                break;
             case "code":
-                if ($v == 401)
+                if ($v != 0)
                 {
                     /*
                      * Error notification - we're going to have to abort because the server didn't like what we sent.
@@ -322,8 +315,10 @@ function printStatus($json)
 
     if (count($he))
     {
-        $stmt = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
+        $getLocalModified = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
         printMSG("The following headends are in your account:\n\n");
+
+        $he = getSchedulesDirectHeadends();
 
         $retrieveLineups = array();
         foreach ($he as $id => $modified)
@@ -336,8 +331,12 @@ function printStatus($json)
             }
             $line .= "Last Updated: $modified\n";
             printMSG($line);
-            $stmt->execute(array("he" => $id));
-            $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $getLocalModified->execute(array("he" => $id));
+            $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
+
+            var_dump($result);
+
+
 
             if ((count($result) == 0) OR ($result[0] < $modified))
             {
@@ -719,21 +718,18 @@ function displayLocalVideoSource()
 
 function getSchedulesDirectHeadends()
 {
-    global $randHash;
-    $res = array();
-    $res = json_decode(getStatus(), true);
+    global $sdStatus;
 
-    foreach ($res as $k => $v)
+    $status = json_decode($sdStatus, TRUE);
+    foreach ($status["headend"] as $hv)
     {
-        if ($k == "headend")
-        {
-            foreach ($v as $hv)
-            {
-                $schedulesDirectHeadends[$hv["ID"]] = 1;
-                printMSG("Headend: " . $hv["ID"] . "\n");
-            }
-        }
+        $schedulesDirectHeadends[$hv["ID"]] = $hv["modified"];
     }
+
+var_dump($schedulesDirectHeadends);
+
+exit;
+
 }
 
 ?>
