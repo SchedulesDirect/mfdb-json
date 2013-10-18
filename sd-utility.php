@@ -379,12 +379,7 @@ function processLineups(array $retrieveLineups)
     $res = array();
     $res = json_decode(getLineup($retrieveLineups), true);
 
-    var_dump($res);
-    $tt=fgets(STDIN);
-
-
-
-    if ($res["response"] != "OK")
+    if ($res["code"] != 0)
     {
         printMSG("\n\n-----\nERROR: Bad response from Schedules Direct.\n");
         printMSG($res["message"] . "\n\n-----\n");
