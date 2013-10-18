@@ -355,13 +355,14 @@ function printStatus($json)
         $retrieveLineups = array();
         foreach ($he as $id => $modified)
         {
-            printMSG("ID: $id\t\t");
+            $line = "ID: $id\t\t";
             if (strlen($id) < 4)
             {
                 // We want the tabs to align.
-                printMSG("\t");
+                $line .= "\t";
             }
-            printMSG("SD Modified: $modified\n");
+            $line .= "SD Modified: $modified\n";
+            printMSG($line);
             $stmt->execute(array("he" => $id));
             $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
