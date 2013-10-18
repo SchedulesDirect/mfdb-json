@@ -195,7 +195,7 @@ function setup()
 
             if (count($he))
             {
-                printMSG("A to add a new sourceid in MythTV\n");
+                printMSG("A to add a new videosource to MythTV\n");
                 printMSG("L to Link an existing sourceid to an existing headend at SD\n");
                 printMSG("Q to Quit\n");
                 $response = strtoupper(readline(">"));
