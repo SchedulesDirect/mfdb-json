@@ -719,6 +719,7 @@ function displayLocalVideoSource()
 function getSchedulesDirectHeadends()
 {
     global $sdStatus;
+    $schedulesDirectHeadends = array();
 
     $status = json_decode($sdStatus, TRUE);
     foreach ($status["headend"] as $hv)
@@ -726,10 +727,7 @@ function getSchedulesDirectHeadends()
         $schedulesDirectHeadends[$hv["ID"]] = $hv["modified"];
     }
 
-    var_dump($schedulesDirectHeadends);
-
-    exit;
-
+    return ($schedulesDirectHeadends);
 }
 
 ?>
