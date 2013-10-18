@@ -177,7 +177,6 @@ function setup()
         addHeadendsToSchedulesDirect($randHash);
     }
 }
-}
 
 function addHeadendsToSchedulesDirect()
 {
