@@ -5,6 +5,7 @@ $isBeta = FALSE;
 $debug = TRUE;
 $doSetup = FALSE;
 $quiet = FALSE;
+$headendToRefresh = array();
 
 date_default_timezone_set("UTC");
 $date = new DateTime();
@@ -263,22 +264,6 @@ function getLineup(array $he)
     $res["request"] = $he;
 
     return sendRequest(json_encode($res), true);
-}
-
-function parseScheduleFile(array $sched)
-{
-    /*
-     * This function takes an array and pulls out the programIDs and the md5
-     */
-
-    $pID = array();
-
-    foreach ($sched["programs"] as $v)
-    {
-        $pID[$v["programID"]] = $v["md5"];
-    }
-
-    return $pID;
 }
 
 function getStatus()
