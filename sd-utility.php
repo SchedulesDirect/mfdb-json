@@ -335,7 +335,7 @@ function printStatus()
             $getLocalModified->execute(array("he" => $id));
             $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
 
-            var_dump($result);
+            print "$id: result[0] " . $result[0] . " modified: $modified\n";
 
 
             if ((count($result) == 0) OR ($result[0] < $modified))
@@ -346,6 +346,9 @@ function printStatus()
 
         if (count($retrieveLineups))
         {
+            print "inside process Lineups\n";
+            var_dump($retrieveLineups);
+            $tt=fgets(STDIN);
             processLineups($retrieveLineups);
         }
     }
