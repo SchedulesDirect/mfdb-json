@@ -335,9 +335,6 @@ function printStatus()
             $getLocalModified->execute(array("he" => $id));
             $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
 
-            print "$id: result[0] " . $result[0] . " modified: $modified\n";
-
-
             if ((count($result) == 0) OR ($result[0] < $modified))
             {
                 $retrieveLineups[] = $id;
@@ -347,8 +344,6 @@ function printStatus()
         if (count($retrieveLineups))
         {
             print "inside process Lineups\n";
-            var_dump($retrieveLineups);
-            $tt=fgets(STDIN);
             processLineups($retrieveLineups);
         }
     }
@@ -397,12 +392,17 @@ function processLineups(array $retrieveLineups)
     /*
      * First, store a copy of the data that we just downloaded into the cache for later.
      */
-    $stmt = $dbh->prepare("REPLACE INTO SDlineupCache(headend,json) VALUES(:he,:json)");
+    $stmt = $dbh->prepare("REPLACE INTO SDlineupCache(headend,json,modified) VALUES(:he,:json,:modified)");
     foreach (glob("$tempDir/*.json.txt") as $f)
     {
         $json = file_get_contents($f);
         $a = json_decode($json, true);
         $he = $a["headend"];
+
+        var_dump($a);
+        $tt=fgets(STDIN);
+
+
         $stmt->execute(array("he" => $he, "json" => $json));
     }
 
