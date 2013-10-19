@@ -122,13 +122,14 @@ function setup()
 {
     global $dbh;
     global $schedulesDirectHeadends;
+    global $randHash;
 
     $username = readline("Schedules Direct username:");
     $password = readline("Schedules Direct password:");
 
     printMSG("Checking existing lineups at Schedules Direct.\n");
 
-    if (count($he))
+    if (count($schedulesDirectHeadends))
     {
         displayLocalVideoSource();
 
@@ -235,7 +236,7 @@ function addHeadendsToSchedulesDirect()
     }
 }
 
-function getLineup(array $he)
+function getLineup(array $heToGet)
 {
     global $randHash;
     global $api;
@@ -247,7 +248,7 @@ function getLineup(array $he)
     $res["object"] = "lineups";
     $res["randhash"] = $randHash;
     $res["api"] = $api;
-    $res["request"] = $he;
+    $res["request"] = array_keys($heToGet);
 
     return sendRequest(json_encode($res), true);
 }
@@ -337,13 +338,12 @@ function printStatus()
 
             if ((count($result) == 0) OR ($result[0] < $modified))
             {
-                $retrieveLineups[] = $id;
+                $retrieveLineups[$id] = $modified;
             }
         }
 
         if (count($retrieveLineups))
         {
-            print "inside process Lineups\n";
             processLineups($retrieveLineups);
         }
     }
@@ -399,11 +399,7 @@ function processLineups(array $retrieveLineups)
         $a = json_decode($json, true);
         $he = $a["headend"];
 
-        var_dump($a);
-        $tt=fgets(STDIN);
-
-
-        $stmt->execute(array("he" => $he, "json" => $json));
+        $stmt->execute(array("he" => $he, "modified" => $retrieveLineups[$he], "json" => $json));
     }
 
     /*
@@ -652,12 +648,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'timeout' => 900,
-                                               'content' => $data
-                                           )
+                                               array(
+                                                   'method'  => 'POST',
+                                                   'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                                   'timeout' => 900,
+                                                   'content' => $data
+                                               )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
