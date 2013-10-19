@@ -9,6 +9,7 @@ $schedulesDirectHeadends = array();
 $sdStatus = "";
 $username = "";
 $password = "";
+$passwordHash = "";
 
 $updatedHeadendsToRefresh = array();
 
@@ -143,6 +144,9 @@ while (!$done)
         case "1":
             addHeadendsToSchedulesDirect();
             break;
+        case "2":
+            deleteHeadendFromSchedulesDirect();
+            break;
         case "L":
             print "Linking Schedules Direct headend to sourceid\n\n";
             $sid = readline("Source id:>");
@@ -263,6 +267,35 @@ function addHeadendsToSchedulesDirect()
     if ($res["code"] == 0)
     {
         print "Successfully added headend.\n";
+    }
+    else
+    {
+        print "ERROR:Received error response from server:\n";
+        print$res["message"] . "\n\n-----\n";
+        print "Press ENTER to continue.\n";
+        $a = fgets(STDIN);
+    }
+}
+
+function deleteHeadendFromSchedulesDirect()
+{
+    global $randHash;
+    global $api;
+
+    $toDelete = readline("Headend to Delete:>");
+
+    $res = array();
+    $res["action"] = "delete";
+    $res["object"] = "headends";
+    $res["randhash"] = $randHash;
+    $res["api"] = $api;
+    $res["request"] = $toDelete;
+
+    $res = json_decode(sendRequest(json_encode($res)), true);
+
+    if ($res["code"] == 0)
+    {
+        print "Successfully deleted headend.\n";
     }
     else
     {
