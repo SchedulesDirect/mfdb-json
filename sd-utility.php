@@ -8,7 +8,7 @@ $quiet = FALSE;
 $schedulesDirectHeadends = array();
 $sdStatus = "";
 
-$headendToRefresh = array();
+$updatedHeadendsToRefresh = array();
 
 date_default_timezone_set("UTC");
 $date = new DateTime();
@@ -90,7 +90,8 @@ if ($doSetup)
     setup();
 }
 
-$stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
+$stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource
+                       WHERE grabber='schedulesdirect1' LIMIT 1");
 $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -109,8 +110,6 @@ foreach ($result[0] as $k => $v)
     }
 }
 
-print "u:$username p:$password\n";
-
 printMSG("Logging into Schedules Direct.\n");
 $randHash = getRandhash($username, $password);
 
@@ -118,6 +117,17 @@ if ($randHash != "ERROR")
 {
     getStatus();
     printStatus();
+    if (count($updatedHeadendsToRefresh))
+    {
+        foreach ($updatedHeadendsToRefresh as $he => $modified)
+        {
+            printMSG("Headend update for $he\n");
+            $response = readline("Use entire lineup? (Y/n)>");
+            var_dump($response);
+            $tt = fgets(STDIN);
+
+        }
+    }
 }
 
 function setup()
@@ -274,6 +284,7 @@ function printStatus()
 {
     global $dbh;
     global $sdStatus;
+    global $updatedHeadendsToRefresh;
 
     printMSG("Status messages from Schedules Direct:\n");
 
@@ -324,7 +335,6 @@ function printStatus()
 
     if (count($he))
     {
-        $retrieveLineups = array();
         foreach ($he as $id => $modified)
         {
             $line = "ID: $id\t\t";
@@ -340,18 +350,18 @@ function printStatus()
 
             if ((count($result) == 0) OR ($result[0] < $modified))
             {
-                $retrieveLineups[$id] = $modified;
+                $updatedHeadendsToRefresh[$id] = $modified;
             }
         }
 
-        if (count($retrieveLineups))
+        if (count($updatedHeadendsToRefresh))
         {
-            updateLocalHeadendCache($retrieveLineups);
+            updateLocalHeadendCache($updatedHeadendsToRefresh);
         }
     }
 }
 
-function updateLocalHeadendCache(array $retrieveLineups)
+function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
 {
     global $dbh;
 
@@ -364,7 +374,7 @@ function updateLocalHeadendCache(array $retrieveLineups)
     printMSG("Checking for updated lineups from Schedules Direct.\n");
 
     $res = array();
-    $res = json_decode(getLineup($retrieveLineups), true);
+    $res = json_decode(getLineup($updatedHeadendsToRefresh), true);
 
     if ($res["code"] != 0)
     {
@@ -392,7 +402,7 @@ function updateLocalHeadendCache(array $retrieveLineups)
     }
 
     /*
-     * First, store a copy of the data that we just downloaded into the cache for later.
+     * Store a copy of the data that we just downloaded into the cache.
      */
     $stmt = $dbh->prepare("REPLACE INTO headendCacheSD(headend,json,modified) VALUES(:he,:json,:modified)");
     foreach (glob("$tempDir/*.json.txt") as $f)
@@ -401,7 +411,7 @@ function updateLocalHeadendCache(array $retrieveLineups)
         $a = json_decode($json, true);
         $he = $a["headend"];
 
-        $stmt->execute(array("he" => $he, "modified" => $retrieveLineups[$he], "json" => $json));
+        $stmt->execute(array("he" => $he, "modified" => $updatedHeadendsToRefresh[$he], "json" => $json));
     }
 }
 
