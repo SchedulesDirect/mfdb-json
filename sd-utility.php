@@ -91,7 +91,7 @@ if ($doSetup)
 }
 
 $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource
-                       WHERE grabber='schedulesdirect1' LIMIT 1");
+                       WHERE xmltvgrabber='schedulesdirect1' LIMIT 1");
 $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -125,6 +125,7 @@ if ($randHash != "ERROR")
             $response = readline("Use entire lineup? (Y/n)>");
             var_dump($response);
             $tt = fgets(STDIN);
+            updte
 
         }
     }
