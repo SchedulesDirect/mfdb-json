@@ -140,7 +140,9 @@ while (!$done)
 
     switch ($response)
     {
-
+        case "1":
+            addHeadendsToSchedulesDirect();
+            break;
         case "L":
             print "Linking Schedules Direct headend to sourceid\n\n";
             $sid = readline("Source id:>");
@@ -258,7 +260,7 @@ function addHeadendsToSchedulesDirect()
 
     $res = json_decode(sendRequest(json_encode($res)), true);
 
-    if ($res["response"] == "OK")
+    if ($res["code"] == 0)
     {
         print "Successfully added headend.\n";
     }
