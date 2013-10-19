@@ -122,9 +122,11 @@ if ($randHash != "ERROR")
         foreach ($updatedHeadendsToRefresh as $he => $modified)
         {
             printMSG("Headend update for $he\n");
-            $response = readline("Use entire lineup? (Y/n)>");
-            var_dump($response);
-            $tt = fgets(STDIN);
+            $response = strtoupper(readline("Use entire lineup? (Y/n)>"));
+            if ($response == "" OR $response == "Y")
+            {
+
+            }
         }
     }
 }
