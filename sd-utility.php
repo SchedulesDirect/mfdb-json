@@ -5,8 +5,11 @@ $isBeta = TRUE;
 $debug = TRUE;
 $doSetup = FALSE;
 $quiet = FALSE;
+$done = FALSE;
 $schedulesDirectHeadends = array();
 $sdStatus = "";
+$username = "";
+$password = "";
 
 $updatedHeadendsToRefresh = array();
 
@@ -15,12 +18,13 @@ $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 
-$user = "mythtv";
-$password = "mythtv";
+$dbUser = "mythtv";
+$dbPassword = "mythtv";
 $host = "localhost";
 $db = "mythconverg";
 
-$longoptions = array("beta::", "debug::", "help::", "host::", "password::", "setup::", "user::");
+$longoptions = array("beta::", "debug::", "help::", "host::", "dbpassword::", "dbuser::", "setup::", "username::",
+    "password::");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -39,20 +43,29 @@ foreach ($options as $k => $v)
             print "--beta\n";
             print "--help\t(this text)\n";
             print "--host=\t\texample: --host=192.168.10.10\n";
-            print "--user=\t\tUsername to connect as\n";
-            print "--password=\tPassword to access database.\n";
+            print "--dbuser=\t\tUsername to access database\n";
+            print "--dbpassword=\tPassword to access database.\n";
+            print "--username=\tSchedules Direct username.\n";
+            print "--password=\tSchedules Direct password.\n";
             exit;
         case "host":
             $host = $v;
             break;
+        case "dbpassword":
+            $dbPassword = $v;
+            break;
+        case "dbuser":
+            $dbUser = $v;
+            break;
+        case "username":
+            $username = $v;
+            break;
         case "password":
             $password = $v;
+            $passwordHash = sha1($v);
             break;
         case "setup":
             $doSetup = TRUE;
-            break;
-        case "user":
-            $user = $v;
             break;
     }
 }
@@ -60,7 +73,7 @@ foreach ($options as $k => $v)
 printMSG("Attempting to connect to database.\n");
 try
 {
-    $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $password,
+    $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $dbUser, $dbPassword,
         array(PDO::ATTR_PERSISTENT => true));
     $dbh->exec("SET CHARACTER SET utf8");
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -85,56 +98,101 @@ else
     $api = 20130512;
 }
 
-$stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource
-                       WHERE xmltvgrabber='schedulesdirect1' LIMIT 1");
-$stmt->execute();
-$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($result[0] as $k => $v)
+if ($username == "" AND $passwordHash == "")
 {
-    switch ($k)
+    $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect1' LIMIT 1");
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (isset($result[0]["userid"]))
     {
-        case
-        "userid":
-            $username = $v;
-            break;
-        case
-        "password":
-            $password = sha1($v);
-            break;
+        $username = $result[0]["userid"];
+        $userPassword = $result[0]["password"];
+        $passwordHash = sha1($userPassword);
+    }
+    else
+    {
+        $username = readline("Schedules Direct username:");
+        $password = readline("Schedules Direct password:");
+        $passwordHash = sha1($password);
     }
 }
 
 printMSG("Logging into Schedules Direct.\n");
-$randHash = getRandhash($username, $password);
-
-if ($doSetup)
-{
-    getStatus();
-    getSchedulesDirectHeadends();
-    setup();
-}
-
-
+$randHash = getRandhash($username, $passwordHash);
 if ($randHash != "ERROR")
 {
     getStatus();
     printStatus();
-    if (count($updatedHeadendsToRefresh))
-    {
-        foreach ($updatedHeadendsToRefresh as $he => $modified)
-        {
-            printMSG("Headend update for $he\n");
-            $response = strtoupper(readline("Use entire lineup? (Y/n)>"));
-            if ($response == "" OR $response == "Y")
-            {
+}
 
-            }
-        }
+while (!$done)
+{
+    printMSG("Main Menu:\n");
+    printMSG("1 Add a headend to account at Schedules Direct\n");
+    printMSG("2 Delete a headend from account at Schedules Direct\n");
+    printMSG("L to Link a videosource to a headend at SD\n");
+    printMSG("S to Setup\n");
+    printMSG("V to add a new videosource to MythTV\n");
+    printMSG("Q to Quit\n");
+
+    $response = strtoupper(readline(">"));
+
+    switch ($response)
+    {
+
+        case "L":
+            printMSG("Linking Schedules Direct headend to sourceid\n\n");
+            $sid = readline("Source id:>");
+            $he = readline("Headend:>");
+
+            /*
+             * TODO: Add a way to pull a specific lineup from the headend
+             */
+
+            $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
+            $stmt->execute(array("he" => $he, "sid" => $sid));
+            /*
+             * Download the lineups
+             */
+            /*
+             * Create the channel table.
+             */
+            break;
+        case "S":
+            getSchedulesDirectHeadends();
+            setup();
+            break;
+        case "V":
+            printMSG("Adding new videosource\n\n");
+            $newName = readline("Name:>");
+            $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
+                        VALUES(:name,:userid,:password,'schedulesdirect1')");
+            $stmt->execute(array("name"     => $newName, "userid" => $username,
+                                 "password" => $password));
+            break;
+        case "Q":
+        default:
+            $done = TRUE;
+            break;
+
     }
 }
 
+exit;
 
+if (count($updatedHeadendsToRefresh))
+{
+    foreach ($updatedHeadendsToRefresh as $he => $modified)
+    {
+        printMSG("Headend update for $he\n");
+        $response = strtoupper(readline("Use entire lineup? (Y/n)>"));
+        if ($response == "" OR $response == "Y")
+        {
+
+        }
+    }
+}
 
 function setup()
 {
@@ -142,53 +200,13 @@ function setup()
     global $schedulesDirectHeadends;
     global $randHash;
 
-    $username = readline("Schedules Direct username:");
-    $password = readline("Schedules Direct password:");
-
     printMSG("Checking existing lineups at Schedules Direct.\n");
 
     if (count($schedulesDirectHeadends))
     {
         displayLocalVideoSource();
 
-        printMSG("A to add a new videosource to MythTV\n");
-        printMSG("L to Link a videosource to a headend at SD\n");
-        printMSG("Q to Quit\n");
-        $response = strtoupper(readline(">"));
 
-        switch ($response)
-        {
-            case "A":
-                printMSG("Adding new videosource\n\n");
-                $newName = readline("Name:>");
-                $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password)
-                        VALUES(:name,:userid,:password)");
-                $stmt->execute(array("name"     => $newName, "userid" => $username,
-                                     "password" => $password));
-                break;
-            case "L":
-                printMSG("Linking Schedules Direct headend to sourceid\n\n");
-                $sid = readline("Source id:>");
-                $he = readline("Headend:>");
-
-                /*
-                 * TODO: Add a way to pull a specific lineup from the headend
-                 */
-
-                $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
-                $stmt->execute(array("he" => $he, "sid" => $sid));
-                /*
-                 * Download the lineups
-                 */
-                /*
-                 * Create the channel table.
-                 */
-                break;
-            case "Q":
-            default:
-                $done = TRUE;
-                break;
-        }
     }
     else
     {
@@ -627,13 +645,13 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
     print "***DEBUG: Exiting updateChannelTable.\n";
 }
 
-function getRandhash($username, $password)
+function getRandhash($username, $passwordHash)
 {
     global $api;
     $res = array();
     $res["action"] = "get";
     $res["object"] = "randhash";
-    $res["request"] = array("username" => $username, "password" => $password);
+    $res["request"] = array("username" => $username, "password" => $passwordHash);
     $res["api"] = $api;
 
     $response = sendRequest(json_encode($res));
