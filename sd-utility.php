@@ -1,7 +1,7 @@
 #!/usr/bin/php
 
 <?php
-$isBeta = FALSE;
+$isBeta = TRUE;
 $debug = TRUE;
 $doSetup = FALSE;
 $quiet = FALSE;
@@ -108,6 +108,8 @@ foreach ($result[0] as $k => $v)
             break;
     }
 }
+
+print "u:$username p:$password\n";
 
 printMSG("Logging into Schedules Direct.\n");
 $randHash = getRandhash($username, $password);
@@ -315,7 +317,7 @@ function printStatus()
     printMSG("Max number of headends for your account: $maxHeadends\n");
     printMSG("Next suggested connect time: $nextConnectTime\n");
 
-    $getLocalModified = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
+    $getLocalModified = $dbh->prepare("SELECT modified FROM headendCacheSD WHERE headend=:he");
     printMSG("The following headends are in your account:\n\n");
 
     $he = getSchedulesDirectHeadends();
@@ -344,12 +346,12 @@ function printStatus()
 
         if (count($retrieveLineups))
         {
-            processLineups($retrieveLineups);
+            updateLocalHeadendCache($retrieveLineups);
         }
     }
 }
 
-function processLineups(array $retrieveLineups)
+function updateLocalHeadendCache(array $retrieveLineups)
 {
     global $dbh;
 
@@ -392,7 +394,7 @@ function processLineups(array $retrieveLineups)
     /*
      * First, store a copy of the data that we just downloaded into the cache for later.
      */
-    $stmt = $dbh->prepare("REPLACE INTO SDlineupCache(headend,json,modified) VALUES(:he,:json,:modified)");
+    $stmt = $dbh->prepare("REPLACE INTO headendCacheSD(headend,json,modified) VALUES(:he,:json,:modified)");
     foreach (glob("$tempDir/*.json.txt") as $f)
     {
         $json = file_get_contents($f);
@@ -401,6 +403,11 @@ function processLineups(array $retrieveLineups)
 
         $stmt->execute(array("he" => $he, "modified" => $retrieveLineups[$he], "json" => $json));
     }
+}
+
+function test()
+{
+    global $dbh;
 
     /*
      * Get list of lineups that the user has and only worry about those.
@@ -438,7 +445,7 @@ function processLineups(array $retrieveLineups)
      * Now we have to determine if the lineup that the user is actually using has been updated.
      */
 
-    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE headend=:he");
+    $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
     foreach ($lineup as $lineupid => $v)
     {
         $headend = $v["headend"];

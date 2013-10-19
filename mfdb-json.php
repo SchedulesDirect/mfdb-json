@@ -758,7 +758,7 @@ function printStatus($json)
 
     if (count($he))
     {
-        $stmt = $dbh->prepare("SELECT modified FROM SDlineupCache WHERE headend=:he");
+        $stmt = $dbh->prepare("SELECT modified FROM headendCacheSD WHERE headend=:he");
         printMSG("The following headends are in your account:\n");
 
         $retrieveLineups = array();
