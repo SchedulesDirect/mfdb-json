@@ -4,8 +4,6 @@
 $isBeta = TRUE;
 $debug = TRUE;
 $doSetup = FALSE;
-$quiet = FALSE;
-$printTS = TRUE;
 $done = FALSE;
 $schedulesDirectHeadends = array();
 $sdStatus = "";
@@ -71,7 +69,7 @@ foreach ($options as $k => $v)
     }
 }
 
-printMSG("Attempting to connect to database.\n");
+print "Attempting to connect to database.\n";
 try
 {
     $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $dbUser, $dbPassword,
@@ -88,14 +86,14 @@ if ($isBeta)
 {
     # Test server. Things may be broken there.
     $baseurl = "http://23.21.174.111";
-    printMSG("Using beta server.\n");
+    print "Using beta server.\n";
     # API must match server version.
     $api = 20130709;
 }
 else
 {
     $baseurl = "https://data2.schedulesdirect.org";
-    printMSG("Using production server.\n");
+    print "Using production server.\n";
     $api = 20130512;
 }
 
@@ -119,7 +117,7 @@ if ($username == "" AND $password == "")
     }
 }
 
-printMSG("Logging into Schedules Direct.\n");
+print "Logging into Schedules Direct.\n";
 $randHash = getRandhash($username, $passwordHash);
 if ($randHash != "ERROR")
 {
@@ -127,19 +125,15 @@ if ($randHash != "ERROR")
     printStatus();
 }
 
-$quiet = TRUE;
-
 while (!$done)
 {
-    $printTS = FALSE;
-    printMSG("Main Menu:\n");
-    printMSG("1 Add a headend to account at Schedules Direct\n");
-    printMSG("2 Delete a headend from account at Schedules Direct\n");
-    printMSG("L to Link a videosource to a headend at SD\n");
-    printMSG("S to Setup\n");
-    printMSG("V to add a new videosource to MythTV\n");
-    printMSG("Q to Quit\n");
-    $printTS = TRUE;
+    print "Main Menu:\n";
+    print "1 Add a headend to account at Schedules Direct\n";
+    print "2 Delete a headend from account at Schedules Direct\n";
+    print "L to Link a videosource to a headend at SD\n";
+    print "S to Setup\n";
+    print "V to add a new videosource to MythTV\n";
+    print "Q to Quit\n";
 
     $response = strtoupper(readline(">"));
 
@@ -147,7 +141,7 @@ while (!$done)
     {
 
         case "L":
-            printMSG("Linking Schedules Direct headend to sourceid\n\n");
+            print "Linking Schedules Direct headend to sourceid\n\n";
             $sid = readline("Source id:>");
             $he = readline("Headend:>");
 
@@ -169,7 +163,7 @@ while (!$done)
             setup();
             break;
         case "V":
-            printMSG("Adding new videosource\n\n");
+            print "Adding new videosource\n\n";
             $newName = readline("Name:>");
             $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
                         VALUES(:name,:userid,:password,'schedulesdirect1')");
@@ -190,7 +184,7 @@ if (count($updatedHeadendsToRefresh))
 {
     foreach ($updatedHeadendsToRefresh as $he => $modified)
     {
-        printMSG("Headend update for $he\n");
+        print "Headend update for $he\n";
         $response = strtoupper(readline("Use entire lineup? (Y/n)>"));
         if ($response == "" OR $response == "Y")
         {
@@ -205,7 +199,7 @@ function setup()
     global $schedulesDirectHeadends;
     global $randHash;
 
-    printMSG("Checking existing lineups at Schedules Direct.\n");
+    print "Checking existing lineups at Schedules Direct.\n";
 
     if (count($schedulesDirectHeadends))
     {
@@ -227,10 +221,10 @@ function addHeadendsToSchedulesDirect()
     global $randHash;
     global $api;
 
-    printMSG("Two-character ISO3166 country code: (CA, US or ZZ)");
+    print "Two-character ISO3166 country code: (CA, US or ZZ)";
     $country = readline(">");
-    printMSG("Enter your 5-digit zip code for U.S.\n");
-    printMSG("Enter leftmost 4-character postal code for Canada.\n");
+    print "Enter your 5-digit zip code for U.S.\n";
+    print "Enter leftmost 4-character postal code for Canada.\n";
 
     $postalcode = readline(">");
 
@@ -245,7 +239,7 @@ function addHeadendsToSchedulesDirect()
 
     foreach ($res["data"] as $v)
     {
-        printMSG("headend: " . $v["headend"] . "\nname: " . $v["name"] . "(" . $v["location"] . ")\n\n");
+        print "headend: " . $v["headend"] . "\nname: " . $v["name"] . "(" . $v["location"] . ")\n\n";
     }
 
     $he = readline("Headend to add>");
@@ -265,13 +259,13 @@ function addHeadendsToSchedulesDirect()
 
     if ($res["response"] == "OK")
     {
-        printMSG("Successfully added headend.\n");
+        print "Successfully added headend.\n";
     }
     else
     {
-        printMSG("ERROR:Received error response from server:\n");
-        printMSG($res["message"] . "\n\n-----\n");
-        printMSG("Press ENTER to continue.\n");
+        print "ERROR:Received error response from server:\n";
+        print$res["message"] . "\n\n-----\n";
+        print "Press ENTER to continue.\n";
         $a = fgets(STDIN);
     }
 }
@@ -281,7 +275,7 @@ function getLineup(array $heToGet)
     global $randHash;
     global $api;
 
-    printMSG("Retrieving lineup from Schedules Direct.\n");
+    print "Retrieving lineup from Schedules Direct.\n";
 
     $res = array();
     $res["action"] = "get";
@@ -317,7 +311,7 @@ function printStatus()
 
     $printTS = FALSE;
 
-    printMSG("Status messages from Schedules Direct:\n");
+    print "Status messages from Schedules Direct:\n";
 
     $res = array();
     $res = json_decode($sdStatus, TRUE);
@@ -344,23 +338,23 @@ function printStatus()
                     /*
                      * Error notification - we're going to have to abort because the server didn't like what we sent.
                      */
-                    printMSG("Received error response from server!\n");
-                    printMSG("ServerID: " . $res["serverID"] . "\n");
-                    printMSG("Message: " . $res["message"] . "\n");
-                    printMSG("\nFATAL ERROR. Terminating execution.\n");
+                    print "Received error response from server!\n";
+                    print "ServerID: " . $res["serverID"] . "\n";
+                    print "Message: " . $res["message"] . "\n";
+                    print "\nFATAL ERROR. Terminating execution.\n";
                     exit;
                 }
         }
     }
 
-    printMSG("Server: " . $res["serverID"] . "\n");
-    printMSG("Last data refresh: " . $res["lastDataUpdate"] . "\n");
-    printMSG("Account expires: $expires\n");
-    printMSG("Max number of headends for your account: $maxHeadends\n");
-    printMSG("Next suggested connect time: $nextConnectTime\n");
+    print "Server: " . $res["serverID"] . "\n";
+    print "Last data refresh: " . $res["lastDataUpdate"] . "\n";
+    print "Account expires: $expires\n";
+    print "Max number of headends for your account: $maxHeadends\n";
+    print "Next suggested connect time: $nextConnectTime\n";
 
     $getLocalModified = $dbh->prepare("SELECT modified FROM headendCacheSD WHERE headend=:he");
-    printMSG("The following headends are in your account at Schedules Direct:\n\n");
+    print "The following headends are in your account at Schedules Direct:\n\n";
 
     $he = getSchedulesDirectHeadends();
 
@@ -375,7 +369,7 @@ function printStatus()
                 $line .= "\t";
             }
             $line .= "Last Updated: $modified\n";
-            printMSG($line);
+            print "$line\n";
             $getLocalModified->execute(array("he" => $id));
             $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
 
@@ -390,7 +384,6 @@ function printStatus()
             updateLocalHeadendCache($updatedHeadendsToRefresh);
         }
     }
-    $printTS = TRUE;
 }
 
 function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
@@ -403,15 +396,15 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
      * of the lineups in the headend. But we may not be using that particular lineup, so dig deeper...
      */
 
-    printMSG("Checking for updated lineups from Schedules Direct.\n");
+    print "Checking for updated lineups from Schedules Direct.\n";
 
     $res = array();
     $res = json_decode(getLineup($updatedHeadendsToRefresh), true);
 
     if ($res["code"] != 0)
     {
-        printMSG("\n\n-----\nERROR: Bad response from Schedules Direct.\n");
-        printMSG($res["message"] . "\n\n-----\n");
+        print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
+        print$res["message"] . "\n\n-----\n";
         exit;
     }
 
@@ -428,8 +421,8 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
     }
     else
     {
-        printMSG("FATAL: Could not open lineups zip file.\n");
-        printMSG("tempdir is $tempDir\n");
+        print "FATAL: Could not open lineups zip file.\n";
+        print "tempdir is $tempDir\n";
         exit;
     }
 
@@ -480,7 +473,7 @@ function test()
             $device = "Analog";
         }
         $lineup[$v["sourceid"]] = array("headend" => $headend, "device" => $device, "modified" => $modified);
-        // printMSG("headend:$headend device:$device modified:$modified\n");
+        // print "headend:$headend device:$device modified:$modified\n";
     }
 
     /*
@@ -502,12 +495,12 @@ function test()
             {
                 $jsonModified = $v1["modified"];
                 $transport = $v1["transport"];
-                // Eventually we won't print once coding is done.
-                printMSG("$headend:$device local modified date:" . $lineup[$lineupid]["modified"] . "\n");
-                printMSG("server modified date:$jsonModified\n");
+                // Eventually we won't print "once coding is done.
+                print "$headend:$device local modified date:" . $lineup[$lineupid]["modified"] . "\n";
+                print "server modified date:$jsonModified\n";
                 if ($jsonModified != $lineup[$lineupid]["modified"])
                 {
-                    printMSG("Use new lineup?\n");
+                    print "Use new lineup?\n";
                     $updateDB = strtoupper(readline(">"));
                     if ($updateDB == "Y")
                     {
@@ -527,7 +520,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
 {
     global $dbh;
 
-    printMSG("Updating channel table for sourceid:$sourceid\n");
+    print "Updating channel table for sourceid:$sourceid\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
     $stmt->execute(array("sourceid" => $sourceid));
 
@@ -591,7 +584,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
 
     if (isset($json["QAM"]))
     {
-        printMSG("Adding QAM data.\n");
+        print "Adding QAM data.\n";
         $dtvMultiplex = array();
 
         $channelInsert =
@@ -599,7 +592,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
         WHERE xmltvid=:stationID");
 
         $qamModified = $json["QAM"]["metadata"]["modified"];
-        printMSG("qam modified:$qamModified\n");
+        print "qam modified:$qamModified\n";
 
         foreach ($json["QAM"]["map"] as $v)
         {
@@ -617,7 +610,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
                 $virtualChannel = "";
             }
 
-            // printMSG("$stationID $qamType $qamFreq $qamProgram $channel\n");
+            // print "$stationID $qamType $qamFreq $qamProgram $channel\n";
 
             /*
              * Because multiple programs  may end up on a single frequency, we only want to insert once, but we want
@@ -640,7 +633,7 @@ function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
         }
     }
 
-    printMSG("***DEBUG: Exiting updateChannelTable.\n");
+    print "***DEBUG: Exiting updateChannelTable.\n";
     /*
      * Set the startchan to a non-bogus value.
      */
@@ -670,7 +663,7 @@ function getRandhash($username, $passwordHash)
 
     if (json_last_error() != 0)
     {
-        printMSG("JSON decode error:\n");
+        print "JSON decode error:\n";
         var_dump($response);
         exit;
     }
@@ -680,7 +673,7 @@ function getRandhash($username, $passwordHash)
         return $res["randhash"];
     }
 
-    printMSG("Response from schedulesdirect: $response\n");
+    print "Response from schedulesdirect: $response\n";
 
     return "ERROR";
 }
@@ -718,34 +711,10 @@ function tempdir()
     mkdir($tempfile);
     if (is_dir($tempfile))
     {
-        printMSG("tempdir is $tempfile\n");
+        print "tempdir is $tempfile\n";
 
         return $tempfile;
     }
-}
-
-function printMSG($str)
-{
-    global $fh_log;
-    global $quiet;
-    global $printTS;
-
-    if ($printTS)
-    {
-        $str = date("H:i:s") . ":$str";
-    }
-    else
-    {
-        print "$str";
-    }
-
-    if (!$quiet)
-    {
-        print "$str";
-    }
-
-    $str = str_replace("\r", "\n", $str);
-    fwrite($fh_log, $str);
 }
 
 function displayLocalVideoSource()
@@ -758,15 +727,15 @@ function displayLocalVideoSource()
 
     if (count($result))
     {
-        printMSG("Existing sources:\n");
+        print "Existing sources:\n";
         foreach ($result as $v)
         {
-            printMSG("sourceid: " . $v["sourceid"] . "\n");
-            printMSG("name: " . $v["name"] . "\n");
-            printMSG("userid: " . $v["userid"] . "\n");
+            print "sourceid: " . $v["sourceid"] . "\n";
+            print "name: " . $v["name"] . "\n";
+            print "userid: " . $v["userid"] . "\n";
             $username = $v["userid"];
-            printMSG("lineupid: " . $v["lineupid"] . "\n");
-            printMSG("password: " . $v["password"] . "\n\n");
+            print "lineupid: " . $v["lineupid"] . "\n";
+            print "password: " . $v["password"] . "\n\n";
             $password = $v["password"];
         }
     }
