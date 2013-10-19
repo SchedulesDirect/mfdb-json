@@ -127,6 +127,8 @@ if ($randHash != "ERROR")
     printStatus();
 }
 
+$quiet = TRUE;
+
 while (!$done)
 {
     $printTS = FALSE;
