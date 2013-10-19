@@ -313,6 +313,9 @@ function printStatus()
     global $dbh;
     global $sdStatus;
     global $updatedHeadendsToRefresh;
+    global $printTS;
+
+    $printTS = FALSE;
 
     printMSG("Status messages from Schedules Direct:\n");
 
@@ -387,6 +390,7 @@ function printStatus()
             updateLocalHeadendCache($updatedHeadendsToRefresh);
         }
     }
+    $printTS = TRUE;
 }
 
 function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
