@@ -229,11 +229,22 @@ function addHeadendsToSchedulesDirect()
     global $api;
 
     print "Two-character ISO3166 country code: (CA, US or ZZ)";
-    $country = readline(">");
-    print "Enter your 5-digit zip code for U.S.\n";
-    print "Enter leftmost 4-character postal code for Canada.\n";
+    $country = strtoupper(readline(">"));
 
-    $postalcode = readline(">");
+    if ($country != "ZZ")
+    {
+        print "Enter your 5-digit zip code for U.S.\n";
+        print "Enter leftmost 4-character postal code for Canada.\n";
+
+        $postalcode = strtoupper(readline(">"));
+    }
+    else
+    {
+        /*
+         * Doesn't matter for "ZZ" codes.
+         */
+        $postalcode = "00000";
+    }
 
     $res = array();
     $res["action"] = "get";
@@ -726,12 +737,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                               array(
-                                                   'method'  => 'POST',
-                                                   'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                                   'timeout' => 900,
-                                                   'content' => $data
-                                               )
+                                           array(
+                                               'method'  => 'POST',
+                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                               'timeout' => 900,
+                                               'content' => $data
+                                           )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
