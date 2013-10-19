@@ -357,7 +357,7 @@ function printStatus()
     printMSG("Next suggested connect time: $nextConnectTime\n");
 
     $getLocalModified = $dbh->prepare("SELECT modified FROM headendCacheSD WHERE headend=:he");
-    printMSG("The following headends are in your account:\n\n");
+    printMSG("The following headends are in your account at Schedules Direct:\n\n");
 
     $he = getSchedulesDirectHeadends();
 
