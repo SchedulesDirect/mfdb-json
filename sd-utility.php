@@ -204,7 +204,7 @@ function addHeadendsToSchedulesDirect()
     global $randHash;
     global $api;
 
-    printMSG("Two-character ISO3166 country code: (CA, US or ZZ");
+    printMSG("Two-character ISO3166 country code: (CA, US or ZZ)");
     $country = readline(">");
     printMSG("Enter your 5-digit zip code for U.S.\n");
     printMSG("Enter leftmost 4-character postal code for Canada.\n");
