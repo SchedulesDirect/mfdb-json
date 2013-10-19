@@ -5,6 +5,7 @@ $isBeta = TRUE;
 $debug = TRUE;
 $doSetup = FALSE;
 $quiet = FALSE;
+$printTS = TRUE;
 $done = FALSE;
 $schedulesDirectHeadends = array();
 $sdStatus = "";
@@ -98,7 +99,7 @@ else
     $api = 20130512;
 }
 
-if ($username == "" AND $passwordHash == "")
+if ($username == "" AND $password == "")
 {
     $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect1' LIMIT 1");
     $stmt->execute();
@@ -128,6 +129,7 @@ if ($randHash != "ERROR")
 
 while (!$done)
 {
+    $printTS = FALSE;
     printMSG("Main Menu:\n");
     printMSG("1 Add a headend to account at Schedules Direct\n");
     printMSG("2 Delete a headend from account at Schedules Direct\n");
@@ -135,6 +137,7 @@ while (!$done)
     printMSG("S to Setup\n");
     printMSG("V to add a new videosource to MythTV\n");
     printMSG("Q to Quit\n");
+    $printTS = TRUE;
 
     $response = strtoupper(readline(">"));
 
@@ -719,8 +722,16 @@ function printMSG($str)
 {
     global $fh_log;
     global $quiet;
+    global $printTS;
 
-    $str = date("H:i:s") . ":$str";
+    if ($printTS)
+    {
+        $str = date("H:i:s") . ":$str";
+    }
+    else
+    {
+        print "$str";
+    }
 
     if (!$quiet)
     {
