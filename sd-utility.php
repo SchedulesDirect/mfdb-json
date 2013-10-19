@@ -118,14 +118,16 @@ if ($username == "" AND $password == "")
 
 print "Logging into Schedules Direct.\n";
 $randHash = getRandhash($username, $passwordHash);
-if ($randHash != "ERROR")
+if ($randHash == "ERROR")
 {
-    getStatus();
-    printStatus();
+    exit;
 }
 
 while (!$done)
 {
+    getStatus();
+    printStatus();
+
     print "Main Menu:\n";
     print "1 Add a headend to account at Schedules Direct\n";
     print "2 Delete a headend from account at Schedules Direct\n";
