@@ -370,7 +370,7 @@ function printStatus()
                 $line .= "\t";
             }
             $line .= "Last Updated: $modified\n";
-            print "$line\n";
+            print "$line";
             $getLocalModified->execute(array("he" => $id));
             $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
 
