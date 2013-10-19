@@ -125,8 +125,6 @@ if ($randHash != "ERROR")
             $response = readline("Use entire lineup? (Y/n)>");
             var_dump($response);
             $tt = fgets(STDIN);
-            updte
-
         }
     }
 }
