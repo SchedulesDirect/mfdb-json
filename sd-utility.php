@@ -85,11 +85,6 @@ else
     $api = 20130512;
 }
 
-if ($doSetup)
-{
-    setup();
-}
-
 $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource
                        WHERE xmltvgrabber='schedulesdirect1' LIMIT 1");
 $stmt->execute();
@@ -113,6 +108,14 @@ foreach ($result[0] as $k => $v)
 printMSG("Logging into Schedules Direct.\n");
 $randHash = getRandhash($username, $password);
 
+if ($doSetup)
+{
+    getStatus();
+    getSchedulesDirectHeadends();
+    setup();
+}
+
+
 if ($randHash != "ERROR")
 {
     getStatus();
@@ -130,6 +133,8 @@ if ($randHash != "ERROR")
         }
     }
 }
+
+
 
 function setup()
 {
@@ -199,7 +204,6 @@ function addHeadendsToSchedulesDirect()
     global $randHash;
     global $api;
 
-    printMSG("No headends are configured in your Schedules Direct account.\n");
     printMSG("Two-character ISO3166 country code: (CA, US or ZZ");
     $country = readline(">");
     printMSG("Enter your 5-digit zip code for U.S.\n");
