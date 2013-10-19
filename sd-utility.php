@@ -15,7 +15,6 @@ $updatedHeadendsToRefresh = array();
 date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
-$fh_log = fopen("$todayDate.log", "a");
 
 $dbUser = "mythtv";
 $dbPassword = "mythtv";
