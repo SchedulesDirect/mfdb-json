@@ -170,15 +170,7 @@ while (!$done)
             break;
         case "L":
             print "Linking Schedules Direct headend to sourceid\n\n";
-            $sid = readline("Source id:>");
-            $he = strtoupper(readline("Headend:>"));
-
-            /*
-             * TODO: Add a way to pull a specific lineup from the headend
-             */
-
-            $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
-            $stmt->execute(array("he" => $he, "sid" => $sid));
+            linkSchedulesDirectHeadend();
             break;
         case "R":
             refreshLineup();
@@ -205,6 +197,45 @@ if (count($updatedHeadendsToRefresh))
     }
 }
 
+function linkSchedulesDirectHeadend()
+{
+    global $dbh;
+
+    $sid = readline("Source id:>");
+    $he = strtoupper(readline("Headend:>"));
+
+    $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
+    $stmt->execute(array("he" => $he));
+    $response = json_decode($stmt->fetchColumn(), TRUE);
+
+    if (!count($response))
+    {
+        return;
+    }
+
+    if (count($response["deviceTypes"]) > 1)
+    {
+        print "Your headend has these devicetypes: ";
+        foreach ($response["deviceTypes"] as $v)
+        {
+            print "$v ";
+        }
+        print "\n";
+
+        $deviceToLink = strtoupper(readline("Which device to link:>"));
+    }
+    else
+    {
+        print "Your headend has only one devicetype: ";
+        print $response["deviceTypes"][0] . "\n";
+        $deviceToLink = $response["deviceTypes"][0];
+    }
+
+    $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
+    $stmt->execute(array("he" => "$he:$deviceToLink", "sid" => $sid));
+
+}
+
 function printLineup()
 {
     global $dbh;
@@ -222,7 +253,6 @@ function printLineup()
     {
         return;
     }
-
 
     if (count($response["deviceTypes"]) > 1)
     {
@@ -811,12 +841,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                               array(
-                                                   'method'  => 'POST',
-                                                   'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                                   'timeout' => 900,
-                                                   'content' => $data
-                                               )
+                                           array(
+                                               'method'  => 'POST',
+                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                               'timeout' => 900,
+                                               'content' => $data
+                                           )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
