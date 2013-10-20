@@ -131,6 +131,7 @@ while (!$done)
     print "1 Add a headend to account at Schedules Direct\n";
     print "2 Delete a headend from account at Schedules Direct\n";
     print "3 Acknowledge a message\n";
+    print "4 Print a channel lineup for a headend\n";
     print "\nMythTV functions:\n";
     print "A to Add a new videosource to MythTV\n";
     print "D to Delete a videosource in MythTV\n";
@@ -150,6 +151,8 @@ while (!$done)
         case "3":
             deleteMessageFromSchedulesDirect();
             break;
+        case "4":
+            printLineup();
         case "A":
             print "Adding new videosource\n\n";
             $newName = readline("Name:>");
@@ -166,7 +169,7 @@ while (!$done)
         case "L":
             print "Linking Schedules Direct headend to sourceid\n\n";
             $sid = readline("Source id:>");
-            $he = readline("Headend:>");
+            $he = strtoupper(readline("Headend:>"));
 
             /*
              * TODO: Add a way to pull a specific lineup from the headend
@@ -174,18 +177,11 @@ while (!$done)
 
             $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
             $stmt->execute(array("he" => $he, "sid" => $sid));
-            /*
-             * Download the lineups
-             */
-            /*
-             * Create the channel table.
-             */
             break;
         case "Q":
         default:
             $done = TRUE;
             break;
-
     }
 }
 
@@ -202,6 +198,31 @@ if (count($updatedHeadendsToRefresh))
 
         }
     }
+}
+
+function printLineup()
+{
+    global $dbh;
+
+    /*
+     * First we want to get the headend that we're interested in.
+     */
+
+    $he = strtoupper(readline("Headend:>"));
+    $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
+    $stmt->execute(array("he" => $he));
+    $response = $stmt->fetchColumn();
+
+    var_dump($response);
+    $tt=fgets(STDIN);
+    exit;
+
+    if (count($response))
+    {
+        foreach ($response)
+        {}
+    }
+
 }
 
 function addHeadendsToSchedulesDirect()
