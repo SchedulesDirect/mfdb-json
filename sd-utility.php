@@ -213,17 +213,24 @@ function printLineup()
     $stmt->execute(array("he" => $he));
     $response = $stmt->fetchColumn();
 
-    var_dump($response);
-    $tt = fgets(STDIN);
-    exit;
-
-    if (count($response))
+    if (!count($response))
     {
-        foreach ($response as $v)
-        {
-        }
+        return;
     }
 
+    print "Your headend has these devicetypes: ";
+    if (count($response["deviceTypes"]) > 1)
+    {
+        foreach ($response["deviceTypes"] as $v)
+        {
+            print "$v ";
+        }
+        print "\n";
+    }
+    else
+    {
+        print $response["deviceTypes"] . "\n";
+    }
 }
 
 function addHeadendsToSchedulesDirect()
