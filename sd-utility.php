@@ -123,6 +123,7 @@ if ($randHash == "ERROR")
 while (!$done)
 {
     getStatus();
+
     printStatus();
 
     displayLocalVideoSources();
@@ -132,6 +133,7 @@ while (!$done)
     print "2 Delete a headend from account at Schedules Direct\n";
     print "3 Acknowledge a message\n";
     print "4 Print a channel lineup for a headend\n";
+
     print "\nMythTV functions:\n";
     print "A to Add a new videosource to MythTV\n";
     print "D to Delete a videosource in MythTV\n";
@@ -528,15 +530,18 @@ function printStatus()
                 // We want the tabs to align.
                 $line .= "\t";
             }
-            $line .= "Last Updated: $modified\n";
-            print "$line";
+            $line .= "Last Updated: $modified";
+
             $getLocalModified->execute(array("he" => $id));
             $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
 
             if ((count($result) == 0) OR ($result[0] < $modified))
             {
                 $updatedHeadendsToRefresh[$id] = $modified;
+                $line .= "(*** Update Available ***)";
             }
+
+            print "$line\n";
         }
 
         if (count($updatedHeadendsToRefresh))
