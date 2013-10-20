@@ -129,7 +129,7 @@ while (!$done)
     getStatus();
     printStatus();
 
-    print "Main Menu:\n";
+    print "\nMain Menu:\n";
     print "1 Add a headend to account at Schedules Direct\n";
     print "2 Delete a headend from account at Schedules Direct\n";
     print "3 Acknowledge a message\n";
@@ -373,7 +373,7 @@ function printStatus()
                 foreach ($v["messages"] as $a)
                 {
                     $am[$a["msgID"]] = array("date" => $a["date"], "message" => $a["message"]);
-                    print "MessageID:" . $a["msgID"] . ": " . $a["date"] . " " . $a["message"] . "\n";
+                    print "MessageID: " . $a["msgID"] . " : " . $a["date"] . " " . $a["message"] . "\n";
                 }
                 $expires = $v["expires"];
                 $maxHeadends = $v["maxHeadends"];
