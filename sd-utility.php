@@ -440,48 +440,26 @@ function printStatus()
 
     print "\nStatus messages from Schedules Direct:\n";
 
-    $res = array();
     $res = json_decode($sdStatus, TRUE);
 
-    $am = array();
-    $he = array();
-
-    print "res is\n\n";
-    var_dump($res);
-    $tt=fgets(STDIN);
-
-
-
-
-
-
-    foreach ($res as $k => $v)
+    if ($res["response"]["code"])
     {
-        switch ($k)
+        $expires = $res["account"]["expires"];
+        $maxHeadends = $res["account"]["maxHeadends"];
+        $nextConnectTime = $res["account"]["nextSuggestedConnectTime"];
+
+        foreach ($res["account"]["messages"] as $a)
         {
-            case "account":
-                foreach ($v["messages"] as $a)
-                {
-                    $am[$a["msgID"]] = array("date" => $a["date"], "message" => $a["message"]);
-                    print "MessageID: " . $a["msgID"] . " : " . $a["date"] . " : " . $a["message"] . "\n";
-                }
-                $expires = $v["expires"];
-                $maxHeadends = $v["maxHeadends"];
-                $nextConnectTime = $v["nextSuggestedConnectTime"];
-                break;
-            case "code":
-                if ($v != 0)
-                {
-                    /*
-                     * Error notification - we're going to have to abort because the server didn't like what we sent.
-                     */
-                    print "Received error response from server!\n";
-                    print "ServerID: " . $res["serverID"] . "\n";
-                    print "Message: " . $res["message"] . "\n";
-                    print "\nFATAL ERROR. Terminating execution.\n";
-                    exit;
-                }
+            print "MessageID: " . $a["msgID"] . " : " . $a["date"] . " : " . $a["message"] . "\n";
         }
+    }
+    else
+    {
+        print "Received error response from server!\n";
+        print "ServerID: " . $res["serverID"] . "\n";
+        print "Message: " . $res["message"] . "\n";
+        print "\nFATAL ERROR. Terminating execution.\n";
+        exit;
     }
 
     print "Server: " . $res["serverID"] . "\n";
