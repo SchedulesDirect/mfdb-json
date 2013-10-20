@@ -129,6 +129,8 @@ while (!$done)
     getStatus();
     printStatus();
 
+    displayLocalVideoSources();
+
     print "\nMain Menu:\n";
     print "1 Add a headend to account at Schedules Direct\n";
     print "2 Delete a headend from account at Schedules Direct\n";
@@ -215,7 +217,7 @@ function setup()
 
     if (count($schedulesDirectHeadends))
     {
-        displayLocalVideoSource();
+        displayLocalVideoSources();
 
 
     }
@@ -797,11 +799,11 @@ function tempdir()
     }
 }
 
-function displayLocalVideoSource()
+function displayLocalVideoSources()
 {
     global $dbh;
 
-    $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
+    $stmt = $dbh->prepare("SELECT sourceid,name,lineupid FROM videosource");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -812,11 +814,7 @@ function displayLocalVideoSource()
         {
             print "sourceid: " . $v["sourceid"] . "\n";
             print "name: " . $v["name"] . "\n";
-            print "userid: " . $v["userid"] . "\n";
-            $username = $v["userid"];
             print "lineupid: " . $v["lineupid"] . "\n";
-            print "password: " . $v["password"] . "\n\n";
-            $password = $v["password"];
         }
     }
 }
