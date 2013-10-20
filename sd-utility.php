@@ -233,7 +233,7 @@ function printLineup()
     }
     else
     {
-        print "Your headend has only one devicetype:\n";
+        print "Your headend has only one devicetype: ";
         print $response["deviceTypes"][0] . "\n";
         $toPrint = $response["deviceTypes"][0];
     }
