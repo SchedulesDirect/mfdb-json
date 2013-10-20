@@ -3,7 +3,6 @@
 <?php
 $isBeta = TRUE;
 $debug = TRUE;
-$doSetup = FALSE;
 $done = FALSE;
 $schedulesDirectHeadends = array();
 $sdStatus = "";
@@ -22,7 +21,7 @@ $dbPassword = "mythtv";
 $host = "localhost";
 $db = "mythconverg";
 
-$longoptions = array("beta::", "debug::", "help::", "host::", "dbpassword::", "dbuser::", "setup::", "username::",
+$longoptions = array("beta::", "debug::", "help::", "host::", "dbpassword::", "dbuser::", "username::",
     "password::");
 
 $options = getopt("h::", $longoptions);
@@ -62,9 +61,6 @@ foreach ($options as $k => $v)
         case "password":
             $password = $v;
             $passwordHash = sha1($v);
-            break;
-        case "setup":
-            $doSetup = TRUE;
             break;
     }
 }
@@ -131,16 +127,14 @@ while (!$done)
 
     displayLocalVideoSources();
 
-    print "\nMain Menu:\n";
-    print "Schedules Direct functions:\n";
+    print "\nSchedules Direct functions:\n";
     print "1 Add a headend to account at Schedules Direct\n";
     print "2 Delete a headend from account at Schedules Direct\n";
     print "3 Acknowledge a message\n";
-    print "MythTV functions:\n";
+    print "\nMythTV functions:\n";
     print "A to Add a new videosource to MythTV\n";
     print "D to Delete a videosource in MythTV\n";
     print "L to Link a videosource to a headend at SD\n";
-    print "S to Setup\n";
     print "Q to Quit\n";
 
     $response = strtoupper(readline(">"));
@@ -187,11 +181,6 @@ while (!$done)
              * Create the channel table.
              */
             break;
-        case "S":
-            getSchedulesDirectHeadends();
-            setup();
-            break;
-
         case "Q":
         default:
             $done = TRUE;
@@ -212,29 +201,6 @@ if (count($updatedHeadendsToRefresh))
         {
 
         }
-    }
-}
-
-function setup()
-{
-    global $dbh;
-    global $schedulesDirectHeadends;
-    global $randHash;
-
-    print "Checking existing lineups at Schedules Direct.\n";
-
-    if (count($schedulesDirectHeadends))
-    {
-        displayLocalVideoSources();
-
-
-    }
-    else
-    {
-        /*
-         * User has no headends defined in their SD account.
-         */
-        addHeadendsToSchedulesDirect($randHash);
     }
 }
 
