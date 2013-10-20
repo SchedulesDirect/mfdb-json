@@ -245,7 +245,7 @@ function printLineup()
 
     foreach ($response["stations"] as $v)
     {
-        print "v is $v\n;"
+        print "v is $v\n";
     }
 
     $tt=fgets(STDIN);
