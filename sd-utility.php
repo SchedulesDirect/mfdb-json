@@ -812,9 +812,7 @@ function displayLocalVideoSources()
         print "Existing sources:\n";
         foreach ($result as $v)
         {
-            print "sourceid: " . $v["sourceid"] . "\n";
-            print "name: " . $v["name"] . "\n";
-            print "lineupid: " . $v["lineupid"] . "\n";
+            print "sourceid: " . $v["sourceid"] . " name: " . $v["name"] . " lineupid: " . $v["lineupid"] . "\n";
         }
     }
 }
