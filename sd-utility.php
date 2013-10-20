@@ -40,9 +40,9 @@ foreach ($options as $k => $v)
         case "h":
             print "The following options are available:\n";
             print "--beta\n";
-            print "--help\t(this text)\n";
-            print "--host=\t\texample: --host=192.168.10.10\n";
-            print "--dbuser=\t\tUsername to access database\n";
+            print "--help\t\t(this text)\n";
+            print "--host=\t\tMySQL database hostname\n";
+            print "--dbuser=\tUsername to access database\n";
             print "--dbpassword=\tPassword to access database.\n";
             print "--username=\tSchedules Direct username.\n";
             print "--password=\tSchedules Direct password.\n";
