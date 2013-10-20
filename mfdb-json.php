@@ -133,6 +133,7 @@ function getSchedules(array $stationIDs, $debug)
     global $dbh;
     global $api;
     global $randHash;
+    global $quiet;
 
     $dbProgramCache = array();
     $schedTempDir = tempdir();
@@ -539,7 +540,9 @@ function getSchedules(array $stationIDs, $debug)
 
             if ($dubbed AND $dubbedLanguage == NULL)
             {
+                $quiet = TRUE;
                 printMSG("*** Warning: $programID has dub but no dubbed language set.\n");
+                $quiet = FALSE;
             }
 
             if (isset($v["subtitled"]))
@@ -561,7 +564,9 @@ function getSchedules(array $stationIDs, $debug)
             }
             if ($isSubtitled AND $subtitledLanguage == NULL)
             {
+                $quiet = TRUE;
                 printMSG("*** Warning: $programID has subtitle but no subtitled language set.\n");
+                $quiet = FALSE;
             }
 
             if (isset($v["sap"]))
@@ -584,7 +589,9 @@ function getSchedules(array $stationIDs, $debug)
 
             if ($sap AND $sapLanguage == NULL)
             {
+                $quiet = TRUE;
                 printMSG("*** Warning: $programID has SAP but no SAP language set.\n");
+                $quiet = FALSE;
             }
 
             if (isset($v["programLanguage"]))
