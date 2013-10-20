@@ -136,6 +136,7 @@ while (!$done)
     print "A to Add a new videosource to MythTV\n";
     print "D to Delete a videosource in MythTV\n";
     print "L to Link a videosource to a headend at SD\n";
+    print "R to refresh a videosource with new lineup information\n";
     print "Q to Quit\n";
 
     $response = strtoupper(readline(">"));
@@ -178,6 +179,9 @@ while (!$done)
 
             $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
             $stmt->execute(array("he" => $he, "sid" => $sid));
+            break;
+        case "R":
+            refreshLineup();
             break;
         case "Q":
         default:
