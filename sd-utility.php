@@ -372,7 +372,7 @@ function printStatus()
                 foreach ($v["messages"] as $a)
                 {
                     $am[$a["msgID"]] = array("date" => $a["date"], "message" => $a["message"]);
-                    print $a["msgID"] . ":" . $a["date"] . " " . $a["message"] . "\n";
+                    print "MessageID:" . $a["msgID"] . ": " . $a["date"] . " " . $a["message"] . "\n";
                 }
                 $expires = $v["expires"];
                 $maxHeadends = $v["maxHeadends"];
