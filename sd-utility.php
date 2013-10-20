@@ -133,9 +133,9 @@ while (!$done)
     print "1 Add a headend to account at Schedules Direct\n";
     print "2 Delete a headend from account at Schedules Direct\n";
     print "3 Acknowledge a message\n";
+    print "A to add a new videosource to MythTV\n";
     print "L to Link a videosource to a headend at SD\n";
     print "S to Setup\n";
-    print "V to add a new videosource to MythTV\n";
     print "Q to Quit\n";
 
     $response = strtoupper(readline(">"));
@@ -150,6 +150,14 @@ while (!$done)
             break;
         case "3":
             deleteMessageFromSchedulesDirect();
+            break;
+        case "A":
+            print "Adding new videosource\n\n";
+            $newName = readline("Name:>");
+            $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
+                        VALUES(:name,:userid,:password,'schedulesdirect1')");
+            $stmt->execute(array("name"     => $newName, "userid" => $username,
+                                 "password" => $password));
             break;
         case "L":
             print "Linking Schedules Direct headend to sourceid\n\n";
@@ -173,14 +181,7 @@ while (!$done)
             getSchedulesDirectHeadends();
             setup();
             break;
-        case "V":
-            print "Adding new videosource\n\n";
-            $newName = readline("Name:>");
-            $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
-                        VALUES(:name,:userid,:password,'schedulesdirect1')");
-            $stmt->execute(array("name"     => $newName, "userid" => $username,
-                                 "password" => $password));
-            break;
+
         case "Q":
         default:
             $done = TRUE;
