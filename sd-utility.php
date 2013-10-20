@@ -186,15 +186,21 @@ while (!$done)
 
 exit;
 
-if (count($updatedHeadendsToRefresh))
+function refreshLineup()
 {
-    foreach ($updatedHeadendsToRefresh as $he => $modified)
-    {
-        print "Headend update for $he\n";
-        $response = strtoupper(readline("Use entire lineup? (Y/n)>"));
-        if ($response == "" OR $response == "Y")
-        {
+    global $dbh;
+    global $updatedHeadendsToRefresh;
 
+    if (count($updatedHeadendsToRefresh))
+    {
+        foreach ($updatedHeadendsToRefresh as $he => $modified)
+        {
+            print "Headend update for $he\n";
+            $response = strtoupper(readline("Use entire lineup? (Y/n)>"));
+            if ($response == "" OR $response == "Y")
+            {
+
+            }
         }
     }
 }
