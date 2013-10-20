@@ -202,7 +202,7 @@ function refreshLineup()
             $response = strtoupper(readline("Use entire lineup? (Y/n)>"));
             if ($response == "" OR $response == "Y")
             {
-
+                updateChannelTable($he, $json);
             }
         }
     }
@@ -690,9 +690,17 @@ function test()
     }
 }
 
-function updateChannelTable($sourceid, $he, $dev, $transport, array $json)
+function updateChannelTable($he)
 {
     global $dbh;
+
+    $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid LIKE :he");
+    $stmt->execute(array("he"=>"$he%"));
+    $sourcesToUpdate = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    var_dump($sourcesToUpdate);
+    $tt=fgets(STDIN);
+
 
     print "Updating channel table for sourceid:$sourceid\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
