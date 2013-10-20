@@ -547,7 +547,7 @@ function printStatus()
             if ((count($result) == 0) OR ($result[0] < $modified))
             {
                 $updatedHeadendsToRefresh[$id] = $modified;
-                $line .= "(*** Update Available ***)";
+                $line .= " (*** Update Available ***)";
             }
 
             print "$line\n";
