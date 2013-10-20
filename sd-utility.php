@@ -444,7 +444,7 @@ function printStatus()
 
     var_dump($res);
 
-    if ($res["response"]["code"] == 0)
+    if ($res["code"] == 0)
     {
         $expires = $res["account"]["expires"];
         $maxHeadends = $res["account"]["maxHeadends"];
