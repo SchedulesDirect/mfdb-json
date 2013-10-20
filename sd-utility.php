@@ -356,8 +356,6 @@ function printStatus()
     global $updatedHeadendsToRefresh;
     global $printTS;
 
-    $printTS = FALSE;
-
     print "Status messages from Schedules Direct:\n";
 
     $res = array();
@@ -374,6 +372,7 @@ function printStatus()
                 foreach ($v["messages"] as $a)
                 {
                     $am[$a["msgID"]] = array("date" => $a["date"], "message" => $a["message"]);
+                    print $a["msgID"] . ":" . $a["date"] . " " . $a["message"] . "\n";
                 }
                 $expires = $v["expires"];
                 $maxHeadends = $v["maxHeadends"];
