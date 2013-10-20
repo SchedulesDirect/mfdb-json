@@ -875,7 +875,7 @@ function printMSG($str)
     global $quiet;
     global $printTS;
 
-    if (!$printTS)
+    if ($printTS)
     {
         $str = date("H:i:s") . ":$str";
     }
