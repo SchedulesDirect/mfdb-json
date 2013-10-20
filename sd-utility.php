@@ -132,7 +132,7 @@ while (!$done)
     print "Main Menu:\n";
     print "1 Add a headend to account at Schedules Direct\n";
     print "2 Delete a headend from account at Schedules Direct\n";
-    print "3 Acknowlege a message\n";
+    print "3 Acknowledge a message\n";
     print "L to Link a videosource to a headend at SD\n";
     print "S to Setup\n";
     print "V to add a new videosource to MythTV\n";
