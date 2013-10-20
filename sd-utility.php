@@ -211,7 +211,7 @@ function printLineup()
     $he = strtoupper(readline("Headend:>"));
     $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
     $stmt->execute(array("he" => $he));
-    $response = $stmt->fetchColumn();
+    $response = json_decode($stmt->fetchColumn(), TRUE);
 
     if (!count($response))
     {
