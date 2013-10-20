@@ -261,7 +261,7 @@ function addHeadendsToSchedulesDirect()
 
     foreach ($res["data"] as $v)
     {
-        print "headend: " . $v["headend"] . "\nname: " . $v["name"] . "(" . $v["location"] . ")\n\n";
+        print "headend: " . $v["headend"] . "\nname: " . $v["name"] . " (" . $v["location"] . ")\n\n";
     }
 
     $he = readline("Headend to add>");
