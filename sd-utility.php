@@ -420,7 +420,7 @@ function printStatus()
     global $updatedHeadendsToRefresh;
     global $printTS;
 
-    print "Status messages from Schedules Direct:\n";
+    print "\nStatus messages from Schedules Direct:\n";
 
     $res = array();
     $res = json_decode($sdStatus, TRUE);
