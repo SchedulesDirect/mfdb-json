@@ -694,7 +694,7 @@ function updateChannelTable($he, $sourceID)
 {
     global $dbh;
 
-    $stmt = $dbh->prepare("SELECT lineupid FROM videosource WHERE")
+    $stmt = $dbh->prepare("SELECT lineupid FROM videosource WHERE");
 
     print "Updating channel table for sourceid:$sourceID\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
