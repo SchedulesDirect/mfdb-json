@@ -239,16 +239,32 @@ function printLineup()
     print "\n";
 
     var_dump($response);
-    $tt=fgets(STDIN);
-
+    $tt = fgets(STDIN);
 
 
     $chanMap = array();
     $stationMap = array();
 
-    foreach ($response[$toPrint]["map"] as $v)
+    if ($toPrint != "Antenna")
     {
-        $chanMap[$v["stationID"]] = $v["channel"];
+        foreach ($response[$toPrint]["map"] as $v)
+        {
+            $chanMap[$v["stationID"]] = $v["channel"];
+        }
+    }
+    else
+    {
+        foreach ($response["Antenna"]["map"] as $v)
+        {
+            if (isset($v["atscMajor"]))
+            {
+                $chanMap[$v["stationID"]] = $v["atscMajor"] . "." . $v["atscMinor"];
+            }
+            else
+            {
+                $chanMap[$v["stationID"]] = $v["uhfVhf"];
+            }
+        }
     }
 
     foreach ($response["stations"] as $v)
