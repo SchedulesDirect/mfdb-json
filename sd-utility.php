@@ -690,21 +690,15 @@ function test()
     }
 }
 
-function updateChannelTable($he)
+function updateChannelTable($he, $sourceID)
 {
     global $dbh;
 
-    $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid LIKE :he");
-    $stmt->execute(array("he"=>"$he%"));
-    $sourcesToUpdate = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $stmt = $dbh->prepare("SELECT lineupid FROM videosource WHERE")
 
-    var_dump($sourcesToUpdate);
-    $tt=fgets(STDIN);
-
-
-    print "Updating channel table for sourceid:$sourceid\n";
+    print "Updating channel table for sourceid:$sourceID\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
-    $stmt->execute(array("sourceid" => $sourceid));
+    $stmt->execute(array("sourceid" => $sourceID));
 
     foreach ($json[$dev]["map"] as $mapArray)
     {
