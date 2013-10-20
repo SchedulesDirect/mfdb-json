@@ -245,10 +245,12 @@ function printLineup()
 
     foreach ($response["stations"] as $v)
     {
-        print "v is $v\n";
+        print "v is\n";
+        var_dump($v);
+        $tt=fgets(STDIN);
     }
 
-    $tt=fgets(STDIN);
+
 
     //print "Channel: " . $v["channel"] . " stationID: " . $v["stationID"] . "\n";
 
