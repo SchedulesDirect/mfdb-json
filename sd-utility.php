@@ -246,31 +246,16 @@ function printLineup()
         $chanMap[$v["stationID"]] = $v["channel"];
     }
 
-    print "chanmap is\n\n";
-    var_dump($chanMap);
-    $tt=fgets(STDIN);
-
-
     foreach ($response["stations"] as $v)
     {
         $stationMap[$v["stationID"]] = $v["callsign"] . " (" . $v["affiliate"] . ")";
     }
 
-    print "stationmap is\n\n";
-    var_dump($stationMap);
-    $tt=fgets(STDIN);
-
-
-    print "Channel\tCallsign\t\t\tStationID\n";
+    print "Channel\tCallsign\t\t\t\t\tStationID\n";
     foreach ($chanMap as $stationID => $channel)
     {
-        print "$channel\t" . $stationMap[$stationID] . "\t\t$stationID\n";
+        print "$channel\t" . $stationMap[$stationID] . "\t\t\t\t\t$stationID\n";
     }
-
-    $tt = fgets(STDIN);
-
-    //print "Channel: " . $v["channel"] . " stationID: " . $v["stationID"] . "\n";
-
 }
 
 function addHeadendsToSchedulesDirect()
