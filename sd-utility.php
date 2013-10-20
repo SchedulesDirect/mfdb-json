@@ -132,9 +132,11 @@ while (!$done)
     displayLocalVideoSources();
 
     print "\nMain Menu:\n";
+    print "Schedules Direct functions:\n";
     print "1 Add a headend to account at Schedules Direct\n";
     print "2 Delete a headend from account at Schedules Direct\n";
     print "3 Acknowledge a message\n";
+    print "MythTV functions:\n";
     print "A to Add a new videosource to MythTV\n";
     print "D to Delete a videosource in MythTV\n";
     print "L to Link a videosource to a headend at SD\n";
