@@ -442,8 +442,6 @@ function printStatus()
 
     $res = json_decode($sdStatus, TRUE);
 
-    var_dump($res);
-
     if ($res["code"] == 0)
     {
         $expires = $res["account"]["expires"];
