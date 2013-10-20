@@ -231,8 +231,17 @@ function linkSchedulesDirectHeadend()
         $deviceToLink = $response["deviceTypes"][0];
     }
 
+    if ($deviceToLink == "Antenna")
+    {
+        $compositeDevice = $he;
+    }
+    else
+    {
+        $compositeDevice = "$he:$deviceToLink";
+    }
+
     $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
-    $stmt->execute(array("he" => "$he:$deviceToLink", "sid" => $sid));
+    $stmt->execute(array("he" => $compositeDevice, "sid" => $sid));
 
 }
 
