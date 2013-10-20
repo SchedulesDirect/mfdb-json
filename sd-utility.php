@@ -153,6 +153,7 @@ while (!$done)
             break;
         case "4":
             printLineup();
+            break;
         case "A":
             print "Adding new videosource\n\n";
             $newName = readline("Name:>");
@@ -226,11 +227,20 @@ function printLineup()
             print "$v ";
         }
         print "\n";
+
+        $toPrint = strtoupper(readline("Print which device:>"));
     }
     else
     {
         print $response["deviceTypes"][0] . "\n";
+        $toPrint = $response["deviceTypes"][0];
     }
+
+
+
+
+
+
 }
 
 function addHeadendsToSchedulesDirect()
