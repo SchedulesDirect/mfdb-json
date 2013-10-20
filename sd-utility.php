@@ -214,13 +214,14 @@ function printLineup()
     $response = $stmt->fetchColumn();
 
     var_dump($response);
-    $tt=fgets(STDIN);
+    $tt = fgets(STDIN);
     exit;
 
     if (count($response))
     {
-        foreach ($response)
-        {}
+        foreach ($response as $v)
+        {
+        }
     }
 
 }
