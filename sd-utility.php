@@ -442,7 +442,9 @@ function printStatus()
 
     $res = json_decode($sdStatus, TRUE);
 
-    if ($res["response"]["code"] != 0)
+    var_dump($res);
+
+    if ($res["response"]["code"] == 0)
     {
         $expires = $res["account"]["expires"];
         $maxHeadends = $res["account"]["maxHeadends"];
