@@ -251,10 +251,10 @@ function printLineup()
         $stationMap[$v["stationID"]] = $v["callsign"] . " (" . $v["affiliate"] . ")";
     }
 
-    print "Channel\tCallsign\t\t\t\t\tStationID\n";
+    print "Channel\tCallsign\tStationID\n";
     foreach ($chanMap as $stationID => $channel)
     {
-        print "$channel\t" . $stationMap[$stationID] . "\t\t\t\t\t$stationID\n";
+        print "$channel\t" . $stationMap[$stationID] . "\t$stationID\n";
     }
 }
 
