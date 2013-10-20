@@ -370,19 +370,18 @@ function getSchedules(array $stationIDs, $debug)
 
     $insertSchedule = $dbh->prepare("INSERT INTO s_scheduleSD(stationID,programID,md5,air_datetime,duration,
     previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
-    dolby,dubbed,dubLanguage,subtitled,subtitleLanguage,sap,sapLanguage,programLanguage,tvRating,dialogRating,languageRating,
+    dolby,dubbed,dubLanguage,subtitled,subtitleLanguage,sap,sapLanguage,programLanguage,tvRatingSystem,tvRating,
+    dialogRating,languageRating,
     sexualContentRating,violenceRating,fvRating) 
     
     VALUES(:stationID,:programID,:md5,:air_datetime,:duration,
     :previouslyshown,:closecaptioned,:partnumber,:parttotal,:first,:last,:dvs,:new,:educational,:hdtv,:3d,
     :letterbox,:stereo,:dolby,:dubbed,:dubLanguage,:subtitled,:subtitleLanguage,:sap,:sapLanguage,:programLanguage,
-    :tvRating,:dialogRating,:languageRating,:sexualContentRating,:violenceRating,:fvRating)");
+    :ratingSystem,:tvRating,:dialogRating,:languageRating,:sexualContentRating,:violenceRating,:fvRating)");
 
     foreach ($downloadedStationIDs as $stationID)
     {
         $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), TRUE);
-
-        // printMSG("Reading $stationID\n");
 
         $counter++;
         if ($counter % 100 == 0)
@@ -681,6 +680,7 @@ function getSchedules(array $stationIDs, $debug)
                 "sap"                 => $sap,
                 "sapLanguage"         => $sapLanguage,
                 "programLanguage"     => $programLanguage,
+                "ratingSystem"        => $ratingSystem,
                 "tvRating"            => $rating,
                 "dialogRating"        => $dialogRating,
                 "languageRating"      => $languageRating,
@@ -692,7 +692,7 @@ function getSchedules(array $stationIDs, $debug)
         $dbh->commit();
     }
 
-    printMSG("Done inserting schedules.\n");
+    printMSG("\nDone inserting schedules.\n");
     $stmt = $dbh->exec("DROP TABLE scheduleSD");
     $stmt = $dbh->exec("RENAME TABLE s_scheduleSD TO scheduleSD");
 }
@@ -837,12 +837,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'timeout' => 900,
-                                               'content' => $data
-                                           )
+                                               array(
+                                                   'method'  => 'POST',
+                                                   'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                                   'timeout' => 900,
+                                                   'content' => $data
+                                               )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
