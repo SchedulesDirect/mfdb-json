@@ -229,7 +229,7 @@ function printLineup()
     }
     else
     {
-        print $response["deviceTypes"] . "\n";
+        print $response["deviceTypes"][0] . "\n";
     }
 }
 
