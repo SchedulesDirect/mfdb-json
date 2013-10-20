@@ -437,7 +437,6 @@ function printStatus()
     global $dbh;
     global $sdStatus;
     global $updatedHeadendsToRefresh;
-    global $printTS;
 
     print "\nStatus messages from Schedules Direct:\n";
 
@@ -446,6 +445,15 @@ function printStatus()
 
     $am = array();
     $he = array();
+
+    print "res is\n\n";
+    var_dump($res);
+    $tt=fgets(STDIN);
+
+
+
+
+
 
     foreach ($res as $k => $v)
     {
