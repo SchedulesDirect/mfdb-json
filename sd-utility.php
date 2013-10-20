@@ -148,6 +148,9 @@ while (!$done)
         case "2":
             deleteHeadendFromSchedulesDirect();
             break;
+        case "3":
+            deleteMessageFromSchedulesDirect();
+            break;
         case "L":
             print "Linking Schedules Direct headend to sourceid\n\n";
             $sid = readline("Source id:>");
@@ -308,6 +311,35 @@ function deleteHeadendFromSchedulesDirect()
     if ($res["code"] == 0)
     {
         print "Successfully deleted headend.\n";
+    }
+    else
+    {
+        print "ERROR:Received error response from server:\n";
+        print$res["message"] . "\n\n-----\n";
+        print "Press ENTER to continue.\n";
+        $a = fgets(STDIN);
+    }
+}
+
+function deleteMessageFromSchedulesDirect()
+{
+    global $randHash;
+    global $api;
+
+    $toDelete = readline("MessageID to acknowledge:>");
+
+    $res = array();
+    $res["action"] = "delete";
+    $res["object"] = "message";
+    $res["randhash"] = $randHash;
+    $res["api"] = $api;
+    $res["request"] = $toDelete;
+
+    $res = json_decode(sendRequest(json_encode($res)), true);
+
+    if ($res["code"] == 0)
+    {
+        print "Successfully deleted message.\n";
     }
     else
     {
