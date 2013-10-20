@@ -268,7 +268,7 @@ function printLineup()
         $stationMap[$v["stationID"]] = $v["callsign"] . " (" . $v["affiliate"] . ")";
     }
 
-    asort($channel, SORT_NATURAL);
+    asort($chanMap, SORT_NATURAL);
 
     print "Channel\tCallsign\tStationID\n";
     foreach ($chanMap as $stationID => $channel)
