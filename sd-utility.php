@@ -219,19 +219,21 @@ function printLineup()
         return;
     }
 
-    print "Your headend has these devicetypes: ";
+
     if (count($response["deviceTypes"]) > 1)
     {
+        print "Your headend has these devicetypes: ";
         foreach ($response["deviceTypes"] as $v)
         {
             print "$v ";
         }
         print "\n";
 
-        $toPrint = strtoupper(readline("Print which device:>"));
+        $toPrint = strtoupper(readline("Which device to display:>"));
     }
     else
     {
+        print "Your headend has only one devicetype:\n";
         print $response["deviceTypes"][0] . "\n";
         $toPrint = $response["deviceTypes"][0];
     }
