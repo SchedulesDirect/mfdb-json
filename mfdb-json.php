@@ -8,6 +8,7 @@
 $isBeta = FALSE;
 $debug = TRUE;
 $quiet = FALSE;
+$printTS = FALSE;
 
 date_default_timezone_set("UTC");
 $date = new DateTime();
@@ -714,6 +715,7 @@ function getStatus()
 function printStatus($json)
 {
     global $dbh;
+    global $printTS;
 
     printMSG("Status messages from Schedules Direct:\n");
 
@@ -768,6 +770,7 @@ function printStatus($json)
         $stmt = $dbh->prepare("SELECT modified FROM headendCacheSD WHERE headend=:he");
         printMSG("The following headends are in your account:\n");
 
+        $printTS = FALSE;
         $retrieveLineups = array();
         foreach ($he as $id => $modified)
         {
@@ -786,6 +789,8 @@ function printStatus($json)
                 $retrieveLineups[] = $id;
             }
         }
+
+        $printTS = TRUE;
 
         if (count($retrieveLineups))
         {
@@ -868,8 +873,12 @@ function printMSG($str)
 {
     global $fh_log;
     global $quiet;
+    global $printTS;
 
-    $str = date("H:i:s") . ":$str";
+    if (!$printTS)
+    {
+        $str = date("H:i:s") . ":$str";
+    }
 
     if (!$quiet)
     {
