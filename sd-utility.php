@@ -160,10 +160,13 @@ while (!$done)
         case "A":
             print "Adding new videosource\n\n";
             $newName = readline("Name:>");
-            $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
+            if ($newName != "")
+            {
+                $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
                         VALUES(:name,:userid,:password,'schedulesdirect1')");
-            $stmt->execute(array("name"     => $newName, "userid" => $username,
-                                 "password" => $password));
+                $stmt->execute(array("name"     => $newName, "userid" => $username,
+                                     "password" => $password));
+            }
             break;
         case "D":
             $toDelete = readline("Delete sourceid:>");
