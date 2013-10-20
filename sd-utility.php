@@ -135,7 +135,8 @@ while (!$done)
     print "1 Add a headend to account at Schedules Direct\n";
     print "2 Delete a headend from account at Schedules Direct\n";
     print "3 Acknowledge a message\n";
-    print "A to add a new videosource to MythTV\n";
+    print "A to Add a new videosource to MythTV\n";
+    print "D to Delete a videosource in MythTV\n";
     print "L to Link a videosource to a headend at SD\n";
     print "S to Setup\n";
     print "Q to Quit\n";
@@ -160,6 +161,11 @@ while (!$done)
                         VALUES(:name,:userid,:password,'schedulesdirect1')");
             $stmt->execute(array("name"     => $newName, "userid" => $username,
                                  "password" => $password));
+            break;
+        case "D":
+            $toDelete = readline("Delete sourceid:>");
+            $stmt = $dbh->prepare("DELETE FROM videosource WHERE sourceid=:sid");
+            $stmt->execute(array("sid" => $toDelete));
             break;
         case "L":
             print "Linking Schedules Direct headend to sourceid\n\n";
@@ -772,12 +778,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'timeout' => 900,
-                                               'content' => $data
-                                           )
+                                               array(
+                                                   'method'  => 'POST',
+                                                   'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                                   'timeout' => 900,
+                                                   'content' => $data
+                                               )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
