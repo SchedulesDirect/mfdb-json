@@ -236,9 +236,10 @@ function printLineup()
         $toPrint = $response["deviceTypes"][0];
     }
 
-
-
-
+    foreach ($response[$toPrint]["map"] as $v)
+    {
+        print "Channel: " . $v["channel"] . " stationID: " . $v["stationID"] . "\n";
+    }
 
 
 }
