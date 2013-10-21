@@ -218,6 +218,10 @@ function updateChannelTable($he, $sourceID)
 
     $stmt = $dbh->prepare("SELECT lineupid FROM videosource WHERE sourceid=:sourceid");
     $stmt->execute(array("sourceid" => $sourceID));
+    $result = $stmt->fetchColumn();
+
+    var_dump($result);
+    exit;
 
     print "Updating channel table for sourceid:$sourceID\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
