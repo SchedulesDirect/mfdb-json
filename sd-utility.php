@@ -280,7 +280,7 @@ function updateChannelTable($he, $sourceID)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
             $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channum, "channum" => $channum,
-                                 "freqid" => $channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
+                                 "freqid" => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
         }
         else
         {
@@ -288,7 +288,7 @@ function updateChannelTable($he, $sourceID)
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
                 VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
             $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$freqid, "channum" => $freqid,
-                                 "freqid"          => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
+                                 "freqid"          => $freqid, "sourceid" => $sourceID, "xmltvid" => $stationID,
                                  "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
         }
     }
@@ -347,7 +347,7 @@ function updateChannelTable($he, $sourceID)
                 (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
                 VALUES
                 (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
-                $insertDTVMultiplex->execute(array("sourceid" => $sourceid, "freq" => $qamFreq));
+                $insertDTVMultiplex->execute(array("sourceid" => $sourceID, "freq" => $qamFreq));
                 $dtvMultiplex[$qamFreq] = $dbh->lastInsertId();
             }
 
@@ -356,7 +356,6 @@ function updateChannelTable($he, $sourceID)
         }
     }
 
-    print "***DEBUG: Exiting updateChannelTable.\n";
     /*
      * Set the startchan to a non-bogus value.
      */
@@ -367,7 +366,6 @@ function updateChannelTable($he, $sourceID)
     $startChan = $result[0];
     $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
     $setStartChannel->execute(array("sourceid" => $sourceID, "startChan" => $startChan));
-    print "***DEBUG: Exiting updateChannelTable.\n";
 }
 
 
