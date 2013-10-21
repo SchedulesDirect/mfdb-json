@@ -528,6 +528,9 @@ function addHeadendsToSchedulesDirect()
 
     $res = json_decode(sendRequest(json_encode($res)), true);
 
+    var_dump($res);
+    $tt=fgets(STDIN);
+
     foreach ($res["data"] as $v)
     {
         print "headend: " . $v["headend"] . "\nname: " . $v["name"] . " (" . $v["location"] . ")\n\n";
