@@ -528,8 +528,12 @@ function addHeadendsToSchedulesDirect()
 
     $res = json_decode(sendRequest(json_encode($res)), true);
 
-    var_dump($res);
-    $tt=fgets(STDIN);
+    if ($res["code"] != 0)
+    {
+        print "Error!\n";
+        print $res["code"] . " " . $res["response"] . " " . $res["message"] . "\n";
+        return;
+    }
 
     foreach ($res["data"] as $v)
     {
