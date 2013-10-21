@@ -531,7 +531,7 @@ function addHeadendsToSchedulesDirect()
     if ($res["code"] != 0)
     {
         print "Error!\n";
-        print $res["code"] . " " . $res["response"] . " " . $res["message"] . "\n";
+        print "code:" . $res["code"] . " response:" . $res["response"] . " message:" . $res["message"] . "\n";
         return;
     }
 
