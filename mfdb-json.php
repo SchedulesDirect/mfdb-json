@@ -693,7 +693,7 @@ function getSchedules(array $stationIDs, $debug)
         $dbh->commit();
     }
 
-    printMSG("\nDone inserting schedules.\n");
+    printMSG("Done inserting schedules.\n");
     $stmt = $dbh->exec("DROP TABLE scheduleSD");
     $stmt = $dbh->exec("RENAME TABLE s_scheduleSD TO scheduleSD");
 }
