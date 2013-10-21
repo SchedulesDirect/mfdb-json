@@ -218,14 +218,26 @@ function updateChannelTable($he, $sourceID)
 
     $stmt = $dbh->prepare("SELECT lineupid FROM videosource WHERE sourceid=:sourceid");
     $stmt->execute(array("sourceid" => $sourceID));
-    $result = $stmt->fetchColumn();
+    $lineupid = $stmt->fetchColumn();
 
-    var_dump($result);
-    exit;
+    list($h, $dev) = explode(":", $lineupid);
+
+    $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
+    $stmt->execute(array("he" => $he));
+    $json = json_decode($stmt->fetchColumn());
 
     print "Updating channel table for sourceid:$sourceID\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
     $stmt->execute(array("sourceid" => $sourceID));
+
+    if (substr($h, 0, 2) == "PC")
+    {
+        $transport = "Antenna";
+    }
+    else
+    {
+        $transport = "Cable";
+    }
 
     foreach ($json[$dev]["map"] as $mapArray)
     {
@@ -259,7 +271,7 @@ function updateChannelTable($he, $sourceID)
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
-            $stmt->execute(array("chanid" => (int)($sourceid * 1000) + (int)$channum, "channum" => $channum,
+            $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channum, "channum" => $channum,
                                  "freqid" => $channum, "sourceid" => $sourceid, "xmltvid" => $stationID));
         }
         else
@@ -267,7 +279,7 @@ function updateChannelTable($he, $sourceID)
             $stmt = $dbh->prepare(
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
                 VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
-            $stmt->execute(array("chanid"          => (int)($sourceid * 1000) + (int)$freqid, "channum" => $freqid,
+            $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$freqid, "channum" => $freqid,
                                  "freqid"          => $freqid, "sourceid" => $sourceid, "xmltvid" => $stationID,
                                  "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
         }
@@ -342,11 +354,11 @@ function updateChannelTable($he, $sourceID)
      */
 
     $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid ORDER BY CAST(channum AS SIGNED) LIMIT 1");
-    $stmt->execute(array("sourceid" => $sourceid));
+    $stmt->execute(array("sourceid" => $sourceID));
     $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
     $startChan = $result[0];
     $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
-    $setStartChannel->execute(array("sourceid" => $sourceid, "startChan" => $startChan));
+    $setStartChannel->execute(array("sourceid" => $sourceID, "startChan" => $startChan));
     print "***DEBUG: Exiting updateChannelTable.\n";
 }
 
@@ -877,12 +889,12 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'  => 'POST',
-                                               'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                               'timeout' => 900,
-                                               'content' => $data
-                                           )
+                                               array(
+                                                   'method'  => 'POST',
+                                                   'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                                   'timeout' => 900,
+                                                   'content' => $data
+                                               )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
