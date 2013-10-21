@@ -226,7 +226,7 @@ function updateChannelTable($he, $sourceID)
 
     $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
     $stmt->execute(array("he" => $he));
-    $json = json_decode($stmt->fetchColumn());
+    $json = json_decode($stmt->fetchColumn(), TRUE);
 
     print "Updating channel table for sourceid:$sourceID\n";
     $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
