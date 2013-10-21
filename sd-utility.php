@@ -172,6 +172,8 @@ while (!$done)
             $toDelete = readline("Delete sourceid:>");
             $stmt = $dbh->prepare("DELETE FROM videosource WHERE sourceid=:sid");
             $stmt->execute(array("sid" => $toDelete));
+            $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sid");
+            $stmt->execute(array("sid" => $toDelete));
             break;
         case "L":
             print "Linking Schedules Direct headend to sourceid\n\n";
@@ -191,7 +193,6 @@ exit;
 
 function refreshLineup()
 {
-    global $dbh;
     global $updatedHeadendsToRefresh;
 
     if (count($updatedHeadendsToRefresh))
@@ -199,15 +200,19 @@ function refreshLineup()
         foreach ($updatedHeadendsToRefresh as $he => $modified)
         {
             print "Headend update for $he\n";
-            $response = strtoupper(readline("Use entire lineup? (Y/n)>"));
-            if ($response == "" OR $response == "Y")
-            {
+            /*
+             * For now we're just going to grab everything; selecting which channels to update is better left for
+             * other applications, like MythWeb or something like that.
+             */
+            //$response = strtoupper(readline("Use entire lineup? (Y/n)>"));
+            //if ($response == "" OR $response == "Y")
+            //{
                 $sourceID = readline("Apply to sourceid:>");
                 if ($sourceID != "")
                 {
                     updateChannelTable($he, $sourceID);
                 }
-            }
+            //}
         }
     }
 }
