@@ -246,12 +246,6 @@ function updateChannelTable($he, $sourceID)
         $transport = "Cable";
     }
 
-    var_dump($json);
-
-    $tt=fgets(STDIN);
-
-
-
     foreach ($json[$dev]["map"] as $mapArray)
     {
         $stationID = $mapArray["stationID"];
