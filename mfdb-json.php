@@ -73,13 +73,13 @@ if ($isBeta)
     $baseurl = "http://23.21.174.111";
     printMSG("Using beta server.\n");
     # API must match server version.
-    $api = 20130709;
+    $api = 20131021;
 }
 else
 {
     $baseurl = "https://data2.schedulesdirect.org";
     printMSG("Using production server.\n");
-    $api = 20130512;
+    $api = 20130709;
 }
 
 $stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
