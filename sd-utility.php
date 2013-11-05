@@ -304,6 +304,10 @@ function updateChannelTable($he, $sourceID)
         $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
     }
 
+    /*
+     * TODO: QAM data is going to be its own device type, so this next routine needs to be updated.
+     */
+
     if (isset($json["QAM"]))
     {
         print "Adding QAM data.\n";
