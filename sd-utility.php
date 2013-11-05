@@ -84,13 +84,13 @@ if ($isBeta)
     $baseurl = "http://23.21.174.111";
     print "Using beta server.\n";
     # API must match server version.
-    $api = 20130709;
+    $api = 20131021;
 }
 else
 {
     $baseurl = "https://data2.schedulesdirect.org";
     print "Using production server.\n";
-    $api = 20130512;
+    $api = 20130709;
 }
 
 if ($username == "" AND $password == "")
