@@ -259,6 +259,18 @@ function updateChannelTable($he, $sourceID)
         print "QAM modified:$qamModified\n";
     }
 
+    $dtvMultiplex = array();
+
+    $channelInsert =
+        $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
+        WHERE xmltvid=:stationID");
+    $insertDTVMultiplex = $dbh->prepare
+        ("INSERT INTO dtv_multiplex
+        (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
+        VALUES
+        (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
+
+
     foreach ($json[$dev]["map"] as $mapArray)
     {
         $stationID = $mapArray["stationID"];
@@ -283,12 +295,14 @@ function updateChannelTable($he, $sourceID)
             $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$freqid, "channum" => $freqid,
                                  "freqid"          => $freqid, "sourceid" => $sourceID, "xmltvid" => $stationID,
                                  "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
-
         }
 
-        /*
-         * If we start to do things like "IP" then we'll be inserting URLs, but this is fine for now.
-         */
+        if ($transport == "IP")
+        {
+            /*
+             * Nothing yet.
+             */
+        }
 
         if ($transport == "Cable")
         {
@@ -303,21 +317,16 @@ function updateChannelTable($he, $sourceID)
 
         if ($transport == "QAM")
         {
-            /*
-             * Yuck.
-             */
-
-            $dtvMultiplex = array();
-
-            $channelInsert =
-                $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
-        WHERE xmltvid=:stationID");
+            $stmt = $dbh->prepare(
+                "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
+                 VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
             $stationID = $mapArray["stationID"];
             $qamType = $mapArray["qamType"];
             $qamProgram = $mapArray["qamProgram"];
             $qamFreq = $mapArray["qamFreq"];
             $channel = $mapArray["channel"];
+
             if (isset($mapArray["virtualChannel"]))
             {
                 $virtualChannel = $mapArray["virtualChannel"];
@@ -327,20 +336,16 @@ function updateChannelTable($he, $sourceID)
                 $virtualChannel = "";
             }
 
-            // print "$stationID $qamType $qamFreq $qamProgram $channel\n";
+            $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channel, "channum" => $channel,
+                                 "freqid" => $channel, "sourceid" => $sourceID, "xmltvid" => $stationID));
 
             /*
-             * Because multiple programs  may end up on a single frequency, we only want to insert once, but we want
+             * Because multiple programs may end up on a single frequency, we only want to insert once, but we want
              * to track the mplexid assigned when we do the insert, because that might be used more than once.
              */
 
             if (!isset($dtvMultiplex[$qamFreq]))
             {
-                $insertDTVMultiplex = $dbh->prepare
-                    ("INSERT INTO dtv_multiplex
-                (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
-                VALUES
-                (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
                 $insertDTVMultiplex->execute(array("sourceid" => $sourceID, "freq" => $qamFreq));
                 $dtvMultiplex[$qamFreq] = $dbh->lastInsertId();
             }
@@ -367,12 +372,16 @@ function updateChannelTable($he, $sourceID)
      * Set the startchan to a non-bogus value.
      */
 
-    $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid ORDER BY CAST(channum AS SIGNED) LIMIT 1");
+    $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid
+    ORDER BY CAST(channum AS SIGNED) LIMIT 1");
     $stmt->execute(array("sourceid" => $sourceID));
     $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    $startChan = $result[0];
-    $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
-    $setStartChannel->execute(array("sourceid" => $sourceID, "startChan" => $startChan));
+    if (count($result))
+    {
+        $startChan = $result[0];
+        $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
+        $setStartChannel->execute(array("sourceid" => $sourceID, "startChan" => $startChan));
+    }
 }
 
 function linkSchedulesDirectHeadend()
