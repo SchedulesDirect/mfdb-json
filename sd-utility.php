@@ -204,15 +204,12 @@ function refreshLineup()
              * For now we're just going to grab everything; selecting which channels to update is better left for
              * other applications, like MythWeb or something like that.
              */
-            //$response = strtoupper(readline("Use entire lineup? (Y/n)>"));
-            //if ($response == "" OR $response == "Y")
-            //{
-                $sourceID = readline("Apply to sourceid:>");
-                if ($sourceID != "")
-                {
-                    updateChannelTable($he, $sourceID);
-                }
-            //}
+
+            $sourceID = readline("Apply to sourceid:>");
+            if ($sourceID != "")
+            {
+                updateChannelTable($he, $sourceID);
+            }
         }
     }
 }
@@ -246,6 +243,22 @@ function updateChannelTable($he, $sourceID)
         $transport = "Cable";
     }
 
+    if ($dev == "Q")
+    {
+        $transport = "QAM";
+        $qamModified = "";
+
+        foreach ($json["metadata"] as $v)
+        {
+            if ($v["device"] == "Q")
+            {
+                $qamModified = $v["modified"];
+            }
+        }
+
+        print "QAM modified:$qamModified\n";
+    }
+
     foreach ($json[$dev]["map"] as $mapArray)
     {
         $stationID = $mapArray["stationID"];
@@ -263,17 +276,23 @@ function updateChannelTable($he, $sourceID)
                 $atscMajor = 0;
                 $atscMinor = 0;
             }
+
+            $stmt = $dbh->prepare(
+                "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
+                VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
+            $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$freqid, "channum" => $freqid,
+                                 "freqid"          => $freqid, "sourceid" => $sourceID, "xmltvid" => $stationID,
+                                 "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
+
         }
-        else
-        {
-            $channum = $mapArray["channel"];
-        }
+
         /*
          * If we start to do things like "IP" then we'll be inserting URLs, but this is fine for now.
          */
 
         if ($transport == "Cable")
         {
+            $channum = $mapArray["channel"];
             $stmt = $dbh->prepare(
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
@@ -281,55 +300,27 @@ function updateChannelTable($he, $sourceID)
             $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channum, "channum" => $channum,
                                  "freqid" => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
         }
-        else
+
+        if ($transport == "QAM")
         {
-            $stmt = $dbh->prepare(
-                "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
-                VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
-            $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$freqid, "channum" => $freqid,
-                                 "freqid"          => $freqid, "sourceid" => $sourceID, "xmltvid" => $stationID,
-                                 "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
-        }
-    }
-    /*
-     * Now that we have basic information in the database, we can start filling in other things, like callsigns, etc.
-     */
+            /*
+             * Yuck.
+             */
 
-    $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
-    foreach ($json["stations"] as $stationArray)
-    {
-        $stationID = $stationArray["stationID"];
-        $name = $stationArray["name"];
-        $callsign = $stationArray["callsign"];
-        $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
-    }
+            $dtvMultiplex = array();
 
-    /*
-     * TODO: QAM data is going to be its own device type, so this next routine needs to be updated.
-     */
-
-    if (isset($json["QAM"]))
-    {
-        print "Adding QAM data.\n";
-        $dtvMultiplex = array();
-
-        $channelInsert =
-            $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
+            $channelInsert =
+                $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
         WHERE xmltvid=:stationID");
 
-        $qamModified = $json["QAM"]["metadata"]["modified"];
-        print "qam modified:$qamModified\n";
-
-        foreach ($json["QAM"]["map"] as $v)
-        {
-            $stationID = $v["stationID"];
-            $qamType = $v["qamType"];
-            $qamProgram = $v["qamProgram"];
-            $qamFreq = $v["qamFreq"];
-            $channel = $v["channel"];
-            if (isset($v["virtualChannel"]))
+            $stationID = $mapArray["stationID"];
+            $qamType = $mapArray["qamType"];
+            $qamProgram = $mapArray["qamProgram"];
+            $qamFreq = $mapArray["qamFreq"];
+            $channel = $mapArray["channel"];
+            if (isset($mapArray["virtualChannel"]))
             {
-                $virtualChannel = $v["virtualChannel"];
+                $virtualChannel = $mapArray["virtualChannel"];
             }
             else
             {
@@ -360,6 +351,19 @@ function updateChannelTable($he, $sourceID)
     }
 
     /*
+     * Now that we have basic information in the database, we can start filling in other things, like callsigns, etc.
+     */
+
+    $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
+    foreach ($json["stations"] as $stationArray)
+    {
+        $stationID = $stationArray["stationID"];
+        $name = $stationArray["name"];
+        $callsign = $stationArray["callsign"];
+        $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
+    }
+
+    /*
      * Set the startchan to a non-bogus value.
      */
 
@@ -370,7 +374,6 @@ function updateChannelTable($he, $sourceID)
     $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
     $setStartChannel->execute(array("sourceid" => $sourceID, "startChan" => $startChan));
 }
-
 
 function linkSchedulesDirectHeadend()
 {
@@ -533,6 +536,7 @@ function addHeadendsToSchedulesDirect()
     {
         print "Error!\n";
         print "code:" . $res["code"] . " response:" . $res["response"] . " message:" . $res["message"] . "\n";
+
         return;
     }
 

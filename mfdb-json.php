@@ -5,7 +5,7 @@
  * This file is a grabber which downloads data from Schedules Direct's JSON service.
  */
 
-$isBeta = FALSE;
+$isBeta = TRUE;
 $debug = TRUE;
 $quiet = FALSE;
 $printTS = FALSE;
@@ -275,7 +275,6 @@ function getSchedules(array $stationIDs, $debug)
             $peopleCache = array();
             $getPeople = $dbh->prepare("SELECT name,personID FROM peopleSD");
             $getPeople->execute();
-
 
             while ($row = $getPeople->fetch())
             {
