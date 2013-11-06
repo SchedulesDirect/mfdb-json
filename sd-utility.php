@@ -224,8 +224,6 @@ function updateChannelTable($he, $sourceID)
 
     list($h, $dev) = explode(":", $lineupid);
 
-    print "h is $h dev is $dev\n";
-
     $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
     $stmt->execute(array("he" => $he));
     $json = json_decode($stmt->fetchColumn(), TRUE);
