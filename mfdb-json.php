@@ -265,7 +265,6 @@ function getSchedules(array $stationIDs)
             $insertJSON = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
-            $total = count($toRetrieve);
 
             $insertPerson = $dbh->prepare("INSERT INTO peopleSD(personID,name) VALUES(:personID, :name)
         ON DUPLICATE KEY UPDATE name=:name");
@@ -280,6 +279,8 @@ function getSchedules(array $stationIDs)
             $getPeople = $dbh->prepare("SELECT name,personID FROM peopleSD");
             $getPeople->execute();
             $peopleCache = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            $total = count($toRetrieve);
 
             foreach ($toRetrieve as $md5 => $pid)
             {
@@ -369,6 +370,8 @@ function getSchedules(array $stationIDs)
     :previouslyshown,:closecaptioned,:partnumber,:parttotal,:first,:last,:dvs,:new,:educational,:hdtv,:3d,
     :letterbox,:stereo,:dolby,:dubbed,:dubLanguage,:subtitled,:subtitleLanguage,:sap,:sapLanguage,:programLanguage,
     :ratingSystem,:tvRating,:dialogRating,:languageRating,:sexualContentRating,:violenceRating,:fvRating)");
+
+    printMSG("Inserted $counter of $total stationIDs.                                         \r");
 
     foreach ($downloadedStationIDs as $stationID)
     {
@@ -683,7 +686,7 @@ function getSchedules(array $stationIDs)
         $dbh->commit();
     }
 
-    printMSG("Done inserting schedules.\n");
+    printMSG("\nDone inserting schedules.\n");
     $stmt = $dbh->exec("DROP TABLE scheduleSD");
     $stmt = $dbh->exec("RENAME TABLE s_scheduleSD TO scheduleSD");
 }
