@@ -114,7 +114,7 @@ $randHash = getRandhash($username, $password);
 
 if ($randHash != "ERROR")
 {
-    printStatus(getStatus());
+    // printStatus(getStatus());
     getSchedules($stationIDs);
 }
 
@@ -678,107 +678,6 @@ function getSchedules(array $stationIDs)
     printMSG("Done inserting schedules.\n");
     $stmt = $dbh->exec("DROP TABLE scheduleSD");
     $stmt = $dbh->exec("RENAME TABLE s_scheduleSD TO scheduleSD");
-}
-
-function getStatus()
-{
-    global $api;
-    global $randHash;
-
-    $res = array();
-    $res["action"] = "get";
-    $res["object"] = "status";
-    $res["randhash"] = $randHash;
-    $res["api"] = $api;
-
-    return sendRequest(json_encode($res));
-}
-
-function printStatus($json)
-{
-    global $dbh;
-    global $printTS;
-
-    printMSG("Status messages from Schedules Direct:\n");
-
-    $res = array();
-    $res = json_decode($json, true);
-
-    $am = array();
-    $he = array();
-
-    foreach ($res as $k => $v)
-    {
-        switch ($k)
-        {
-            case "account":
-                foreach ($v["messages"] as $a)
-                {
-                    $am[$a["msgID"]] = array("date" => $a["date"], "message" => $a["message"]);
-                }
-                $expires = $v["expires"];
-                $maxHeadends = $v["maxHeadends"];
-                $nextConnectTime = $v["nextSuggestedConnectTime"];
-                break;
-            case "headend":
-                foreach ($v as $hv)
-                {
-                    $he[$hv["ID"]] = $hv["modified"];
-                }
-                break;
-            case "code":
-                if ($v == 401)
-                {
-                    /*
-                     * Error notification - we're going to have to abort because the server didn't like what we sent.
-                     */
-                    printMSG("Received error response from server!\n");
-                    printMSG("ServerID: " . $res["serverID"] . "\n");
-                    printMSG("Message: " . $res["message"] . "\n");
-                    printMSG("\nFATAL ERROR. Terminating execution.\n");
-                    exit;
-                }
-        }
-    }
-
-    printMSG("Server: " . $res["serverID"] . "\n");
-    printMSG("Last data refresh: " . $res["lastDataUpdate"] . "\n");
-    printMSG("Account expires: $expires\n");
-    printMSG("Max number of headends for your account: $maxHeadends\n");
-    printMSG("Next suggested connect time: $nextConnectTime\n");
-
-    if (count($he))
-    {
-        $stmt = $dbh->prepare("SELECT modified FROM headendCacheSD WHERE headend=:he");
-        printMSG("The following headends are in your account:\n");
-
-        $printTS = FALSE;
-        $retrieveLineups = array();
-        foreach ($he as $id => $modified)
-        {
-            printMSG("ID: $id\t\t");
-            if (strlen($id) < 4)
-            {
-                // We want the tabs to align.
-                printMSG("\t");
-            }
-            printMSG("SD Modified: $modified\n");
-            $stmt->execute(array("he" => $id));
-            $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-            if ((count($result) == 0) OR ($result[0] < $modified))
-            {
-                $retrieveLineups[] = $id;
-            }
-        }
-
-        $printTS = TRUE;
-
-        if (count($retrieveLineups))
-        {
-            processLineups($retrieveLineups);
-        }
-    }
 }
 
 function getRandhash($username, $password)
