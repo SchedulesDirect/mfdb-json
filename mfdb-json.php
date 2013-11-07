@@ -15,12 +15,12 @@ $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 
-$user = "mythtv";
-$password = "mythtv";
-$host = "localhost";
+$dbuser = "mythtv";
+$dbpassword = "mythtv";
+$dbhost = "localhost";
 $db = "mythconverg";
 
-$longoptions = array("beta::", "debug::", "help::", "host::", "password::", "setup::", "user::");
+$longoptions = array("beta::", "debug::", "help::", "dbhost::", "dbpassword::", "setup::", "dbuser::");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -38,18 +38,18 @@ foreach ($options as $k => $v)
             print "The following options are available:\n";
             print "--beta\n";
             print "--help\t(this text)\n";
-            print "--host=\t\texample: --host=192.168.10.10\n";
-            print "--user=\t\tUsername to connect as\n";
-            print "--password=\tPassword to access database.\n";
+            print "--dbhost=\t\texample: --host=192.168.10.10\tDefault:$dbhost\n";
+            print "--dbuser=\t\tUsername to connect to MythTV database\tDefault:$dbuser\n";
+            print "--dbpassword=\tPassword to access MythtTV database\tDefault:$dbpassword\n";
             exit;
         case "host":
-            $host = $v;
+            $dbhost = $v;
             break;
         case "password":
-            $password = $v;
+            $dbpassword = $v;
             break;
         case "user":
-            $user = $v;
+            $dbuser = $v;
             break;
     }
 }
@@ -57,7 +57,7 @@ foreach ($options as $k => $v)
 printMSG("Attempting to connect to database.\n");
 try
 {
-    $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $password,
+    $dbh = new PDO("mysql:host=$dbhost;dbname=$db;charset=utf8", $dbuser, $dbpassword,
         array(PDO::ATTR_PERSISTENT => true));
     $dbh->exec("SET CHARACTER SET utf8");
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -82,24 +82,28 @@ else
     $api = 20130709;
 }
 
-$stmt = $dbh->prepare("SELECT sourceid,name,userid,lineupid,password FROM videosource");
+$stmt = $dbh->prepare("SELECT userid,password FROM videosource LIMIT 1");
 $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+/*
 foreach ($result[0] as $k => $v)
 {
     switch ($k)
     {
         case
         "userid":
-            $username = $v;
+            $sdUsername = $v;
             break;
         case
         "password":
-            $password = sha1($v);
+            $sdPassword = sha1($v);
             break;
     }
 }
+*/
+
+$sdUsername = $result[0]["userid"];
+$sdPassword = sha1($result[0]["password"]);
 
 $globalStartTime = time();
 $globalStartDate = new DateTime();
@@ -110,12 +114,16 @@ $stmt->execute();
 $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 printMSG("Logging into Schedules Direct.\n");
-$randHash = getRandhash($username, $password);
+$randHash = getRandhash($sdUsername, $sdPassword);
 
 if ($randHash != "ERROR")
 {
-    // printStatus(getStatus());
     getSchedules($stationIDs);
+}
+else
+{
+    print "Error connecting to Schedules Direct.\n";
+    exit;
 }
 
 printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
