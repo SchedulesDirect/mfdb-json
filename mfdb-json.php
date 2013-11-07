@@ -115,7 +115,7 @@ $randHash = getRandhash($username, $password);
 if ($randHash != "ERROR")
 {
     printStatus(getStatus());
-    getSchedules($stationIDs, $debug);
+    getSchedules($stationIDs);
 }
 
 printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
@@ -129,12 +129,13 @@ printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\
 
 printMSG("Done.\n");
 
-function getSchedules(array $stationIDs, $debug)
+function getSchedules(array $stationIDs)
 {
     global $dbh;
     global $api;
     global $randHash;
     global $quiet;
+    global $debug;
 
     $dbProgramCache = array();
     $schedTempDir = tempdir();
@@ -152,11 +153,6 @@ function getSchedules(array $stationIDs, $debug)
 
     $res = array();
     $res = json_decode($response, TRUE);
-
-    /*
-     * First we're going to load all the programIDs and md5's from the schedule files we just downloaded into
-     * an array called programCache
-     */
 
     if ($res["response"] == "OK")
     {
@@ -194,14 +190,14 @@ function getSchedules(array $stationIDs, $debug)
     printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.\n");
     printMSG("Retrieving existing MD5 values.\n");
 
-    $stmt = $dbh->prepare("SELECT programID,md5 FROM SDprogramCache");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    /*
+     * First we're going to load all the programIDs and md5's from the schedule files we just downloaded into
+     * an array called programCache
+     */
 
-    foreach ($result as $v)
-    {
-        $dbProgramCache[$v["md5"]] = $v["programID"];
-    }
+    $stmt = $dbh->prepare("SELECT md5, programID FROM SDprogramCache");
+    $stmt->execute();
+    $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
     $toRetrieve = array();
     $toRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
@@ -275,11 +271,7 @@ function getSchedules(array $stationIDs, $debug)
             $peopleCache = array();
             $getPeople = $dbh->prepare("SELECT name,personID FROM peopleSD");
             $getPeople->execute();
-
-            while ($row = $getPeople->fetch())
-            {
-                $peopleCache[$row[0]] = $row[1];
-            }
+            $peopleCache = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
             foreach ($toRetrieve as $md5 => $pid)
             {
@@ -313,22 +305,13 @@ function getSchedules(array $stationIDs, $debug)
                 {
                     foreach ($jsonProgram["castAndCrew"] as $credit)
                     {
-                        list ($role, $name) = explode(":", $credit);
-                        $role = strtolower($role);
+                        $role = $credit["role"];
+                        $personID = $credit["personID"];
+                        $name = $credit["name"];
 
-                        if (isset($peopleCache[$name]))
-                        {
-                            $personID = $peopleCache[$name];
-                        }
-                        else
-                        {
-                            $personID = mt_rand(1000, 10000000);
-                            $peopleCache[$name] = $personID;
-                        }
+                        $insertPerson->execute(array("personID" => (int)$personID, "name" => $name));
 
-                        $insertPerson->execute(array("personID" => $personID, "name" => $name));
-
-                        $insertCredit->execute(array("personID" => $personID, "pid" => $pid,
+                        $insertCredit->execute(array("personID" => (int)$personID, "pid" => $pid,
                                                      "role"     => $role));
                     }
                 }
