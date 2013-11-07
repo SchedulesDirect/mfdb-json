@@ -8,7 +8,7 @@
 $isBeta = TRUE;
 $debug = TRUE;
 $quiet = FALSE;
-$printTS = FALSE;
+$printTS = TRUE;
 
 date_default_timezone_set("UTC");
 $date = new DateTime();
