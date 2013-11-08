@@ -161,7 +161,6 @@ function getSchedules(array $stationIDs)
 
             foreach (glob("$schedTempDir/sched_*.json.txt") as $f)
             {
-                // print "***DEBUG: Reading schedule $f\n";
                 $a = json_decode(file_get_contents($f), TRUE);
                 $stationID = $a["stationID"];
                 $downloadedStationIDs[] = $stationID;
