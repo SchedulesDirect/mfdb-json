@@ -325,8 +325,8 @@ function insertJSON(array $jsonProgramstoRetrieve)
             {
                 if (!isset($credit["role"]))
                 {
-                    print "p:$pid\n";
-                    var_dump($credit);
+                    print "\n\n\n";
+                    var_dump($jsonProgram);
                     exit;
                 }
                 $role = $credit["role"];
