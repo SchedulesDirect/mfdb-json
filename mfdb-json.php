@@ -9,6 +9,11 @@ $isBeta = TRUE;
 $debug = TRUE;
 $quiet = FALSE;
 $printTS = TRUE;
+$dlSchedTempDir = tempdir();
+printMSG("Temp directory for Schedules is $dlSchedTempDir\n");
+$dlProgramTempDir = tempdir();
+printMSG("Temp directory for Programs is $dlProgramTempDir\n");
+$jsonProgramstoRetrieve = array();
 
 date_default_timezone_set("UTC");
 $date = new DateTime();
@@ -132,9 +137,11 @@ function getSchedules(array $stationIDs)
     global $dbh;
     global $api;
     global $randHash;
+    global $dlProgramTempDir;
+    global $dlSchedTempDir;
 
     $dbProgramCache = array();
-    $dlSchedTempDir = tempdir();
+
     $downloadedStationIDs = array();
     $serverScheduleMD5 = array();
 
@@ -194,22 +201,21 @@ function getSchedules(array $stationIDs)
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $toRetrieve = array();
-    $toRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
+    $jsonProgramstoRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
 
     /*
      * Now we've got an array of programIDs that we need to download in $toRetrieve,
      * either because we didn't have them, or they have different md5's.
      */
 
-    printMSG("Need to download " . count($toRetrieve) . " new or updated programs.\n");
+    printMSG("Need to download " . count($jsonProgramstoRetrieve) . " new or updated programs.\n");
 
-    if (count($toRetrieve) > 10000)
+    if (count($jsonProgramstoRetrieve) > 10000)
     {
         printMSG("Requesting more than 10000 programs. Please be patient.\n");
     }
 
-    if (count($toRetrieve))
+    if (count($jsonProgramstoRetrieve))
     {
         printMSG("Requesting new and updated programs.\n");
         $res = array();
@@ -217,7 +223,7 @@ function getSchedules(array $stationIDs)
         $res["object"] = "programs";
         $res["randhash"] = $randHash;
         $res["api"] = $api;
-        $res["request"] = $toRetrieve;
+        $res["request"] = $jsonProgramstoRetrieve;
 
         $response = sendRequest(json_encode($res));
 
@@ -227,7 +233,6 @@ function getSchedules(array $stationIDs)
         if ($res["response"] == "OK")
         {
             printMSG("Downloading program file.\n");
-            $dlProgramTempDir = tempdir();
 
             $fileName = $res["filename"];
             $url = $res["URL"];
@@ -259,7 +264,7 @@ function getSchedules(array $stationIDs)
 function insertJSON()
 {
     global $dbh;
-    global $toRetrieve;
+    global $jsonProgramstoRetrieve;
     global $dlProgramTempDir;
     global $debug;
 
@@ -284,9 +289,9 @@ function insertJSON()
     $getPeople->execute();
     $peopleCache = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $total = count($toRetrieve);
+    $total = count($jsonProgramstoRetrieve);
 
-    foreach ($toRetrieve as $md5 => $pid)
+    foreach ($jsonProgramstoRetrieve as $md5 => $pid)
     {
         $counter++;
         if ($counter % 1000)
@@ -357,7 +362,7 @@ function insertJSON()
 function insertSchedule()
 {
     global $dbh;
-    global $schedTempDir;
+    global $dlSchedTempDir;
 
     printMSG("Inserting schedules.\n");
 
@@ -403,7 +408,7 @@ function insertSchedule()
 
         printMSG("c:$chanID sou:$sourceID sid:$stationID\n");
 
-        $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), TRUE);
+        $a = json_decode(file_get_contents("$dlSchedTempDir/sched_$stationID.json.txt"), TRUE);
 
         $dbh->beginTransaction();
 
@@ -801,8 +806,6 @@ function tempdir()
     mkdir($tempfile);
     if (is_dir($tempfile))
     {
-        printMSG("tempdir is $tempfile\n");
-
         return $tempfile;
     }
 }
