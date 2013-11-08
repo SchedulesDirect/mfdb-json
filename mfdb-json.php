@@ -310,7 +310,7 @@ function insertJSON()
     foreach ($jsonProgramstoRetrieve as $md5 => $pid)
     {
         $counter++;
-        if ($counter % 1000)
+        if ($counter % 100)
         {
             printMSG("$counter / $total             \r");
         }
