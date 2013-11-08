@@ -202,7 +202,19 @@ function getSchedules(array $stationIDs)
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
+    print "\n\nserver md5:";
+    var_dump($serverScheduleMD5);
+
+    print "\n\nsd program cache\n\n";
+    var_dump($dbProgramCache);
+
+    print "\n\nTo Get\n\n";
+
     $jsonProgramstoRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
+
+    var_dump($jsonProgramstoRetrieve);
+    exit;
+
 
     /*
      * Now we've got an array of programIDs that we need to download in $toRetrieve,
@@ -308,8 +320,13 @@ function insertJSON()
             continue;
         }
 
+        printMSG("About to insert:$fileJSON\n");
+
         $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
                                    "json"      => $fileJSON));
+
+        printMSG("Check db");
+        $tt=fgets(STDIN);
 
         $jsonProgram = json_decode($fileJSON, TRUE);
 
@@ -445,6 +462,7 @@ function insertSchedule()
                 continue;
             }
 
+            $md5 = $v["md5"];
             $air_datetime = $v["airDateTime"];
             $duration = $v["duration"];
 
