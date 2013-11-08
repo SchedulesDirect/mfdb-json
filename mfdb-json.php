@@ -418,6 +418,7 @@ function insertSchedule()
             /*
              * A few things need to be set to non-null, so declare them here. Also, quiets some warnings.
              */
+            $title = "";
             $ratingSystem = "";
             $rating = "";
             $movieYear = "";
@@ -434,7 +435,6 @@ function insertSchedule()
             $isFirst = 0;
             $isLast = 0;
 
-
             $programID = $v["programID"];
             $getProgramInformation->execute(array("pid" => $programID));
             $programJSON = json_decode($getProgramInformation->fetchColumn(), TRUE);
@@ -445,7 +445,6 @@ function insertSchedule()
                 continue;
             }
 
-            $md5 = $v["md5"];
             $air_datetime = $v["airDateTime"];
             $duration = $v["duration"];
 
@@ -710,6 +709,12 @@ function insertSchedule()
 
             $title = $programJSON["titles"]["title120"];
 
+            if ($title == NULL OR $title == "")
+            {
+                printMSG("FATAL ERROR: Empty title? $programID\n");
+                exit;
+            }
+
             if (isset($programJSON["episodeTitle150"]))
             {
                 $subTitle = $programJSON["episodeTitle150"];
@@ -745,7 +750,7 @@ function insertSchedule()
                 case "sh":
                     $categoryType = "series";
                     $isGeneric = TRUE;
-                    $seriesID = "EP" .substr($programJSON, 2, 8);
+                    $seriesID = "EP" . substr($programID, 2, 8);
                     break;
                 case "ep":
                     $categoryType = "tvshow";
