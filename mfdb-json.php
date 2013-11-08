@@ -749,7 +749,7 @@ function insertSchedule()
                     break;
                 case "ep":
                     $categoryType = "tvshow";
-                    $seriesID = substr($programJSON, 0, 10);
+                    $seriesID = substr($programID, 0, 10);
                     break;
                 case "mv":
                     $categoryType = "movie";
