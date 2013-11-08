@@ -108,7 +108,7 @@ $randHash = getRandhash($sdUsername, $sdPassword);
 
 if ($randHash != "ERROR")
 {
-    $success = getSchedules($stationIDs);
+    $jsonProgramstoRetrieve = getSchedules($stationIDs);
 }
 else
 {
@@ -116,9 +116,9 @@ else
     exit;
 }
 
-if ($success)
+if (count($jsonProgramstoRetrieve))
 {
-    insertJSON();
+    insertJSON($jsonProgramstoRetrieve);
     insertSchedule();
 }
 
@@ -270,13 +270,12 @@ function getSchedules(array $stationIDs)
         }
     }
 
-    return (TRUE);
+    return ($jsonProgramstoRetrieve);
 }
 
-function insertJSON()
+function insertJSON(array $jsonProgramstoRetrieve)
 {
     global $dbh;
-    global $jsonProgramstoRetrieve;
     global $dlProgramTempDir;
     global $debug;
 
