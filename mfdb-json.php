@@ -303,6 +303,10 @@ function insertJSON()
 
     $total = count($jsonProgramstoRetrieve);
 
+    print "inside INSERTJSON\n";
+    print "total:$total\n";
+    var_dump($jsonProgramstoRetrieve);
+
     foreach ($jsonProgramstoRetrieve as $md5 => $pid)
     {
         $counter++;
