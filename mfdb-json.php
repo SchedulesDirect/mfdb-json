@@ -112,7 +112,8 @@ else
 
 if ($success)
 {
-    insertSchedules();
+    insertJSON();
+    insertSchedule();
 }
 
 printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
@@ -255,27 +256,27 @@ function getSchedules(array $stationIDs)
     return (TRUE);
 }
 
-function insertSchedules()
+function insertJSON()
 {
     global $dbh;
     global $toRetrieve;
-    global $tempDir;
+    global $dlProgramTempDir;
     global $debug;
 
     $counter = 0;
-    printMSG("Performing inserts.\n");
+    printMSG("Performing inserts of JSON data.\n");
 
     $insertJSON = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
 
-    $insertPerson = $dbh->prepare("INSERT INTO peopleSD(personID,name) VALUES(:personID, :name)
+    $insertPersonSD = $dbh->prepare("INSERT INTO peopleSD(personID,name) VALUES(:personID, :name)
         ON DUPLICATE KEY UPDATE name=:name");
 
-    $insertCredit = $dbh->prepare("INSERT INTO creditsSD(personID,programID,role)
+    $insertCreditSD = $dbh->prepare("INSERT INTO creditsSD(personID,programID,role)
     VALUES(:personID,:pid,:role)");
 
-    $insertProgramGenres = $dbh->prepare("INSERT INTO programgenresSD(programID,relevance,genre)
+    $insertProgramGenresSD = $dbh->prepare("INSERT INTO programgenresSD(programID,relevance,genre)
     VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
 
     $peopleCache = array();
@@ -293,11 +294,11 @@ function insertSchedules()
             printMSG("$counter / $total             \r");
         }
 
-        $fileJSON = file_get_contents("$tempDir/$pid.json.txt");
+        $fileJSON = file_get_contents("$dlProgramTempDir/$pid.json.txt");
 
         if ($fileJSON === FALSE)
         {
-            printMSG("*** ERROR: Could not open file $tempDir/$pid.json.txt\n");
+            printMSG("*** ERROR: Could not open file $dlProgramTempDir/$pid.json.txt\n");
             continue;
         }
 
@@ -308,7 +309,7 @@ function insertSchedules()
 
         if (json_last_error())
         {
-            printMSG("*** ERROR: JSON decode error $tempDir/$pid.json.txt\n");
+            printMSG("*** ERROR: JSON decode error $dlProgramTempDir/$pid.json.txt\n");
             printMSG("$fileJSON\n");
             continue;
         }
@@ -321,10 +322,10 @@ function insertSchedules()
                 $personID = $credit["personID"];
                 $name = $credit["name"];
 
-                $insertPerson->execute(array("personID" => (int)$personID, "name" => $name));
+                $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
 
-                $insertCredit->execute(array("personID" => (int)$personID, "pid" => $pid,
-                                             "role"     => $role));
+                $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
+                                               "role"     => $role));
             }
         }
 
@@ -332,41 +333,43 @@ function insertSchedules()
         {
             foreach ($jsonProgram["genres"] as $relevance => $genre)
             {
-                $insertProgramGenres->execute(array("pid"       => $pid,
-                                                    "relevance" => $relevance, "genre" => $genre));
+                $insertProgramGenresSD->execute(array("pid"       => $pid,
+                                                      "relevance" => $relevance, "genre" => $genre));
             }
         }
 
         if ($debug == FALSE)
         {
-            unlink("$tempDir/$pid.json.txt");
+            unlink("$dlProgramTempDir/$pid.json.txt");
         }
+
     }
 
     if ($debug == FALSE)
     {
-        unlink("$tempDir/serverID.txt");
-        rmdir("$tempDir");
+        unlink("$dlProgramTempDir/serverID.txt");
+        rmdir("$dlProgramTempDir");
     }
+
+    printMSG("Completed local database program updates.\n");
 }
 
-printMSG("Completed local database program updates.\n");
-}
+function insertSchedule()
+{
+    global $dbh;
+    global $schedTempDir;
 
-printMSG("Inserting schedules.\n");
+    printMSG("Inserting schedules.\n");
 
-$counter = 0;
-$total = count($downloadedStationIDs);
+    $counter = 0;
 
-printMSG("Starting insert loop. $total station schedules to insert.\n");
+    $stmt = $dbh->exec("DROP TABLE IF EXISTS t_scheduleSD");
+    $stmt = $dbh->exec("CREATE TABLE t_scheduleSD LIKE scheduleSD");
 
-$stmt = $dbh->exec("DROP TABLE IF EXISTS t_scheduleSD");
-$stmt = $dbh->exec("CREATE TABLE t_scheduleSD LIKE scheduleSD");
+    $stmt = $dbh->exec("DROP TABLE IF EXISTS t_program");
+    $stmt = $dbh->exec("CREATE TABLE t_program LIKE program");
 
-$stmt = $dbh->exec("DROP TABLE IF EXISTS t_program");
-$stmt = $dbh->exec("CREATE TABLE t_program LIKE program");
-
-$insertScheduleSD = $dbh->prepare("INSERT INTO t_scheduleSD(stationID,programID,md5,air_datetime,duration,
+    $insertScheduleSD = $dbh->prepare("INSERT INTO t_scheduleSD(stationID,programID,md5,air_datetime,duration,
     previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
     dolby,dubbed,dubLanguage,subtitled,subtitleLanguage,sap,sapLanguage,programLanguage,tvRatingSystem,tvRating,
     dialogRating,languageRating,sexualContentRating,violenceRating,fvRating)
@@ -375,7 +378,7 @@ $insertScheduleSD = $dbh->prepare("INSERT INTO t_scheduleSD(stationID,programID,
     :letterbox,:stereo,:dolby,:dubbed,:dubLanguage,:subtitled,:subtitleLanguage,:sap,:sapLanguage,:programLanguage,
     :ratingSystem,:tvRating,:dialogRating,:languageRating,:sexualContentRating,:violenceRating,:fvRating)");
 
-$insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
+    $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
     category,category_type,airdate,stars,previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,
     seriesid,originalairdate,showtype,colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,
     audioprop,subtitletypes,videoprop)
@@ -385,328 +388,353 @@ $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,
     :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop)");
 
-printMSG("Inserted $counter of $total stationIDs.                                         \r");
+    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1");
+    $getExistingChannels->execute();
 
-foreach ($downloadedStationIDs as $stationID)
-{
-    $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), TRUE);
+    $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
-    $counter++;
-    if ($counter % 100 == 0)
+    $getProgramInformation = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
+
+    foreach ($existingChannels as $channel)
     {
-        printMSG("Inserted $counter of $total stationIDs.                                         \r");
-    }
+        $chanID = $channel["chanid"];
+        $sourceID = $channel["sourceid"];
+        $stationID = $channel["xmltvid"];
 
-    $dbh->beginTransaction();
+        printMSG("c:$chanID sou:$sourceID sid:$stationID\n");
 
-    foreach ($a["programs"] as $v)
-    {
-        $programID = $v["programID"];
-        $md5 = $v["md5"];
-        $air_datetime = $v["airDateTime"];
-        $duration = $v["duration"];
+        $a = json_decode(file_get_contents("$schedTempDir/sched_$stationID.json.txt"), TRUE);
 
+        $dbh->beginTransaction();
 
-        if (isset($v["new"]))
+        foreach ($a["programs"] as $v)
         {
-            $isNew = TRUE;
-            $previouslyshown = FALSE;
-        }
-        else
-        {
-            $isNew = FALSE;
-            $previouslyshown = TRUE;
-        }
+            $programID = $v["programID"];
+            $getProgramInformation->execute(array("pid" => $programID));
+            $programJSON = json_decode($getProgramInformation->fetchColumn(), TRUE);
 
-        if (isset($v["cc"]))
-        {
-            $isClosedCaption = TRUE;
-        }
-        else
-        {
-            $isClosedCaption = FALSE;
-        }
-
-        if (isset($v["partNumber"]))
-        {
-            $partNumber = $v["partNumber"];
-        }
-        else
-        {
-            $partNumber = 0;
-        }
-
-        if (isset($v["numberOfParts"]))
-        {
-            $numberOfParts = $v["numberOfParts"];
-        }
-        else
-        {
-            $numberOfParts = 0;
-        }
-
-        if (isset($v["isPremiereOrFinale"]))
-        {
-            switch ($v["isPremiereOrFinale"])
+            if (!json_last_error())
             {
-                case "Series Premiere":
-                case "Season Premiere":
-                    $isFirst = TRUE;
-                    break;
-                case "Series Finale":
-                case "Season Finale":
-                    $isLast = TRUE;
-                    break;
+                printMSG("Error retrieving / decoding $programID from local database.\n");
+                continue;
             }
-        }
-        else
-        {
-            $isFirst = FALSE;
-            $isLast = FALSE;
+
+            $md5 = $v["md5"];
+            $air_datetime = $v["airDateTime"];
+            $duration = $v["duration"];
+
+            $programStartTimeMyth = str_replace("T", " ", $air_datetime);
+            $programStartTimeMyth = rtrim($programStartTimeMyth, "Z");
+            $programEndTimeMyth = gmdate("Y-m-d H:i:s", strtotime("$air_datetime + $duration seconds"));
+
+            print "\n\n";
+            var_dump($programJSON);
+
+            print "s:$programStartTimeMyth d:$duration e:$programEndTimeMyth\n";
+            $tt = fgets(STDIN);
+
+            if (isset($v["new"]))
+            {
+                $isNew = TRUE;
+                $previouslyshown = FALSE;
+            }
+            else
+            {
+                $isNew = FALSE;
+                $previouslyshown = TRUE;
+            }
+
+            if (isset($v["cc"]))
+            {
+                $isClosedCaption = TRUE;
+            }
+            else
+            {
+                $isClosedCaption = FALSE;
+            }
+
+            if (isset($v["partNumber"]))
+            {
+                $partNumber = $v["partNumber"];
+            }
+            else
+            {
+                $partNumber = 0;
+            }
+
+            if (isset($v["numberOfParts"]))
+            {
+                $numberOfParts = $v["numberOfParts"];
+            }
+            else
+            {
+                $numberOfParts = 0;
+            }
+
+            if (isset($v["isPremiereOrFinale"]))
+            {
+                switch ($v["isPremiereOrFinale"])
+                {
+                    case "Series Premiere":
+                    case "Season Premiere":
+                        $isFirst = TRUE;
+                        break;
+                    case "Series Finale":
+                    case "Season Finale":
+                        $isLast = TRUE;
+                        break;
+                }
+            }
+            else
+            {
+                $isFirst = FALSE;
+                $isLast = FALSE;
+            }
+
+            if (isset($v["dvs"]))
+            {
+                $dvs = TRUE;
+            }
+            else
+            {
+                $dvs = FALSE;
+            }
+
+            if (isset($v["educational"]))
+            {
+                $isEducational = TRUE;
+            }
+            else
+            {
+                $isEducational = FALSE;
+            }
+
+            if (isset($v["hdtv"]))
+            {
+                $isHDTV = TRUE;
+            }
+            else
+            {
+                $isHDTV = FALSE;
+            }
+
+            if (isset($v["is3d"]))
+            {
+                $is3d = TRUE;
+            }
+            else
+            {
+                $is3d = FALSE;
+            }
+
+            if (isset($v["letterbox"]))
+            {
+                $isLetterboxed = TRUE;
+            }
+            else
+            {
+                $isLetterboxed = FALSE;
+            }
+
+            if (isset($v["stereo"]))
+            {
+                $isStereo = TRUE;
+            }
+            else
+            {
+                $isStereo = FALSE;
+            }
+
+            if (isset($v["dolby"]))
+            {
+                $dolby = $v["dolby"];
+            }
+            else
+            {
+                $dolby = NULL;
+            }
+
+            if (isset($v["dubbed"]))
+            {
+                $dubbed = TRUE;
+            }
+            else
+            {
+                $dubbed = FALSE;
+            }
+
+            if (isset($v["dubbedLanguage"]))
+            {
+                $dubbedLanguage = $v["dubbedLanguage"];
+            }
+            else
+            {
+                $dubbedLanguage = NULL;
+            }
+
+            if ($dubbed AND $dubbedLanguage == NULL)
+            {
+                $quiet = TRUE;
+                printMSG("*** Warning: $programID has dub but no dubbed language set.\n");
+                $quiet = FALSE;
+            }
+
+            if (isset($v["subtitled"]))
+            {
+                $isSubtitled = TRUE;
+            }
+            else
+            {
+                $isSubtitled = FALSE;
+            }
+
+            if (isset($v["subtitledLanguage"]))
+            {
+                $subtitledLanguage = $v["subtitledLanguage"];
+            }
+            else
+            {
+                $subtitledLanguage = NULL;
+            }
+            if ($isSubtitled AND $subtitledLanguage == NULL)
+            {
+                $quiet = TRUE;
+                printMSG("*** Warning: $programID has subtitle but no subtitled language set.\n");
+                $quiet = FALSE;
+            }
+
+            if (isset($v["sap"]))
+            {
+                $sap = TRUE;
+            }
+            else
+            {
+                $sap = FALSE;
+            }
+
+            if (isset($v["sapLanguage"]))
+            {
+                $sapLanguage = $v["sapLanguage"];
+            }
+            else
+            {
+                $sapLanguage = NULL;
+            }
+
+            if ($sap AND $sapLanguage == NULL)
+            {
+                $quiet = TRUE;
+                printMSG("*** Warning: $programID has SAP but no SAP language set.\n");
+                $quiet = FALSE;
+            }
+
+            if (isset($v["programLanguage"]))
+            {
+                $programLanguage = $v["programLanguage"];
+            }
+            else
+            {
+                $programLanguage = NULL;
+            }
+
+            if (isset($v["tvRating"]))
+            {
+                $ratingSystem = "V-CHIP";
+                $rating = $v["tvRating"];
+            }
+
+            if (isset($v["hasDialogRating"]))
+            {
+                $dialogRating = TRUE;
+            }
+            else
+            {
+                $dialogRating = FALSE;
+            }
+
+            if (isset($v["hasLanguageRating"]))
+            {
+                $languageRating = TRUE;
+            }
+            else
+            {
+                $languageRating = FALSE;
+            }
+
+            if (isset($v["hasSexRating"]))
+            {
+                $sexRating = TRUE;
+            }
+            else
+            {
+                $sexRating = FALSE;
+            }
+
+            if (isset($v["hasViolenceRating"]))
+            {
+                $violenceRating = TRUE;
+            }
+            else
+            {
+                $violenceRating = FALSE;
+            }
+
+            if (isset($v["hasFantasyViolenceRating"]))
+            {
+                $fvRating = TRUE;
+            }
+            else
+            {
+                $fvRating = FALSE;
+            }
+
+            $insertScheduleSD->execute(array(
+                "stationID"           => $stationID,
+                "programID"           => $programID,
+                "md5"                 => $md5,
+                "air_datetime"        => $air_datetime,
+                "duration"            => $duration,
+                "previouslyshown"     => $previouslyshown,
+                "closecaptioned"      => $isClosedCaption,
+                "partnumber"          => $partNumber,
+                "parttotal"           => $numberOfParts,
+                "first"               => $isFirst,
+                "last"                => $isLast,
+                "dvs"                 => $dvs,
+                "new"                 => $isNew,
+                "educational"         => $isEducational,
+                "hdtv"                => $isHDTV,
+                "3d"                  => $is3d,
+                "letterbox"           => $isLetterboxed,
+                "stereo"              => $isStereo,
+                "dolby"               => $dolby,
+                "dubbed"              => $dubbed,
+                "dubLanguage"         => $dubbedLanguage,
+                "subtitled"           => $isSubtitled,
+                "subtitleLanguage"    => $subtitledLanguage,
+                "sap"                 => $sap,
+                "sapLanguage"         => $sapLanguage,
+                "programLanguage"     => $programLanguage,
+                "ratingSystem"        => $ratingSystem,
+                "tvRating"            => $rating,
+                "dialogRating"        => $dialogRating,
+                "languageRating"      => $languageRating,
+                "sexualContentRating" => $sexRating,
+                "violenceRating"      => $violenceRating,
+                "fvRating"            => $fvRating));
+
+
         }
 
-        if (isset($v["dvs"]))
-        {
-            $dvs = TRUE;
-        }
-        else
-        {
-            $dvs = FALSE;
-        }
-
-        if (isset($v["educational"]))
-        {
-            $isEducational = TRUE;
-        }
-        else
-        {
-            $isEducational = FALSE;
-        }
-
-        if (isset($v["hdtv"]))
-        {
-            $isHDTV = TRUE;
-        }
-        else
-        {
-            $isHDTV = FALSE;
-        }
-
-        if (isset($v["is3d"]))
-        {
-            $is3d = TRUE;
-        }
-        else
-        {
-            $is3d = FALSE;
-        }
-
-        if (isset($v["letterbox"]))
-        {
-            $isLetterboxed = TRUE;
-        }
-        else
-        {
-            $isLetterboxed = FALSE;
-        }
-
-        if (isset($v["stereo"]))
-        {
-            $isStereo = TRUE;
-        }
-        else
-        {
-            $isStereo = FALSE;
-        }
-
-        if (isset($v["dolby"]))
-        {
-            $dolby = $v["dolby"];
-        }
-        else
-        {
-            $dolby = NULL;
-        }
-
-        if (isset($v["dubbed"]))
-        {
-            $dubbed = TRUE;
-        }
-        else
-        {
-            $dubbed = FALSE;
-        }
-
-        if (isset($v["dubbedLanguage"]))
-        {
-            $dubbedLanguage = $v["dubbedLanguage"];
-        }
-        else
-        {
-            $dubbedLanguage = NULL;
-        }
-
-        if ($dubbed AND $dubbedLanguage == NULL)
-        {
-            $quiet = TRUE;
-            printMSG("*** Warning: $programID has dub but no dubbed language set.\n");
-            $quiet = FALSE;
-        }
-
-        if (isset($v["subtitled"]))
-        {
-            $isSubtitled = TRUE;
-        }
-        else
-        {
-            $isSubtitled = FALSE;
-        }
-
-        if (isset($v["subtitledLanguage"]))
-        {
-            $subtitledLanguage = $v["subtitledLanguage"];
-        }
-        else
-        {
-            $subtitledLanguage = NULL;
-        }
-        if ($isSubtitled AND $subtitledLanguage == NULL)
-        {
-            $quiet = TRUE;
-            printMSG("*** Warning: $programID has subtitle but no subtitled language set.\n");
-            $quiet = FALSE;
-        }
-
-        if (isset($v["sap"]))
-        {
-            $sap = TRUE;
-        }
-        else
-        {
-            $sap = FALSE;
-        }
-
-        if (isset($v["sapLanguage"]))
-        {
-            $sapLanguage = $v["sapLanguage"];
-        }
-        else
-        {
-            $sapLanguage = NULL;
-        }
-
-        if ($sap AND $sapLanguage == NULL)
-        {
-            $quiet = TRUE;
-            printMSG("*** Warning: $programID has SAP but no SAP language set.\n");
-            $quiet = FALSE;
-        }
-
-        if (isset($v["programLanguage"]))
-        {
-            $programLanguage = $v["programLanguage"];
-        }
-        else
-        {
-            $programLanguage = NULL;
-        }
-
-        if (isset($v["tvRating"]))
-        {
-            $ratingSystem = "V-CHIP";
-            $rating = $v["tvRating"];
-        }
-
-        if (isset($v["hasDialogRating"]))
-        {
-            $dialogRating = TRUE;
-        }
-        else
-        {
-            $dialogRating = FALSE;
-        }
-
-        if (isset($v["hasLanguageRating"]))
-        {
-            $languageRating = TRUE;
-        }
-        else
-        {
-            $languageRating = FALSE;
-        }
-
-        if (isset($v["hasSexRating"]))
-        {
-            $sexRating = TRUE;
-        }
-        else
-        {
-            $sexRating = FALSE;
-        }
-
-        if (isset($v["hasViolenceRating"]))
-        {
-            $violenceRating = TRUE;
-        }
-        else
-        {
-            $violenceRating = FALSE;
-        }
-
-        if (isset($v["hasFantasyViolenceRating"]))
-        {
-            $fvRating = TRUE;
-        }
-        else
-        {
-            $fvRating = FALSE;
-        }
-
-        $insertScheduleSD->execute(array(
-            "stationID"           => $stationID,
-            "programID"           => $programID,
-            "md5"                 => $md5,
-            "air_datetime"        => $air_datetime,
-            "duration"            => $duration,
-            "previouslyshown"     => $previouslyshown,
-            "closecaptioned"      => $isClosedCaption,
-            "partnumber"          => $partNumber,
-            "parttotal"           => $numberOfParts,
-            "first"               => $isFirst,
-            "last"                => $isLast,
-            "dvs"                 => $dvs,
-            "new"                 => $isNew,
-            "educational"         => $isEducational,
-            "hdtv"                => $isHDTV,
-            "3d"                  => $is3d,
-            "letterbox"           => $isLetterboxed,
-            "stereo"              => $isStereo,
-            "dolby"               => $dolby,
-            "dubbed"              => $dubbed,
-            "dubLanguage"         => $dubbedLanguage,
-            "subtitled"           => $isSubtitled,
-            "subtitleLanguage"    => $subtitledLanguage,
-            "sap"                 => $sap,
-            "sapLanguage"         => $sapLanguage,
-            "programLanguage"     => $programLanguage,
-            "ratingSystem"        => $ratingSystem,
-            "tvRating"            => $rating,
-            "dialogRating"        => $dialogRating,
-            "languageRating"      => $languageRating,
-            "sexualContentRating" => $sexRating,
-            "violenceRating"      => $violenceRating,
-            "fvRating"            => $fvRating));
+        $dbh->commit();
     }
 
-    $dbh->commit();
-}
+    printMSG("\nDone inserting schedules.\n");
+    $stmt = $dbh->exec("DROP TABLE scheduleSD");
+    $stmt = $dbh->exec("RENAME TABLE t_scheduleSD TO scheduleSD");
 
-printMSG("\nDone inserting schedules.\n");
-$stmt = $dbh->exec("DROP TABLE scheduleSD");
-$stmt = $dbh->exec("RENAME TABLE t_scheduleSD TO scheduleSD");
-
-$stmt = $dbh->exec("DROP TABLE program");
-$stmt = $dbh->exec("RENAME TABLE t_program TO program");
+    $stmt = $dbh->exec("DROP TABLE program");
+    $stmt = $dbh->exec("RENAME TABLE t_program TO program");
 }
 
 function getRandhash($username, $password)
