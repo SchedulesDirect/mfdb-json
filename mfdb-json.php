@@ -9,16 +9,17 @@ $isBeta = TRUE;
 $debug = TRUE;
 $quiet = FALSE;
 $printTS = TRUE;
-$dlSchedTempDir = tempdir();
-printMSG("Temp directory for Schedules is $dlSchedTempDir\n");
-$dlProgramTempDir = tempdir();
-printMSG("Temp directory for Programs is $dlProgramTempDir\n");
-$jsonProgramstoRetrieve = array();
 
 date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
+
+$dlSchedTempDir = tempdir();
+printMSG("Temp directory for Schedules is $dlSchedTempDir\n");
+$dlProgramTempDir = tempdir();
+printMSG("Temp directory for Programs is $dlProgramTempDir\n");
+$jsonProgramstoRetrieve = array();
 
 $dbuser = "mythtv";
 $dbpassword = "mythtv";
@@ -418,7 +419,7 @@ function insertSchedule()
             $getProgramInformation->execute(array("pid" => $programID));
             $programJSON = json_decode($getProgramInformation->fetchColumn(), TRUE);
 
-            if (!json_last_error())
+            if (json_last_error())
             {
                 printMSG("Error retrieving / decoding $programID from local database.\n");
                 continue;
