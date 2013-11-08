@@ -323,6 +323,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
         {
             foreach ($jsonProgram["castAndCrew"] as $credit)
             {
+                print "p:$pid\n";
                 var_dump($credit);
                 $tt=fgets(STDIN);
 
