@@ -415,6 +415,26 @@ function insertSchedule()
 
         foreach ($a["programs"] as $v)
         {
+            /*
+             * A few things need to be set to non-null, so declare them here. Also, quiets some warnings.
+             */
+            $ratingSystem = "";
+            $rating = "";
+            $movieYear = "";
+            $starRating = 0;
+            $colorCode = "";
+            $syndicatedEpisodeNumber = "";
+            $showType = "";
+            $oad = NULL;
+            $audioprop = "";
+
+            /*
+             * These are updated in another part of mfdb?
+             */
+            $isFirst = 0;
+            $isLast = 0;
+
+
             $programID = $v["programID"];
             $getProgramInformation->execute(array("pid" => $programID));
             $programJSON = json_decode($getProgramInformation->fetchColumn(), TRUE);
@@ -432,12 +452,6 @@ function insertSchedule()
             $programStartTimeMyth = str_replace("T", " ", $air_datetime);
             $programStartTimeMyth = rtrim($programStartTimeMyth, "Z");
             $programEndTimeMyth = gmdate("Y-m-d H:i:s", strtotime("$air_datetime + $duration seconds"));
-
-            print "\n\n";
-            var_dump($programJSON);
-
-            print "s:$programStartTimeMyth d:$duration e:$programEndTimeMyth\n";
-            $tt = fgets(STDIN);
 
             if (isset($v["new"]))
             {
@@ -553,11 +567,11 @@ function insertSchedule()
 
             if (isset($v["dolby"]))
             {
-                $dolby = $v["dolby"];
+                $dolbyType = $v["dolby"];
             }
             else
             {
-                $dolby = NULL;
+                $dolbyType = NULL;
             }
 
             if (isset($v["dubbed"]))
@@ -694,6 +708,151 @@ function insertSchedule()
                 $fvRating = FALSE;
             }
 
+            $title = $programJSON["titles"]["title120"];
+
+            if (isset($programJSON["episodeTitle150"]))
+            {
+                $subTitle = $programJSON["episodeTitle150"];
+            }
+            else
+            {
+                $subTitle = "";
+            }
+
+            if (isset($programJSON["descriptions"]["description255"]))
+            {
+                $description = $programJSON["descriptions"]["description255"];
+            }
+            else
+            {
+                $description = "";
+            }
+
+            if (isset($programJSON["genres"]))
+            {
+                $category = $programJSON["genres"][0];
+            }
+            else
+            {
+                $category = "";
+            }
+
+            $isGeneric = FALSE;
+            $seriesID = "";
+            $type = strtolower(substr($programID, 0, 2));
+            switch ($type)
+            {
+                case "sh":
+                    $categoryType = "series";
+                    $isGeneric = TRUE;
+                    $seriesID = "EP" .substr($programJSON, 2, 8);
+                    break;
+                case "ep":
+                    $categoryType = "tvshow";
+                    $seriesID = substr($programJSON, 0, 10);
+                    break;
+                case "mv":
+                    $categoryType = "movie";
+                    break;
+                case "sp":
+                    $categoryType = "sports";
+                    break;
+                default:
+                    printMSG("FATAL ERROR: $programID has unknown type.\n");
+                    exit;
+                    break;
+            }
+
+            if ($type == "mv" AND isset($programJSON["movie"]))
+            {
+                if (isset($programJSON["movie"]["year"]))
+                {
+                    $movieYear = $programJSON["movie"]["year"];
+                }
+
+                if (isset($programJSON["movie"]["starRating"]))
+                {
+                    $starRating = substr_count($programJSON["movie"]["starRating"], "*") +
+                        (.5 * substr_count($programJSON["movie"]["starRating"], "+"));
+                }
+            }
+
+            if (isset($programJSON["colorCode"]))
+            {
+                $colorCode = $programJSON["colorCode"];
+            }
+
+            if (isset($programJSON["syndicatedEpisodeNumber"]))
+            {
+                $syndicatedEpisodeNumber = $programJSON["syndicatedEpisodeNumber"];
+            }
+
+            if ($isStereo)
+            {
+                $audioprop = "STEREO";
+            }
+
+            if ($dolbyType)
+            {
+                $audioprop = "DOLBY";
+            }
+
+            if (isset($programJSON["showType"]))
+            {
+                $showType = $programJSON["showType"];
+            }
+
+            if (isset($programJSON["originalAirDate"]))
+            {
+                $oad = $programJSON["originalAirDate"];
+            }
+
+            $subtitleTypes = "";
+            $videoProperties = "";
+
+            $insertSchedule->execute(array(
+                "chanid"                  => $chanID,
+                "starttime"               => $programStartTimeMyth,
+                "endtime"                 => $programEndTimeMyth,
+                "title"                   => $title,
+                "subtitle"                => $subTitle,
+                "description"             => $description,
+                "category"                => $category,
+                "category_type"           => $categoryType,
+                "airdate"                 => $movieYear,
+                "stars"                   => $starRating,
+                "previouslyshown"         => $previouslyshown,
+                "stereo"                  => $isStereo,
+                "subtitled"               => $isSubtitled,
+                "hdtv"                    => $isHDTV,
+                "closecaptioned"          => $isClosedCaption,
+                "partnumber"              => $partNumber,
+                "parttotal"               => $numberOfParts,
+                "seriesid"                => $seriesID,
+                "originalairdate"         => $oad,
+                "showtype"                => $showType,
+                "colorcode"               => $colorCode,
+                "syndicatedepisodenumber" => $syndicatedEpisodeNumber,
+                "programid"               => $programID,
+                "generic"                 => $isGeneric,
+                "listingsource"           => $sourceID,
+                "first"                   => $isFirst,
+                "last"                    => $isLast,
+                "audioprop"               => $audioprop,
+                "subtitletypes"           => $subtitleTypes,
+                "videoprop"               => $videoProperties
+            ));
+
+            $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
+    category,category_type,airdate,stars,previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,
+    seriesid,originalairdate,showtype,colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,
+    audioprop,subtitletypes,videoprop)
+
+    VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,:stars,
+    :previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,
+    :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
+    :first,:last,:audioprop,:subtitletypes,:videoprop)");
+
             $insertScheduleSD->execute(array(
                 "stationID"           => $stationID,
                 "programID"           => $programID,
@@ -713,7 +872,7 @@ function insertSchedule()
                 "3d"                  => $is3d,
                 "letterbox"           => $isLetterboxed,
                 "stereo"              => $isStereo,
-                "dolby"               => $dolby,
+                "dolby"               => $dolbyType,
                 "dubbed"              => $dubbed,
                 "dubLanguage"         => $dubbedLanguage,
                 "subtitled"           => $isSubtitled,
@@ -728,8 +887,6 @@ function insertSchedule()
                 "sexualContentRating" => $sexRating,
                 "violenceRating"      => $violenceRating,
                 "fvRating"            => $fvRating));
-
-
         }
 
         $dbh->commit();
