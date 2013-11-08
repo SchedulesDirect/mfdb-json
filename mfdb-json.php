@@ -203,17 +203,16 @@ function getSchedules(array $stationIDs)
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
     print "\n\nserver md5:";
-    var_dump($serverScheduleMD5);
+    //var_dump($serverScheduleMD5);
 
     print "\n\nsd program cache\n\n";
-    var_dump($dbProgramCache);
+    //var_dump($dbProgramCache);
 
     print "\n\nTo Get\n\n";
 
     $jsonProgramstoRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
 
     var_dump($jsonProgramstoRetrieve);
-    exit;
 
 
     /*
