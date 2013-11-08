@@ -380,7 +380,7 @@ function insertSchedule()
     $stmt = $dbh->exec("DROP TABLE IF EXISTS t_program");
     $stmt = $dbh->exec("CREATE TABLE t_program LIKE program");
 
-    $insertScheduleSD = $dbh->prepare("INSERT INTO t_scheduleSD(stationID,programID,md5,air_datetime,duration,
+    $insertScheduleSD = $dbh->prepare("INSERT IGNORE INTO t_scheduleSD(stationID,programID,md5,air_datetime,duration,
     previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
     dolby,dubbed,dubLanguage,subtitled,subtitleLanguage,sap,sapLanguage,programLanguage,tvRatingSystem,tvRating,
     dialogRating,languageRating,sexualContentRating,violenceRating,fvRating)
@@ -389,7 +389,7 @@ function insertSchedule()
     :letterbox,:stereo,:dolby,:dubbed,:dubLanguage,:subtitled,:subtitleLanguage,:sap,:sapLanguage,:programLanguage,
     :ratingSystem,:tvRating,:dialogRating,:languageRating,:sexualContentRating,:violenceRating,:fvRating)");
 
-    $insertSchedule = $dbh->prepare("INSERT IGNORE INTO t_program(chanid,starttime,endtime,title,subtitle,description,
+    $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
     category,category_type,airdate,stars,previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,
     seriesid,originalairdate,showtype,colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,
     audioprop,subtitletypes,videoprop)
