@@ -54,7 +54,7 @@ foreach ($options as $k => $v)
     }
 }
 
-printMSG("Attempting to connect to database.\n");
+printMSG("Connecting to database.\n");
 try
 {
     $dbh = new PDO("mysql:host=$dbhost;dbname=$db;charset=utf8", $dbuser, $dbpassword,
@@ -85,22 +85,6 @@ else
 $stmt = $dbh->prepare("SELECT userid,password FROM videosource LIMIT 1");
 $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-/*
-foreach ($result[0] as $k => $v)
-{
-    switch ($k)
-    {
-        case
-        "userid":
-            $sdUsername = $v;
-            break;
-        case
-        "password":
-            $sdPassword = sha1($v);
-            break;
-    }
-}
-*/
 
 $sdUsername = $result[0]["userid"];
 $sdPassword = sha1($result[0]["password"]);
