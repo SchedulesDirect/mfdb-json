@@ -239,6 +239,7 @@ function updateChannelTable($he, $sourceID)
          *  lineup file.
          */
         $transport = "Antenna";
+        $dev = "Antenna";
     }
     else
     {
