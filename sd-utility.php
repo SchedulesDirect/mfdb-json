@@ -9,6 +9,10 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
+$scriptVersion = "0.01";
+$scriptDate = "2013-11-11";
+
+$agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
 $updatedHeadendsToRefresh = array();
 
@@ -855,6 +859,7 @@ function sendRequest($jsonText)
      */
 
     global $baseurl;
+    global $agentString;
 
     $data = http_build_query(array("request" => $jsonText));
 
@@ -862,6 +867,7 @@ function sendRequest($jsonText)
                                                array(
                                                    'method'  => 'POST',
                                                    'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                                   'agent'   => $agentString,
                                                    'timeout' => 900,
                                                    'content' => $data
                                                )

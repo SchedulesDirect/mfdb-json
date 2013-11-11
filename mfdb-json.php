@@ -3,12 +3,19 @@
 <?php
 /*
  * This file is a grabber which downloads data from Schedules Direct's JSON service.
+ * Robert Kulagowski
+ * grabber@schedulesdirect.org
+ *
  */
 
 $isBeta = TRUE;
 $debug = TRUE;
 $quiet = FALSE;
-$printTS = TRUE;
+$printTimeStamp = TRUE;
+$scriptVersion = "0.01";
+$scriptDate = "2013-11-11";
+
+$agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
 date_default_timezone_set("UTC");
 $date = new DateTime();
@@ -60,7 +67,7 @@ foreach ($options as $k => $v)
     }
 }
 
-printMSG("Connecting to database.\n");
+printMSG("Connecting to MythTV database.\n");
 try
 {
     $dbh = new PDO("mysql:host=$dbhost;dbname=$db;charset=utf8", $dbuser, $dbpassword,
@@ -121,9 +128,6 @@ if (count($jsonProgramstoRetrieve))
     insertJSON($jsonProgramstoRetrieve);
     insertSchedule();
 }
-
-insertSchedule();
-// Oneshot to update s/e information.
 
 printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
 printMSG("Global. End Time:" . date("Y-m-d H:i:s") . "\n");
@@ -950,6 +954,7 @@ function sendRequest($jsonText)
      */
 
     global $baseurl;
+    global $agentString;
 
     $data = http_build_query(array("request" => $jsonText));
 
@@ -957,6 +962,7 @@ function sendRequest($jsonText)
                                                array(
                                                    'method'  => 'POST',
                                                    'header'  => 'Content-type: application/x-www-form-urlencoded',
+                                                   'agent'   => $agentString,
                                                    'timeout' => 900,
                                                    'content' => $data
                                                )
@@ -983,9 +989,9 @@ function printMSG($str)
 {
     global $fh_log;
     global $quiet;
-    global $printTS;
+    global $printTimeStamp;
 
-    if ($printTS)
+    if ($printTimeStamp)
     {
         $str = date("H:i:s") . ":$str";
     }
