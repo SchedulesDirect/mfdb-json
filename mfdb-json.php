@@ -923,28 +923,30 @@ function insertSchedule()
                 "violenceRating"      => $violenceRating,
                 "fvRating"            => $fvRating));
 
-            foreach ($programJSON["castAndCrew"] as $credit)
+            if (isset($programJSON["castAndCrew"]))
             {
-                $role = strtolower($credit["role"]);
-                /*
-                 * MythTV has hardcoded maps of roles because it uses a set during the create table.
-                 */
-                switch ($role)
+                foreach ($programJSON["castAndCrew"] as $credit)
                 {
-                    case "executive producer":
-                        $role = "executive_producer";
-                        break;
-                    case "guest star":
-                        $role = "guest_star";
-                        break;
+                    $role = strtolower($credit["role"]);
+                    /*
+                     * MythTV has hardcoded maps of roles because it uses a set during the create table.
+                     */
+                    switch ($role)
+                    {
+                        case "executive producer":
+                            $role = "executive_producer";
+                            break;
+                        case "guest star":
+                            $role = "guest_star";
+                            break;
+                    }
+
+                    $roleTable[$role] = 1;
+
+                    $insertCreditMyth->execute(array("person"    => $peopleCache[$credit["name"]], "chanid" => $chanID,
+                                                     "starttime" => $programStartTimeMyth, "role" => $role));
                 }
-
-                $roleTable[$role] = 1;
-
-                $insertCreditMyth->execute(array("person"    => $peopleCache[$credit["name"]], "chanid" => $chanID,
-                                                 "starttime" => $programStartTimeMyth, "role" => $role));
             }
-
         }
 
         $dbh->commit();
