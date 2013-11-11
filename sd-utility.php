@@ -740,7 +740,7 @@ function printStatus()
     {
         foreach ($he as $id => $modified)
         {
-            $line = "$id\t\t";
+            $line = "$id\t\t\t";
             if (strlen($id) < 4)
             {
                 // We want the tabs to align.
