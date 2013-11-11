@@ -756,21 +756,12 @@ function insertSchedule()
 
             if (isset($programJSON["metadata"]))
             {
-                if (isset($programJSON["metadata"]["Tribune"]))
-                {
-                    print "direct array:\n";
-                    var_dump($programJSON["metadata"]["Tribune"]);
-                    $tt = fgets(STDIN);
-                }
                 foreach ($programJSON["metadata"] as $md)
                 {
-                    var_dump($md);
-                    $tt = fgets(STDIN);
                     if (isset($md["Tribune"]))
                     {
                         $season = $md["Tribune"]["season"];
                         $episode = $md["Tribune"]["episode"];
-                        print "pid:$programID Season:$season episode:$episode\n";
                     }
                 }
             }
