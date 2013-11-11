@@ -41,6 +41,7 @@ foreach ($options as $k => $v)
             break;
         case "help":
         case "h":
+            print "$agentString\n\n";
             print "The following options are available:\n";
             print "--beta\n";
             print "--help\t\t(this text)\n";
@@ -69,6 +70,7 @@ foreach ($options as $k => $v)
     }
 }
 
+print "$agentString\n";
 print "Attempting to connect to database.\n";
 try
 {
