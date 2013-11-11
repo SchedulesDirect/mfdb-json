@@ -404,8 +404,8 @@ function linkSchedulesDirectHeadend()
 {
     global $dbh;
 
-    $sid = readline("Source id:>");
-    $he = strtoupper(readline("Headend:>"));
+    $sid = readline("sourceid:>");
+    $he = strtoupper(readline("lineupid:>"));
 
     $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
     $stmt->execute(array("he" => $he));
