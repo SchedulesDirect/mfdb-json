@@ -303,7 +303,13 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
     $getPeople = $dbh->prepare("SELECT name,person FROM people");
     $getPeople->execute();
-    $peopleCache = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
+    $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
+
+    $getPeople = $dbh->prepare("SELECT personID,name FROM peopleSD");
+    $getPeople->execute();
+    $peopleCacheSD = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
+
+    // $getCreditsSD = $dbh->prepare("SELECT ")
 
     $total = count($jsonProgramstoRetrieve);
 
@@ -349,13 +355,16 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 $personID = $credit["personID"];
                 $name = $credit["name"];
 
-                $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
+                if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
+                {
+                    $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
+                }
 
-                if (!isset($peopleCache[$name]))
+                if (!isset($peopleCacheMyth[$name]))
                 {
                     $insertPersonMyth->execute(array("name" => $name));
                     $id = $dbh->lastInsertId();
-                    $peopleCache[$name] = $id;
+                    $peopleCacheMyth[$name] = $id;
                 }
 
                 $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
