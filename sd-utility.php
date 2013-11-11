@@ -740,13 +740,7 @@ function printStatus()
     {
         foreach ($he as $id => $modified)
         {
-            $line = "$id\t\t\t";
-            if (strlen($id) < 4)
-            {
-                // We want the tabs to align.
-                $line .= "\t";
-            }
-            $line .= "Last Updated: $modified";
+            $line = "$id\t Last Updated: $modified";
 
             $getLocalModified->execute(array("he" => $id));
             $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
