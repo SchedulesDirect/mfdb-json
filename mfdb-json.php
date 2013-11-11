@@ -416,7 +416,7 @@ function insertSchedule()
         $sourceID = $channel["sourceid"];
         $stationID = $channel["xmltvid"];
 
-        printMSG("c:$chanID sou:$sourceID sid:$stationID\n");
+        printMSG("Updating chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
 
         $a = json_decode(file_get_contents("$dlSchedTempDir/sched_$stationID.json.txt"), TRUE);
 
@@ -603,13 +603,6 @@ function insertSchedule()
                 $dubbedLanguage = NULL;
             }
 
-            if ($dubbed AND $dubbedLanguage == NULL)
-            {
-                $quiet = TRUE;
-                printMSG("*** Warning: $programID has dub but no dubbed language set.\n");
-                $quiet = FALSE;
-            }
-
             if (isset($v["subtitled"]))
             {
                 $isSubtitled = TRUE;
@@ -626,12 +619,6 @@ function insertSchedule()
             else
             {
                 $subtitledLanguage = NULL;
-            }
-            if ($isSubtitled AND $subtitledLanguage == NULL)
-            {
-                $quiet = TRUE;
-                printMSG("*** Warning: $programID has subtitle but no subtitled language set.\n");
-                $quiet = FALSE;
             }
 
             if (isset($v["sap"]))
@@ -650,13 +637,6 @@ function insertSchedule()
             else
             {
                 $sapLanguage = NULL;
-            }
-
-            if ($sap AND $sapLanguage == NULL)
-            {
-                $quiet = TRUE;
-                printMSG("*** Warning: $programID has SAP but no SAP language set.\n");
-                $quiet = FALSE;
             }
 
             if (isset($v["programLanguage"]))
@@ -923,7 +903,7 @@ function insertSchedule()
         $dbh->commit();
     }
 
-    printMSG("\nDone inserting schedules.\n");
+    printMSG("Done inserting schedules.\n");
     $stmt = $dbh->exec("DROP TABLE scheduleSD");
     $stmt = $dbh->exec("RENAME TABLE t_scheduleSD TO scheduleSD");
 
