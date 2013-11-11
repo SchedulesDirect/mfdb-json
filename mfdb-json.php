@@ -8,6 +8,8 @@
  *
  */
 
+ini_set('memory_limit', '256M');
+
 $isBeta = TRUE;
 $debug = TRUE;
 $quiet = FALSE;
