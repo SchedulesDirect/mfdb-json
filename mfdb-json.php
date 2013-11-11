@@ -756,6 +756,12 @@ function insertSchedule()
 
             if (isset($programJSON["metadata"]))
             {
+                if (isset($programJSON["metadata"]["Tribune"]))
+                {
+                    print "direct array:\n";
+                    var_dump($programJSON["metadata"]["Tribune"]);
+                    $tt = fgets(STDIN);
+                }
                 foreach ($programJSON["metadata"] as $md)
                 {
                     var_dump($md);
