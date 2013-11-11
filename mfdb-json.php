@@ -122,6 +122,9 @@ if (count($jsonProgramstoRetrieve))
     insertSchedule();
 }
 
+insertSchedule();
+// Oneshot to update s/e information.
+
 printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
 printMSG("Global. End Time:" . date("Y-m-d H:i:s") . "\n");
 $globalSinceStart = $globalStartDate->diff(new DateTime());
