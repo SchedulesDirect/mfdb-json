@@ -302,7 +302,7 @@ function updateChannelTable($he, $sourceID)
             {
                 $channum = $freqid;
                 $updateChannelTableAnalog->execute(array("channum" => $channum, "sid" => $stationID,
-                                                         "freqid"  => $freqid));
+                                                         "freqID"  => $freqid));
 
             }
             /*
