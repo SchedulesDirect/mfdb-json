@@ -197,20 +197,21 @@ function refreshLineup()
 
     //if (count($updatedHeadendsToRefresh))
     //{
-    foreach ($updatedHeadendsToRefresh as $he => $modified)
-    {
-        print "Headend update for $he\n";
-        /*
-         * For now we're just going to grab everything; selecting which channels to update is better left for
-         * other applications, like MythWeb or something like that.
-         */
+    //foreach ($updatedHeadendsToRefresh as $he => $modified)
+    //{
+    $he = readline("lineupid:>");
+    print "Headend update for $he\n";
+    /*
+     * For now we're just going to grab everything; selecting which channels to update is better left for
+     * other applications, like MythWeb or something like that.
+     */
 
-        $sourceID = readline("Apply to sourceid:>");
-        if ($sourceID != "")
-        {
-            updateChannelTable($he, $sourceID);
-        }
+    $sourceID = readline("Apply to sourceid:>");
+    if ($sourceID != "")
+    {
+        updateChannelTable($he, $sourceID);
     }
+    //}
     //}
 }
 
