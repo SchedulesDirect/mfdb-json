@@ -206,12 +206,6 @@ exit;
 
 function refreshLineup()
 {
-    global $updatedHeadendsToRefresh;
-
-    //if (count($updatedHeadendsToRefresh))
-    //{
-    //foreach ($updatedHeadendsToRefresh as $he => $modified)
-    //{
     $he = readline("lineupid:>");
     print "Headend update for $he\n";
     /*
@@ -224,8 +218,6 @@ function refreshLineup()
     {
         updateChannelTable($he, $sourceID);
     }
-    //}
-    //}
 }
 
 function updateChannelTable($he, $sourceID)
@@ -748,7 +740,7 @@ function printStatus()
     {
         foreach ($he as $id => $modified)
         {
-            $line = "ID: $id\t\t";
+            $line = "$id\t\t";
             if (strlen($id) < 4)
             {
                 // We want the tabs to align.
