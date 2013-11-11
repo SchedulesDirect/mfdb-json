@@ -27,8 +27,9 @@ $dlSchedTempDir = tempdir();
 printMSG("Temp directory for Schedules is $dlSchedTempDir\n");
 $dlProgramTempDir = tempdir();
 printMSG("Temp directory for Programs is $dlProgramTempDir\n");
-$jsonProgramstoRetrieve = array();
 
+$jsonProgramstoRetrieve = array();
+$peopleCache = array();
 
 $dbuser = "mythtv";
 $dbpassword = "mythtv";
@@ -130,6 +131,11 @@ if (count($jsonProgramstoRetrieve))
     insertJSON($jsonProgramstoRetrieve);
     insertSchedule();
 }
+
+/*
+ * Remove the forced schedule once we're done with all the various tables that we're updating.
+ */
+insertSchedule();
 
 printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
 printMSG("Global. End Time:" . date("Y-m-d H:i:s") . "\n");
@@ -287,6 +293,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
     $insertPersonSD = $dbh->prepare("INSERT INTO peopleSD(personID,name) VALUES(:personID, :name)
         ON DUPLICATE KEY UPDATE name=:name");
+    $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
     $insertCreditSD = $dbh->prepare("INSERT INTO creditsSD(personID,programID,role)
     VALUES(:personID,:pid,:role)");
@@ -294,8 +301,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
     $insertProgramGenresSD = $dbh->prepare("INSERT INTO programgenresSD(programID,relevance,genre)
     VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
 
-    $peopleCache = array();
-    $getPeople = $dbh->prepare("SELECT name,personID FROM peopleSD");
+    $getPeople = $dbh->prepare("SELECT name,person FROM people");
     $getPeople->execute();
     $peopleCache = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -345,6 +351,13 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
                 $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
 
+                if (!isset($peopleCache[$name]))
+                {
+                    $insertPersonMyth->execute(array("name" => $name));
+                    $id = $dbh->lastInsertId();
+                    $peopleCache[$name] = $id;
+                }
+
                 $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
                                                "role"     => $role));
             }
@@ -379,6 +392,19 @@ function insertSchedule()
 {
     global $dbh;
     global $dlSchedTempDir;
+    global $peopleCache;
+
+    if (!count($peopleCache))
+    {
+        /*
+         * People cache array is empty, so read it in.
+         */
+        $getPeople = $dbh->prepare("SELECT name,person FROM people");
+        $getPeople->execute();
+        $peopleCache = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
+    }
+
+    $roleTable = array();
 
     printMSG("Inserting schedules.\n");
 
@@ -409,9 +435,11 @@ function insertSchedule()
     :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop,:season,:episode)");
 
+    $insertCreditMyth = $dbh->prepare("INSERT INTO credits(person,chanid,starttime,role)
+    VALUES(:person,:chanid,:starttime,:role)");
+
     $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1 AND xmltvid != ''");
     $getExistingChannels->execute();
-
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
     $getProgramInformation = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
@@ -860,16 +888,6 @@ function insertSchedule()
                 "episode"                 => $episode
             ));
 
-            $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
-    category,category_type,airdate,stars,previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,
-    seriesid,originalairdate,showtype,colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,
-    audioprop,subtitletypes,videoprop,season,episode)
-
-    VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,:stars,
-    :previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,
-    :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
-    :first,:last,:audioprop,:subtitletypes,:videoprop,:season,:episode)");
-
             $insertScheduleSD->execute(array(
                 "stationID"           => $stationID,
                 "programID"           => $programID,
@@ -904,10 +922,35 @@ function insertSchedule()
                 "sexualContentRating" => $sexRating,
                 "violenceRating"      => $violenceRating,
                 "fvRating"            => $fvRating));
+
+            foreach ($programJSON["castAndCrew"] as $credit)
+            {
+                $role = strtolower($credit["role"]);
+                /*
+                 * MythTV has hardcoded maps of roles because it uses a set during the create table.
+                 */
+                switch ($role)
+                {
+                    case "executive producer":
+                        $role = "executive_producer";
+                        break;
+                    case "guest star":
+                        $role = "guest_star";
+                        break;
+                }
+
+                $roleTable[$role] = 1;
+
+                $insertCreditMyth->execute(array("person"    => $peopleCache[$credit["name"]], "chanid" => $chanID,
+                                                 "starttime" => $programStartTimeMyth, "role" => $role));
+            }
+
         }
 
         $dbh->commit();
     }
+
+    var_dump($roleTable);
 
     printMSG("Done inserting schedules.\n");
     $stmt = $dbh->exec("DROP TABLE scheduleSD");
