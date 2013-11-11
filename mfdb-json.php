@@ -760,9 +760,12 @@ function insertSchedule()
                 {
                     var_dump($md);
                     $tt = fgets(STDIN);
-                    //$season = $programJSON["metadata"]["Tribune"]["season"];
-                    //$episode = $programJSON["metadata"]["Tribune"]["episode"];
-                    //print "pid:$programID Season:$season episode:$episode\n";
+                    if (isset($md["Tribune"]))
+                    {
+                        $season = $md["Tribune"]["season"];
+                        $episode = $md["Tribune"]["episode"];
+                        print "pid:$programID Season:$season episode:$episode\n";
+                    }
                 }
             }
 
