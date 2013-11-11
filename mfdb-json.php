@@ -962,11 +962,11 @@ function sendRequest($jsonText)
 
     $context = stream_context_create(array('http' =>
                                                array(
-                                                   'method'  => 'POST',
-                                                   'header'  => 'Content-type: application/x-www-form-urlencoded',
-                                                   'agent'   => $agentString,
-                                                   'timeout' => 900,
-                                                   'content' => $data
+                                                   'method'     => 'POST',
+                                                   'header'     => 'Content-type: application/x-www-form-urlencoded',
+                                                   'user_agent' => $agentString,
+                                                   'timeout'    => 900,
+                                                   'content'    => $data
                                                )
     ));
 
