@@ -284,9 +284,6 @@ function insertJSON(array $jsonProgramstoRetrieve)
     global $dlProgramTempDir;
     global $debug;
 
-    $counter = 0;
-    printMSG("Performing inserts of JSON data.\n");
-
     $insertJSON = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
@@ -309,16 +306,25 @@ function insertJSON(array $jsonProgramstoRetrieve)
     $getPeople->execute();
     $peopleCacheSD = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    // $getCreditsSD = $dbh->prepare("SELECT ")
+    $getCredits = $dbh->prepare("SELECT CONCAT(personID,'-',programID,'-',role) FROM creditsSD");
+    $getCredits->execute();
+    $creditCache = $getCredits->fetchAll(PDO::FETCH_COLUMN);
 
+    $creditCache = array_flip($creditCache);
+
+    $counter = 0;
     $total = count($jsonProgramstoRetrieve);
+    printMSG("Performing inserts of JSON data.\n");
 
+    $dbh->beginTransaction();
     foreach ($jsonProgramstoRetrieve as $md5 => $pid)
     {
         $counter++;
-        if ($counter % 100)
+        if ($counter % 100 == 0)
         {
             printMSG("$counter / $total             \r");
+            $dbh->commit();
+            $dbh->beginTransaction();
         }
 
         $fileJSON = file_get_contents("$dlProgramTempDir/$pid.json.txt");
@@ -367,8 +373,12 @@ function insertJSON(array $jsonProgramstoRetrieve)
                     $peopleCacheMyth[$name] = $id;
                 }
 
-                $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
-                                               "role"     => $role));
+                if (!isset($creditCache["$personID-$pid-$role"]))
+                {
+                    $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
+                                                   "role"     => $role));
+                    $creditCache["$personID-$pid-$role"] = 1;
+                }
             }
         }
 
@@ -393,6 +403,8 @@ function insertJSON(array $jsonProgramstoRetrieve)
         unlink("$dlProgramTempDir/serverID.txt");
         rmdir("$dlProgramTempDir");
     }
+
+    $dbh->commit();
 
     printMSG("Completed local database program updates.\n");
 }
@@ -1015,13 +1027,13 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                               array(
-                                                   'method'     => 'POST',
-                                                   'header'     => 'Content-type: application/x-www-form-urlencoded',
-                                                   'user_agent' => $agentString,
-                                                   'timeout'    => 900,
-                                                   'content'    => $data
-                                               )
+                                           array(
+                                               'method'     => 'POST',
+                                               'header'     => 'Content-type: application/x-www-form-urlencoded',
+                                               'user_agent' => $agentString,
+                                               'timeout'    => 900,
+                                               'content'    => $data
+                                           )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
