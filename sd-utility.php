@@ -195,23 +195,23 @@ function refreshLineup()
 {
     global $updatedHeadendsToRefresh;
 
-    if (count($updatedHeadendsToRefresh))
+    //if (count($updatedHeadendsToRefresh))
+    //{
+    foreach ($updatedHeadendsToRefresh as $he => $modified)
     {
-        foreach ($updatedHeadendsToRefresh as $he => $modified)
-        {
-            print "Headend update for $he\n";
-            /*
-             * For now we're just going to grab everything; selecting which channels to update is better left for
-             * other applications, like MythWeb or something like that.
-             */
+        print "Headend update for $he\n";
+        /*
+         * For now we're just going to grab everything; selecting which channels to update is better left for
+         * other applications, like MythWeb or something like that.
+         */
 
-            $sourceID = readline("Apply to sourceid:>");
-            if ($sourceID != "")
-            {
-                updateChannelTable($he, $sourceID);
-            }
+        $sourceID = readline("Apply to sourceid:>");
+        if ($sourceID != "")
+        {
+            updateChannelTable($he, $sourceID);
         }
     }
+    //}
 }
 
 function updateChannelTable($he, $sourceID)
@@ -367,7 +367,7 @@ function updateChannelTable($he, $sourceID)
             }
 
             $channelInsertQAM->execute(array("mplexid"   => $dtvMultiplex[$qamFreq], "qamprogram" => $qamProgram,
-                                          "stationID" => $stationID));
+                                             "stationID" => $stationID));
         }
     }
 
