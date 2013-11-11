@@ -229,16 +229,21 @@ function updateChannelTable($he, $sourceID)
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
     print "Updating channel table for sourceid:$sourceID\n";
-    $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
-    $stmt->execute(array("sourceid" => $sourceID));
 
     if (substr($h, 0, 2) == "PC")
     {
+        /*
+         * For antenna lineups, we're not going to delete the existing channel table or dtv_multiplex; we're still
+         * going to use the scan, but use the atsc major and minor to correlate what we've scanned with what's in the
+         *  lineup file.
+         */
         $transport = "Antenna";
     }
     else
     {
         $transport = "Cable";
+        $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
+        $stmt->execute(array("sourceid" => $sourceID));
     }
 
     if ($dev == "Q")
@@ -259,7 +264,7 @@ function updateChannelTable($he, $sourceID)
 
     $dtvMultiplex = array();
 
-    $channelInsert =
+    $channelInsertQAM =
         $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
         WHERE xmltvid=:stationID");
     $insertDTVMultiplex = $dbh->prepare
@@ -267,6 +272,12 @@ function updateChannelTable($he, $sourceID)
         (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
         VALUES
         (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
+
+    $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
+    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
+
+    $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
+    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=0 AND atsc_minor_chan=0 AND freqID=:freqID");
 
 
     foreach ($json[$dev]["map"] as $mapArray)
@@ -280,19 +291,26 @@ function updateChannelTable($he, $sourceID)
             {
                 $atscMajor = $mapArray["atscMajor"];
                 $atscMinor = $mapArray["atscMinor"];
+                $channum = "$atscMajor.$atscMinor";
+                $updateChannelTableATSC->execute(array("channum"   => $channum, "sid" => $stationID,
+                                                       "atscMajor" => $atscMajor,
+                                                       "atscMinor" => $atscMinor));
             }
             else
             {
-                $atscMajor = 0;
-                $atscMinor = 0;
-            }
+                $channum = $freqid;
+                $updateChannelTableAnalog->execute(array("channum" => $channum, "sid" => $stationID,
+                                                         "freqid"  => $freqid));
 
-            $stmt = $dbh->prepare(
-                "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
-                VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
-            $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$freqid, "channum" => $freqid,
-                                 "freqid"          => $freqid, "sourceid" => $sourceID, "xmltvid" => $stationID,
-                                 "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
+            }
+            /*
+                        $stmt = $dbh->prepare(
+                            "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
+                            VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
+                        $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$freqid, "channum" => $freqid,
+                                             "freqid"          => $freqid, "sourceid" => $sourceID, "xmltvid" => $stationID,
+                                             "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
+            */
         }
 
         if ($transport == "IP")
@@ -348,7 +366,7 @@ function updateChannelTable($he, $sourceID)
                 $dtvMultiplex[$qamFreq] = $dbh->lastInsertId();
             }
 
-            $channelInsert->execute(array("mplexid"   => $dtvMultiplex[$qamFreq], "qamprogram" => $qamProgram,
+            $channelInsertQAM->execute(array("mplexid"   => $dtvMultiplex[$qamFreq], "qamprogram" => $qamProgram,
                                           "stationID" => $stationID));
         }
     }
