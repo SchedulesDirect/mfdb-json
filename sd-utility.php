@@ -1,6 +1,13 @@
 #!/usr/bin/php
 
 <?php
+/*
+ * This file is a utility program which performs the necessary setup for using the Schedules Direct API and the
+ * native MythTV tables.
+ * Robert Kulagowski
+ * grabber@schedulesdirect.org
+ *
+ */
 $isBeta = TRUE;
 $debug = TRUE;
 $done = FALSE;
