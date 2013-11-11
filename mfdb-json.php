@@ -434,6 +434,8 @@ function insertSchedule()
             $showType = "";
             $oad = NULL;
             $audioprop = "";
+            $season = 0;
+            $episode = 0;
 
             /*
              * These are updated in another part of mfdb?
@@ -749,6 +751,13 @@ function insertSchedule()
                 $category = "";
             }
 
+            if (isset($programJSON["metadata"]["Tribune"]))
+            {
+                $season = $programJSON["metadata"]["Tribune"]["season"];
+                $episode = $programJSON["metadata"]["Tribune"]["episode"];
+                print "pid:$programID Season:$season episode:$episode\n";
+            }
+
             $isGeneric = FALSE;
             $seriesID = "";
             $type = strtolower(substr($programID, 0, 2));
@@ -852,18 +861,20 @@ function insertSchedule()
                 "last"                    => $isLast,
                 "audioprop"               => $audioprop,
                 "subtitletypes"           => $subtitleTypes,
-                "videoprop"               => $videoProperties
+                "videoprop"               => $videoProperties,
+                "season"                  => $season,
+                "episode"                 => $episode
             ));
 
             $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
     category,category_type,airdate,stars,previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,
     seriesid,originalairdate,showtype,colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,
-    audioprop,subtitletypes,videoprop)
+    audioprop,subtitletypes,videoprop,season,episode)
 
     VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,:stars,
     :previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,
     :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
-    :first,:last,:audioprop,:subtitletypes,:videoprop)");
+    :first,:last,:audioprop,:subtitletypes,:videoprop,:season,:episode)");
 
             $insertScheduleSD->execute(array(
                 "stationID"           => $stationID,
