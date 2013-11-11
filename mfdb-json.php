@@ -99,7 +99,7 @@ $globalStartTime = time();
 $globalStartDate = new DateTime();
 
 printMSG("Retrieving list of channels to download.\n");
-$stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE");
+$stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE AND xmltvid != ''");
 $stmt->execute();
 $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -174,6 +174,7 @@ function getSchedules(array $stationIDs)
 
             foreach (glob("$dlSchedTempDir/sched_*.json.txt") as $f)
             {
+                print "Parsing $f\n";
                 $a = json_decode(file_get_contents($f), TRUE);
                 $stationID = $a["stationID"];
                 $downloadedStationIDs[] = $stationID;
@@ -399,7 +400,7 @@ function insertSchedule()
     :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop)");
 
-    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1");
+    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1 AND xmltvid != ''");
     $getExistingChannels->execute();
 
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
