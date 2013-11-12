@@ -1,5 +1,7 @@
 USE mythconverg;
 
+DROP TABLE IF EXISTS SDprogramCache,SDCredits,SDheadendCache,SDpeople,SDprogramgenres,SDprogramrating,SDschedule;
+
  CREATE TABLE `SDprogramCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `programID` varchar(64) NOT NULL,
@@ -9,9 +11,9 @@ USE mythconverg;
   PRIMARY KEY (`row`),
   UNIQUE KEY `pid` (`programID`),
   KEY `programID` (`programID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
- CREATE TABLE `creditsSD` (
+ CREATE TABLE `SDcredits` (
   `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `programID` varchar(64) NOT NULL,
   `role` varchar(100) DEFAULT NULL,
@@ -19,7 +21,7 @@ USE mythconverg;
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
- CREATE TABLE `headendCacheSD` (
+ CREATE TABLE `SDheadendCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `headend` varchar(14) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
@@ -29,14 +31,14 @@ USE mythconverg;
   UNIQUE KEY `headend` (`headend`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
-CREATE TABLE `peopleSD` (
+CREATE TABLE `SDpeople` (
   `personID` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`personID`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
-CREATE TABLE `programgenresSD` (
+CREATE TABLE `SDprogramgenres` (
   `programID` varchar(64) NOT NULL,
   `relevance` char(1) NOT NULL DEFAULT '0',
   `genre` varchar(30) NOT NULL,
@@ -45,14 +47,14 @@ CREATE TABLE `programgenresSD` (
   KEY `genre` (`genre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
-CREATE TABLE `programratingSD` (
+CREATE TABLE `SDprogramrating` (
   `programID` varchar(64) NOT NULL,
   `system` varchar(30) NOT NULL,
   `rating` varchar(16) DEFAULT NULL,
   PRIMARY KEY (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
-CREATE TABLE `scheduleSD` (
+CREATE TABLE `SDschedule` (
   `stationID` varchar(12) NOT NULL,
   `programID` varchar(64) NOT NULL,
   `md5` char(22) NOT NULL,
@@ -93,6 +95,7 @@ CREATE TABLE `scheduleSD` (
   KEY `programid` (`programID`),
   KEY `md5` (`md5`),
   KEY `sid` (`stationID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
-alter table credits change role role set('actor','director','producer','executive_producer','writer','guest_star','host','adapter','presenter','commentator','guest','musical_guest','judge','correspondent','contestant');
+ALTER TABLE credits CHANGE role role SET('actor','director','producer','executive_producer','writer',
+'guest_star','host','adapter','presenter','commentator','guest','musical_guest','judge','correspondent','contestant');
