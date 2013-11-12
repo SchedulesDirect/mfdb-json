@@ -972,7 +972,6 @@ function insertSchedule()
 
                     $roleTable[$role] = 1;
 
-                    // print "p:$programID role is $role\n";
                     $insertCreditMyth->execute(array("person"    => $peopleCache[$credit["name"]], "chanid" => $chanID,
                                                      "starttime" => $programStartTimeMyth, "role" => $role));
                 }
