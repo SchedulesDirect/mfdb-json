@@ -94,3 +94,5 @@ CREATE TABLE `scheduleSD` (
   KEY `md5` (`md5`),
   KEY `sid` (`stationID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8
+
+alter table credits change role role set('actor','director','producer','executive_producer','writer','guest_star','host','adapter','presenter','commentator','guest','musical_guest','judge','correspondent','contestant');
