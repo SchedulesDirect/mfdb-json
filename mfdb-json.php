@@ -11,7 +11,7 @@
 ini_set('memory_limit', '256M');
 
 $isBeta = TRUE;
-$debug = TRUE;
+$debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
 $scriptVersion = "0.01";
