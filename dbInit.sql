@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS SDprogramCache,SDCredits,SDheadendCache,SDpeople,SDprogramg
   PRIMARY KEY (`row`),
   UNIQUE KEY `pid` (`programID`),
   KEY `programID` (`programID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
  CREATE TABLE `SDcredits` (
   `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -19,7 +19,7 @@ DROP TABLE IF EXISTS SDprogramCache,SDCredits,SDheadendCache,SDpeople,SDprogramg
   `role` varchar(100) DEFAULT NULL,
   KEY `personID` (`personID`),
   KEY `programID` (`programID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
  CREATE TABLE `SDheadendCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -29,14 +29,14 @@ DROP TABLE IF EXISTS SDprogramCache,SDCredits,SDheadendCache,SDpeople,SDprogramg
   `json` mediumtext,
   PRIMARY KEY (`row`),
   UNIQUE KEY `headend` (`headend`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `SDpeople` (
   `personID` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`personID`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `SDprogramgenres` (
   `programID` varchar(64) NOT NULL,
@@ -45,14 +45,14 @@ CREATE TABLE `SDprogramgenres` (
   PRIMARY KEY (`programID`),
   UNIQUE KEY `pid_relevance` (`programID`,`relevance`),
   KEY `genre` (`genre`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `SDprogramrating` (
   `programID` varchar(64) NOT NULL,
   `system` varchar(30) NOT NULL,
   `rating` varchar(16) DEFAULT NULL,
   PRIMARY KEY (`programID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `SDschedule` (
   `stationID` varchar(12) NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE `SDschedule` (
   KEY `programid` (`programID`),
   KEY `md5` (`md5`),
   KEY `sid` (`stationID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE credits CHANGE role role SET('actor','director','producer','executive_producer','writer',
 'guest_star','host','adapter','presenter','commentator','guest','musical_guest','judge','correspondent','contestant');
