@@ -1,6 +1,6 @@
 USE mythconverg;
 
-DROP TABLE IF EXISTS SDprogramCache,SDCredits,SDheadendCache,SDpeople,SDprogramgenres,SDprogramrating,SDschedule;
+DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,SDprogramrating,SDschedule;
 
  CREATE TABLE `SDprogramCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
