@@ -230,7 +230,7 @@ function updateChannelTable($he, $sourceID)
 
     list($h, $dev) = explode(":", $lineupid);
 
-    $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
+    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE headend=:he");
     $stmt->execute(array("he" => $he));
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -414,7 +414,7 @@ function linkSchedulesDirectHeadend()
     $sid = readline("sourceid:>");
     $he = strtoupper(readline("lineupid:>"));
 
-    $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
+    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE headend=:he");
     $stmt->execute(array("he" => $he));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -464,7 +464,7 @@ function printLineup()
      */
 
     $he = strtoupper(readline("Headend:>"));
-    $stmt = $dbh->prepare("SELECT json FROM headendCacheSD WHERE headend=:he");
+    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE headend=:he");
     $stmt->execute(array("he" => $he));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -731,7 +731,7 @@ function printStatus()
     print "Max number of headends for your account: $maxHeadends\n";
     print "Next suggested connect time: $nextConnectTime\n";
 
-    $getLocalModified = $dbh->prepare("SELECT modified FROM headendCacheSD WHERE headend=:he");
+    $getLocalModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE headend=:he");
     print "The following headends are in your account at Schedules Direct:\n\n";
 
     $he = getSchedulesDirectHeadends();
@@ -804,7 +804,7 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
     /*
      * Store a copy of the data that we just downloaded into the cache.
      */
-    $stmt = $dbh->prepare("REPLACE INTO headendCacheSD(headend,json,modified) VALUES(:he,:json,:modified)");
+    $stmt = $dbh->prepare("REPLACE INTO SDheadendCache(headend,json,modified) VALUES(:he,:json,:modified)");
     foreach (glob("$tempDir/*.json.txt") as $f)
     {
         $json = file_get_contents($f);

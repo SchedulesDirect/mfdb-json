@@ -285,25 +285,25 @@ function insertJSON(array $jsonProgramstoRetrieve)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
 
-    $insertPersonSD = $dbh->prepare("INSERT INTO peopleSD(personID,name) VALUES(:personID, :name)
+    $insertPersonSD = $dbh->prepare("INSERT INTO SDpeople(personID,name) VALUES(:personID, :name)
         ON DUPLICATE KEY UPDATE name=:name");
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
-    $insertCreditSD = $dbh->prepare("INSERT INTO creditsSD(personID,programID,role)
+    $insertCreditSD = $dbh->prepare("INSERT INTO SDcredits(personID,programID,role)
     VALUES(:personID,:pid,:role)");
 
-    $insertProgramGenresSD = $dbh->prepare("INSERT INTO programgenresSD(programID,relevance,genre)
+    $insertProgramGenresSD = $dbh->prepare("INSERT INTO SDprogramgenres(programID,relevance,genre)
     VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
 
     $getPeople = $dbh->prepare("SELECT name,person FROM people");
     $getPeople->execute();
     $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $getPeople = $dbh->prepare("SELECT personID,name FROM peopleSD");
+    $getPeople = $dbh->prepare("SELECT personID,name FROM SDpeople");
     $getPeople->execute();
     $peopleCacheSD = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $getCredits = $dbh->prepare("SELECT CONCAT(personID,'-',programID,'-',role) FROM creditsSD");
+    $getCredits = $dbh->prepare("SELECT CONCAT(personID,'-',programID,'-',role) FROM SDcredits");
     $getCredits->execute();
     $creditCache = $getCredits->fetchAll(PDO::FETCH_COLUMN);
 
@@ -429,8 +429,8 @@ function insertSchedule()
 
     $counter = 0;
 
-    $dbh->exec("DROP TABLE IF EXISTS t_scheduleSD");
-    $dbh->exec("CREATE TABLE t_scheduleSD LIKE scheduleSD");
+    $dbh->exec("DROP TABLE IF EXISTS t_SDschedule");
+    $dbh->exec("CREATE TABLE t_SDschedule LIKE SDschedule");
 
     $dbh->exec("DROP TABLE IF EXISTS t_program");
     $dbh->exec("CREATE TABLE t_program LIKE program");
@@ -441,7 +441,7 @@ function insertSchedule()
     $dbh->exec("DROP TABLE IF EXISTS t_programrating");
     $dbh->exec("CREATE TABLE t_programrating LIKE programrating");
 
-    $insertScheduleSD = $dbh->prepare("INSERT IGNORE INTO t_scheduleSD(stationID,programID,md5,air_datetime,duration,
+    $insertScheduleSD = $dbh->prepare("INSERT IGNORE INTO t_SDschedule(stationID,programID,md5,air_datetime,duration,
     previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
     dolby,dubbed,dubLanguage,subtitled,subtitleLanguage,sap,sapLanguage,programLanguage,tvRatingSystem,tvRating,
     dialogRating,languageRating,sexualContentRating,violenceRating,fvRating)
@@ -1007,8 +1007,8 @@ function insertSchedule()
     }
 
     printMSG("Done inserting schedules.\n");
-    $dbh->exec("DROP TABLE scheduleSD");
-    $dbh->exec("RENAME TABLE t_scheduleSD TO scheduleSD");
+    $dbh->exec("DROP TABLE SDschedule");
+    $dbh->exec("RENAME TABLE t_SDschedule TO SDschedule");
 
     $dbh->exec("DROP TABLE program");
     $dbh->exec("RENAME TABLE t_program TO program");
