@@ -251,7 +251,7 @@ function getSchedules(array $stationIDs)
 
         if ($res["response"] == "OK")
         {
-            printMSG("Downloading program file.\n");
+            printMSG("Downloading new and updated programs.\n");
 
             $fileName = $res["filename"];
             $url = $res["URL"];
@@ -467,8 +467,8 @@ function insertSchedule()
     $insertCreditMyth = $dbh->prepare("INSERT INTO t_credits(person,chanid,starttime,role)
     VALUES(:person,:chanid,:starttime,:role)");
 
-    $insertProgramRatingMyth = $dbh->prepare("INSERT INTO programrating(chanid,starttime,system,rating)
-    VALUES(:chanid,:startttime,:system,:rating)");
+    $insertProgramRatingMyth = $dbh->prepare("INSERT INTO t_programrating(chanid,starttime,system,rating)
+    VALUES(:chanid,:starttime,:system,:rating)");
 
     $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1
     AND xmltvid != ''");
