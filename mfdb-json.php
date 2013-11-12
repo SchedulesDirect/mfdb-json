@@ -134,11 +134,6 @@ if (count($jsonProgramstoRetrieve))
     insertSchedule();
 }
 
-/*
- * Remove the forced schedule once we're done with all the various tables that we're updating.
- */
-insertSchedule();
-
 printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
 printMSG("Global. End Time:" . date("Y-m-d H:i:s") . "\n");
 $globalSinceStart = $globalStartDate->diff(new DateTime());
@@ -191,7 +186,7 @@ function getSchedules(array $stationIDs)
 
             foreach (glob("$dlSchedTempDir/sched_*.json.txt") as $f)
             {
-                print "Parsing $f\n";
+                printMSG("Parsing $f\n");
                 $a = json_decode(file_get_contents($f), TRUE);
                 $stationID = $a["stationID"];
                 $downloadedStationIDs[] = $stationID;
@@ -416,6 +411,7 @@ function insertSchedule()
     global $dbh;
     global $dlSchedTempDir;
     global $peopleCache;
+    global $debug;
 
     if (!count($peopleCache))
     {
@@ -483,7 +479,7 @@ function insertSchedule()
         $sourceID = $channel["sourceid"];
         $stationID = $channel["xmltvid"];
 
-        printMSG("Updating chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
+        printMSG("Inserted schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
 
         $a = json_decode(file_get_contents("$dlSchedTempDir/sched_$stationID.json.txt"), TRUE);
 
@@ -1000,7 +996,15 @@ function insertSchedule()
         $dbh->commit();
     }
 
-    var_dump($roleTable);
+    /*
+     * If users start to complain about errors on the insert, it's probably due to a new role type.
+     */
+
+    if ($debug)
+    {
+        print "Role table:\n";
+        var_dump($roleTable);
+    }
 
     printMSG("Done inserting schedules.\n");
     $dbh->exec("DROP TABLE scheduleSD");
