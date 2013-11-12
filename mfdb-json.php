@@ -439,6 +439,9 @@ function insertSchedule()
     $stmt = $dbh->exec("DROP TABLE IF EXISTS t_program");
     $stmt = $dbh->exec("CREATE TABLE t_program LIKE program");
 
+    $stmt = $dbh->exec("DROP TABLE IF EXISTS t_credits");
+    $stmt = $dbh->exec("CREATE TABLE t_credits LIKE credits");
+
     $insertScheduleSD = $dbh->prepare("INSERT IGNORE INTO t_scheduleSD(stationID,programID,md5,air_datetime,duration,
     previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
     dolby,dubbed,dubLanguage,subtitled,subtitleLanguage,sap,sapLanguage,programLanguage,tvRatingSystem,tvRating,
@@ -458,7 +461,7 @@ function insertSchedule()
     :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop,:season,:episode)");
 
-    $insertCreditMyth = $dbh->prepare("INSERT INTO credits(person,chanid,starttime,role)
+    $insertCreditMyth = $dbh->prepare("INSERT INTO t_credits(person,chanid,starttime,role)
     VALUES(:person,:chanid,:starttime,:role)");
 
     $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1 AND xmltvid != ''");
@@ -987,6 +990,11 @@ function insertSchedule()
 
     $stmt = $dbh->exec("DROP TABLE program");
     $stmt = $dbh->exec("RENAME TABLE t_program TO program");
+
+    $stmt = $dbh->exec("DROP TABLE credits");
+    $stmt = $dbh->exec("RENAME TABLE t_credits TO credits");
+
+
 }
 
 function getRandhash($username, $password)
