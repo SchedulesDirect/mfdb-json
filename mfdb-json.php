@@ -851,6 +851,12 @@ function insertSchedule()
                     $starRating = substr_count($programJSON["movie"]["starRating"], "*") +
                         (.5 * substr_count($programJSON["movie"]["starRating"], "+"));
                 }
+
+                if (isset($programJSON["movie"]["mpaaRating"]))
+                {
+                    $ratingSystem = "MPAA";
+                    $rating = $programJSON["movie"]["mpaaRating"];
+                }
             }
 
             if (isset($programJSON["colorCode"]))
