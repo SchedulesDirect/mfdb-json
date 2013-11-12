@@ -962,11 +962,14 @@ function insertSchedule()
                         case "guest star":
                             $role = "guest_star";
                             break;
+                        case "musical guest":
+                            $role = "musical_guest";
+                            break;
                     }
 
                     $roleTable[$role] = 1;
 
-                    print "p:$programID role is $role\n";
+                    // print "p:$programID role is $role\n";
                     $insertCreditMyth->execute(array("person"    => $peopleCache[$credit["name"]], "chanid" => $chanID,
                                                      "starttime" => $programStartTimeMyth, "role" => $role));
                 }
