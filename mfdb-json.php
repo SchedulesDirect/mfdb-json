@@ -433,14 +433,17 @@ function insertSchedule()
 
     $counter = 0;
 
-    $stmt = $dbh->exec("DROP TABLE IF EXISTS t_scheduleSD");
-    $stmt = $dbh->exec("CREATE TABLE t_scheduleSD LIKE scheduleSD");
+    $dbh->exec("DROP TABLE IF EXISTS t_scheduleSD");
+    $dbh->exec("CREATE TABLE t_scheduleSD LIKE scheduleSD");
 
-    $stmt = $dbh->exec("DROP TABLE IF EXISTS t_program");
-    $stmt = $dbh->exec("CREATE TABLE t_program LIKE program");
+    $dbh->exec("DROP TABLE IF EXISTS t_program");
+    $dbh->exec("CREATE TABLE t_program LIKE program");
 
-    $stmt = $dbh->exec("DROP TABLE IF EXISTS t_credits");
-    $stmt = $dbh->exec("CREATE TABLE t_credits LIKE credits");
+    $dbh->exec("DROP TABLE IF EXISTS t_credits");
+    $dbh->exec("CREATE TABLE t_credits LIKE credits");
+
+    $dbh->exec("DROP TABLE IF EXISTS t_programrating");
+    $dbh->exec("CREATE TABLE t_programrating LIKE programrating");
 
     $insertScheduleSD = $dbh->prepare("INSERT IGNORE INTO t_scheduleSD(stationID,programID,md5,air_datetime,duration,
     previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
@@ -464,7 +467,11 @@ function insertSchedule()
     $insertCreditMyth = $dbh->prepare("INSERT INTO t_credits(person,chanid,starttime,role)
     VALUES(:person,:chanid,:starttime,:role)");
 
-    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1 AND xmltvid != ''");
+    $insertProgramRatingMyth = $dbh->prepare("INSERT INTO programrating(chanid,starttime,system,rating)
+    VALUES(:chanid,:startttime,:system,:rating)");
+
+    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1
+    AND xmltvid != ''");
     $getExistingChannels->execute();
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
@@ -976,6 +983,12 @@ function insertSchedule()
                                                      "starttime" => $programStartTimeMyth, "role" => $role));
                 }
             }
+
+            if ($ratingSystem != "")
+            {
+                $insertProgramRatingMyth->execute(array("chanid" => $chanID, "starttime" => $programStartTimeMyth,
+                                                        "system" => $ratingSystem, "rating" => $rating));
+            }
         }
 
         $dbh->commit();
@@ -984,16 +997,17 @@ function insertSchedule()
     var_dump($roleTable);
 
     printMSG("Done inserting schedules.\n");
-    $stmt = $dbh->exec("DROP TABLE scheduleSD");
-    $stmt = $dbh->exec("RENAME TABLE t_scheduleSD TO scheduleSD");
+    $dbh->exec("DROP TABLE scheduleSD");
+    $dbh->exec("RENAME TABLE t_scheduleSD TO scheduleSD");
 
-    $stmt = $dbh->exec("DROP TABLE program");
-    $stmt = $dbh->exec("RENAME TABLE t_program TO program");
+    $dbh->exec("DROP TABLE program");
+    $dbh->exec("RENAME TABLE t_program TO program");
 
-    $stmt = $dbh->exec("DROP TABLE credits");
-    $stmt = $dbh->exec("RENAME TABLE t_credits TO credits");
+    $dbh->exec("DROP TABLE credits");
+    $dbh->exec("RENAME TABLE t_credits TO credits");
 
-
+    $dbh->exec("DROP TABLE programrating");
+    $dbh->exec("RENAME TABLE t_programrating TO programrating");
 }
 
 function getRandhash($username, $password)
@@ -1040,13 +1054,13 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-                                           array(
-                                               'method'     => 'POST',
-                                               'header'     => 'Content-type: application/x-www-form-urlencoded',
-                                               'user_agent' => $agentString,
-                                               'timeout'    => 900,
-                                               'content'    => $data
-                                           )
+                                               array(
+                                                   'method'     => 'POST',
+                                                   'header'     => 'Content-type: application/x-www-form-urlencoded',
+                                                   'user_agent' => $agentString,
+                                                   'timeout'    => 900,
+                                                   'content'    => $data
+                                               )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
