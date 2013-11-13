@@ -253,7 +253,7 @@ function getSchedules(array $stationIDs)
             $res["randhash"] = $randHash;
             $res["api"] = $api;
 
-            printMSG("Retrieving chunk $i of $totalChunks\n");
+            printMSG("Retrieving chunk $i of $totalChunks.\n");
             $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
             $res["request"] = $chunk;
