@@ -57,9 +57,9 @@ foreach ($options as $k => $v)
             print "The following options are available:\n";
             print "--beta\n";
             print "--help\t\t(this text)\n";
-            print "--dbhost=\texample: --host=192.168.10.10 Default:$dbhost\n";
-            print "--dbuser=\tUsername to connect to MythTV database Default:$dbuser\n";
-            print "--dbpassword=\tPassword to access MythtTV database Default:$dbpassword\n";
+            print "--dbhost=\texample: --host=192.168.10.10 (Default:$dbhost(\n";
+            print "--dbuser=\tUsername to connect to MythTV database (Default:$dbuser(\n";
+            print "--dbpassword=\tPassword to access MythtTV database (Default:$dbpassword(\n";
             print "--max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)\n";
             exit;
         case "dbhost":
