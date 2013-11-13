@@ -842,10 +842,14 @@ function insertSchedule()
                     $movieYear = $programJSON["movie"]["year"];
                 }
 
+                /*
+                 * MythTV uses a system where 4 stars would be a "1.0".
+                 */
+
                 if (isset($programJSON["movie"]["starRating"]))
                 {
-                    $starRating = substr_count($programJSON["movie"]["starRating"], "*") +
-                        (.5 * substr_count($programJSON["movie"]["starRating"], "+"));
+                    $starRating = (.5 * substr_count($programJSON["movie"]["starRating"], "*")) +
+                        (.125 * substr_count($programJSON["movie"]["starRating"], "+"));
                 }
 
                 if (isset($programJSON["movie"]["mpaaRating"]))
