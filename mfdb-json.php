@@ -16,7 +16,7 @@ $quiet = FALSE;
 $printTimeStamp = TRUE;
 $scriptVersion = "0.01";
 $scriptDate = "2013-11-13";
-$maxProgramsToGet = 5000;
+$maxProgramsToGet = 2000;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
@@ -253,7 +253,7 @@ function getSchedules(array $stationIDs)
             $res["randhash"] = $randHash;
             $res["api"] = $api;
 
-            printMSG("Retrieving chunk $i of $totalChunks.\n");
+            printMSG("Retrieving chunk " . $i + 1 . " of " . $totalChunks + 1 . ".\n");
             $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
             $res["request"] = $chunk;
