@@ -16,6 +16,7 @@ $quiet = FALSE;
 $printTimeStamp = TRUE;
 $scriptVersion = "0.01";
 $scriptDate = "2013-11-13";
+$maxProgramsToGet = 5000;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
@@ -152,6 +153,7 @@ function getSchedules(array $stationIDs)
     global $randHash;
     global $dlProgramTempDir;
     global $dlSchedTempDir;
+    global $maxProgramsToGet;
 
     $dbProgramCache = array();
 
@@ -217,14 +219,16 @@ function getSchedules(array $stationIDs)
 
     $jsonProgramstoRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
 
+    $toRetrieveTotal = count($jsonProgramstoRetrieve);
+
     /*
      * Now we've got an array of programIDs that we need to download in $toRetrieve,
      * either because we didn't have them, or they have different md5's.
      */
 
-    printMSG("Need to download " . count($jsonProgramstoRetrieve) . " new or updated programs.\n");
+    printMSG("Need to download $toRetrieveTotal new or updated programs.\n");
 
-    if (count($jsonProgramstoRetrieve) > 10000)
+    if ($toRetrieveTotal > 10000)
     {
         printMSG("Requesting more than 10000 programs. Please be patient.\n");
     }
@@ -232,43 +236,50 @@ function getSchedules(array $stationIDs)
     if (count($jsonProgramstoRetrieve))
     {
         printMSG("Requesting new and updated programs.\n");
+
+        $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
+
         $res = array();
         $res["action"] = "get";
         $res["object"] = "programs";
         $res["randhash"] = $randHash;
         $res["api"] = $api;
-        $res["request"] = $jsonProgramstoRetrieve;
 
-        $response = sendRequest(json_encode($res));
-
-        $res = array();
-        $res = json_decode($response, TRUE);
-
-        if ($res["response"] == "OK")
+        for ($i = 0; $i <= $totalChunks; $i++)
         {
-            printMSG("Downloading new and updated programs.\n");
+            $res["request"] = $jsonProgramstoRetrieve;
 
-            $fileName = $res["filename"];
-            $url = $res["URL"];
-            file_put_contents("$dlProgramTempDir/$fileName", file_get_contents($url));
+            $response = sendRequest(json_encode($res));
 
-            $zipArchive = new ZipArchive();
-            $result = $zipArchive->open("$dlProgramTempDir/$fileName");
-            if ($result === TRUE)
+            $res = array();
+            $res = json_decode($response, TRUE);
+
+            if ($res["response"] == "OK")
             {
-                $zipArchive->extractTo("$dlProgramTempDir");
-                $zipArchive->close();
+                printMSG("Downloading new and updated programs.\n");
+
+                $fileName = $res["filename"];
+                $url = $res["URL"];
+                file_put_contents("$dlProgramTempDir/$fileName", file_get_contents($url));
+
+                $zipArchive = new ZipArchive();
+                $result = $zipArchive->open("$dlProgramTempDir/$fileName");
+                if ($result === TRUE)
+                {
+                    $zipArchive->extractTo("$dlProgramTempDir");
+                    $zipArchive->close();
+                }
+                else
+                {
+                    printMSG("FATAL: Could not open .zip file while extracting programIDs.\n");
+                    exit;
+                }
             }
             else
             {
-                printMSG("FATAL: Could not open .zip file while extracting programIDs.\n");
+                printMSG("Error getting programs:\n" . var_dump($res));
                 exit;
             }
-        }
-        else
-        {
-            printMSG("Error getting programs:\n" . var_dump($res));
-            exit;
         }
     }
 
