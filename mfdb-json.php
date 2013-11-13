@@ -398,6 +398,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
     if ($debug == FALSE)
     {
         unlink("$dlProgramTempDir/serverID.txt");
+        unlink("$dlProgramTempDir/programs.json.zip");
         rmdir("$dlProgramTempDir");
     }
 
