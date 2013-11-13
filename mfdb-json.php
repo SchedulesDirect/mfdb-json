@@ -253,7 +253,7 @@ function getSchedules(array $stationIDs)
             $res["randhash"] = $randHash;
             $res["api"] = $api;
 
-            print "Retrieving $i of $totalChunks\n";
+            printMSG("Retrieving chunk $i of $totalChunks\n");
             $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
             $res["request"] = $chunk;
@@ -267,7 +267,7 @@ function getSchedules(array $stationIDs)
 
             if ($res["response"] == "OK")
             {
-                printMSG("Downloading new and updated programs.\n");
+                //printMSG("Downloading new and updated programs.\n");
 
                 $fileName = $res["filename"];
                 $url = $res["URL"];
