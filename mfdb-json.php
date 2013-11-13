@@ -15,7 +15,7 @@ $debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
 $scriptVersion = "0.01";
-$scriptDate = "2013-11-11";
+$scriptDate = "2013-11-13";
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
