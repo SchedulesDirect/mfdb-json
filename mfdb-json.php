@@ -239,20 +239,20 @@ function getSchedules(array $stationIDs)
 
     if (count($jsonProgramstoRetrieve))
     {
-        printMSG("Requesting new and updated programs.\n");
+//        printMSG("Requesting new and updated programs.\n");
 
         $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
-
-        $res = array();
-        $res["action"] = "get";
-        $res["object"] = "programs";
-        $res["randhash"] = $randHash;
-        $res["api"] = $api;
 
         $counter = 0;
 
         for ($i = 0; $i <= $totalChunks; $i++)
         {
+            $res = array();
+            $res["action"] = "get";
+            $res["object"] = "programs";
+            $res["randhash"] = $randHash;
+            $res["api"] = $api;
+
             print "Retrieving $i of $totalChunks\n";
             $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
