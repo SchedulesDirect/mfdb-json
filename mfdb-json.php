@@ -249,15 +249,16 @@ function getSchedules(array $stationIDs)
         $res["randhash"] = $randHash;
         $res["api"] = $api;
 
+        $counter = 0;
+
         for ($i = 0; $i <= $totalChunks; $i++)
         {
             print "Retrieving $i of $totalChunks\n";
-            $startOffset = $i * 5000;
+            $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
             $res["request"] = $chunk;
 
-            var_dump($chunk);
-            $tt = fgets(STDIN);
+            $counter += count($chunk);
 
             $response = sendRequest(json_encode($res));
 
@@ -291,6 +292,9 @@ function getSchedules(array $stationIDs)
                 exit;
             }
         }
+
+        print "counter is $counter\n";
+        $tt=fgets(STDIN);
     }
 
     return ($jsonProgramstoRetrieve);
