@@ -39,9 +39,9 @@ $dbpassword = "mythtv";
 $dbhost = "localhost";
 $db = "mythconverg";
 
-$longoptions = array("beta::", "debug::", "help::", "dbhost::", "dbpassword::", "setup::", "dbuser::");
-
+$longoptions = array("beta::", "dbhost::", "dbpassword::", "dbuser::", "debug::", "help::", "max::");
 $options = getopt("h::", $longoptions);
+
 foreach ($options as $k => $v)
 {
     switch ($k)
@@ -60,15 +60,19 @@ foreach ($options as $k => $v)
             print "--dbhost=\t\texample: --host=192.168.10.10\tDefault:$dbhost\n";
             print "--dbuser=\t\tUsername to connect to MythTV database\tDefault:$dbuser\n";
             print "--dbpassword=\tPassword to access MythtTV database\tDefault:$dbpassword\n";
+            print "--max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)\n";
             exit;
-        case "host":
+        case "dbhost":
             $dbhost = $v;
             break;
-        case "password":
+        case "dbpassword":
             $dbpassword = $v;
             break;
-        case "user":
+        case "dbuser":
             $dbuser = $v;
+            break;
+        case "max":
+            $maxProgramsToGet = $v;
             break;
     }
 }
@@ -247,7 +251,13 @@ function getSchedules(array $stationIDs)
 
         for ($i = 0; $i <= $totalChunks; $i++)
         {
-            $res["request"] = $jsonProgramstoRetrieve;
+            print "Retrieving $i of $totalChunks\n";
+            $startOffset = $i * 5000;
+            $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
+            $res["request"] = $chunk;
+
+            var_dump($chunk);
+            $tt = fgets(STDIN);
 
             $response = sendRequest(json_encode($res));
 
