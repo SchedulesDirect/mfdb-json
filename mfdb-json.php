@@ -293,8 +293,8 @@ function getSchedules(array $stationIDs)
             }
         }
 
-        print "counter is $counter\n";
-        $tt=fgets(STDIN);
+        print "to get was: $toRetrieveTotal got is $counter\n";
+        $tt = fgets(STDIN);
     }
 
     return ($jsonProgramstoRetrieve);
