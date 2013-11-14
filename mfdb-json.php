@@ -915,6 +915,8 @@ function insertSchedule()
             $subtitleTypes = "";
             $videoProperties = "";
 
+            print "Inserting $programID\n";
+
             try
             {
                 $insertSchedule->execute(array(
