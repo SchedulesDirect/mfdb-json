@@ -915,7 +915,7 @@ function insertSchedule()
             $subtitleTypes = "";
             $videoProperties = "";
 
-            print "Inserting $programID\n";
+            print "Inserting $programID c:$chanID pstm:$programStartTimeMyth t:$title s:$subTitle d:$descritpion\n";
 
             try
             {
