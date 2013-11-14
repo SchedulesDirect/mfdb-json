@@ -14,8 +14,8 @@ $isBeta = TRUE;
 $debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
-$scriptVersion = "0.01";
-$scriptDate = "2013-11-13";
+$scriptVersion = "0.02";
+$scriptDate = "2013-11-14";
 $maxProgramsToGet = 2000;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
