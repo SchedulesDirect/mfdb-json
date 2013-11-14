@@ -1051,30 +1051,29 @@ function insertSchedule()
     }
 
     $dbh->commit();
-}
 
-/*
- * If users start to complain about errors on the insert, it's probably due to a new role type.
- */
+    /*
+     * If users start to complain about errors on the insert, it's probably due to a new role type.
+     */
 
-if ($debug)
-{
-    print "Role table:\n";
-    var_dump($roleTable);
-}
+    if ($debug)
+    {
+        print "Role table:\n";
+        var_dump($roleTable);
+    }
 
-printMSG("Done inserting schedules.\n");
-$dbh->exec("DROP TABLE SDschedule");
-$dbh->exec("RENAME TABLE t_SDschedule TO SDschedule");
+    printMSG("Done inserting schedules.\n");
+    $dbh->exec("DROP TABLE SDschedule");
+    $dbh->exec("RENAME TABLE t_SDschedule TO SDschedule");
 
-$dbh->exec("DROP TABLE program");
-$dbh->exec("RENAME TABLE t_program TO program");
+    $dbh->exec("DROP TABLE program");
+    $dbh->exec("RENAME TABLE t_program TO program");
 
-$dbh->exec("DROP TABLE credits");
-$dbh->exec("RENAME TABLE t_credits TO credits");
+    $dbh->exec("DROP TABLE credits");
+    $dbh->exec("RENAME TABLE t_credits TO credits");
 
-$dbh->exec("DROP TABLE programrating");
-$dbh->exec("RENAME TABLE t_programrating TO programrating");
+    $dbh->exec("DROP TABLE programrating");
+    $dbh->exec("RENAME TABLE t_programrating TO programrating");
 }
 
 function getRandhash($username, $password)
