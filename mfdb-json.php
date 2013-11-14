@@ -506,7 +506,7 @@ function insertSchedule()
 
         $a = json_decode(file_get_contents("$dlSchedTempDir/sched_$stationID.json.txt"), TRUE);
 
-        $dbh->beginTransaction();
+        //$dbh->beginTransaction();
 
         foreach ($a["programs"] as $v)
         {
@@ -955,6 +955,7 @@ function insertSchedule()
             {
                 print "Exception: " . $e->getMessage();
                 $debug = TRUE;
+                var_dump($programJSON);
             }
 
             try
@@ -997,6 +998,7 @@ function insertSchedule()
             {
                 print "Exception: " . $e->getMessage();
                 $debug = TRUE;
+                var_dump($programJSON);
             }
 
             if (isset($programJSON["castAndCrew"]))
@@ -1031,6 +1033,7 @@ function insertSchedule()
                     {
                         print "Exception: " . $e->getMessage();
                         $debug = TRUE;
+                        var_dump($programJSON);
                     }
                 }
             }
@@ -1050,7 +1053,7 @@ function insertSchedule()
         }
     }
 
-    $dbh->commit();
+    //$dbh->commit();
 
     /*
      * If users start to complain about errors on the insert, it's probably due to a new role type.
