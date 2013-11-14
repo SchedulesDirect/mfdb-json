@@ -14,7 +14,7 @@ $isBeta = TRUE;
 $debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
-$scriptVersion = "0.02";
+$scriptVersion = "0.03";
 $scriptDate = "2013-11-14";
 $maxProgramsToGet = 2000;
 
@@ -506,7 +506,7 @@ function insertSchedule()
 
         $a = json_decode(file_get_contents("$dlSchedTempDir/sched_$stationID.json.txt"), TRUE);
 
-        //$dbh->beginTransaction();
+        $dbh->beginTransaction();
 
         foreach ($a["programs"] as $v)
         {
@@ -915,7 +915,7 @@ function insertSchedule()
             $subtitleTypes = "";
             $videoProperties = "";
 
-            print "Inserting $programID c:$chanID pstm:$programStartTimeMyth t:$title s:$subTitle d:$description\n";
+            //print "Inserting $programID c:$chanID pstm:$programStartTimeMyth t:$title s:$subTitle d:$description\n";
 
             try
             {
@@ -1055,7 +1055,7 @@ function insertSchedule()
         }
     }
 
-    //$dbh->commit();
+    $dbh->commit();
 
     /*
      * If users start to complain about errors on the insert, it's probably due to a new role type.
