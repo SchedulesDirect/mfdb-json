@@ -951,7 +951,7 @@ function insertSchedule()
                     "season"                  => $season,
                     "episode"                 => $episode
                 ));
-            } catch (Exception $e)
+            } catch (PDOException $e)
             {
                 print "Exception: " . $e->getMessage();
                 $debug = TRUE;
@@ -994,7 +994,7 @@ function insertSchedule()
                     "sexualContentRating" => $sexRating,
                     "violenceRating"      => $violenceRating,
                     "fvRating"            => $fvRating));
-            } catch (Exception $e)
+            } catch (PDOException $e)
             {
                 print "Exception: " . $e->getMessage();
                 $debug = TRUE;
@@ -1029,7 +1029,7 @@ function insertSchedule()
                         $insertCreditMyth->execute(array("person"    => $peopleCache[$credit["name"]],
                                                          "chanid"    => $chanID,
                                                          "starttime" => $programStartTimeMyth, "role" => $role));
-                    } catch (Exception $e)
+                    } catch (PDOException $e)
                     {
                         print "Exception: " . $e->getMessage();
                         $debug = TRUE;
@@ -1044,7 +1044,7 @@ function insertSchedule()
                 {
                     $insertProgramRatingMyth->execute(array("chanid" => $chanID, "starttime" => $programStartTimeMyth,
                                                             "system" => $ratingSystem, "rating" => $rating));
-                } catch (Exception $e)
+                } catch (PDOException $e)
                 {
                     print "Exception: " . $e->getMessage();
                     $debug = TRUE;
