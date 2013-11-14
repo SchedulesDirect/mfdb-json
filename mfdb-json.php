@@ -14,7 +14,7 @@ $isBeta = TRUE;
 $debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
-$scriptVersion = "0.03";
+$scriptVersion = "0.04";
 $scriptDate = "2013-11-14";
 $maxProgramsToGet = 2000;
 
