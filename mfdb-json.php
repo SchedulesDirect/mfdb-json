@@ -502,7 +502,7 @@ function insertSchedule()
         $sourceID = $channel["sourceid"];
         $stationID = $channel["xmltvid"];
 
-        printMSG("Inserted schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
+        printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
 
         $a = json_decode(file_get_contents("$dlSchedTempDir/sched_$stationID.json.txt"), TRUE);
 
