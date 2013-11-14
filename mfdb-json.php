@@ -253,7 +253,7 @@ function getSchedules(array $stationIDs)
             $res["randhash"] = $randHash;
             $res["api"] = $api;
 
-            printMSG("Retrieving chunk " . $i + 1 . " of " . $totalChunks + 1 . ".\n");
+            printMSG("Retrieving chunk " . ($i + 1) . " of " . ($totalChunks + 1) . ".\n");
             $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
             $res["request"] = $chunk;
@@ -915,75 +915,89 @@ function insertSchedule()
             $subtitleTypes = "";
             $videoProperties = "";
 
-            $insertSchedule->execute(array(
-                "chanid"                  => $chanID,
-                "starttime"               => $programStartTimeMyth,
-                "endtime"                 => $programEndTimeMyth,
-                "title"                   => $title,
-                "subtitle"                => $subTitle,
-                "description"             => $description,
-                "category"                => $category,
-                "category_type"           => $categoryType,
-                "airdate"                 => $movieYear,
-                "stars"                   => $starRating,
-                "previouslyshown"         => $previouslyshown,
-                "stereo"                  => $isStereo,
-                "subtitled"               => $isSubtitled,
-                "hdtv"                    => $isHDTV,
-                "closecaptioned"          => $isClosedCaption,
-                "partnumber"              => $partNumber,
-                "parttotal"               => $numberOfParts,
-                "seriesid"                => $seriesID,
-                "originalairdate"         => $oad,
-                "showtype"                => $showType,
-                "colorcode"               => $colorCode,
-                "syndicatedepisodenumber" => $syndicatedEpisodeNumber,
-                "programid"               => $programID,
-                "generic"                 => $isGeneric,
-                "listingsource"           => $sourceID,
-                "first"                   => $isFirst,
-                "last"                    => $isLast,
-                "audioprop"               => $audioprop,
-                "subtitletypes"           => $subtitleTypes,
-                "videoprop"               => $videoProperties,
-                "season"                  => $season,
-                "episode"                 => $episode
-            ));
+            try
+            {
+                $insertSchedule->execute(array(
+                    "chanid"                  => $chanID,
+                    "starttime"               => $programStartTimeMyth,
+                    "endtime"                 => $programEndTimeMyth,
+                    "title"                   => $title,
+                    "subtitle"                => $subTitle,
+                    "description"             => $description,
+                    "category"                => $category,
+                    "category_type"           => $categoryType,
+                    "airdate"                 => $movieYear,
+                    "stars"                   => $starRating,
+                    "previouslyshown"         => $previouslyshown,
+                    "stereo"                  => $isStereo,
+                    "subtitled"               => $isSubtitled,
+                    "hdtv"                    => $isHDTV,
+                    "closecaptioned"          => $isClosedCaption,
+                    "partnumber"              => $partNumber,
+                    "parttotal"               => $numberOfParts,
+                    "seriesid"                => $seriesID,
+                    "originalairdate"         => $oad,
+                    "showtype"                => $showType,
+                    "colorcode"               => $colorCode,
+                    "syndicatedepisodenumber" => $syndicatedEpisodeNumber,
+                    "programid"               => $programID,
+                    "generic"                 => $isGeneric,
+                    "listingsource"           => $sourceID,
+                    "first"                   => $isFirst,
+                    "last"                    => $isLast,
+                    "audioprop"               => $audioprop,
+                    "subtitletypes"           => $subtitleTypes,
+                    "videoprop"               => $videoProperties,
+                    "season"                  => $season,
+                    "episode"                 => $episode
+                ));
+            } catch (Exception $e)
+            {
+                print "Exception: " . $e->getMessage();
+                $debug = TRUE;
+            }
 
-            $insertScheduleSD->execute(array(
-                "stationID"           => $stationID,
-                "programID"           => $programID,
-                "md5"                 => $md5,
-                "air_datetime"        => $air_datetime,
-                "duration"            => $duration,
-                "previouslyshown"     => $previouslyshown,
-                "closecaptioned"      => $isClosedCaption,
-                "partnumber"          => $partNumber,
-                "parttotal"           => $numberOfParts,
-                "first"               => $isFirst,
-                "last"                => $isLast,
-                "dvs"                 => $dvs,
-                "new"                 => $isNew,
-                "educational"         => $isEducational,
-                "hdtv"                => $isHDTV,
-                "3d"                  => $is3d,
-                "letterbox"           => $isLetterboxed,
-                "stereo"              => $isStereo,
-                "dolby"               => $dolbyType,
-                "dubbed"              => $dubbed,
-                "dubLanguage"         => $dubbedLanguage,
-                "subtitled"           => $isSubtitled,
-                "subtitleLanguage"    => $subtitledLanguage,
-                "sap"                 => $sap,
-                "sapLanguage"         => $sapLanguage,
-                "programLanguage"     => $programLanguage,
-                "ratingSystem"        => $ratingSystem,
-                "tvRating"            => $rating,
-                "dialogRating"        => $dialogRating,
-                "languageRating"      => $languageRating,
-                "sexualContentRating" => $sexRating,
-                "violenceRating"      => $violenceRating,
-                "fvRating"            => $fvRating));
+            try
+            {
+                $insertScheduleSD->execute(array(
+                    "stationID"           => $stationID,
+                    "programID"           => $programID,
+                    "md5"                 => $md5,
+                    "air_datetime"        => $air_datetime,
+                    "duration"            => $duration,
+                    "previouslyshown"     => $previouslyshown,
+                    "closecaptioned"      => $isClosedCaption,
+                    "partnumber"          => $partNumber,
+                    "parttotal"           => $numberOfParts,
+                    "first"               => $isFirst,
+                    "last"                => $isLast,
+                    "dvs"                 => $dvs,
+                    "new"                 => $isNew,
+                    "educational"         => $isEducational,
+                    "hdtv"                => $isHDTV,
+                    "3d"                  => $is3d,
+                    "letterbox"           => $isLetterboxed,
+                    "stereo"              => $isStereo,
+                    "dolby"               => $dolbyType,
+                    "dubbed"              => $dubbed,
+                    "dubLanguage"         => $dubbedLanguage,
+                    "subtitled"           => $isSubtitled,
+                    "subtitleLanguage"    => $subtitledLanguage,
+                    "sap"                 => $sap,
+                    "sapLanguage"         => $sapLanguage,
+                    "programLanguage"     => $programLanguage,
+                    "ratingSystem"        => $ratingSystem,
+                    "tvRating"            => $rating,
+                    "dialogRating"        => $dialogRating,
+                    "languageRating"      => $languageRating,
+                    "sexualContentRating" => $sexRating,
+                    "violenceRating"      => $violenceRating,
+                    "fvRating"            => $fvRating));
+            } catch (Exception $e)
+            {
+                print "Exception: " . $e->getMessage();
+                $debug = TRUE;
+            }
 
             if (isset($programJSON["castAndCrew"]))
             {
@@ -1008,43 +1022,59 @@ function insertSchedule()
 
                     $roleTable[$role] = 1;
 
-                    $insertCreditMyth->execute(array("person"    => $peopleCache[$credit["name"]], "chanid" => $chanID,
-                                                     "starttime" => $programStartTimeMyth, "role" => $role));
+                    try
+                    {
+                        $insertCreditMyth->execute(array("person"    => $peopleCache[$credit["name"]],
+                                                         "chanid"    => $chanID,
+                                                         "starttime" => $programStartTimeMyth, "role" => $role));
+                    } catch (Exception $e)
+                    {
+                        print "Exception: " . $e->getMessage();
+                        $debug = TRUE;
+                    }
                 }
             }
 
             if ($ratingSystem != "")
             {
-                $insertProgramRatingMyth->execute(array("chanid" => $chanID, "starttime" => $programStartTimeMyth,
-                                                        "system" => $ratingSystem, "rating" => $rating));
+                try
+                {
+                    $insertProgramRatingMyth->execute(array("chanid" => $chanID, "starttime" => $programStartTimeMyth,
+                                                            "system" => $ratingSystem, "rating" => $rating));
+                } catch (Exception $e)
+                {
+                    print "Exception: " . $e->getMessage();
+                    $debug = TRUE;
+                }
             }
         }
-
-        $dbh->commit();
     }
 
-    /*
-     * If users start to complain about errors on the insert, it's probably due to a new role type.
-     */
+    $dbh->commit();
+}
 
-    if ($debug)
-    {
-        print "Role table:\n";
-        var_dump($roleTable);
-    }
+/*
+ * If users start to complain about errors on the insert, it's probably due to a new role type.
+ */
 
-    printMSG("Done inserting schedules.\n");
-    $dbh->exec("DROP TABLE SDschedule");
-    $dbh->exec("RENAME TABLE t_SDschedule TO SDschedule");
+if ($debug)
+{
+    print "Role table:\n";
+    var_dump($roleTable);
+}
 
-    $dbh->exec("DROP TABLE program");
-    $dbh->exec("RENAME TABLE t_program TO program");
+printMSG("Done inserting schedules.\n");
+$dbh->exec("DROP TABLE SDschedule");
+$dbh->exec("RENAME TABLE t_SDschedule TO SDschedule");
 
-    $dbh->exec("DROP TABLE credits");
-    $dbh->exec("RENAME TABLE t_credits TO credits");
+$dbh->exec("DROP TABLE program");
+$dbh->exec("RENAME TABLE t_program TO program");
 
-    $dbh->exec("DROP TABLE programrating");
-    $dbh->exec("RENAME TABLE t_programrating TO programrating");
+$dbh->exec("DROP TABLE credits");
+$dbh->exec("RENAME TABLE t_credits TO credits");
+
+$dbh->exec("DROP TABLE programrating");
+$dbh->exec("RENAME TABLE t_programrating TO programrating");
 }
 
 function getRandhash($username, $password)
