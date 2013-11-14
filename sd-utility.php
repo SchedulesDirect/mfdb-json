@@ -16,10 +16,10 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.01";
-$scriptDate = "2013-11-11";
+$scriptVersion = "0.02";
+$scriptDate = "2013-11-14";
 
-$agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
+$agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
 
 $updatedHeadendsToRefresh = array();
 
