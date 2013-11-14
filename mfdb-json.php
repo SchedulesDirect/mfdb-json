@@ -1053,9 +1053,9 @@ function insertSchedule()
                 }
             }
         }
-    }
 
-    $dbh->commit();
+        $dbh->commit();
+    }
 
     /*
      * If users start to complain about errors on the insert, it's probably due to a new role type.
