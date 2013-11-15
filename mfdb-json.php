@@ -14,8 +14,8 @@ $isBeta = TRUE;
 $debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
-$scriptVersion = "0.04";
-$scriptDate = "2013-11-14";
+$scriptVersion = "0.05";
+$scriptDate = "2013-11-15";
 $maxProgramsToGet = 2000;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
@@ -130,17 +130,27 @@ if ($randHash != "ERROR")
 else
 {
     print "Error connecting to Schedules Direct.\n";
-    exit;
+    $statusMessage = "Error connecting to Schedules Direct.";
 }
 
 if (count($jsonProgramstoRetrieve))
 {
     insertJSON($jsonProgramstoRetrieve);
     insertSchedule();
+    $statusMessage = "Successful.";
+}
+else
+{
+    $statusMessage = "No new programs to retrieve.";
 }
 
-printMSG("Global. Start Time:" . date("Y-m-d H:i:s", $globalStartTime) . "\n");
-printMSG("Global. End Time:" . date("Y-m-d H:i:s") . "\n");
+printMSG("Status:$statusMessage\n");
+
+$gst = date("Y-m-d H:i:s", $globalStartTime);
+$get = date("Y-m-d H:i:s");
+
+printMSG("Global. Start Time:$gst\n");
+printMSG("Global. End Time:$get\n");
 $globalSinceStart = $globalStartDate->diff(new DateTime());
 if ($globalSinceStart->h)
 {
@@ -149,6 +159,19 @@ if ($globalSinceStart->h)
 printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\n");
 
 printMSG("Done.\n");
+
+printMSG("Updating status.\n");
+
+$stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStart' AND hostname=NULL");
+$stmt->execute(array("data" => $gst));
+
+$stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunEnd' AND hostname=NULL");
+$stmt->execute(array("data" => $get));
+
+$stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStatus' AND hostname=NULL");
+$stmt->execute(array("data" => $statusMessage));
+
+exit;
 
 function getSchedules(array $stationIDs)
 {
