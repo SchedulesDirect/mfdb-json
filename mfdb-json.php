@@ -1257,7 +1257,9 @@ function getStatus()
     $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
     $stmt->execute(array("data" => "Your subscription expires on $expires."));
 
-    $getLastUpdate = $dbh->exec("SELECT data FROM settings WHERE value='SchedulesDirectLastUpdate'");
+    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='SchedulesDirectLastUpdate'");
+    $result = $stmt->fetchColumn();
+    $getLastUpdate = $result[0];
 
     if ($res["lastDataUpdate"] == $getLastUpdate)
     {
