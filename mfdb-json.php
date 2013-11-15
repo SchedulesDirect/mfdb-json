@@ -393,12 +393,6 @@ function insertJSON(array $jsonProgramstoRetrieve)
         {
             foreach ($jsonProgram["castAndCrew"] as $credit)
             {
-                if (!isset($credit["role"]))
-                {
-                    print "\n\n\n";
-                    var_dump($jsonProgram);
-                    exit;
-                }
                 $role = $credit["role"];
                 $personID = $credit["personID"];
                 $name = $credit["name"];
