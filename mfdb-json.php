@@ -167,8 +167,6 @@ if ($globalSinceStart->h)
 }
 printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\n");
 
-printMSG("Done.\n");
-
 printMSG("Updating status.\n");
 
 $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStart' AND hostname IS NULL");
@@ -179,6 +177,8 @@ $stmt->execute(array("data" => $get));
 
 $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStatus' AND hostname IS NULL");
 $stmt->execute(array("data" => $statusMessage));
+
+printMSG("Done.\n");
 
 exit;
 
