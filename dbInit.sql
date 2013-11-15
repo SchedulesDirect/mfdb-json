@@ -1,6 +1,6 @@
 USE mythconverg;
 
-DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,SDprogramrating,SDschedule;
+DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,SDprogramrating,SDschedule,SDMessages;
 
  CREATE TABLE `SDprogramCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -97,5 +97,20 @@ CREATE TABLE `SDschedule` (
   KEY `sid` (`stationID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+ CREATE TABLE `SDMessages` (
+  `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `id` char(22) DEFAULT NULL COMMENT 'Required to ACK a message from the server.',
+  `date` char(20) DEFAULT NULL,
+  `message` varchar(512) DEFAULT NULL,
+  `type` char(1) DEFAULT NULL COMMENT 'Message type. G-global, S-service status, U-user specific',
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`row`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 ALTER TABLE credits CHANGE role role SET('actor','director','producer','executive_producer','writer',
 'guest_star','host','adapter','presenter','commentator','guest','musical_guest','judge','correspondent','contestant');
+
+INSERT IGNORE INTO settings(value,data,hostname) VALUES("mythfilldatabaseLastRunStart","",NULL),
+("mythfilldatabaseLastRunEnd","",NULL),("mythfilldatabaseLastRunStatus","",NULL),("MythFillSuggestedRunTime","",NULL),
+("DataDirectMessage","",NULL),("SchedulesDirectLastUpdate","",NULL);
