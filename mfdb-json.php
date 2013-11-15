@@ -450,8 +450,6 @@ function insertSchedule()
 
     printMSG("Inserting schedules.\n");
 
-    $counter = 0;
-
     $dbh->exec("DROP TABLE IF EXISTS t_SDschedule");
     $dbh->exec("CREATE TABLE t_SDschedule LIKE SDschedule");
 
