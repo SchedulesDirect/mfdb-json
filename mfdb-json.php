@@ -20,7 +20,8 @@ $maxProgramsToGet = 2000;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
-date_default_timezone_set("UTC");
+date_default_timezone_set(@date_default_timezone_get());
+//date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
@@ -122,8 +123,16 @@ $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 printMSG("Logging into Schedules Direct.\n");
 $randHash = getRandhash($sdUsername, $sdPassword);
+printMSG("Retrieving server status message.\n");
 
-if ($randHash != "ERROR")
+$response = getStatus();
+
+if ($response == "No new data on server.")
+{
+    $statusMessage = "No new programs to retrieve.";
+}
+
+if ($randHash != "ERROR" AND $response != "ERROR")
 {
     $jsonProgramstoRetrieve = getSchedules($stationIDs);
 }
@@ -1097,6 +1106,7 @@ function insertSchedule()
 function getRandhash($username, $password)
 {
     global $api;
+
     $res = array();
     $res["action"] = "get";
     $res["object"] = "randhash";
@@ -1182,6 +1192,83 @@ function printMSG($str)
 
     $str = str_replace("\r", "\n", $str);
     fwrite($fh_log, $str);
+}
+
+function getStatus()
+{
+    global $api;
+    global $randHash;
+    global $dbh;
+    global $debug;
+
+    $res = array();
+    $res["action"] = "get";
+    $res["object"] = "status";
+    $res["randhash"] = $randHash;
+    $res["api"] = $api;
+
+    $sdStatus = sendRequest(json_encode($res));
+
+    $res = json_decode($sdStatus, TRUE);
+
+    if ($debug)
+    {
+        var_dump($res);
+    }
+
+    $updateLocalMessageTable = $dbh->prepare("INSERT INTO SDMessages(msgID,messagedate,messagetype)
+    VALUES(:mid,:mdate,:mtext) ON DUPLICATE KEY UPDATE messagetext=:mtext,messagedate=:mdate");
+
+    if ($res["code"] == 0)
+    {
+        $expires = $res["account"]["expires"];
+        $maxHeadends = $res["account"]["maxHeadends"];
+        $nextConnectTime = $res["account"]["nextSuggestedConnectTime"];
+
+        foreach ($res["account"]["messages"] as $a)
+        {
+            $msgID = $a["msgID"];
+            $msgDate = $a["date"];
+            $message = $a["message"];
+            printMSG("MessageID:$msgID : $msgDate : $message\n");
+            $updateLocalMessageTable->execute(array("mid" => $msgID, "mdate" => $msgDate, "mtext" => $message));
+        }
+    }
+    else
+    {
+        printMSG("Received error response from server!\n");
+        printMSG("ServerID: " . $res["serverID"] . "\n");
+        printMSG("Message: " . $res["message"] . "\n");
+        printMSG("\nFATAL ERROR. Terminating execution.\n");
+
+        return ("ERROR");
+    }
+
+    printMSG("Server: " . $res["serverID"] . "\n");
+    printMSG("Last data refresh: " . $res["lastDataUpdate"] . "\n");
+    printMSG("Account expires: $expires\n");
+    printMSG("Max number of headends for your account: $maxHeadends\n");
+    printMSG("Next suggested connect time: $nextConnectTime\n");
+
+    $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='MythFillSuggestedRunTime' AND hostname IS NULL");
+    $stmt->execute(array("data" => $nextConnectTime));
+
+    $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
+    $stmt->execute(array("data" => "Your subscription expires on $expires."));
+
+    $getLastUpdate = $dbh->exec("SELECT data FROM settings WHERE value='SchedulesDirectLastUpdate'");
+
+    if ($res["lastDataUpdate"] == $getLastUpdate)
+    {
+        return ("No new data on server.");
+    }
+    else
+    {
+        $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate' AND hostname IS NULL");
+        $stmt->execute(array("data" => $res["lastDataUpdate"]));
+    }
+
+    return ("");
 }
 
 ?>
