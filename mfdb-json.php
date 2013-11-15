@@ -1216,8 +1216,8 @@ function getStatus()
         var_dump($res);
     }
 
-    $updateLocalMessageTable = $dbh->prepare("INSERT INTO SDMessages(id,date,type,text)
-    VALUES(:id,:date,:type,:text) ON DUPLICATE KEY UPDATE text=:text,date=:date,type=:type");
+    $updateLocalMessageTable = $dbh->prepare("INSERT INTO SDMessages(id,date,message,type)
+    VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
 
     if ($res["code"] == 0)
     {
@@ -1231,7 +1231,7 @@ function getStatus()
             $msgDate = $a["date"];
             $message = $a["message"];
             printMSG("MessageID:$msgID : $msgDate : $message\n");
-            $updateLocalMessageTable->execute(array("id"   => $msgID, "date" => $msgDate, "text" => $message,
+            $updateLocalMessageTable->execute(array("id"   => $msgID, "date" => $msgDate, "message" => $message,
                                                     "type" => "U"));
         }
     }
