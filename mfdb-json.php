@@ -14,8 +14,8 @@ $isBeta = TRUE;
 $debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
-$scriptVersion = "0.05";
-$scriptDate = "2013-11-15";
+$scriptVersion = "0.06";
+$scriptDate = "2014-01-13";
 $maxProgramsToGet = 2000;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
@@ -368,7 +368,9 @@ function insertJSON(array $jsonProgramstoRetrieve)
     printMSG("Performing inserts of JSON data.\n");
 
     $dbh->beginTransaction();
-    foreach ($jsonProgramstoRetrieve as $md5 => $pid)
+    reset($jsonProgramstoRetrieve);
+    while (list($md5, $pid) = each($jsonProgramstoRetrieve))
+    //foreach ($jsonProgramstoRetrieve as $md5 => $pid)
     {
         $counter++;
         if ($counter % 100 == 0)
