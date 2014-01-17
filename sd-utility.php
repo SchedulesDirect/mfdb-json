@@ -822,7 +822,7 @@ function displayLocalVideoSources()
     }
     else
     {
-        print "\nWARNING:No videosources configured in MythTV.\n";
+        print "\nWARNING: *** No videosources configured in MythTV. ***\n";
     }
 }
 
