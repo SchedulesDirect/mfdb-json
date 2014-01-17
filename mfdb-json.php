@@ -218,6 +218,7 @@ function getSchedules(array $stationIDs)
                 } else {
                     print "Received error response from Schedules Direct:\n";
                     print "{$a["message"]}\n";
+                    $tt = fgets(STDIN);
                 }
             }
         } else {
