@@ -15,7 +15,7 @@ $debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
 $scriptVersion = "0.06";
-$scriptDate = "2014-01-13";
+$scriptDate = "2014-01-17";
 $maxProgramsToGet = 2000;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
@@ -106,7 +106,7 @@ else
     $api = 20130709;
 }
 
-$stmt = $dbh->prepare("SELECT userid,password FROM videosource LIMIT 1");
+$stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2' LIMIT 1");
 $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
