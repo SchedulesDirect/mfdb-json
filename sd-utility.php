@@ -33,8 +33,8 @@ $host = "localhost";
 $db = "mythconverg";
 
 $helpText = <<< eol
-The following options are available:\n";
---beta\n";
+The following options are available:
+--beta
 --help\t\t(this text)
 --host=\t\tMySQL database hostname
 --dbuser=\tUsername to access database
