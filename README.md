@@ -12,7 +12,8 @@ Features:
 
 - only downloads programs that have changes. Your first download may be
   40000 programs, but daily downloads after that will be 2-3000 depending on
-  how many channels you have.
+  how many channels you have.  If the same program is broadcast on multiple
+  channels, it's still only downloaded once.
 - QAM tuning information.
 - program-specific language information. (A program that's being broadcast
   in Mandarin will have a Mandarin tag associated with it)
@@ -200,9 +201,46 @@ Exit mythtv-setup
 
 Run the mfdb-json.php script to retrieve the data.
 
+20:45:28:mfdb-json.php developer grabber v0.06/2014-01-17
+20:45:28:Temp directory for Schedules is /tmp/mfdbN6mfYN
+20:45:28:Temp directory for Programs is /tmp/mfdbaziI7w
+20:45:28:Connecting to MythTV database.
+20:45:28:Using beta server.
+20:45:28:Retrieving list of channels to download.
+20:45:28:Logging into Schedules Direct.
+20:45:29:Retrieving server status message.
+20:45:29:MessageID:1234567890123456789012 : 2013-11-15T19:49:53Z : This is a test of the message function.
+20:45:29:Server: AWS-micro.1
+20:45:29:Last data refresh: 2014-01-17T16:57:11Z
+20:45:29:Account expires: 2014-06-28T05:16:29Z
+20:45:29:Max number of headends for your account: 3
+20:45:29:Next suggested connect time: 2014-01-17T22:24:28Z
+20:45:29:Sending schedule request.
+20:45:58:Parsing /tmp/mfdbN6mfYN/sched_10021.json.txt
+20:45:58:Parsing /tmp/mfdbN6mfYN/sched_10035.json.txt
+(etc)
+
+20:46:01:There are 39461 programIDs in the upcoming schedule.
+20:46:01:Retrieving existing MD5 values.
+20:46:01:Need to download 39461 new or updated programs.
+20:46:01:Requesting more than 10000 programs. Please be patient.
+20:46:01:Retrieving chunk 1 of 20.
+20:46:26:Retrieving chunk 2 of 20.
+20:50:46:Retrieving chunk 3 of 20.
+20:51:06:Retrieving chunk 4 of 20.
+(etc)
+20:55:25:Performing inserts of JSON data.
+20:58:07:Completed local database program updates.
+20:58:07:Inserting schedules.
+20:58:08:Inserting schedule for chanid:1001 sourceid:1 xmltvid:74348
+20:58:08:Inserting schedule for chanid:1002 sourceid:1 xmltvid:11299
+20:58:09:Inserting schedule for chanid:1003 sourceid:1 xmltvid:12475
+(etc)
+
 Once the download / update is done, start mythbackend and see if it's happy. 
 Try to schedule something to record.  If it works, then excellent!  If not,
 let me know what didn't work and I'll take a look.
 
 The scripts will tell you the directories they're using; the raw data files
 are going to be plaintext inside a .zip
+
