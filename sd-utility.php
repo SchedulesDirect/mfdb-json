@@ -105,7 +105,7 @@ if ($isBeta) {
 }
 
 if ($username == "" AND $password == "") {
-    $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect1' LIMIT 1");
+    $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2' LIMIT 1");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -171,7 +171,7 @@ while (!$done) {
             $newName = readline("Name:>");
             if ($newName != "") {
                 $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
-                        VALUES(:name,:userid,:password,'schedulesdirect1')");
+                        VALUES(:name,:userid,:password,'schedulesdirect2')");
                 $stmt->execute(array("name" => $newName, "userid" => $username,
                     "password" => $password));
             }
