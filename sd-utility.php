@@ -32,6 +32,17 @@ $dbPassword = "mythtv";
 $host = "localhost";
 $db = "mythconverg";
 
+$helpText = <<< eol
+The following options are available:\n";
+--beta\n";
+--help\t\t(this text)
+--host=\t\tMySQL database hostname
+--dbuser=\tUsername to access database
+--dbpassword=\tPassword to access database.
+--username=\tSchedules Direct username.
+--password=\tSchedules Direct password.
+eol;
+
 $longoptions = array("beta::", "debug::", "help::", "host::", "dbpassword::", "dbuser::", "username::",
     "password::");
 
@@ -47,14 +58,7 @@ foreach ($options as $k => $v) {
         case "help":
         case "h":
             print "$agentString\n\n";
-            print "The following options are available:\n";
-            print "--beta\n";
-            print "--help\t\t(this text)\n";
-            print "--host=\t\tMySQL database hostname\n";
-            print "--dbuser=\tUsername to access database\n";
-            print "--dbpassword=\tPassword to access database.\n";
-            print "--username=\tSchedules Direct username.\n";
-            print "--password=\tSchedules Direct password.\n";
+            print "$helpText\n";
             exit;
         case "host":
             $host = $v;
@@ -817,7 +821,7 @@ function displayLocalVideoSources()
     }
     else
     {
-        print "No existing videosources configured. Videosource must be added.\n";
+        print "\nWARNING:No videosources configured in MythTV.\n";
     }
 }
 
