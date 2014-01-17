@@ -38,8 +38,36 @@ mysql -umythtv -p < dbInit.sql
 
 Configuration
 =============
-Create a source in MythTV called "SD JSON Beta" and associate it with your
-tuners, but don't run mythfilldatabase.
+If you've never run mythtv-setup, configure the following first, otherwise
+skip to the next section.
+
+1. General
+2. Capture cards
+3. Recording Profiles
+7. Storage Directories
+
+Do not configure Video Sources or Input Connections.
+
+Exit mythtv-setup. You will be prompted that you haven't set your start
+channel.  Select "No, I know what I'm doing."
+
+Next:
+-----
+Run the sd-utility.php script.
+
+If you've never used Schedules Direct before, you will be prompted to enter
+your username and password; otherwise, your username and password will be
+read from the "videosource" table in mythconverg.
+
+
+
+If you've 
+In "Video Sources", create a source called "SD JSON Beta". Set the listings
+grabber to "No grabber".
+
+In "Input Connections", set your hardware to use the source you created in
+the above step.
+
 
 Run sd-utility.php first, add your headend to your Schedules Direct
 JSON-service account.  Your existing Schedules Direct information for the
