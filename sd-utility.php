@@ -22,6 +22,7 @@ $scriptDate = "2014-01-17";
 $agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
 
 $updatedHeadendsToRefresh = array();
+$needToStoreUserPassword = FALSE;
 
 date_default_timezone_set("UTC");
 $date = new DateTime();
@@ -112,7 +113,6 @@ if ($username == "" AND $password == "") {
         $username = $result[0]["userid"];
         $userPassword = $result[0]["password"];
         $passwordHash = sha1($userPassword);
-        $needToStoreUserPassword = FALSE;
     } else {
         $username = readline("Schedules Direct username:");
         $password = readline("Schedules Direct password:");
