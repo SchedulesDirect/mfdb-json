@@ -815,6 +815,10 @@ function displayLocalVideoSources()
             print "sourceid: " . $v["sourceid"] . "\tname: " . $v["name"] . "\tlineupid: " . $v["lineupid"] . "\n";
         }
     }
+    else
+    {
+        print "No existing videosources configured. Videosource must be added.\n";
+    }
 }
 
 function getSchedulesDirectHeadends()
