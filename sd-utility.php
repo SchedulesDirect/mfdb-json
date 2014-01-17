@@ -289,7 +289,7 @@ function updateChannelTable($he, $sourceID)
                     "atscMinor" => $atscMinor));
             } else {
                 $channum = $freqid;
-                $updateChannelTableAnalog->execute(array("channum" => $channum, "sid" => $stationID,
+                $updateChannelTableAnalog->execute(array("channum" => ltrim($channum,"0"), "sid" => $stationID,
                     "freqID" => $freqid));
 
             }
