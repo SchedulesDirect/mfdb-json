@@ -45,11 +45,13 @@ The following options are available:
 eol;
 
 $longoptions = array("beta::", "debug::", "help::", "host::", "dbpassword::", "dbuser::", "username::",
-    "password::");
+                     "password::");
 
 $options = getopt("h::", $longoptions);
-foreach ($options as $k => $v) {
-    switch ($k) {
+foreach ($options as $k => $v)
+{
+    switch ($k)
+    {
         case "beta":
             $isBeta = TRUE;
             break;
@@ -82,38 +84,47 @@ foreach ($options as $k => $v) {
 
 print "$agentString\n";
 print "Attempting to connect to database.\n";
-try {
+try
+{
     $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $dbUser, $dbPassword,
         array(PDO::ATTR_PERSISTENT => true));
     $dbh->exec("SET CHARACTER SET utf8");
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-} catch (PDOException $e) {
+} catch (PDOException $e)
+{
     print "Exception with PDO: " . $e->getMessage() . "\n";
     exit;
 }
 
-if ($isBeta) {
+if ($isBeta)
+{
     # Test server. Things may be broken there.
     $baseurl = "http://23.21.174.111";
     print "Using beta server.\n";
     # API must match server version.
     $api = 20131021;
-} else {
+}
+else
+{
     $baseurl = "https://data2.schedulesdirect.org";
     print "Using production server.\n";
     $api = 20130709;
 }
 
-if ($username == "" AND $password == "") {
+if ($username == "" AND $password == "")
+{
     $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2' LIMIT 1");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (isset($result[0]["userid"])) {
+    if (isset($result[0]["userid"]))
+    {
         $username = $result[0]["userid"];
         $userPassword = $result[0]["password"];
         $passwordHash = sha1($userPassword);
-    } else {
+    }
+    else
+    {
         $username = readline("Schedules Direct username:");
         $password = readline("Schedules Direct password:");
         $passwordHash = sha1($password);
@@ -124,14 +135,18 @@ if ($username == "" AND $password == "") {
 print "Logging into Schedules Direct.\n";
 $randHash = getRandhash($username, $passwordHash);
 
-if ($randHash == "ERROR") {
+if ($randHash == "ERROR")
+{
     exit;
-} elseif ($needToStoreUserPassword) {
+}
+elseif ($needToStoreUserPassword)
+{
     $stmt = $dbh->prepare("UPDATE videosource SET userid=:user,password=:password WHERE password IS NULL");
     $stmt->execute(array("user" => $username, "password" => $password));
 }
 
-while (!$done) {
+while (!$done)
+{
     getStatus();
 
     printStatus();
@@ -153,7 +168,8 @@ while (!$done) {
 
     $response = strtoupper(readline(">"));
 
-    switch ($response) {
+    switch ($response)
+    {
         case "1":
             addHeadendsToSchedulesDirect();
             break;
@@ -169,11 +185,12 @@ while (!$done) {
         case "A":
             print "Adding new videosource\n\n";
             $newName = readline("Name:>");
-            if ($newName != "") {
+            if ($newName != "")
+            {
                 $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
                         VALUES(:name,:userid,:password,'schedulesdirect2')");
-                $stmt->execute(array("name" => $newName, "userid" => $username,
-                    "password" => $password));
+                $stmt->execute(array("name"     => $newName, "userid" => $username,
+                                     "password" => $password));
             }
             break;
         case "D":
@@ -209,7 +226,8 @@ function refreshLineup()
      */
 
     $sourceID = readline("Apply to sourceid:>");
-    if ($sourceID != "") {
+    if ($sourceID != "")
+    {
         updateChannelTable($he, $sourceID);
     }
 }
@@ -230,7 +248,8 @@ function updateChannelTable($he, $sourceID)
 
     print "Updating channel table for sourceid:$sourceID\n";
 
-    if (substr($h, 0, 2) == "PC") {
+    if (substr($h, 0, 2) == "PC")
+    {
         /*
          * For antenna lineups, we're not going to delete the existing channel table or dtv_multiplex; we're still
          * going to use the scan, but use the atsc major and minor to correlate what we've scanned with what's in the
@@ -238,18 +257,23 @@ function updateChannelTable($he, $sourceID)
          */
         $transport = "Antenna";
         $dev = "Antenna";
-    } else {
+    }
+    else
+    {
         $transport = "Cable";
         $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
         $stmt->execute(array("sourceid" => $sourceID));
     }
 
-    if ($dev == "Q") {
+    if ($dev == "Q")
+    {
         $transport = "QAM";
         $qamModified = "";
 
-        foreach ($json["metadata"] as $v) {
-            if ($v["device"] == "Q") {
+        foreach ($json["metadata"] as $v)
+        {
+            if ($v["device"] == "Q")
+            {
                 $qamModified = $v["modified"];
             }
         }
@@ -275,22 +299,27 @@ function updateChannelTable($he, $sourceID)
     xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=0 AND atsc_minor_chan=0 AND freqID=:freqID");
 
 
-    foreach ($json[$dev]["map"] as $mapArray) {
+    foreach ($json[$dev]["map"] as $mapArray)
+    {
         $stationID = $mapArray["stationID"];
 
-        if ($transport == "Antenna") {
+        if ($transport == "Antenna")
+        {
             $freqid = $mapArray["uhfVhf"];
-            if (isset($mapArray["atscMajor"])) {
+            if (isset($mapArray["atscMajor"]))
+            {
                 $atscMajor = $mapArray["atscMajor"];
                 $atscMinor = $mapArray["atscMinor"];
                 $channum = "$atscMajor.$atscMinor";
-                $updateChannelTableATSC->execute(array("channum" => $channum, "sid" => $stationID,
-                    "atscMajor" => $atscMajor,
-                    "atscMinor" => $atscMinor));
-            } else {
+                $updateChannelTableATSC->execute(array("channum"   => $channum, "sid" => $stationID,
+                                                       "atscMajor" => $atscMajor,
+                                                       "atscMinor" => $atscMinor));
+            }
+            else
+            {
                 $channum = $freqid;
-                $updateChannelTableAnalog->execute(array("channum" => ltrim($channum,"0"), "sid" => $stationID,
-                    "freqID" => $freqid));
+                $updateChannelTableAnalog->execute(array("channum" => ltrim($channum, "0"), "sid" => $stationID,
+                                                         "freqID"  => $freqid));
 
             }
             /*
@@ -303,23 +332,26 @@ function updateChannelTable($he, $sourceID)
             */
         }
 
-        if ($transport == "IP") {
+        if ($transport == "IP")
+        {
             /*
              * Nothing yet.
              */
         }
 
-        if ($transport == "Cable") {
+        if ($transport == "Cable")
+        {
             $channum = $mapArray["channel"];
             $stmt = $dbh->prepare(
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
-            $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channum, "channum" => ltrim($channum,"0"),
-                "freqid" => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
+            $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channum, "channum" => ltrim($channum, "0"),
+                                 "freqid" => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
         }
 
-        if ($transport == "QAM") {
+        if ($transport == "QAM")
+        {
             $stmt = $dbh->prepare(
                 "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                  VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
@@ -330,27 +362,31 @@ function updateChannelTable($he, $sourceID)
             $qamFreq = $mapArray["qamFreq"];
             $channel = $mapArray["channel"];
 
-            if (isset($mapArray["virtualChannel"])) {
+            if (isset($mapArray["virtualChannel"]))
+            {
                 $virtualChannel = $mapArray["virtualChannel"];
-            } else {
+            }
+            else
+            {
                 $virtualChannel = "";
             }
 
             $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channel, "channum" => $channel,
-                "freqid" => $channel, "sourceid" => $sourceID, "xmltvid" => $stationID));
+                                 "freqid" => $channel, "sourceid" => $sourceID, "xmltvid" => $stationID));
 
             /*
              * Because multiple programs may end up on a single frequency, we only want to insert once, but we want
              * to track the mplexid assigned when we do the insert, because that might be used more than once.
              */
 
-            if (!isset($dtvMultiplex[$qamFreq])) {
+            if (!isset($dtvMultiplex[$qamFreq]))
+            {
                 $insertDTVMultiplex->execute(array("sourceid" => $sourceID, "freq" => $qamFreq));
                 $dtvMultiplex[$qamFreq] = $dbh->lastInsertId();
             }
 
-            $channelInsertQAM->execute(array("mplexid" => $dtvMultiplex[$qamFreq], "qamprogram" => $qamProgram,
-                "stationID" => $stationID));
+            $channelInsertQAM->execute(array("mplexid"   => $dtvMultiplex[$qamFreq], "qamprogram" => $qamProgram,
+                                             "stationID" => $stationID));
         }
     }
 
@@ -359,7 +395,8 @@ function updateChannelTable($he, $sourceID)
      */
 
     $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
-    foreach ($json["stations"] as $stationArray) {
+    foreach ($json["stations"] as $stationArray)
+    {
         $stationID = $stationArray["stationID"];
         $name = $stationArray["name"];
         $callsign = $stationArray["callsign"];
@@ -374,7 +411,8 @@ function updateChannelTable($he, $sourceID)
     ORDER BY CAST(channum AS SIGNED) LIMIT 1");
     $stmt->execute(array("sourceid" => $sourceID));
     $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    if (count($result)) {
+    if (count($result))
+    {
         $startChan = $result[0];
         $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
         $setStartChannel->execute(array("sourceid" => $sourceID, "startChan" => $startChan));
@@ -392,27 +430,35 @@ function linkSchedulesDirectHeadend()
     $stmt->execute(array("he" => $he));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
-    if (!count($response)) {
+    if (!count($response))
+    {
         return;
     }
 
-    if (count($response["deviceTypes"]) > 1) {
+    if (count($response["deviceTypes"]) > 1)
+    {
         print "Your headend has these devicetypes: ";
-        foreach ($response["deviceTypes"] as $v) {
+        foreach ($response["deviceTypes"] as $v)
+        {
             print "$v ";
         }
         print "\n";
 
         $deviceToLink = strtoupper(readline("Which device to link:>"));
-    } else {
+    }
+    else
+    {
         print "Your headend has only one devicetype: ";
         print $response["deviceTypes"][0] . "\n";
         $deviceToLink = $response["deviceTypes"][0];
     }
 
-    if ($deviceToLink == "Antenna") {
+    if ($deviceToLink == "Antenna")
+    {
         $compositeDevice = $he;
-    } else {
+    }
+    else
+    {
         $compositeDevice = "$he:$deviceToLink";
     }
 
@@ -434,19 +480,24 @@ function printLineup()
     $stmt->execute(array("he" => $he));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
-    if (!count($response)) {
+    if (!count($response))
+    {
         return;
     }
 
-    if (count($response["deviceTypes"]) > 1) {
+    if (count($response["deviceTypes"]) > 1)
+    {
         print "Your headend has these devicetypes: ";
-        foreach ($response["deviceTypes"] as $v) {
+        foreach ($response["deviceTypes"] as $v)
+        {
             print "$v ";
         }
         print "\n";
 
         $toPrint = strtoupper(readline("Which device to display:>"));
-    } else {
+    }
+    else
+    {
         print "Your headend has only one devicetype: ";
         print $response["deviceTypes"][0] . "\n";
         $toPrint = $response["deviceTypes"][0];
@@ -457,28 +508,38 @@ function printLineup()
     $chanMap = array();
     $stationMap = array();
 
-    if ($toPrint != "Antenna") {
-        foreach ($response[$toPrint]["map"] as $v) {
+    if ($toPrint != "Antenna")
+    {
+        foreach ($response[$toPrint]["map"] as $v)
+        {
             $chanMap[$v["stationID"]] = $v["channel"];
         }
-    } else {
-        foreach ($response["Antenna"]["map"] as $v) {
-            if (isset($v["atscMajor"])) {
+    }
+    else
+    {
+        foreach ($response["Antenna"]["map"] as $v)
+        {
+            if (isset($v["atscMajor"]))
+            {
                 $chanMap[$v["stationID"]] = $v["atscMajor"] . "." . $v["atscMinor"];
-            } else {
+            }
+            else
+            {
                 $chanMap[$v["stationID"]] = $v["uhfVhf"];
             }
         }
     }
 
-    foreach ($response["stations"] as $v) {
+    foreach ($response["stations"] as $v)
+    {
         $stationMap[$v["stationID"]] = $v["callsign"] . " (" . $v["affiliate"] . ")";
     }
 
     asort($chanMap, SORT_NATURAL);
 
     print "Channel\tCallsign\tStationID\n";
-    foreach ($chanMap as $stationID => $channel) {
+    foreach ($chanMap as $stationID => $channel)
+    {
         print "$channel\t" . $stationMap[$stationID] . "\t$stationID\n";
     }
 }
@@ -491,12 +552,15 @@ function addHeadendsToSchedulesDirect()
     print "Two-character ISO3166 country code: (CA, US or ZZ)";
     $country = strtoupper(readline(">"));
 
-    if ($country != "ZZ") {
+    if ($country != "ZZ")
+    {
         print "Enter your 5-digit zip code for U.S.\n";
         print "Enter leftmost 4-character postal code for Canada.\n";
 
         $postalcode = strtoupper(readline(">"));
-    } else {
+    }
+    else
+    {
         /*
          * Doesn't matter for "ZZ" codes.
          */
@@ -512,19 +576,22 @@ function addHeadendsToSchedulesDirect()
 
     $res = json_decode(sendRequest(json_encode($res)), true);
 
-    if ($res["code"] != 0) {
+    if ($res["code"] != 0)
+    {
         print "Error!\n";
         print "code:" . $res["code"] . " response:" . $res["response"] . " message:" . $res["message"] . "\n";
 
         return;
     }
 
-    foreach ($res["data"] as $v) {
+    foreach ($res["data"] as $v)
+    {
         print "headend: " . $v["headend"] . "\nname: " . $v["name"] . " (" . $v["location"] . ")\n\n";
     }
 
     $he = readline("Headend to add>");
-    if ($he == "") {
+    if ($he == "")
+    {
         return;
     }
 
@@ -537,9 +604,12 @@ function addHeadendsToSchedulesDirect()
 
     $res = json_decode(sendRequest(json_encode($res)), true);
 
-    if ($res["code"] == 0) {
+    if ($res["code"] == 0)
+    {
         print "Successfully added headend.\n";
-    } else {
+    }
+    else
+    {
         print "ERROR:Received error response from server:\n";
         print$res["message"] . "\n\n-----\n";
         print "Press ENTER to continue.\n";
@@ -563,9 +633,12 @@ function deleteHeadendFromSchedulesDirect()
 
     $res = json_decode(sendRequest(json_encode($res)), true);
 
-    if ($res["code"] == 0) {
+    if ($res["code"] == 0)
+    {
         print "Successfully deleted headend.\n";
-    } else {
+    }
+    else
+    {
         print "ERROR:Received error response from server:\n";
         print$res["message"] . "\n\n-----\n";
         print "Press ENTER to continue.\n";
@@ -589,9 +662,12 @@ function deleteMessageFromSchedulesDirect()
 
     $res = json_decode(sendRequest(json_encode($res)), true);
 
-    if ($res["code"] == 0) {
+    if ($res["code"] == 0)
+    {
         print "Successfully deleted message.\n";
-    } else {
+    }
+    else
+    {
         print "ERROR:Received error response from server:\n";
         print$res["message"] . "\n\n-----\n";
         print "Press ENTER to continue.\n";
@@ -641,15 +717,19 @@ function printStatus()
 
     $res = json_decode($sdStatus, TRUE);
 
-    if ($res["code"] == 0) {
+    if ($res["code"] == 0)
+    {
         $expires = $res["account"]["expires"];
         $maxHeadends = $res["account"]["maxHeadends"];
         $nextConnectTime = $res["account"]["nextSuggestedConnectTime"];
 
-        foreach ($res["account"]["messages"] as $a) {
+        foreach ($res["account"]["messages"] as $a)
+        {
             print "MessageID: " . $a["msgID"] . " : " . $a["date"] . " : " . $a["message"] . "\n";
         }
-    } else {
+    }
+    else
+    {
         print "Received error response from server!\n";
         print "ServerID: " . $res["serverID"] . "\n";
         print "Message: " . $res["message"] . "\n";
@@ -668,14 +748,17 @@ function printStatus()
 
     $he = getSchedulesDirectHeadends();
 
-    if (count($he)) {
-        foreach ($he as $id => $modified) {
+    if (count($he))
+    {
+        foreach ($he as $id => $modified)
+        {
             $line = "$id\t Last Updated: $modified";
 
             $getLocalModified->execute(array("he" => $id));
             $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
 
-            if ((count($result) == 0) OR ($result[0] < $modified)) {
+            if ((count($result) == 0) OR ($result[0] < $modified))
+            {
                 $updatedHeadendsToRefresh[$id] = $modified;
                 $line .= " (*** Update Available ***)";
             }
@@ -683,7 +766,8 @@ function printStatus()
             print "$line\n";
         }
 
-        if (count($updatedHeadendsToRefresh)) {
+        if (count($updatedHeadendsToRefresh))
+        {
             updateLocalHeadendCache($updatedHeadendsToRefresh);
         }
     }
@@ -704,7 +788,8 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
     $res = array();
     $res = json_decode(getLineup($updatedHeadendsToRefresh), true);
 
-    if ($res["code"] != 0) {
+    if ($res["code"] != 0)
+    {
         print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
         print$res["message"] . "\n\n-----\n";
         exit;
@@ -716,10 +801,13 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
 
     $zipArchive = new ZipArchive();
     $result = $zipArchive->open("$fileName");
-    if ($result === TRUE) {
+    if ($result === TRUE)
+    {
         $zipArchive->extractTo("$tempDir");
         $zipArchive->close();
-    } else {
+    }
+    else
+    {
         print "FATAL: Could not open lineups zip file.\n";
         print "tempdir is $tempDir\n";
         exit;
@@ -729,7 +817,8 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
      * Store a copy of the data that we just downloaded into the cache.
      */
     $stmt = $dbh->prepare("REPLACE INTO SDheadendCache(headend,json,modified) VALUES(:he,:json,:modified)");
-    foreach (glob("$tempDir/*.json.txt") as $f) {
+    foreach (glob("$tempDir/*.json.txt") as $f)
+    {
         $json = file_get_contents($f);
         $a = json_decode($json, true);
         $he = $a["headend"];
@@ -752,13 +841,15 @@ function getRandhash($username, $passwordHash)
     $res = array();
     $res = json_decode($response, true);
 
-    if (json_last_error() != 0) {
+    if (json_last_error() != 0)
+    {
         print "JSON decode error:\n";
         var_dump($response);
         exit;
     }
 
-    if ($res["response"] == "OK") {
+    if ($res["response"] == "OK")
+    {
         return $res["randhash"];
     }
 
@@ -780,13 +871,13 @@ function sendRequest($jsonText)
     $data = http_build_query(array("request" => $jsonText));
 
     $context = stream_context_create(array('http' =>
-        array(
-            'method' => 'POST',
-            'header' => 'Content-type: application/x-www-form-urlencoded',
-            'user_agent' => $agentString,
-            'timeout' => 900,
-            'content' => $data
-        )
+                                               array(
+                                                   'method'     => 'POST',
+                                                   'header'     => 'Content-type: application/x-www-form-urlencoded',
+                                                   'user_agent' => $agentString,
+                                                   'timeout'    => 900,
+                                                   'content'    => $data
+                                               )
     ));
 
     return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
@@ -795,11 +886,13 @@ function sendRequest($jsonText)
 function tempdir()
 {
     $tempfile = tempnam(sys_get_temp_dir(), "mfdb");
-    if (file_exists($tempfile)) {
+    if (file_exists($tempfile))
+    {
         unlink($tempfile);
     }
     mkdir($tempfile);
-    if (is_dir($tempfile)) {
+    if (is_dir($tempfile))
+    {
         print "tempdir is $tempfile\n";
 
         return $tempfile;
@@ -814,9 +907,11 @@ function displayLocalVideoSources()
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (count($result)) {
+    if (count($result))
+    {
         print "\nExisting sources in MythTV:\n";
-        foreach ($result as $v) {
+        foreach ($result as $v)
+        {
             print "sourceid: " . $v["sourceid"] . "\tname: " . $v["name"] . "\tlineupid: " . $v["lineupid"] . "\n";
         }
     }
@@ -832,7 +927,8 @@ function getSchedulesDirectHeadends()
     $schedulesDirectHeadends = array();
 
     $status = json_decode($sdStatus, TRUE);
-    foreach ($status["headend"] as $hv) {
+    foreach ($status["headend"] as $hv)
+    {
         $schedulesDirectHeadends[$hv["ID"]] = $hv["modified"];
     }
 
