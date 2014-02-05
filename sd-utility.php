@@ -852,7 +852,7 @@ function getToken($username, $passwordHash)
         exit;
     }
 
-    if ($res["response"] == "OK")
+    if ($res["code"] == 0)
     {
         return $res["token"];
     }
