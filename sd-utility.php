@@ -842,16 +842,8 @@ function getToken($username, $passwordHash)
     $request = $client->post("token", array(), $body);
     $response = $request->send();
 
-    $data = $response->json();
-    var_dump($data);
-    $tt=fgets(STDIN);
-exit;
-
-
-    $response = sendRequest(json_encode($res));
-
     $res = array();
-    $res = json_decode($response, true);
+    $res = $response->json();
 
     if (json_last_error() != 0)
     {
@@ -862,7 +854,7 @@ exit;
 
     if ($res["response"] == "OK")
     {
-        return $res["randhash"];
+        return $res["token"];
     }
 
     print "Response from schedulesdirect: $response\n";
