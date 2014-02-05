@@ -10,12 +10,15 @@
 
 ini_set('memory_limit', '256M');
 
+require_once 'vendor/autoload.php';
+use Guzzle\Http\Client;
+
 $isBeta = TRUE;
 $debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
-$scriptVersion = "0.06";
-$scriptDate = "2014-01-17";
+$scriptVersion = "0.07";
+$scriptDate = "2014-02-04";
 $maxProgramsToGet = 2000;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
@@ -94,7 +97,7 @@ try
 if ($isBeta)
 {
     # Test server. Things may be broken there.
-    $baseurl = "http://23.21.174.111";
+    $baseurl = "http://23.21.174.111/20131021/";
     printMSG("Using beta server.\n");
     # API must match server version.
     $api = 20131021;
@@ -105,6 +108,9 @@ else
     printMSG("Using production server.\n");
     $api = 20130709;
 }
+
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
 
 $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2' LIMIT 1");
 $stmt->execute();
@@ -122,7 +128,7 @@ $stmt->execute();
 $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 printMSG("Logging into Schedules Direct.\n");
-$randHash = getRandhash($sdUsername, $sdPassword);
+$token = getToken($sdUsername, $sdPassword);
 printMSG("Retrieving server status message.\n");
 
 $response = getStatus();
@@ -132,7 +138,7 @@ if ($response == "No new data on server.")
     $statusMessage = "No new programs to retrieve.";
 }
 
-if ($randHash != "ERROR" AND $response != "ERROR")
+if ($token != "ERROR" AND $response != "ERROR")
 {
     $jsonProgramstoRetrieve = getSchedules($stationIDs);
 }
@@ -186,7 +192,7 @@ function getSchedules(array $stationIDs)
 {
     global $dbh;
     global $api;
-    global $randHash;
+    global $token;
     global $dlProgramTempDir;
     global $dlSchedTempDir;
     global $maxProgramsToGet;
@@ -200,7 +206,7 @@ function getSchedules(array $stationIDs)
     $res = array();
     $res["action"] = "get";
     $res["object"] = "schedules";
-    $res["randhash"] = $randHash;
+    $res["randhash"] = $token;
     $res["api"] = $api;
     $res["request"] = $stationIDs;
 
@@ -291,7 +297,7 @@ function getSchedules(array $stationIDs)
             $res = array();
             $res["action"] = "get";
             $res["object"] = "programs";
-            $res["randhash"] = $randHash;
+            $res["randhash"] = $token;
             $res["api"] = $api;
 
             printMSG("Retrieving chunk " . ($i + 1) . " of " . ($totalChunks + 1) . ".\n");
@@ -1113,17 +1119,27 @@ function insertSchedule()
     $dbh->exec("RENAME TABLE t_programrating TO programrating");
 }
 
-function getRandhash($username, $password)
+function getToken($username, $password)
 {
-    global $api;
-
+    global $client;
+/*
     $res = array();
     $res["action"] = "get";
     $res["object"] = "randhash";
     $res["request"] = array("username" => $username, "password" => $password);
     $res["api"] = $api;
+*/
+    $body = json_encode(array("username" => $username, "password" => $password));
 
-    $response = sendRequest(json_encode($res));
+    $request = $client->post("/token", array(), $body);
+    $response = $request->send();
+
+    var_dump($response);
+    $tt=fgets(STDIN);
+
+
+
+//    $response = sendRequest(json_encode($res));
 
     $res = array();
     $res = json_decode($response, true);
@@ -1207,14 +1223,14 @@ function printMSG($str)
 function getStatus()
 {
     global $api;
-    global $randHash;
+    global $token;
     global $dbh;
     global $debug;
 
     $res = array();
     $res["action"] = "get";
     $res["object"] = "status";
-    $res["randhash"] = $randHash;
+    $res["randhash"] = $token;
     $res["api"] = $api;
 
     $sdStatus = sendRequest(json_encode($res));
