@@ -842,7 +842,8 @@ function getToken($username, $passwordHash)
     $request = $client->post("token", array(), $body);
     $response = $request->send();
 
-    var_dump($response);
+    $data = $response->json();
+    var_dump($data);
     $tt=fgets(STDIN);
 exit;
 
