@@ -27,7 +27,7 @@ Installation
 ============
 Install the prerequisites:
 
-apt-get install git php-cli 
+sudo apt-get install git php5-cli curl
 
 Start by cloning into a local directory:
 
@@ -36,6 +36,14 @@ git clone https://github.com/SchedulesDirect/mfdb-json.git
 Create the required tables with the dbInit.sql script
 
 mysql -umythtv -p < dbInit.sql
+
+Install Composer:
+
+curl -sS https://getcomposer.org/installer | php
+
+Add Guzzle as a dependency:
+
+php composer.phar require guzzle/guzzle:~3.7
 
 Configuration
 =============
