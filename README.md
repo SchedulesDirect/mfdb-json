@@ -27,7 +27,7 @@ Installation
 ============
 Install the prerequisites:
 
-sudo apt-get install git php5-cli curl
+sudo apt-get install git php5-cli php5-curl curl
 
 Start by cloning into a local directory:
 
