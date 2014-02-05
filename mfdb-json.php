@@ -1131,7 +1131,7 @@ function getToken($username, $password)
 */
     $body = json_encode(array("username" => $username, "password" => $password));
 
-    $request = $client->post("/token", array(), $body);
+    $request = $client->post("token", array(), $body);
     $response = $request->send();
 
     var_dump($response);
