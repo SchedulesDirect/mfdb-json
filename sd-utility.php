@@ -139,9 +139,9 @@ if ($username == "" AND $password == "")
 }
 
 print "Logging into Schedules Direct.\n";
-$randHash = getRandhash($username, $passwordHash);
+$token = getToken($username, $passwordHash);
 
-if ($randHash == "ERROR")
+if ($token == "ERROR")
 {
     exit;
 }
@@ -552,7 +552,7 @@ function printLineup()
 
 function addHeadendsToSchedulesDirect()
 {
-    global $randHash;
+    global $token;
     global $api;
 
     print "Two-character ISO3166 country code: (CA, US or ZZ)";
@@ -576,7 +576,7 @@ function addHeadendsToSchedulesDirect()
     $res = array();
     $res["action"] = "get";
     $res["object"] = "headends";
-    $res["randhash"] = $randHash;
+    $res["randhash"] = $token;
     $res["api"] = $api;
     $res["request"] = array("country" => $country, "postalcode" => "PC:$postalcode");
 
@@ -604,7 +604,7 @@ function addHeadendsToSchedulesDirect()
     $res = array();
     $res["action"] = "add";
     $res["object"] = "headends";
-    $res["randhash"] = $randHash;
+    $res["randhash"] = $token;
     $res["api"] = $api;
     $res["request"] = $he;
 
@@ -625,7 +625,7 @@ function addHeadendsToSchedulesDirect()
 
 function deleteHeadendFromSchedulesDirect()
 {
-    global $randHash;
+    global $token;
     global $api;
 
     $toDelete = readline("Headend to Delete:>");
@@ -633,7 +633,7 @@ function deleteHeadendFromSchedulesDirect()
     $res = array();
     $res["action"] = "delete";
     $res["object"] = "headends";
-    $res["randhash"] = $randHash;
+    $res["randhash"] = $token;
     $res["api"] = $api;
     $res["request"] = $toDelete;
 
@@ -654,7 +654,7 @@ function deleteHeadendFromSchedulesDirect()
 
 function deleteMessageFromSchedulesDirect()
 {
-    global $randHash;
+    global $token;
     global $api;
 
     $toDelete = readline("MessageID to acknowledge:>");
@@ -662,7 +662,7 @@ function deleteMessageFromSchedulesDirect()
     $res = array();
     $res["action"] = "delete";
     $res["object"] = "message";
-    $res["randhash"] = $randHash;
+    $res["randhash"] = $token;
     $res["api"] = $api;
     $res["request"] = $toDelete;
 
@@ -683,7 +683,7 @@ function deleteMessageFromSchedulesDirect()
 
 function getLineup(array $heToGet)
 {
-    global $randHash;
+    global $token;
     global $api;
 
     print "Retrieving lineup from Schedules Direct.\n";
@@ -691,7 +691,7 @@ function getLineup(array $heToGet)
     $res = array();
     $res["action"] = "get";
     $res["object"] = "lineups";
-    $res["randhash"] = $randHash;
+    $res["randhash"] = $token;
     $res["api"] = $api;
     $res["request"] = array_keys($heToGet);
 
@@ -701,13 +701,13 @@ function getLineup(array $heToGet)
 function getStatus()
 {
     global $api;
-    global $randHash;
+    global $token;
     global $sdStatus;
 
     $res = array();
     $res["action"] = "get";
     $res["object"] = "status";
-    $res["randhash"] = $randHash;
+    $res["randhash"] = $token;
     $res["api"] = $api;
 
     $sdStatus = sendRequest(json_encode($res));
@@ -833,14 +833,19 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
     }
 }
 
-function getRandhash($username, $passwordHash)
+function getToken($username, $passwordHash)
 {
-    global $api;
-    $res = array();
-    $res["action"] = "get";
-    $res["object"] = "randhash";
-    $res["request"] = array("username" => $username, "password" => $passwordHash);
-    $res["api"] = $api;
+    global $client;
+
+    $body = json_encode(array("username" => $username, "password" => $passwordHash));
+
+    $request = $client->post("token", array(), $body);
+    $response = $request->send();
+
+    var_dump($response);
+    $tt=fgets(STDIN);
+exit;
+
 
     $response = sendRequest(json_encode($res));
 
