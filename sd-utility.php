@@ -16,8 +16,11 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.03";
-$scriptDate = "2014-01-17";
+$scriptVersion = "0.04";
+$scriptDate = "2014-02-04";
+
+require_once 'vendor/autoload.php';
+use Guzzle\Http\Client;
 
 $agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
 
@@ -99,7 +102,7 @@ try
 if ($isBeta)
 {
     # Test server. Things may be broken there.
-    $baseurl = "http://23.21.174.111";
+    $baseurl = "http://23.21.174.111/20131021/";
     print "Using beta server.\n";
     # API must match server version.
     $api = 20131021;
@@ -110,6 +113,9 @@ else
     print "Using production server.\n";
     $api = 20130709;
 }
+
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
 
 if ($username == "" AND $password == "")
 {
