@@ -568,6 +568,8 @@ function addHeadendsToSchedulesDirect()
     global $token;
     global $client;
 
+    print "Token is $token\n";
+
     print "Three-character ISO-3166-1 alpha3 country code:";
     $country = strtoupper(readline(">"));
 
@@ -614,10 +616,21 @@ function addHeadendsToSchedulesDirect()
 
         return;
     }
-
+/*
     $request = $client->put("lineups/$he", array(), array("headers" => array("token" => $token)));
     $response = $request->send();
     $res = $response->json();
+*/
+
+    $request = $client->put("lineups/$he", array(), array(
+        "headers" => array("token" => $token)));
+
+    $response = $request->send();
+    $sdStatus = $response->json();
+
+
+
+
 
     var_dump($res);
     $tt = fgets(STDIN);
@@ -834,31 +847,6 @@ function getToken($username, $passwordHash)
     print "Response from schedulesdirect: $response\n";
 
     return "ERROR";
-}
-
-function sendRequest($jsonText)
-{
-    /*
-     * Retrieving 42k program objects took 8 minutes. Once everything is in a steady state, you're not going to be
-     * having that many objects that need to get pulled. Set timeout for 15 minutes.
-     */
-
-    global $baseurl;
-    global $agentString;
-
-    $data = http_build_query(array("request" => $jsonText));
-
-    $context = stream_context_create(array('http' =>
-                                               array(
-                                                   'method'     => 'POST',
-                                                   'header'     => 'Content-type: application/x-www-form-urlencoded',
-                                                   'user_agent' => $agentString,
-                                                   'timeout'    => 900,
-                                                   'content'    => $data
-                                               )
-    ));
-
-    return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
 }
 
 function tempdir()
