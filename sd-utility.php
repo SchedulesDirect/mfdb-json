@@ -567,7 +567,6 @@ function addHeadendsToSchedulesDirect()
 {
     global $token;
     global $client;
-    global $api;
 
     print "Three-character ISO-3166-1 alpha3 country code:";
     $country = strtoupper(readline(">"));
@@ -582,12 +581,11 @@ function addHeadendsToSchedulesDirect()
     $response = $request->send();
     $headends = $response->json();
 
-    var_dump($headends);
-
     if (isset($headends["code"]))
     {
         print "Error!\n";
         print "code:" . $headends["code"] . " response:" . $headends["response"] . " message:" . $headends["message"] . "\n";
+
         return;
     }
 
@@ -595,7 +593,7 @@ function addHeadendsToSchedulesDirect()
     {
         print "\nheadend: $he\n";
         print "location: {$details["location"]}\n";
-        foreach($details["lineups"] as $v)
+        foreach ($details["lineups"] as $v)
         {
             print "\tname: {$v["name"]}\n";
             $uriArray = explode("/", $v["uri"]);
@@ -604,32 +602,25 @@ function addHeadendsToSchedulesDirect()
     }
 
     print "\n\n";
-    $he = readline("Headend to add>");
+    $he = readline("Lineup to add>");
     if ($he == "")
     {
         return;
     }
 
-    $res = array();
-    $res["action"] = "add";
-    $res["object"] = "headends";
-    $res["randhash"] = $token;
-    $res["api"] = $api;
-    $res["request"] = $he;
-
-    $res = json_decode(sendRequest(json_encode($res)), true);
-
-    if ($res["code"] == 0)
+    if (substr_count($he, "-") != 2)
     {
-        print "Successfully added headend.\n";
+        print "Did not see two hyphens in headend; did you enter it correctly?\n";
+
+        return;
     }
-    else
-    {
-        print "ERROR:Received error response from server:\n";
-        print$res["message"] . "\n\n-----\n";
-        print "Press ENTER to continue.\n";
-        $a = fgets(STDIN);
-    }
+
+    $request = $client->put("lineups/$he", array(), array("headers" => array("token" => $token)));
+    $response = $request->send();
+    $res = $response->json();
+
+    var_dump($res);
+    $tt = fgets(STDIN);
 }
 
 function deleteHeadendFromSchedulesDirect()
