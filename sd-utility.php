@@ -791,11 +791,10 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
     print "Checking for updated lineups from Schedules Direct.\n";
 
 
-
-    foreach ($updatedHeadendsToRefresh as $item)
+    foreach ($updatedHeadendsToRefresh as $k => $v)
     {
         $res = array();
-        $res = getLineup($item);
+        $res = getLineup($k);
 
         if ($res["code"] != 0)
         {
