@@ -566,7 +566,14 @@ function printLineup()
 function addHeadendsToSchedulesDirect()
 {
     global $token;
-    global $client;
+    global $baseurl;
+    global $agentString;
+
+    $client = new Guzzle\Http\Client($baseurl);
+    $client->setUserAgent($agentString);
+
+    $clientPut = new Guzzle\Http\Client($baseurl);
+    $clientPut->setUserAgent($agentString);
 
     print "Token is $token\n";
 
@@ -621,26 +628,24 @@ function addHeadendsToSchedulesDirect()
     $res = $response->json();
 */
 
-    $request = $client->put("lineups/$he", array(), array(
+    $request = $clientPut->put("lineups/$he", array(), array(
         'headers' => array('token' => $token)
     ));
 
 
-
-
-    $request = $client->put("lineups/$he", array(), array(
-        "headers" => array("token" => $token)));
+    //$request = $client->put("lineups/$he", array(), array(
+//        "headers" => array("token" => $token)));
 
 
 
     $response = $request->send();
-    $sdStatus = $response->json();
+    $s = $response->json();
 
 
 
 
 
-    var_dump($res);
+    var_dump($s);
     $tt = fgets(STDIN);
 }
 
