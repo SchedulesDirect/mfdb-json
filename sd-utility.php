@@ -941,8 +941,7 @@ function getSchedulesDirectHeadends()
     global $sdStatus;
     $schedulesDirectHeadends = array();
 
-    $status = json_decode($sdStatus, TRUE);
-    foreach ($status["headend"] as $hv)
+    foreach ($sdStatus["lineups"] as $hv)
     {
         $schedulesDirectHeadends[$hv["ID"]] = $hv["modified"];
     }
