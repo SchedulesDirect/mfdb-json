@@ -700,17 +700,23 @@ function getLineup(array $heToGet)
 
 function getStatus()
 {
-    global $api;
     global $token;
-    global $sdStatus;
+    global $client;
+
+    // $request = $client->get("status", array("token" => $token), $body);
+
+    $request = $client->get("status", array(), array(
+        "headers" => array("token" => $token)));
+
+    $response = $request->send();
 
     $res = array();
-    $res["action"] = "get";
-    $res["object"] = "status";
-    $res["randhash"] = $token;
-    $res["api"] = $api;
+    $res = $response->json();
 
-    $sdStatus = sendRequest(json_encode($res));
+    var_dump($res);
+    $tt = fgets(STDIN);
+
+
 }
 
 function printStatus()
