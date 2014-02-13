@@ -566,6 +566,7 @@ function printLineup()
 function addHeadendsToSchedulesDirect()
 {
     global $token;
+    global $client;
     global $api;
 
     print "Three-character ISO-3166-1 alpha3 country code:";
@@ -573,6 +574,18 @@ function addHeadendsToSchedulesDirect()
 
     print "Enter postal code:";
     $postalcode = strtoupper(readline(">"));
+
+    $request = $client->get("headends", array(), array(
+        "query"   => array("country" => $country, "postalcode" => $postalcode),
+        "headers" => array("token" => $token)));
+
+    $response = $request->send();
+    $headends = $response->json();
+
+    var_dump($headends);
+    $tt=fgets(STDIN);
+    exit;
+
 
     $res = array();
     $res["action"] = "get";
@@ -696,7 +709,6 @@ function getLineup($heToGet)
 
     var_dump($lineup);
     $tt = fgets(STDIN);
-    exit;
 }
 
 function getStatus()
@@ -719,8 +731,6 @@ function printStatus()
     global $updatedHeadendsToRefresh;
 
     print "\nStatus messages from Schedules Direct:\n";
-
-    //$res = json_decode($sdStatus, TRUE);
 
     if ($sdStatus["code"] == 0)
     {
@@ -790,7 +800,6 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
 
     print "Checking for updated lineups from Schedules Direct.\n";
 
-
     foreach ($updatedHeadendsToRefresh as $k => $v)
     {
         $res = array();
@@ -799,25 +808,7 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
         if ($res["code"] != 0)
         {
             print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
-            print$res["message"] . "\n\n-----\n";
-            exit;
-        }
-
-        $tempDir = tempdir();
-        $fileName = "$tempDir/lineups.json.zip";
-        file_put_contents($fileName, file_get_contents($res["URL"]));
-
-        $zipArchive = new ZipArchive();
-        $result = $zipArchive->open("$fileName");
-        if ($result === TRUE)
-        {
-            $zipArchive->extractTo("$tempDir");
-            $zipArchive->close();
-        }
-        else
-        {
-            print "FATAL: Could not open lineups zip file.\n";
-            print "tempdir is $tempDir\n";
+            print $res["message"] . "\n\n-----\n";
             exit;
         }
 
@@ -825,14 +816,9 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
          * Store a copy of the data that we just downloaded into the cache.
          */
         $stmt = $dbh->prepare("REPLACE INTO SDheadendCache(headend,json,modified) VALUES(:he,:json,:modified)");
-        foreach (glob("$tempDir/*.json.txt") as $f)
-        {
-            $json = file_get_contents($f);
-            $a = json_decode($json, true);
-            $he = $a["headend"];
 
-            $stmt->execute(array("he" => $he, "modified" => $updatedHeadendsToRefresh[$he], "json" => $json));
-        }
+        $stmt->execute(array("he"   => $k, "modified" => $updatedHeadendsToRefresh[$k],
+                             "json" => json_encode($res)));
     }
 }
 
