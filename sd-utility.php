@@ -682,7 +682,7 @@ function deleteMessageFromSchedulesDirect()
     }
 }
 
-function getLineup(array $heToGet)
+function getLineup($heToGet)
 {
     global $client;
     global $token;
@@ -695,11 +695,8 @@ function getLineup(array $heToGet)
     $lineup = $response->json();
 
     var_dump($lineup);
-    $tt=fgets(STDIN);
+    $tt = fgets(STDIN);
     exit;
-
-
-    return sendRequest(json_encode($res), true);
 }
 
 function getStatus()
@@ -793,45 +790,50 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
 
     print "Checking for updated lineups from Schedules Direct.\n";
 
-    $res = array();
-    $res = json_decode(getLineup($updatedHeadendsToRefresh), true);
 
-    if ($res["code"] != 0)
+
+    foreach ($updatedHeadendsToRefresh as $item)
     {
-        print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
-        print$res["message"] . "\n\n-----\n";
-        exit;
-    }
+        $res = array();
+        $res = getLineup($item);
 
-    $tempDir = tempdir();
-    $fileName = "$tempDir/lineups.json.zip";
-    file_put_contents($fileName, file_get_contents($res["URL"]));
+        if ($res["code"] != 0)
+        {
+            print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
+            print$res["message"] . "\n\n-----\n";
+            exit;
+        }
 
-    $zipArchive = new ZipArchive();
-    $result = $zipArchive->open("$fileName");
-    if ($result === TRUE)
-    {
-        $zipArchive->extractTo("$tempDir");
-        $zipArchive->close();
-    }
-    else
-    {
-        print "FATAL: Could not open lineups zip file.\n";
-        print "tempdir is $tempDir\n";
-        exit;
-    }
+        $tempDir = tempdir();
+        $fileName = "$tempDir/lineups.json.zip";
+        file_put_contents($fileName, file_get_contents($res["URL"]));
 
-    /*
-     * Store a copy of the data that we just downloaded into the cache.
-     */
-    $stmt = $dbh->prepare("REPLACE INTO SDheadendCache(headend,json,modified) VALUES(:he,:json,:modified)");
-    foreach (glob("$tempDir/*.json.txt") as $f)
-    {
-        $json = file_get_contents($f);
-        $a = json_decode($json, true);
-        $he = $a["headend"];
+        $zipArchive = new ZipArchive();
+        $result = $zipArchive->open("$fileName");
+        if ($result === TRUE)
+        {
+            $zipArchive->extractTo("$tempDir");
+            $zipArchive->close();
+        }
+        else
+        {
+            print "FATAL: Could not open lineups zip file.\n";
+            print "tempdir is $tempDir\n";
+            exit;
+        }
 
-        $stmt->execute(array("he" => $he, "modified" => $updatedHeadendsToRefresh[$he], "json" => $json));
+        /*
+         * Store a copy of the data that we just downloaded into the cache.
+         */
+        $stmt = $dbh->prepare("REPLACE INTO SDheadendCache(headend,json,modified) VALUES(:he,:json,:modified)");
+        foreach (glob("$tempDir/*.json.txt") as $f)
+        {
+            $json = file_get_contents($f);
+            $a = json_decode($json, true);
+            $he = $a["headend"];
+
+            $stmt->execute(array("he" => $he, "modified" => $updatedHeadendsToRefresh[$he], "json" => $json));
+        }
     }
 }
 
