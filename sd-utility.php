@@ -591,7 +591,7 @@ function addHeadendsToSchedulesDirect()
 
     foreach ($headends as $he => $details)
     {
-        print "headend: $he\n";
+        print "\nheadend: $he\n";
         print "location: {$details["location"]}\n";
         foreach($details["lineups"] as $v)
         {
