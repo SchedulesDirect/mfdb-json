@@ -582,31 +582,21 @@ function addHeadendsToSchedulesDirect()
     $response = $request->send();
     $headends = $response->json();
 
-    var_dump($headends);
-    $tt=fgets(STDIN);
-    exit;
-
-
-    $res = array();
-    $res["action"] = "get";
-    $res["object"] = "headends";
-    $res["randhash"] = $token;
-    $res["api"] = $api;
-    $res["request"] = array("country" => $country, "postalcode" => "PC:$postalcode");
-
-    $res = json_decode(sendRequest(json_encode($res)), true);
-
-    if ($res["code"] != 0)
+    if (isset($headends["code"]))
     {
         print "Error!\n";
-        print "code:" . $res["code"] . " response:" . $res["response"] . " message:" . $res["message"] . "\n";
-
+        print "code:" . $headends["code"] . " response:" . $headends["response"] . " message:" . $headends["message"] . "\n";
         return;
     }
 
-    foreach ($res["data"] as $v)
+    foreach ($headends as $he => $details)
     {
-        print "headend: " . $v["headend"] . "\nname: " . $v["name"] . " (" . $v["location"] . ")\n\n";
+        print "headend: $he\n";
+        print "location: {$details["location"]}\n";
+        foreach($details["lineups"] as $v)
+        {
+            print "name: {$v["name"]}\n";
+        }
     }
 
     $he = readline("Headend to add>");
@@ -707,8 +697,7 @@ function getLineup($heToGet)
     $response = $request->send();
     $lineup = $response->json();
 
-    var_dump($lineup);
-    $tt = fgets(STDIN);
+    return $lineup;
 }
 
 function getStatus()
