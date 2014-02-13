@@ -119,6 +119,7 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if (!count($result))
 {
     printMSG("Fatal Error: Could not read userid and password for schedulesdirect2 grabber from videosource.\n");
+    exit;
 }
 
 $sdUsername = $result[0]["userid"];
