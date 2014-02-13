@@ -97,7 +97,7 @@ try
 if ($isBeta)
 {
     # Test server. Things may be broken there.
-    $baseurl = "http://23.21.174.111/20131021/";
+    $baseurl = "http://54.84.90.174/20131021/";
     printMSG("Using beta server.\n");
     # API must match server version.
     $api = 20131021;
