@@ -622,7 +622,16 @@ function addHeadendsToSchedulesDirect()
 */
 
     $request = $client->put("lineups/$he", array(), array(
+        'headers' => array('token' => $token)
+    ));
+
+
+
+
+    $request = $client->put("lineups/$he", array(), array(
         "headers" => array("token" => $token)));
+
+
 
     $response = $request->send();
     $sdStatus = $response->json();
