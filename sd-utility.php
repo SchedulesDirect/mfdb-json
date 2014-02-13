@@ -599,7 +599,7 @@ function addHeadendsToSchedulesDirect()
         {
             print "name: {$v["name"]}\n";
             $uriArray = explode("/", $v["uri"]);
-            print "Lineup: {last($uriArray)}\n";
+            print "Lineup: " . end($uriArray) . "\n";
         }
     }
 
