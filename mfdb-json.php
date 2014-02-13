@@ -116,6 +116,11 @@ $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabbe
 $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+if (!count($result))
+{
+    printMSG("Fatal Error: Could not read userid and password for schedulesdirect2 grabber from videosource.\n");
+}
+
 $sdUsername = $result[0]["userid"];
 $sdPassword = sha1($result[0]["password"]);
 
