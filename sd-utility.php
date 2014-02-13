@@ -598,6 +598,8 @@ function addHeadendsToSchedulesDirect()
         foreach($details["lineups"] as $v)
         {
             print "name: {$v["name"]}\n";
+            $uriArray = explode("/", $v["uri"]);
+            print "Lineup: {last($uriArray)}\n";
         }
     }
 
