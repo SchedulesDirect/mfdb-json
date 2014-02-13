@@ -696,7 +696,8 @@ function getLineup(array $heToGet)
 
     var_dump($lineup);
     $tt=fgets(STDIN);
-    
+    exit;
+
 
     return sendRequest(json_encode($res), true);
 }
