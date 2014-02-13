@@ -137,6 +137,19 @@ if ($username == "" AND $password == "")
         $needToStoreUserPassword = TRUE;
     }
 }
+else
+{
+    if ($username == "")
+    {
+        $username = readline("Schedules Direct username:");
+    }
+
+    if ($password == "")
+    {
+        $password = readline("Schedules Direct password:");
+        $passwordHash = sha1($password);
+    }
+}
 
 print "Logging into Schedules Direct.\n";
 $token = getToken($username, $passwordHash);
@@ -724,7 +737,7 @@ function printStatus()
     if ($sdStatus["code"] == 0)
     {
         $expires = $sdStatus["account"]["expires"];
-        $maxHeadends = $sdStatus["account"]["maxHeadends"];
+        $maxHeadends = $sdStatus["account"]["maxLineups"];
         $nextConnectTime = $sdStatus["account"]["nextSuggestedConnectTime"];
 
         foreach ($sdStatus["account"]["messages"] as $a)
@@ -748,7 +761,7 @@ function printStatus()
     print "Next suggested connect time: $nextConnectTime\n";
 
     $getLocalModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE headend=:he");
-    print "The following headends are in your account at Schedules Direct:\n\n";
+    print "The following lineups are in your account at Schedules Direct:\n\n";
 
     $he = getSchedulesDirectHeadends();
 
