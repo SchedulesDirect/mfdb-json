@@ -702,21 +702,13 @@ function getStatus()
 {
     global $token;
     global $client;
-
-    // $request = $client->get("status", array("token" => $token), $body);
+    global $sdStatus;
 
     $request = $client->get("status", array(), array(
         "headers" => array("token" => $token)));
 
     $response = $request->send();
-
-    $res = array();
-    $res = $response->json();
-
-    var_dump($res);
-    $tt = fgets(STDIN);
-
-
+    $sdStatus = $response->json();
 }
 
 function printStatus()
