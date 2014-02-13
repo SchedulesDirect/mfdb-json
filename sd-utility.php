@@ -597,12 +597,13 @@ function addHeadendsToSchedulesDirect()
         print "location: {$details["location"]}\n";
         foreach($details["lineups"] as $v)
         {
-            print "name: {$v["name"]}\n";
+            print "\tname: {$v["name"]}\n";
             $uriArray = explode("/", $v["uri"]);
-            print "Lineup: " . end($uriArray) . "\n";
+            print "\tLineup: " . end($uriArray) . "\n";
         }
     }
 
+    print "\n\n";
     $he = readline("Headend to add>");
     if ($he == "")
     {
