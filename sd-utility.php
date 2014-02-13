@@ -582,6 +582,8 @@ function addHeadendsToSchedulesDirect()
     $response = $request->send();
     $headends = $response->json();
 
+    var_dump($headends);
+
     if (isset($headends["code"]))
     {
         print "Error!\n";
