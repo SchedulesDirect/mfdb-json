@@ -719,15 +719,15 @@ function printStatus()
 
     print "\nStatus messages from Schedules Direct:\n";
 
-    $res = json_decode($sdStatus, TRUE);
+    //$res = json_decode($sdStatus, TRUE);
 
-    if ($res["code"] == 0)
+    if ($sdStatus["code"] == 0)
     {
-        $expires = $res["account"]["expires"];
-        $maxHeadends = $res["account"]["maxHeadends"];
-        $nextConnectTime = $res["account"]["nextSuggestedConnectTime"];
+        $expires = $sdStatus["account"]["expires"];
+        $maxHeadends = $sdStatus["account"]["maxHeadends"];
+        $nextConnectTime = $sdStatus["account"]["nextSuggestedConnectTime"];
 
-        foreach ($res["account"]["messages"] as $a)
+        foreach ($sdStatus["account"]["messages"] as $a)
         {
             print "MessageID: " . $a["msgID"] . " : " . $a["date"] . " : " . $a["message"] . "\n";
         }
@@ -735,14 +735,14 @@ function printStatus()
     else
     {
         print "Received error response from server!\n";
-        print "ServerID: " . $res["serverID"] . "\n";
-        print "Message: " . $res["message"] . "\n";
+        print "ServerID: " . $sdStatus["serverID"] . "\n";
+        print "Message: " . $sdStatus["message"] . "\n";
         print "\nFATAL ERROR. Terminating execution.\n";
         exit;
     }
 
-    print "Server: " . $res["serverID"] . "\n";
-    print "Last data refresh: " . $res["lastDataUpdate"] . "\n";
+    print "Server: " . $sdStatus["serverID"] . "\n";
+    print "Last data refresh: " . $sdStatus["lastDataUpdate"] . "\n";
     print "Account expires: $expires\n";
     print "Max number of headends for your account: $maxHeadends\n";
     print "Next suggested connect time: $nextConnectTime\n";
@@ -759,9 +759,9 @@ function printStatus()
             $line = "$id\t Last Updated: $modified";
 
             $getLocalModified->execute(array("he" => $id));
-            $result = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
+            $sdStatusult = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
 
-            if ((count($result) == 0) OR ($result[0] < $modified))
+            if ((count($sdStatusult) == 0) OR ($sdStatusult[0] < $modified))
             {
                 $updatedHeadendsToRefresh[$id] = $modified;
                 $line .= " (*** Update Available ***)";
