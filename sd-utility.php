@@ -568,23 +568,11 @@ function addHeadendsToSchedulesDirect()
     global $token;
     global $api;
 
-    print "Two-character ISO3166 country code: (CA, US or ZZ)";
+    print "Three-character ISO-3166-1 alpha3 country code:";
     $country = strtoupper(readline(">"));
 
-    if ($country != "ZZ")
-    {
-        print "Enter your 5-digit zip code for U.S.\n";
-        print "Enter leftmost 4-character postal code for Canada.\n";
-
-        $postalcode = strtoupper(readline(">"));
-    }
-    else
-    {
-        /*
-         * Doesn't matter for "ZZ" codes.
-         */
-        $postalcode = "00000";
-    }
+    print "Enter postal code:";
+    $postalcode = strtoupper(readline(">"));
 
     $res = array();
     $res["action"] = "get";
@@ -696,17 +684,19 @@ function deleteMessageFromSchedulesDirect()
 
 function getLineup(array $heToGet)
 {
+    global $client;
     global $token;
-    global $api;
 
     print "Retrieving lineup from Schedules Direct.\n";
+    $request = $client->get("lineups/$heToGet", array(), array(
+        "headers" => array("token" => $token)));
 
-    $res = array();
-    $res["action"] = "get";
-    $res["object"] = "lineups";
-    $res["randhash"] = $token;
-    $res["api"] = $api;
-    $res["request"] = array_keys($heToGet);
+    $response = $request->send();
+    $lineup = $response->json();
+
+    var_dump($lineup);
+    $tt=fgets(STDIN);
+    
 
     return sendRequest(json_encode($res), true);
 }
