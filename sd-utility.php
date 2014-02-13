@@ -811,7 +811,7 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
         $res = array();
         $res = getLineup($k);
 
-        if ($res["code"] != 0)
+        if (isset($res["code"]))
         {
             print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
             print $res["message"] . "\n\n-----\n";
