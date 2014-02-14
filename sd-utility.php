@@ -221,7 +221,7 @@ while (!$done)
             break;
         case "L":
             print "Linking Schedules Direct headend to sourceid\n\n";
-            linkSchedulesDirectHeadend();
+            linkSchedulesDirectLineup();
             break;
         case "R":
             refreshLineup();
@@ -438,7 +438,7 @@ function updateChannelTable($he, $sourceID)
     }
 }
 
-function linkSchedulesDirectHeadend()
+function linkSchedulesDirectLineup()
 {
     global $dbh;
 
@@ -454,20 +454,8 @@ function linkSchedulesDirectHeadend()
         return;
     }
 
-    var_dump($response);
-    $tt=fgets(STDIN);
-
-    if ($deviceToLink == "Antenna")
-    {
-        $compositeDevice = $he;
-    }
-    else
-    {
-        $compositeDevice = "$he:$deviceToLink";
-    }
-
     $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
-    $stmt->execute(array("he" => $compositeDevice, "sid" => $sid));
+    $stmt->execute(array("he" => $he, "sid" => $sid));
 
 }
 
@@ -489,50 +477,28 @@ function printLineup()
         return;
     }
 
-    if (count($response["deviceTypes"]) > 1)
-    {
-        print "Your headend has these devicetypes: ";
-        foreach ($response["deviceTypes"] as $v)
-        {
-            print "$v ";
-        }
-        print "\n";
-
-        $toPrint = strtoupper(readline("Which device to display:>"));
-    }
-    else
-    {
-        print "Your headend has only one devicetype: ";
-        print $response["deviceTypes"][0] . "\n";
-        $toPrint = $response["deviceTypes"][0];
-    }
-
     print "\n";
 
     $chanMap = array();
     $stationMap = array();
 
-    if ($toPrint != "Antenna")
+    foreach ($response[$he]["map"] as $v)
     {
-        foreach ($response[$toPrint]["map"] as $v)
+        $chanMap[$v["stationID"]] = $v["channel"];
+    }
+
+    foreach ($response["Antenna"]["map"] as $v)
+    {
+        if (isset($v["atscMajor"]))
         {
-            $chanMap[$v["stationID"]] = $v["channel"];
+            $chanMap[$v["stationID"]] = $v["atscMajor"] . "." . $v["atscMinor"];
+        }
+        else
+        {
+            $chanMap[$v["stationID"]] = $v["uhfVhf"];
         }
     }
-    else
-    {
-        foreach ($response["Antenna"]["map"] as $v)
-        {
-            if (isset($v["atscMajor"]))
-            {
-                $chanMap[$v["stationID"]] = $v["atscMajor"] . "." . $v["atscMinor"];
-            }
-            else
-            {
-                $chanMap[$v["stationID"]] = $v["uhfVhf"];
-            }
-        }
-    }
+
 
     foreach ($response["stations"] as $v)
     {
@@ -874,5 +840,9 @@ function getSchedulesDirectHeadends()
 
     return ($schedulesDirectHeadends);
 }
+
+/*
+ * TODO: Check why metadata returned when parsing onconnectCache is buried an extra level.
+ */
 
 ?>
