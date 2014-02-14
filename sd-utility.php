@@ -238,7 +238,7 @@ exit;
 function refreshLineup()
 {
     $he = readline("lineupid:>");
-    print "Headend update for $he\n";
+    print "Lineup update for $he\n";
     /*
      * For now we're just going to grab everything; selecting which channels to update is better left for
      * other applications, like MythWeb or something like that.
@@ -442,8 +442,8 @@ function linkSchedulesDirectHeadend()
 {
     global $dbh;
 
-    $sid = readline("sourceid:>");
-    $he = strtoupper(readline("lineupid:>"));
+    $sid = readline("MythTV sourceid:>");
+    $he = strtoupper(readline("Schedules Direct lineup:>"));
 
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE headend=:he");
     $stmt->execute(array("he" => $he));
@@ -454,23 +454,8 @@ function linkSchedulesDirectHeadend()
         return;
     }
 
-    if (count($response["deviceTypes"]) > 1)
-    {
-        print "Your headend has these devicetypes: ";
-        foreach ($response["deviceTypes"] as $v)
-        {
-            print "$v ";
-        }
-        print "\n";
-
-        $deviceToLink = strtoupper(readline("Which device to link:>"));
-    }
-    else
-    {
-        print "Your headend has only one devicetype: ";
-        print $response["deviceTypes"][0] . "\n";
-        $deviceToLink = $response["deviceTypes"][0];
-    }
+    var_dump($response);
+    $tt=fgets(STDIN);
 
     if ($deviceToLink == "Antenna")
     {
