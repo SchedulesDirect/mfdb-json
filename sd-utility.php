@@ -614,11 +614,7 @@ function addHeadendsToSchedulesDirect()
         return;
     }
 
-
-// Set a single header using path syntax
-    // $client->setDefaultOption('headers/token', $token);
     $request = $client->put("lineups/$he", array("token" => $token), array());
-
     $response = $request->send();
     $s = $response->json();
 
@@ -631,36 +627,31 @@ function addHeadendsToSchedulesDirect()
     }
     else
     {
-        print "Message: {$s["message"]}\n";
+        print "Message from server: {$s["message"]}\n";
     }
 }
 
 function deleteHeadendFromSchedulesDirect()
 {
+    global $client;
     global $token;
-    global $api;
 
     $toDelete = readline("Headend to Delete:>");
 
-    $res = array();
-    $res["action"] = "delete";
-    $res["object"] = "headends";
-    $res["randhash"] = $token;
-    $res["api"] = $api;
-    $res["request"] = $toDelete;
+    $request = $client->delete("lineups/$he", array("token" => $token), array());
+    $response = $request->send();
+    $s = $response->json();
 
-    $res = json_decode(sendRequest(json_encode($res)), true);
-
-    if ($res["code"] == 0)
+    if ($s["code"])
     {
-        print "Successfully deleted headend.\n";
+        print "Error response from server:\n";
+        print "Code: {$s["code"]}\n";
+        print "Message: {$s["message"]}\n";
+        print "Server: {$s["serverID"]}\n";
     }
     else
     {
-        print "ERROR:Received error response from server:\n";
-        print$res["message"] . "\n\n-----\n";
-        print "Press ENTER to continue.\n";
-        $a = fgets(STDIN);
+        print "Message from server: {$s["message"]}\n";
     }
 }
 
