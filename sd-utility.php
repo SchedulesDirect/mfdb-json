@@ -456,7 +456,6 @@ function linkSchedulesDirectLineup()
 
     $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
     $stmt->execute(array("he" => $he, "sid" => $sid));
-
 }
 
 function printLineup()
@@ -467,7 +466,7 @@ function printLineup()
      * First we want to get the headend that we're interested in.
      */
 
-    $he = strtoupper(readline("Headend:>"));
+    $he = strtoupper(readline("Lineup to print:>"));
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:he");
     $stmt->execute(array("he" => $he));
     $response = json_decode($stmt->fetchColumn(), TRUE);
@@ -478,6 +477,9 @@ function printLineup()
     }
 
     print "\n";
+
+    var_dump($response);
+    $tt=fgets(STDIN);
 
     $chanMap = array();
     $stationMap = array();
