@@ -565,17 +565,8 @@ function printLineup()
 
 function addHeadendsToSchedulesDirect()
 {
+    global $client;
     global $token;
-    global $baseurl;
-    global $agentString;
-
-    $client = new Guzzle\Http\Client($baseurl);
-    $client->setUserAgent($agentString);
-
-    $clientPut = new Guzzle\Http\Client($baseurl);
-    $clientPut->setUserAgent($agentString);
-
-    print "Token is $token\n";
 
     print "Three-character ISO-3166-1 alpha3 country code:";
     $country = strtoupper(readline(">"));
@@ -622,14 +613,6 @@ function addHeadendsToSchedulesDirect()
 
         return;
     }
-/*
-    $request = $clientPut->put("lineups/$he", array(), array(
-        'headers' => array('token' => $token)
-    ));
-*/
-
-    $client = new Guzzle\Http\Client($baseurl);
-    $client->setUserAgent($agentString);
 
 // Set a single header using path syntax
     $client->setDefaultOption('headers/token', $token);
@@ -638,8 +621,17 @@ function addHeadendsToSchedulesDirect()
     $response = $request->send();
     $s = $response->json();
 
-    var_dump($s);
-    $tt = fgets(STDIN);
+    if ($s["code"])
+    {
+        printMSG("Error response from server:\n");
+        printMSG("Code: {$s["code"]}\n");
+        printMSG("Message: {$s["message"]}\n");
+        printMSG("Server: {$s["serverID"]}\n");
+    }
+    else
+    {
+        printMSG("Message: {$s["message"]}\n");
+    }
 }
 
 function deleteHeadendFromSchedulesDirect()
