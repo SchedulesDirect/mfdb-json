@@ -628,7 +628,8 @@ function addHeadendsToSchedulesDirect()
     ));
 */
 
-    $client = new Guzzle\Http\Client();
+    $client = new Guzzle\Http\Client($baseurl);
+    $client->setUserAgent($agentString);
 
 // Set a single header using path syntax
     $client->setDefaultOption('headers/token', $token);
@@ -636,10 +637,6 @@ function addHeadendsToSchedulesDirect()
 
     $response = $request->send();
     $s = $response->json();
-
-
-
-
 
     var_dump($s);
     $tt = fgets(STDIN);
