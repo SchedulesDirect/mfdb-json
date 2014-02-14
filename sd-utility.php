@@ -635,6 +635,7 @@ function deleteHeadendFromSchedulesDirect()
 {
     global $client;
     global $token;
+    global $updatedHeadendsToRefresh;
 
     $toDelete = readline("Headend to Delete:>");
 
@@ -652,6 +653,7 @@ function deleteHeadendFromSchedulesDirect()
     else
     {
         print "Message from server: {$s["message"]}\n";
+        unset ($updatedHeadendsToRefresh[$toDelete]);
     }
 }
 
