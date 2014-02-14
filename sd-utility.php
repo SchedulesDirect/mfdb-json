@@ -852,7 +852,8 @@ function displayLocalVideoSources()
         print "\nExisting sources in MythTV:\n";
         foreach ($result as $v)
         {
-            print "sourceid: " . $v["sourceid"] . "\tname: " . $v["name"] . "\tlineupid: " . $v["lineupid"] . "\n";
+            print "sourceid: " . $v["sourceid"] . "\tname: " . $v["name"] . "\tSchedulesDirect lineup: " .
+                $v["lineupid"] . "\n";
         }
     }
     else
