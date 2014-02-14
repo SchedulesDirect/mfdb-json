@@ -705,8 +705,11 @@ function getStatus()
     global $client;
     global $sdStatus;
 
-    $request = $client->get("status", array(), array(
-        "headers" => array("token" => $token)));
+    //$request = $client->get("status", array(), array(
+//        "headers" => array("token" => $token)));
+
+    $request = $client->get("status", array("token" => $token), array());
+    //        "headers" => array("token" => $token)));
 
     $response = $request->send();
     $sdStatus = $response->json();
