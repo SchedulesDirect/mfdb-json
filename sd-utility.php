@@ -690,9 +690,8 @@ function getLineup($heToGet)
     global $token;
 
     print "Retrieving lineup from Schedules Direct.\n";
-    $request = $client->get("lineups/$heToGet", array(), array(
-        "headers" => array("token" => $token)));
 
+    $request = $client->get("lineups/$heToGet", array("token" => $token), array());
     $response = $request->send();
     $lineup = $response->json();
 
@@ -705,12 +704,7 @@ function getStatus()
     global $client;
     global $sdStatus;
 
-    //$request = $client->get("status", array(), array(
-//        "headers" => array("token" => $token)));
-
     $request = $client->get("status", array("token" => $token), array());
-    //        "headers" => array("token" => $token)));
-
     $response = $request->send();
     $sdStatus = $response->json();
 }
