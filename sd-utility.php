@@ -624,14 +624,14 @@ function addHeadendsToSchedulesDirect()
 
     if ($s["code"])
     {
-        printMSG("Error response from server:\n");
-        printMSG("Code: {$s["code"]}\n");
-        printMSG("Message: {$s["message"]}\n");
-        printMSG("Server: {$s["serverID"]}\n");
+        print "Error response from server:\n";
+        print "Code: {$s["code"]}\n";
+        print "Message: {$s["message"]}\n";
+        print "Server: {$s["serverID"]}\n";
     }
     else
     {
-        printMSG("Message: {$s["message"]}\n");
+        print "Message: {$s["message"]}\n";
     }
 }
 
