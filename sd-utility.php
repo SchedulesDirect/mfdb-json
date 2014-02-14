@@ -181,7 +181,7 @@ while (!$done)
     print "\nMythTV functions:\n";
     print "A to Add a new videosource to MythTV\n";
     print "D to Delete a videosource in MythTV\n";
-    print "L to Link a videosource to a headend at SD\n";
+    print "L to Link a videosource to a lineup at SD\n";
     print "R to refresh a videosource with new lineup information\n";
     print "Q to Quit\n";
 
