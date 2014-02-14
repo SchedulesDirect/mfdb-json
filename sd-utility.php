@@ -623,20 +623,16 @@ function addHeadendsToSchedulesDirect()
         return;
     }
 /*
-    $request = $client->put("lineups/$he", array(), array("headers" => array("token" => $token)));
-    $response = $request->send();
-    $res = $response->json();
-*/
-
     $request = $clientPut->put("lineups/$he", array(), array(
         'headers' => array('token' => $token)
     ));
+*/
 
+    $client = new Guzzle\Http\Client();
 
-    //$request = $client->put("lineups/$he", array(), array(
-//        "headers" => array("token" => $token)));
-
-
+// Set a single header using path syntax
+    $client->setDefaultOption('headers/token', $token);
+    $request = $client->put("lineups/$he", array(), array());
 
     $response = $request->send();
     $s = $response->json();
