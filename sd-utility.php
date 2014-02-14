@@ -614,9 +614,10 @@ function addHeadendsToSchedulesDirect()
         return;
     }
 
+
 // Set a single header using path syntax
-    $client->setDefaultOption('headers/token', $token);
-    $request = $client->put("lineups/$he", array(), array());
+    // $client->setDefaultOption('headers/token', $token);
+    $request = $client->put("lineups/$he", array("token" => $token), array());
 
     $response = $request->send();
     $s = $response->json();
