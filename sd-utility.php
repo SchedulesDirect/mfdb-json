@@ -610,19 +610,14 @@ function deleteHeadendFromSchedulesDirect()
 
 function deleteMessageFromSchedulesDirect()
 {
+    global $client;
     global $token;
-    global $api;
 
     $toDelete = readline("MessageID to acknowledge:>");
 
-    $res = array();
-    $res["action"] = "delete";
-    $res["object"] = "message";
-    $res["randhash"] = $token;
-    $res["api"] = $api;
-    $res["request"] = $toDelete;
-
-    $res = json_decode(sendRequest(json_encode($res)), true);
+    $request = $client->delete("messages/$toDelete", array("token" => $token), array());
+    $response = $request->send();
+    $res = $response->json();
 
     if ($res["code"] == 0)
     {
