@@ -23,12 +23,12 @@ DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramg
 
  CREATE TABLE `SDheadendCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `headend` varchar(14) NOT NULL DEFAULT '',
+  `lineup` varchar(50) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
   `modified` char(20) DEFAULT '1970-01-01T00:00:00Z',
   `json` mediumtext,
   PRIMARY KEY (`row`),
-  UNIQUE KEY `headend` (`headend`)
+  UNIQUE KEY `lineup` (`lineup`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `SDpeople` (
