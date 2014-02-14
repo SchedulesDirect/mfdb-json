@@ -638,7 +638,7 @@ function deleteHeadendFromSchedulesDirect()
 
     $toDelete = readline("Headend to Delete:>");
 
-    $request = $client->delete("lineups/$he", array("token" => $token), array());
+    $request = $client->delete("lineups/$toDelete", array("token" => $token), array());
     $response = $request->send();
     $s = $response->json();
 
