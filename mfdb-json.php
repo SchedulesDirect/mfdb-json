@@ -18,7 +18,7 @@ $debug = FALSE;
 $quiet = FALSE;
 $printTimeStamp = TRUE;
 $scriptVersion = "0.07";
-$scriptDate = "2014-02-04";
+$scriptDate = "2014-02-16";
 $maxProgramsToGet = 2000;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
@@ -1128,41 +1128,28 @@ function insertSchedule()
 function getToken($username, $password)
 {
     global $client;
-/*
-    $res = array();
-    $res["action"] = "get";
-    $res["object"] = "randhash";
-    $res["request"] = array("username" => $username, "password" => $password);
-    $res["api"] = $api;
-*/
+
     $body = json_encode(array("username" => $username, "password" => $password));
 
     $request = $client->post("token", array(), $body);
     $response = $request->send();
 
-    var_dump($response);
-    $tt=fgets(STDIN);
-
-
-
-//    $response = sendRequest(json_encode($res));
-
     $res = array();
-    $res = json_decode($response, true);
+    $res = $response->json();
 
     if (json_last_error() != 0)
     {
-        printMSG("JSON decode error:\n");
+        print "JSON decode error:\n";
         var_dump($response);
         exit;
     }
 
-    if ($res["response"] == "OK")
+    if ($res["code"] == 0)
     {
-        return $res["randhash"];
+        return $res["token"];
     }
 
-    printMSG("Response from schedulesdirect: $response\n");
+    print "Response from schedulesdirect: $response\n";
 
     return "ERROR";
 }
