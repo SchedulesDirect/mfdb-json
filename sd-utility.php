@@ -237,8 +237,8 @@ exit;
 
 function refreshLineup()
 {
-    $lineup = readline("SD Lineup Name:>");
-    print "Lineup update for $lineup\n";
+    //$lineup = readline("SD Lineup Name:>");
+    //print "Lineup update for $lineup\n";
     /*
      * For now we're just going to grab everything; selecting which channels to update is better left for
      * other applications, like MythWeb or something like that.
@@ -247,11 +247,11 @@ function refreshLineup()
     $sourceID = readline("Apply to sourceid:>");
     if ($sourceID != "")
     {
-        updateChannelTable($lineup, $sourceID);
+        updateChannelTable($sourceID);
     }
 }
 
-function updateChannelTable($lineup, $sourceID)
+function updateChannelTable($sourceID)
 {
     global $dbh;
 
@@ -272,6 +272,11 @@ function updateChannelTable($lineup, $sourceID)
          * going to use the scan, but use the atsc major and minor to correlate what we've scanned with what's in the
          *  lineup file.
          */
+
+/*
+ * TODO Check if we need to fix chanid for Antenna lineups.
+ */
+
         $transport = "Antenna";
     }
 
