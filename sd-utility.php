@@ -19,7 +19,8 @@ $passwordHash = "";
 $scriptVersion = "0.04";
 $scriptDate = "2014-02-04";
 
-require_once 'vendor/autoload.php';
+require_once "vendor/autoload.php";
+require_once "functions.php";
 use Guzzle\Http\Client;
 
 $agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
@@ -754,35 +755,6 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
         $stmt->execute(array("he"   => $k, "modified" => $updatedHeadendsToRefresh[$k],
                              "json" => json_encode($res)));
     }
-}
-
-function getToken($username, $passwordHash)
-{
-    global $client;
-
-    $body = json_encode(array("username" => $username, "password" => $passwordHash));
-
-    $request = $client->post("token", array(), $body);
-    $response = $request->send();
-
-    $res = array();
-    $res = $response->json();
-
-    if (json_last_error() != 0)
-    {
-        print "JSON decode error:\n";
-        var_dump($response);
-        exit;
-    }
-
-    if ($res["code"] == 0)
-    {
-        return $res["token"];
-    }
-
-    print "Response from schedulesdirect: $response\n";
-
-    return "ERROR";
 }
 
 function tempdir()

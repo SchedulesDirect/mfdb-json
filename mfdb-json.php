@@ -8,9 +8,14 @@
  *
  */
 
-ini_set('memory_limit', '256M');
+/*
+ * We need a bit of memory to process schedules, so request it right at the beginning.
+ */
 
-require_once 'vendor/autoload.php';
+ini_set("memory_limit", "256M");
+
+require_once "vendor/autoload.php";
+require_once "functions.php";
 use Guzzle\Http\Client;
 
 $isBeta = TRUE;
@@ -1123,35 +1128,6 @@ function insertSchedule()
 
     $dbh->exec("DROP TABLE programrating");
     $dbh->exec("RENAME TABLE t_programrating TO programrating");
-}
-
-function getToken($username, $password)
-{
-    global $client;
-
-    $body = json_encode(array("username" => $username, "password" => $password));
-
-    $request = $client->post("token", array(), $body);
-    $response = $request->send();
-
-    $res = array();
-    $res = $response->json();
-
-    if (json_last_error() != 0)
-    {
-        print "JSON decode error:\n";
-        var_dump($response);
-        exit;
-    }
-
-    if ($res["code"] == 0)
-    {
-        return $res["token"];
-    }
-
-    print "Response from schedulesdirect: $response\n";
-
-    return "ERROR";
 }
 
 function sendRequest($jsonText)
