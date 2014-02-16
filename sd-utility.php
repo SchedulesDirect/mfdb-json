@@ -484,7 +484,7 @@ function printLineup()
     $chanMap = array();
     $stationMap = array();
 
-    foreach ($response[$he]["map"] as $v)
+    foreach ($response["map"] as $v)
     {
         $chanMap[$v["stationID"]] = $v["channel"];
     }
@@ -837,9 +837,5 @@ function getSchedulesDirectHeadends()
 
     return ($schedulesDirectHeadends);
 }
-
-/*
- * TODO: Check why metadata returned when parsing onconnectCache is buried an extra level.
- */
 
 ?>
