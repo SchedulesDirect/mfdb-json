@@ -204,7 +204,6 @@ function getSchedules(array $stationIDs)
 {
     global $client;
     global $dbh;
-
     global $token;
     global $dlProgramTempDir;
     global $dlSchedTempDir;
@@ -216,7 +215,8 @@ function getSchedules(array $stationIDs)
     $serverScheduleMD5 = array();
 
     printMSG("Sending schedule request.\n");
-    $body = json_encode($stationIDs);
+
+    $body["request"] = json_encode($stationIDs);
 
     $request = $client->post("schedules", array("token" => $token), $body);
     $response = $request->send();
