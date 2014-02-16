@@ -1201,9 +1201,7 @@ function getStatus1()
     global $token;
     global $dbh;
 
-    $sdStatus = getStatus();
-
-    $res = json_decode($sdStatus, TRUE);
+    $res = getStatus();
 
     $updateLocalMessageTable = $dbh->prepare("INSERT INTO SDMessages(id,date,message,type)
     VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
