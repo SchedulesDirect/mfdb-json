@@ -478,9 +478,6 @@ function printLineup()
 
     print "\n";
 
-    var_dump($response);
-    $tt = fgets(STDIN);
-
     $chanMap = array();
     $stationMap = array();
 
