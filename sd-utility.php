@@ -648,6 +648,8 @@ function getLineup($heToGet)
     return $lineup;
 }
 
+
+/*
 function getStatus()
 {
     global $token;
@@ -658,6 +660,7 @@ function getStatus()
     $response = $request->send();
     $sdStatus = $response->json();
 }
+*/
 
 function printStatus()
 {

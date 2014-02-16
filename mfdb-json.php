@@ -21,6 +21,7 @@ use Guzzle\Http\Client;
 $isBeta = TRUE;
 $debug = FALSE;
 $quiet = FALSE;
+$sdStatus = "";
 $printTimeStamp = TRUE;
 $scriptVersion = "0.07";
 $scriptDate = "2014-02-16";
@@ -143,6 +144,8 @@ $token = getToken($sdUsername, $sdPassword);
 printMSG("Retrieving server status message.\n");
 
 $response = getStatus();
+
+
 
 if ($response == "No new data on server.")
 {
@@ -1189,20 +1192,12 @@ function printMSG($str)
     fwrite($fh_log, $str);
 }
 
-function getStatus()
+function getStatus1()
 {
-    global $api;
     global $token;
     global $dbh;
-    global $debug;
 
-    $res = array();
-    $res["action"] = "get";
-    $res["object"] = "status";
-    $res["randhash"] = $token;
-    $res["api"] = $api;
-
-    $sdStatus = sendRequest(json_encode($res));
+    $sdStatus = getStatus();
 
     $res = json_decode($sdStatus, TRUE);
 
