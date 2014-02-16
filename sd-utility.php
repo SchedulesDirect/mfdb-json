@@ -251,7 +251,7 @@ function refreshLineup()
     }
 }
 
-function updateChannelTable($he, $sourceID)
+function updateChannelTable($lineup, $sourceID)
 {
     global $dbh;
 
