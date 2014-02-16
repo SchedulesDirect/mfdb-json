@@ -479,7 +479,7 @@ function printLineup()
     print "\n";
 
     var_dump($response);
-    $tt=fgets(STDIN);
+    $tt = fgets(STDIN);
 
     $chanMap = array();
     $stationMap = array();
@@ -489,18 +489,20 @@ function printLineup()
         $chanMap[$v["stationID"]] = $v["channel"];
     }
 
-    foreach ($response["Antenna"]["map"] as $v)
+    if ($response["metadata"]["transport"] == "Antenna")
     {
-        if (isset($v["atscMajor"]))
+        foreach ($response["map"] as $v)
         {
-            $chanMap[$v["stationID"]] = $v["atscMajor"] . "." . $v["atscMinor"];
-        }
-        else
-        {
-            $chanMap[$v["stationID"]] = $v["uhfVhf"];
+            if (isset($v["atscMajor"]))
+            {
+                $chanMap[$v["stationID"]] = "{$v["atscMajor"]}.{$v["atscMinor"]}";
+            }
+            else
+            {
+                $chanMap[$v["stationID"]] = $v["uhfVhf"];
+            }
         }
     }
-
 
     foreach ($response["stations"] as $v)
     {
