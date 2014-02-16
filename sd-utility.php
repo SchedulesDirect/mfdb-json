@@ -484,11 +484,6 @@ function printLineup()
     $chanMap = array();
     $stationMap = array();
 
-    foreach ($response["map"] as $v)
-    {
-        $chanMap[$v["stationID"]] = $v["channel"];
-    }
-
     if ($response["metadata"]["transport"] == "Antenna")
     {
         foreach ($response["map"] as $v)
@@ -501,6 +496,13 @@ function printLineup()
             {
                 $chanMap[$v["stationID"]] = $v["uhfVhf"];
             }
+        }
+    }
+    else
+    {
+        foreach ($response["map"] as $v)
+        {
+            $chanMap[$v["stationID"]] = $v["channel"];
         }
     }
 
