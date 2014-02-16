@@ -143,9 +143,7 @@ printMSG("Logging into Schedules Direct.\n");
 $token = getToken($sdUsername, $sdPassword);
 printMSG("Retrieving server status message.\n");
 
-$response = getStatus();
-
-
+$response = getStatus1();
 
 if ($response == "No new data on server.")
 {
@@ -175,11 +173,11 @@ else
 
 printMSG("Status:$statusMessage\n");
 
-$gst = date("Y-m-d H:i:s", $globalStartTime);
+$globalStartTime = date("Y-m-d H:i:s", $globalStartTime);
 $get = date("Y-m-d H:i:s");
 
-printMSG("Global. Start Time:$gst\n");
-printMSG("Global. End Time:$get\n");
+printMSG("Global. Start Time:$globalStartTime\n");
+printMSG("Global. End Time:$globalEndTime\n");
 $globalSinceStart = $globalStartDate->diff(new DateTime());
 if ($globalSinceStart->h)
 {
@@ -190,10 +188,10 @@ printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\
 printMSG("Updating status.\n");
 
 $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStart' AND hostname IS NULL");
-$stmt->execute(array("data" => $gst));
+$stmt->execute(array("data" => $globalStartTime));
 
 $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunEnd' AND hostname IS NULL");
-$stmt->execute(array("data" => $get));
+$stmt->execute(array("data" => $globalEndTime));
 
 $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStatus' AND hostname IS NULL");
 $stmt->execute(array("data" => $statusMessage));
@@ -204,8 +202,9 @@ exit;
 
 function getSchedules(array $stationIDs)
 {
+    global $client;
     global $dbh;
-    global $api;
+
     global $token;
     global $dlProgramTempDir;
     global $dlSchedTempDir;
@@ -217,20 +216,25 @@ function getSchedules(array $stationIDs)
     $serverScheduleMD5 = array();
 
     printMSG("Sending schedule request.\n");
-    $res = array();
-    $res["action"] = "get";
-    $res["object"] = "schedules";
-    $res["randhash"] = $token;
-    $res["api"] = $api;
-    $res["request"] = $stationIDs;
+    $body = json_encode($stationIDs);
 
-    $response = sendRequest(json_encode($res));
+    $request = $client->post("schedules", array("token" => $token), $body);
+    $response = $request->send();
 
     $res = array();
-    $res = json_decode($response, TRUE);
+    $res = $response->json();
+
+    var_dump($res);
+    $tt=fgets(STDIN);
+    exit;
 
     if ($res["response"] == "OK")
     {
+        /*
+         * Mass re-write here; no more zip files; everything is line-oriented.
+         */
+
+
         $fileName = $res["filename"];
         $url = $res["URL"];
         file_put_contents("$dlSchedTempDir/$fileName", file_get_contents($url));
@@ -1201,18 +1205,13 @@ function getStatus1()
 
     $res = json_decode($sdStatus, TRUE);
 
-    if ($debug)
-    {
-        var_dump($res);
-    }
-
     $updateLocalMessageTable = $dbh->prepare("INSERT INTO SDMessages(id,date,message,type)
     VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
 
     if ($res["code"] == 0)
     {
         $expires = $res["account"]["expires"];
-        $maxHeadends = $res["account"]["maxHeadends"];
+        $maxLineups = $res["account"]["maxLineups"];
         $nextConnectTime = $res["account"]["nextSuggestedConnectTime"];
 
         foreach ($res["account"]["messages"] as $a)
@@ -1238,7 +1237,7 @@ function getStatus1()
     printMSG("Server: " . $res["serverID"] . "\n");
     printMSG("Last data refresh: " . $res["lastDataUpdate"] . "\n");
     printMSG("Account expires: $expires\n");
-    printMSG("Max number of headends for your account: $maxHeadends\n");
+    printMSG("Max number of lineups for your account: $maxLineups\n");
     printMSG("Next suggested connect time: $nextConnectTime\n");
 
     $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='MythFillSuggestedRunTime' AND hostname IS NULL");

@@ -648,21 +648,6 @@ function getLineup($heToGet)
     return $lineup;
 }
 
-
-/*
-function getStatus()
-{
-    global $token;
-    global $client;
-    global $sdStatus;
-
-    $request = $client->get("status", array("token" => $token), array());
-    $response = $request->send();
-    $sdStatus = $response->json();
-}
-*/
-
-
 function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
 {
     global $dbh;
