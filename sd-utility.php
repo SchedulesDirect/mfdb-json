@@ -508,7 +508,7 @@ function printLineup()
 
     foreach ($response["stations"] as $v)
     {
-        $stationMap[$v["stationID"]] = $v["callsign"] . " (" . $v["affiliate"] . ")";
+        $stationMap[$v["stationID"]] = "{$v["callsign"]} ({$v["affiliate"]})";
     }
 
     asort($chanMap, SORT_NATURAL);
