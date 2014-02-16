@@ -237,8 +237,8 @@ exit;
 
 function refreshLineup()
 {
-    $he = readline("lineupid:>");
-    print "Lineup update for $he\n";
+    $lineup = readline("SD Lineup Name:>");
+    print "Lineup update for $lineup\n";
     /*
      * For now we're just going to grab everything; selecting which channels to update is better left for
      * other applications, like MythWeb or something like that.
@@ -247,7 +247,7 @@ function refreshLineup()
     $sourceID = readline("Apply to sourceid:>");
     if ($sourceID != "")
     {
-        updateChannelTable($he, $sourceID);
+        updateChannelTable($lineup, $sourceID);
     }
 }
 
@@ -257,17 +257,15 @@ function updateChannelTable($he, $sourceID)
 
     $stmt = $dbh->prepare("SELECT lineupid FROM videosource WHERE sourceid=:sourceid");
     $stmt->execute(array("sourceid" => $sourceID));
-    $lineupid = $stmt->fetchColumn();
+    $lineup = $stmt->fetchColumn();
 
-    list($h, $dev) = explode(":", $lineupid);
-
-    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:he");
-    $stmt->execute(array("he" => $he));
+    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
+    $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
     print "Updating channel table for sourceid:$sourceID\n";
 
-    if (substr($h, 0, 2) == "PC")
+    if ($json["metadata"]["transport"] == "Antenna")
     {
         /*
          * For antenna lineups, we're not going to delete the existing channel table or dtv_multiplex; we're still
@@ -275,17 +273,21 @@ function updateChannelTable($he, $sourceID)
          *  lineup file.
          */
         $transport = "Antenna";
-        $dev = "Antenna";
     }
-    else
+
+    if ($json["metadata"]["transport"] == "Cable")
     {
         $transport = "Cable";
         $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
         $stmt->execute(array("sourceid" => $sourceID));
     }
 
-    if ($dev == "Q")
+    if ($json["metadata"]["transport"] == "QAM")
     {
+        /*
+         * TODO Lots of updates for QAM
+         */
+
         $transport = "QAM";
         $qamModified = "";
 
@@ -298,18 +300,18 @@ function updateChannelTable($he, $sourceID)
         }
 
         print "QAM modified:$qamModified\n";
-    }
 
-    $dtvMultiplex = array();
+        $dtvMultiplex = array();
 
-    $channelInsertQAM =
-        $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
+        $channelInsertQAM =
+            $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
         WHERE xmltvid=:stationID");
-    $insertDTVMultiplex = $dbh->prepare
-        ("INSERT INTO dtv_multiplex
+        $insertDTVMultiplex = $dbh->prepare
+            ("INSERT INTO dtv_multiplex
         (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
         VALUES
         (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
+    }
 
     $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
     xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
@@ -317,8 +319,7 @@ function updateChannelTable($he, $sourceID)
     $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
     xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=0 AND atsc_minor_chan=0 AND freqID=:freqID");
 
-
-    foreach ($json[$dev]["map"] as $mapArray)
+    foreach ($json["map"] as $mapArray)
     {
         $stationID = $mapArray["stationID"];
 
@@ -341,14 +342,6 @@ function updateChannelTable($he, $sourceID)
                                                          "freqID"  => $freqid));
 
             }
-            /*
-                        $stmt = $dbh->prepare(
-                            "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,atsc_major_chan,atsc_minor_chan)
-                            VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:atsc_major_chan,:atsc_minor_chan)");
-                        $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$freqid, "channum" => $freqid,
-                                             "freqid"          => $freqid, "sourceid" => $sourceID, "xmltvid" => $stationID,
-                                             "atsc_major_chan" => $atscMajor, "atsc_minor_chan" => $atscMinor));
-            */
         }
 
         if ($transport == "IP")
