@@ -44,6 +44,8 @@ function getStatus()
     $request = $client->get("status", array("token" => $token), array());
     $response = $request->send();
     $sdStatus = $response->json();
+
+    return $sdStatus;
 }
 
 function printStatus()
