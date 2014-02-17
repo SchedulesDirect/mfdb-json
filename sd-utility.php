@@ -518,7 +518,7 @@ function printLineup()
         var_dump($stationMap[$stationID]);
         var_dump($stationID);
 
-        $stationData->appendRow(array($channel, $stationMap[$stationID], (string)$stationID));
+        $stationData->appendRow(array((string)$channel, $stationMap[$stationID], (string)$stationID));
     }
 
     print $stationData;
