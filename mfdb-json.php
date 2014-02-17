@@ -143,7 +143,7 @@ printMSG("Logging into Schedules Direct.\n");
 $token = getToken($sdUsername, $sdPassword);
 printMSG("Retrieving server status message.\n");
 
-$response = printStatus();
+$response = updateStatus();
 
 if ($response == "No new data on server.")
 {
@@ -234,17 +234,10 @@ function getSchedules(array $stationIDs)
          * Mass re-write here; no more zip files; everything is line-oriented.
          */
 
-
         $fileName = $res["filename"];
-        $url = $res["URL"];
-        file_put_contents("$dlSchedTempDir/$fileName", file_get_contents($url));
+        file_put_contents("$dlSchedTempDir/schedule.json", $res);
 
-        $zipArchive = new ZipArchive();
-        $result = $zipArchive->open("$dlSchedTempDir/$fileName");
-        if ($result === TRUE)
-        {
-            $zipArchive->extractTo("$dlSchedTempDir");
-            $zipArchive->close();
+
 
             foreach (glob("$dlSchedTempDir/sched_*.json.txt") as $f)
             {
@@ -1196,7 +1189,7 @@ function printMSG($str)
     fwrite($fh_log, $str);
 }
 
-function printStatus()
+function updateStatus()
 {
     global $token;
     global $dbh;
