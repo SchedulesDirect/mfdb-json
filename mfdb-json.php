@@ -200,7 +200,7 @@ printMSG("Done.\n");
 
 exit;
 
-function getSchedules(array $stationIDs)
+function getSchedules($stationIDs)
 {
     global $client;
     global $dbh;
@@ -208,6 +208,9 @@ function getSchedules(array $stationIDs)
     global $dlProgramTempDir;
     global $dlSchedTempDir;
     global $maxProgramsToGet;
+
+    var_dump($stationIDs);
+
 
     $dbProgramCache = array();
 
@@ -217,6 +220,12 @@ function getSchedules(array $stationIDs)
     printMSG("Sending schedule request.\n");
 
     $body["request"] = json_encode($stationIDs);
+
+
+    print "body / request is \n";
+    var_dump($body);
+
+
 
     $request = $client->post("schedules", array("token" => $token), $body);
     $response = $request->send();
