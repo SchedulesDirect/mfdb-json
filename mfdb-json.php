@@ -143,7 +143,7 @@ printMSG("Logging into Schedules Direct.\n");
 $token = getToken($sdUsername, $sdPassword);
 printMSG("Retrieving server status message.\n");
 
-$response = getStatus1();
+$response = printStatus();
 
 if ($response == "No new data on server.")
 {
@@ -1196,7 +1196,7 @@ function printMSG($str)
     fwrite($fh_log, $str);
 }
 
-function getStatus1()
+function printStatus()
 {
     global $token;
     global $dbh;
@@ -1254,7 +1254,8 @@ function getStatus1()
     }
     else
     {
-        $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate' AND hostname IS NULL");
+        $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate'
+        AND hostname IS NULL");
         $stmt->execute(array("data" => $res["lastDataUpdate"]));
     }
 
