@@ -509,7 +509,7 @@ function printLineup()
 
     asort($chanMap, SORT_NATURAL);
 
-    $stationData = new Zend\Text\Table\Table(array('columnWidths' => array(11, 30, 30)));
+    $stationData = new Zend\Text\Table\Table(array('columnWidths' => array(8, 50, 10)));
     $stationData->appendRow(array("Channel", "Callsign", "stationID"));
 
     foreach ($chanMap as $stationID => $channel)
