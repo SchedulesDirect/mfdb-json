@@ -225,8 +225,7 @@ function getSchedules(array $stationIDs)
     $res = $response->json();
 
     var_dump($res);
-    $tt=fgets(STDIN);
-    exit;
+    $tt = fgets(STDIN);
 
     if ($res["response"] == "OK")
     {
@@ -234,39 +233,46 @@ function getSchedules(array $stationIDs)
          * Mass re-write here; no more zip files; everything is line-oriented.
          */
 
-        $fileName = $res["filename"];
+        //$fileName = $res["filename"];
+
+        /*
+         * Keep a copy for troubleshooting.
+         */
+
         file_put_contents("$dlSchedTempDir/schedule.json", $res);
 
+        foreach ($res as $a)
+        {
+            printMSG("Parsing $a\n");
+            var_dump($a);
+            $tt=fgets(STDIN);
 
 
-            foreach (glob("$dlSchedTempDir/sched_*.json.txt") as $f)
+            $a = json_decode(file_get_contents($f), TRUE);
+            if (isset($a["stationID"]))
             {
-                printMSG("Parsing $f\n");
-                $a = json_decode(file_get_contents($f), TRUE);
-                if (isset($a["stationID"]))
-                {
-                    $stationID = $a["stationID"];
-                    $downloadedStationIDs[] = $stationID;
+                $stationID = $a["stationID"];
+                $downloadedStationIDs[] = $stationID;
 
-                    foreach ($a["programs"] as $v)
-                    {
-                        $serverScheduleMD5[$v["md5"]] = $v["programID"];
-                    }
-                }
-                else
+                foreach ($a["programs"] as $v)
                 {
-                    print "Received error response from Schedules Direct:\n";
-                    print "{$a["message"]}\n";
-                    $tt = fgets(STDIN);
+                    $serverScheduleMD5[$v["md5"]] = $v["programID"];
                 }
             }
-        }
-        else
-        {
-            printMSG("FATAL: Could not open zip file.\n");
-            exit;
+            else
+            {
+                print "Received error response from Schedules Direct:\n";
+                print "{$a["message"]}\n";
+                $tt = fgets(STDIN);
+            }
         }
     }
+    else
+    {
+        printMSG("FATAL: Could not open zip file.\n");
+        exit;
+    }
+
 
     printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.\n");
     printMSG("Retrieving existing MD5 values.\n");
@@ -297,8 +303,6 @@ function getSchedules(array $stationIDs)
 
     if (count($jsonProgramstoRetrieve))
     {
-//        printMSG("Requesting new and updated programs.\n");
-
         $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
 
         $counter = 0;
