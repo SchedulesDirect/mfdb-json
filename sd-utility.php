@@ -509,11 +509,16 @@ function printLineup()
 
     asort($chanMap, SORT_NATURAL);
 
-    print "Channel\tCallsign\tStationID\n";
+
+    $stationData = new Zend\Text\Table\Table(array('columnWidths' => array(11, 30, 30)));
+    $stationData->appendRow(array("Channel", "Callsign", "stationID"));
+
     foreach ($chanMap as $stationID => $channel)
     {
-        print "$channel\t" . $stationMap[$stationID] . "\t$stationID\n";
+        $stationData->appendRow(array($channel, $stationMap[$stationID], $stationID));
     }
+
+    print $stationData;
 }
 
 function addHeadendsToSchedulesDirect()
