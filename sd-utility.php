@@ -514,10 +514,6 @@ function printLineup()
 
     foreach ($chanMap as $stationID => $channel)
     {
-        var_dump($channel);
-        var_dump($stationMap[$stationID]);
-        var_dump($stationID);
-
         $stationData->appendRow(array((string)$channel, $stationMap[$stationID], (string)$stationID));
     }
 
