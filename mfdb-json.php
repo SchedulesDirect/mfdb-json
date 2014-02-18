@@ -813,7 +813,7 @@ function insertSchedule()
                     printMSG("*** WARNING sid:$stationID pid:$programID has 'new' and 'repeat' set. Open SD ticket:\n");
                     printMSG(print_r($schedule, TRUE) . "\n");
                     $errorWarning = TRUE;
-                    $tt=fgets(STDIN);
+                    $tt = fgets(STDIN);
                 }
                 else
                 {
