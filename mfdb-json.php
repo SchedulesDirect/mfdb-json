@@ -219,8 +219,9 @@ function getSchedules($stationIDs)
 
     printMSG("Sending schedule request.\n");
 
-    $body["request"] = json_encode($stationIDs);
+    $body["request"] = $stationIDs;
 
+    $body = json_encode($body);
 
     print "body / request is \n";
     var_dump($body);
