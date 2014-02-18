@@ -372,15 +372,6 @@ function insertJSON(array $jsonProgramstoRetrieve)
             $pid = $jsonProgram["programID"];
             $md5 = $jsonProgram["md5"];
 
-            print "pid:$pid md5:$md5\n";
-
-            var_dump($jsonProgram);
-
-            //$insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-            //                           "json"      => $jsonProgram));
-
-            exit;
-
 
             if (json_last_error())
             {
@@ -389,12 +380,45 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 continue;
             }
 
-            if (isset($jsonProgram["castAndCrew"]))
+            //$insertJSON->execute(array("programID" => $pid, "md5" => $md5,
+            //                           "json"      => $jsonProgram));
+
+
+            if (isset($jsonProgram["cast"]))
             {
-                foreach ($jsonProgram["castAndCrew"] as $credit)
+                foreach ($jsonProgram["cast"] as $credit)
                 {
                     $role = $credit["role"];
-                    $personID = $credit["personID"];
+                    $personID = $credit["personId"];
+                    $name = $credit["name"];
+
+                    if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
+                    {
+                        $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
+                    }
+
+                    if (!isset($peopleCacheMyth[$name]))
+                    {
+                        $insertPersonMyth->execute(array("name" => $name));
+                        $id = $dbh->lastInsertId();
+                        $peopleCacheMyth[$name] = $id;
+                    }
+
+                    if (!isset($creditCache["$personID-$pid-$role"]))
+                    {
+                        $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
+                                                       "role"     => $role));
+                        $creditCache["$personID-$pid-$role"] = 1;
+                    }
+                }
+            }
+
+            if (isset($jsonProgram["crew"]))
+            {
+                foreach ($jsonProgram["crew"] as $credit)
+                {
+                    $role = $credit["role"];
+                    $personID = $credit["personId"];
                     $name = $credit["name"];
 
                     if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
@@ -818,9 +842,9 @@ function insertSchedule()
                 $subTitle = "";
             }
 
-            if (isset($programJSON["descriptions"]["description255"]))
+            if (isset($programJSON["descriptions"]["description1000"]))
             {
-                $description = $programJSON["descriptions"]["description255"];
+                $description = $programJSON["descriptions"]["description1000"];
             }
             else
             {
@@ -1093,31 +1117,6 @@ function insertSchedule()
 
     $dbh->exec("DROP TABLE programrating");
     $dbh->exec("RENAME TABLE t_programrating TO programrating");
-}
-
-function sendRequest($jsonText)
-{
-    /*
-     * Retrieving 42k program objects took 8 minutes. Once everything is in a steady state, you're not going to be
-     * having that many objects that need to get pulled. Set timeout for 15 minutes.
-     */
-
-    global $baseurl;
-    global $agentString;
-
-    $data = http_build_query(array("request" => $jsonText));
-
-    $context = stream_context_create(array('http' =>
-                                               array(
-                                                   'method'     => 'POST',
-                                                   'header'     => 'Content-type: application/x-www-form-urlencoded',
-                                                   'user_agent' => $agentString,
-                                                   'timeout'    => 900,
-                                                   'content'    => $data
-                                               )
-    ));
-
-    return rtrim(file_get_contents("$baseurl/handleRequest.php", false, $context));
 }
 
 function tempdir()
