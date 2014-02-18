@@ -592,7 +592,6 @@ function insertSchedule()
             $isNew = FALSE;
             $previouslyshown = FALSE;
 
-
             $title = "";
             $ratingSystem = "";
             $rating = "";
@@ -657,11 +656,13 @@ function insertSchedule()
 
             $programID = $schedule["programID"];
             $getProgramInformation->execute(array("pid" => $programID));
-            $programJSON = json_decode($getProgramInformation->fetchColumn(), TRUE);
+            $pj = $getProgramInformation->fetchColumn();
+            $programJSON = json_decode($pj, TRUE);
 
             if (json_last_error())
             {
-                printMSG("Error retrieving / decoding $programID from local database.\n");
+                printMSG("Error retrieving / decoding $programID from local database. Raw data was:\n");
+                printMSG(print_r($pj, TRUE) . "\n");
                 continue;
             }
 
