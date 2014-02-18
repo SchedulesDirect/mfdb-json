@@ -663,6 +663,7 @@ function insertSchedule()
             {
                 printMSG("Error retrieving / decoding $programID from local database. Raw data was:\n");
                 printMSG(print_r($pj, TRUE) . "\n");
+                $errorWarning = TRUE;
                 continue;
             }
 
