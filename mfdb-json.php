@@ -549,8 +549,11 @@ function insertSchedule()
         while (list($key, $item) = each($a))
         {
             $scheduleJSON = json_decode($item, TRUE);
-            var_dump($scheduleJSON);
-            $tt = fgets(STDIN);
+            $stationID = $scheduleJSON["stationID"];
+            foreach($scheduleJSON["programs"] as $program)
+            {
+                var_dump($program);
+            }
             exit;
 
             $chanID = $channel["chanid"];
