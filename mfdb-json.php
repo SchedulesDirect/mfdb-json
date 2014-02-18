@@ -26,6 +26,7 @@ $printTimeStamp = TRUE;
 $scriptVersion = "0.07";
 $scriptDate = "2014-02-16";
 $maxProgramsToGet = 2000;
+$errorWarning = FALSE;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
@@ -197,6 +198,11 @@ $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatab
 $stmt->execute(array("data" => $statusMessage));
 
 printMSG("Done.\n");
+
+if ($errorWarning)
+{
+    printMSG("NOTE! Errors encountered during processing. Check logs.\n");
+}
 
 exit;
 
@@ -483,6 +489,7 @@ function insertSchedule()
     global $dlSchedTempDir;
     global $peopleCache;
     global $debug;
+    global $errorWarning;
 
     if (!count($peopleCache))
     {
@@ -579,7 +586,7 @@ function insertSchedule()
         while (list($dummy, $schedule) = each($scheduleJSON[$stationID]))
         {
             /*
-             * A few things need to be set to non-null, so declare them here. Also, quiets some warnings.
+             * Pre-declare what we'll be using to quiet warning about unused variables.
              */
 
             $title = "";
@@ -592,6 +599,10 @@ function insertSchedule()
             $showType = "";
             $oad = NULL;
             $audioprop = "";
+            $subtitleTypes = "";
+            $videoProperties = "";
+            $partNumber = 0;
+            $numberOfParts = 0;
             $season = 0;
             $episode = 0;
 
@@ -616,10 +627,23 @@ function insertSchedule()
             $isSDTV = FALSE;
 
             /*
-             * Optional booleans
+             * Optional booleans, some of which aren't used by MythTV
              */
 
+            $cableInTheClassroom = FALSE; // Not used by MythTV
+            $catchupProgram = FALSE; // Used in the UK; indicates that a program is available online
+            $continuedProgram = FALSE; // Continued from a previous broadcast
             $isEducational = FALSE;
+            $joinedInProgress = FALSE;
+            $leftInProgress = FALSE;
+            $isPremiere = FALSE; // First showing of a movie or TV series
+            $programBreak = FALSE; // Program stops and will continue later; typically only found in UK
+            $repeat = FALSE;
+            $isSigned = FALSE; // supplemented with a person signing for the hearing impaired
+            $subjectToBlackout = FALSE;
+            $timeApproximate = FALSE;
+            $isPremiereOrFinale = FALSE; // Season Premiere | Season Finale | Series Premiere | Series Finale
+            $liveOrTapeDelay = NULL;
 
             /*
              * These are updated in another part of mfdb?
@@ -644,8 +668,6 @@ function insertSchedule()
             $programStartTimeMyth = str_replace("T", " ", $air_datetime);
             $programStartTimeMyth = rtrim($programStartTimeMyth, "Z");
             $programEndTimeMyth = gmdate("Y-m-d H:i:s", strtotime("$air_datetime + $duration seconds"));
-
-
 
             if (isset($schedule["audioProperties"]))
             {
@@ -751,7 +773,14 @@ function insertSchedule()
 
             if (isset($schedule["ratings"]))
             {
-
+                foreach ($schedule["ratings"] as $r)
+                {
+                    if ($r["body"] == "USA Parental Rating")
+                    {
+                        $ratingSystem = "V-CHIP";
+                        $rating = $r["code"];
+                    }
+                }
             }
 
             /*
@@ -769,168 +798,80 @@ function insertSchedule()
                 $previouslyshown = TRUE;
             }
 
+            /*
+             * Shouldn't be "new" and "repeat"
+             */
+
+            if (isset($schedule["repeat"]) AND !$isNew)
+            {
+                $isNew = FALSE;
+                $previouslyshown = TRUE;
+            }
+            else
+            {
+                printMSG("*** WARNING pid:$programID has 'new' and 'repeat' set. Open SD ticket:\n");
+                printMSG(print_r($schedule, TRUE) . "\n");
+                $errorWarning = TRUE;
+            }
+
+            if (isset($schedule["cableInTheClassroom"]))
+            {
+                $cableInTheClassroom = TRUE;
+            }
+
+            if (isset($schedule["catchup"]))
+            {
+                $catchupProgram = TRUE;
+            }
+
+            if (isset($schedule["continued"]))
+            {
+                $continuedProgram = TRUE;
+            }
+
             if (isset($schedule["educational"]))
             {
                 $isEducational = TRUE;
             }
-            else
+
+            if (isset($schedule["joinedInProgress"]))
             {
-                $isEducational = FALSE;
+                $joinedInProgress = TRUE;
             }
 
-
-        }
-        $tt = fgets(STDIN);
-
-
-
-
-
-
-
-    }
-
-    exit;
-
-    /* These don't seem to be in the On data:
-    if (isset($v["dubbedLanguage"]))
-    {
-        $dubbedLanguage = $v["dubbedLanguage"];
-    }
-    else
-    {
-        $dubbedLanguage = NULL;
-    }
-
-
-    if (isset($v["subtitledLanguage"]))
-    {
-        $subtitledLanguage = $v["subtitledLanguage"];
-    }
-    else
-    {
-        $subtitledLanguage = NULL;
-    }
-
-    if (isset($v["partNumber"]))
+            if (isset($schedule["leftInProgress"]))
             {
-                $partNumber = $v["partNumber"];
-            }
-            else
-            {
-                $partNumber = 0;
+                $leftInProgress = TRUE;
             }
 
-            if (isset($v["numberOfParts"]))
+            if (isset($schedule["premiere"]))
             {
-                $numberOfParts = $v["numberOfParts"];
-            }
-            else
-            {
-                $numberOfParts = 0;
+                $isPremiere = TRUE;
             }
 
-    if (isset($v["sapLanguage"]))
+            if (isset($schedule["programBreak"]))
             {
-                $sapLanguage = $v["sapLanguage"];
-            }
-            else
-            {
-                $sapLanguage = NULL;
+                $programBreak = TRUE;
             }
 
-
-*/
-
-
-
-
-    foreach ($scheduleJSON["programs"] as $v)
-    {
-        foreach ($existingChannels as $i)
-        {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            if (isset($v["sap"]))
+            if (isset($schedule["signed"]))
             {
-                $sap = TRUE;
-            }
-            else
-            {
-                $sap = FALSE;
+                $isSigned = TRUE;
             }
 
-
-            if (isset($v["programLanguage"]))
+            if (isset($schedule["subjectToBlackout"]))
             {
-                $programLanguage = $v["programLanguage"];
-            }
-            else
-            {
-                $programLanguage = NULL;
+                $subjectToBlackout = TRUE;
             }
 
-            if (isset($v["tvRating"]))
+            if (isset($schedule["timeApproximate"]))
             {
-                $ratingSystem = "V-CHIP";
-                $rating = $v["tvRating"];
+                $timeApproximate = TRUE;
             }
 
-            if (isset($v["hasDialogRating"]))
+            if (isset($schedule["liveTapeDelay"]))
             {
-                $dialogRating = TRUE;
-            }
-            else
-            {
-                $dialogRating = FALSE;
-            }
-
-            if (isset($v["hasLanguageRating"]))
-            {
-                $languageRating = TRUE;
-            }
-            else
-            {
-                $languageRating = FALSE;
-            }
-
-            if (isset($v["hasSexRating"]))
-            {
-                $sexRating = TRUE;
-            }
-            else
-            {
-                $sexRating = FALSE;
-            }
-
-            if (isset($v["hasViolenceRating"]))
-            {
-                $violenceRating = TRUE;
-            }
-            else
-            {
-                $violenceRating = FALSE;
-            }
-
-            if (isset($v["hasFantasyViolenceRating"]))
-            {
-                $fvRating = TRUE;
-            }
-            else
-            {
-                $fvRating = FALSE;
+                $liveOrTapeDelay = $schedule["liveTapeDelay"];
             }
 
             $title = $programJSON["titles"]["title120"];
@@ -1050,6 +991,11 @@ function insertSchedule()
                 $audioprop = "DOLBY";
             }
 
+            if ($isSurround)
+            {
+                $audioprop = "SURROUND";
+            }
+
             if (isset($programJSON["showType"]))
             {
                 $showType = $programJSON["showType"];
@@ -1060,8 +1006,20 @@ function insertSchedule()
                 $oad = $programJSON["originalAirDate"];
             }
 
-            $subtitleTypes = "";
-            $videoProperties = "";
+            if ($isLetterboxed)
+            {
+                $videoProperties = "WIDESCREEN";
+            }
+
+            if ($isHDTV)
+            {
+                $videoProperties = "HDTV";
+            }
+
+            if ($isSigned)
+            {
+                $subtitleTypes = "SIGNED";
+            }
 
             try
             {
@@ -1106,6 +1064,7 @@ function insertSchedule()
                 var_dump($programJSON);
             }
 
+/* Bypass the SD-specific insert for now; might be easier to just parse the JSON from the programCache.
             try
             {
                 $insertScheduleSD->execute(array(
@@ -1148,7 +1107,7 @@ function insertSchedule()
                 $debug = TRUE;
                 var_dump($programJSON);
             }
-
+*/
             if (isset($programJSON["castAndCrew"]))
             {
                 foreach ($programJSON["castAndCrew"] as $credit)
@@ -1203,6 +1162,122 @@ function insertSchedule()
         }
         $dbh->commit();
     }
+
+    /* These don't seem to be in the On data:
+    if (isset($v["dubbedLanguage"]))
+    {
+        $dubbedLanguage = $v["dubbedLanguage"];
+    }
+    else
+    {
+        $dubbedLanguage = NULL;
+    }
+
+
+    if (isset($v["subtitledLanguage"]))
+    {
+        $subtitledLanguage = $v["subtitledLanguage"];
+    }
+    else
+    {
+        $subtitledLanguage = NULL;
+    }
+
+    if (isset($v["partNumber"]))
+            {
+                $partNumber = $v["partNumber"];
+            }
+            else
+            {
+                $partNumber = 0;
+            }
+
+            if (isset($v["numberOfParts"]))
+            {
+                $numberOfParts = $v["numberOfParts"];
+            }
+            else
+            {
+                $numberOfParts = 0;
+            }
+
+    if (isset($v["sapLanguage"]))
+            {
+                $sapLanguage = $v["sapLanguage"];
+            }
+            else
+            {
+                $sapLanguage = NULL;
+            }
+
+if (isset($v["sap"]))
+            {
+                $sap = TRUE;
+            }
+            else
+            {
+                $sap = FALSE;
+            }
+
+
+            if (isset($v["programLanguage"]))
+            {
+                $programLanguage = $v["programLanguage"];
+            }
+            else
+            {
+                $programLanguage = NULL;
+            }
+
+
+            if (isset($v["hasDialogRating"]))
+            {
+                $dialogRating = TRUE;
+            }
+            else
+            {
+                $dialogRating = FALSE;
+            }
+
+            if (isset($v["hasLanguageRating"]))
+            {
+                $languageRating = TRUE;
+            }
+            else
+            {
+                $languageRating = FALSE;
+            }
+
+            if (isset($v["hasSexRating"]))
+            {
+                $sexRating = TRUE;
+            }
+            else
+            {
+                $sexRating = FALSE;
+            }
+
+            if (isset($v["hasViolenceRating"]))
+            {
+                $violenceRating = TRUE;
+            }
+            else
+            {
+                $violenceRating = FALSE;
+            }
+
+            if (isset($v["hasFantasyViolenceRating"]))
+            {
+                $fvRating = TRUE;
+            }
+            else
+            {
+                $fvRating = FALSE;
+            }
+
+
+*/
+
 
     /*
      * If users start to complain about errors on the insert, it's probably due to a new role type.
