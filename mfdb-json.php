@@ -601,6 +601,9 @@ function insertSchedule()
             $isFirst = 0;
             $isLast = 0;
 
+            var_dump($schedule);
+            $tt=fgets(STDIN);
+
             $programID = $schedule["programID"];
             $getProgramInformation->execute(array("pid" => $programID));
             $programJSON = json_decode($getProgramInformation->fetchColumn(), TRUE);
@@ -615,7 +618,7 @@ function insertSchedule()
             $air_datetime = $schedule["airDateTime"];
             $duration = $schedule["duration"];
 
-            print "pid:$programID md5:$md5 adt:$air_datetime $d:$duration\n";
+            print "pid:$programID md5:$md5 adt:$air_datetime d:$duration\n";
         }
         $tt = fgets(STDIN);
     }
