@@ -218,9 +218,6 @@ function getSchedules($stationIDs)
 
     $body["request"] = $stationIDs;
 
-    var_dump($body);
-
-
     $request = $client->post("schedules", array("token" => $token), json_encode($body));
     $response = $request->send();
 
@@ -236,16 +233,21 @@ function getSchedules($stationIDs)
      * Keep a copy for troubleshooting.
      */
 
-    var_dump($resBody);
-    $tt=fgets(STDIN);
-
     print "Writing to $dlSchedTempDir/schedule.json\n";
 
     file_put_contents("$dlSchedTempDir/schedule.json", $resBody);
 
-    var_dump($res);
-    $tt=fgets(STDIN);
+    $fh = fopen("$dlSchedTempDir/schedule.json", "r");
 
+    while (!feof($fh))
+    {
+        $line = fgets($fh);
+
+        print "line is $line\n";
+        $lineJSON = json_decode($line, TRUE);
+        var_dump($lineJSON);
+        $tt=fgets(STIND);
+    }
 
     $stationID = $res["stationID"];
 
