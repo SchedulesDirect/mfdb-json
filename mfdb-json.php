@@ -1160,7 +1160,7 @@ function insertSchedule()
                 }
             }
         }
-        $dbh->commit();
+        //$dbh->commit();
     }
 
     /* These don't seem to be in the On data:
