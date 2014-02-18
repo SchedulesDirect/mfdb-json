@@ -596,13 +596,36 @@ function insertSchedule()
             $episode = 0;
 
             /*
+             * The various audio properties
+             */
+            $isClosedCaption = FALSE;
+            $dvs = FALSE;
+            $dolbyType = NULL;
+            $dubbed = FALSE;
+            $isStereo = FALSE;
+            $isSubtitled = FALSE;
+            $isSurround = FALSE;
+
+            /*
+             * Video properties
+             */
+            $is3d = FALSE;
+            $isEnhancedResolution = FALSE; // Better than SD, not as good as HD
+            $isHDTV = FALSE;
+            $isLetterboxed = FALSE;
+            $isSDTV = FALSE;
+
+            /*
+             * Optional booleans
+             */
+
+            $isEducational = FALSE;
+
+            /*
              * These are updated in another part of mfdb?
              */
             $isFirst = 0;
             $isLast = 0;
-
-            var_dump($schedule);
-            $tt=fgets(STDIN);
 
             $programID = $schedule["programID"];
             $getProgramInformation->execute(array("pid" => $programID));
@@ -618,66 +641,97 @@ function insertSchedule()
             $air_datetime = $schedule["airDateTime"];
             $duration = $schedule["duration"];
 
-            print "pid:$programID md5:$md5 adt:$air_datetime d:$duration\n";
-        }
-        $tt = fgets(STDIN);
-    }
-
-    exit;
-
-
-    foreach ($scheduleJSON["programs"] as $v)
-    {
-        foreach ($existingChannels as $i)
-        {
-
-
-
             $programStartTimeMyth = str_replace("T", " ", $air_datetime);
             $programStartTimeMyth = rtrim($programStartTimeMyth, "Z");
             $programEndTimeMyth = gmdate("Y-m-d H:i:s", strtotime("$air_datetime + $duration seconds"));
 
-            if (isset($v["new"]))
+
+
+            if (isset($schedule["audioProperties"]))
             {
-                $isNew = TRUE;
-                $previouslyshown = FALSE;
-            }
-            else
-            {
-                $isNew = FALSE;
-                $previouslyshown = TRUE;
+                foreach ($schedule["audioProperties"] as $ap)
+                {
+                    if ($ap == "cc")
+                    {
+                        $isClosedCaption = TRUE;
+                    }
+
+                    if ($ap == "dvs")
+                    {
+                        $dvs = TRUE;
+                    }
+
+                    if ($ap == "Dolby")
+                    {
+                        $dolbyType = "dolby";
+                    }
+
+                    if ($ap == "DD")
+                    {
+                        $dolbyType = "Dolby Digital";
+                    }
+
+                    if ($ap == "DD 5.1")
+                    {
+                        $dolbyType = "Dolby Digital 5.1";
+                    }
+
+                    if ($ap == "dubbed")
+                    {
+                        $dubbed = TRUE;
+                    }
+
+                    if ($ap == "stereo")
+                    {
+                        $isStereo = TRUE;
+                    }
+
+                    if ($ap == "subtitled")
+                    {
+                        $isSubtitled = TRUE;
+                    }
+
+                    if ($ap == "surround")
+                    {
+                        $isSurround = TRUE;
+                    }
+                }
             }
 
-            if (isset($v["cc"]))
+            if (isset($schedule["videoProperties"]))
             {
-                $isClosedCaption = TRUE;
-            }
-            else
-            {
-                $isClosedCaption = FALSE;
+                foreach ($schedule["videoProperties"] as $vp)
+                {
+                    if ($vp == "3d")
+                    {
+                        $is3d = TRUE;
+                    }
+
+                    if ($vp == "enhanced")
+                    {
+                        $isEnhancedResolution = TRUE;
+                    }
+
+                    if ($vp == "hdtv")
+                    {
+                        $isHDTV = TRUE;
+                    }
+
+                    if ($vp == "letterbox")
+                    {
+                        $isLetterboxed = TRUE;
+                    }
+
+                    if ($vp == "sdtv")
+                    {
+                        $isSDTV = TRUE; //Not used in MythTV
+                    }
+                }
             }
 
-            if (isset($v["partNumber"]))
+            if (isset($schedule["isPremiereOrFinale"]))
             {
-                $partNumber = $v["partNumber"];
-            }
-            else
-            {
-                $partNumber = 0;
-            }
-
-            if (isset($v["numberOfParts"]))
-            {
-                $numberOfParts = $v["numberOfParts"];
-            }
-            else
-            {
-                $numberOfParts = 0;
-            }
-
-            if (isset($v["isPremiereOrFinale"]))
-            {
-                switch ($v["isPremiereOrFinale"])
+                switch ($schedule["isPremiereOrFinale"])
                 {
                     case "Series Premiere":
                     case "Season Premiere":
@@ -695,16 +749,27 @@ function insertSchedule()
                 $isLast = FALSE;
             }
 
-            if (isset($v["dvs"]))
+            if (isset($schedule["ratings"]))
             {
-                $dvs = TRUE;
+
+            }
+
+            /*
+             * Boolean types
+             */
+
+            if (isset($schedule["new"]))
+            {
+                $isNew = TRUE;
+                $previouslyshown = FALSE;
             }
             else
             {
-                $dvs = FALSE;
+                $isNew = FALSE;
+                $previouslyshown = TRUE;
             }
 
-            if (isset($v["educational"]))
+            if (isset($schedule["educational"]))
             {
                 $isEducational = TRUE;
             }
@@ -713,86 +778,90 @@ function insertSchedule()
                 $isEducational = FALSE;
             }
 
-            if (isset($v["hdtv"]))
+
+        }
+        $tt = fgets(STDIN);
+
+
+
+
+
+
+
+    }
+
+    exit;
+
+    /* These don't seem to be in the On data:
+    if (isset($v["dubbedLanguage"]))
+    {
+        $dubbedLanguage = $v["dubbedLanguage"];
+    }
+    else
+    {
+        $dubbedLanguage = NULL;
+    }
+
+
+    if (isset($v["subtitledLanguage"]))
+    {
+        $subtitledLanguage = $v["subtitledLanguage"];
+    }
+    else
+    {
+        $subtitledLanguage = NULL;
+    }
+
+    if (isset($v["partNumber"]))
             {
-                $isHDTV = TRUE;
+                $partNumber = $v["partNumber"];
             }
             else
             {
-                $isHDTV = FALSE;
+                $partNumber = 0;
             }
 
-            if (isset($v["is3d"]))
+            if (isset($v["numberOfParts"]))
             {
-                $is3d = TRUE;
+                $numberOfParts = $v["numberOfParts"];
             }
             else
             {
-                $is3d = FALSE;
+                $numberOfParts = 0;
             }
 
-            if (isset($v["letterbox"]))
+    if (isset($v["sapLanguage"]))
             {
-                $isLetterboxed = TRUE;
+                $sapLanguage = $v["sapLanguage"];
             }
             else
             {
-                $isLetterboxed = FALSE;
+                $sapLanguage = NULL;
             }
 
-            if (isset($v["stereo"]))
-            {
-                $isStereo = TRUE;
-            }
-            else
-            {
-                $isStereo = FALSE;
-            }
 
-            if (isset($v["dolby"]))
-            {
-                $dolbyType = $v["dolby"];
-            }
-            else
-            {
-                $dolbyType = NULL;
-            }
+*/
 
-            if (isset($v["dubbed"]))
-            {
-                $dubbed = TRUE;
-            }
-            else
-            {
-                $dubbed = FALSE;
-            }
 
-            if (isset($v["dubbedLanguage"]))
-            {
-                $dubbedLanguage = $v["dubbedLanguage"];
-            }
-            else
-            {
-                $dubbedLanguage = NULL;
-            }
 
-            if (isset($v["subtitled"]))
-            {
-                $isSubtitled = TRUE;
-            }
-            else
-            {
-                $isSubtitled = FALSE;
-            }
 
-            if (isset($v["subtitledLanguage"]))
-            {
-                $subtitledLanguage = $v["subtitledLanguage"];
-            }
-            else
-            {
-                $subtitledLanguage = NULL;
-            }
+    foreach ($scheduleJSON["programs"] as $v)
+    {
+        foreach ($existingChannels as $i)
+        {
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             if (isset($v["sap"]))
             {
@@ -803,14 +872,6 @@ function insertSchedule()
                 $sap = FALSE;
             }
 
-            if (isset($v["sapLanguage"]))
-            {
-                $sapLanguage = $v["sapLanguage"];
-            }
-            else
-            {
-                $sapLanguage = NULL;
-            }
 
             if (isset($v["programLanguage"]))
             {
