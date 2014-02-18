@@ -237,16 +237,20 @@ function getSchedules($stationIDs)
 
     file_put_contents("$dlSchedTempDir/schedule.json", $resBody);
 
-    $fh = fopen("$dlSchedTempDir/schedule.json", "r");
+    $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-    while (!feof($fh))
+    print "size of f is " . count($f) . "\n";
+
+    foreach ($f as $v)
     {
-        $line = fgets($fh);
+        print "line is $v";
+        $tt = fgets(STDIN);
 
-        print "line is $line\n";
-        $lineJSON = json_decode($line, TRUE);
-        var_dump($lineJSON);
-        $tt=fgets(STIND);
+        print "decoded is ";
+        $dec = json_decode($v, TRUE);
+        var_dump($dec);
+        $tt=fgets(STDIN);
+
     }
 
     $stationID = $res["stationID"];
