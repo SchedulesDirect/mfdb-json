@@ -280,6 +280,8 @@ function getSchedules($stationIDs)
         printMSG("Requesting more than 10000 programs. Please be patient.\n");
     }
 
+    printMSG("Maximum programs we're downloading per call: $maxProgramsToGet\n");
+
     if (count($jsonProgramstoRetrieve))
     {
         $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
