@@ -367,21 +367,18 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 //$dbh->beginTransaction();
             }
 
-            var_dump($item);
-            $tt = fgets(STDIN);
+            $jsonProgram = json_decode($item, TRUE);
 
-            $pid = $item["programID"];
-            $md5 = $item["md5"];
+            $pid = $jsonProgram["programID"];
+            $md5 = $jsonProgram["md5"];
 
             print "pid:$pid md5:$md5\n";
 
+            var_dump($jsonProgram);
+
             //$insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-            //                           "json"      => $item));
+            //                           "json"      => $jsonProgram));
 
-            $jsonProgram = json_decode($item, TRUE);
-
-            var_dump($jsonFileToProcess);
-            $tt=fgets(STDIN);
             exit;
 
 
