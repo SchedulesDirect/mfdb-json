@@ -288,50 +288,22 @@ function getSchedules($stationIDs)
 
         for ($i = 0; $i <= $totalChunks; $i++)
         {
-            $res = array();
-            $res["action"] = "get";
-            $res["object"] = "programs";
-            $res["randhash"] = $token;
-            $res["api"] = $api;
-
             printMSG("Retrieving chunk " . ($i + 1) . " of " . ($totalChunks + 1) . ".\n");
             $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
-            $res["request"] = $chunk;
+
+            $body["request"] = $chunk;
 
             $counter += count($chunk);
 
-            $response = sendRequest(json_encode($res));
+            $request = $client->post("programs", array("token" => $token), json_encode($body));
+            $response = $request->send();
 
-            $res = array();
-            $res = json_decode($response, TRUE);
+            $res = $response->json();
 
-            if ($res["response"] == "OK")
-            {
-                //printMSG("Downloading new and updated programs.\n");
+            $resBody = $response->getBody();
 
-                $fileName = $res["filename"];
-                $url = $res["URL"];
-                file_put_contents("$dlProgramTempDir/$fileName", file_get_contents($url));
-
-                $zipArchive = new ZipArchive();
-                $result = $zipArchive->open("$dlProgramTempDir/$fileName");
-                if ($result === TRUE)
-                {
-                    $zipArchive->extractTo("$dlProgramTempDir");
-                    $zipArchive->close();
-                }
-                else
-                {
-                    printMSG("FATAL: Could not open .zip file while extracting programIDs.\n");
-                    exit;
-                }
-            }
-            else
-            {
-                printMSG("Error getting programs:\n" . var_dump($res));
-                exit;
-            }
+            file_put_contents("$dlProgramTempDir/programs.$i.json", $resBody);
         }
     }
 
