@@ -355,7 +355,6 @@ function insertJSON(array $jsonProgramstoRetrieve)
     {
         $a = file($jsonFileToProcess);
         print "size of file is " . count($a) . "\n";
-        $tt = fgets(STDIN);
 
         while (list($dummy, $item) = each($a))
         //while (list($md5, $pid) = each($jsonProgramstoRetrieve))
@@ -364,9 +363,12 @@ function insertJSON(array $jsonProgramstoRetrieve)
             if ($counter % 100 == 0)
             {
                 printMSG("$counter / $total             \r");
-                $dbh->commit();
-                $dbh->beginTransaction();
+                //$dbh->commit();
+                //$dbh->beginTransaction();
             }
+
+            var_dump($item);
+            $tt = fgets(STDIN);
 
             $pid = $item["programID"];
             $md5 = $item["md5"];
