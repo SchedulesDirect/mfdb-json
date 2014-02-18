@@ -209,9 +209,6 @@ function getSchedules($stationIDs)
     global $dlSchedTempDir;
     global $maxProgramsToGet;
 
-    var_dump($stationIDs);
-
-
     $dbProgramCache = array();
 
     $downloadedStationIDs = array();
@@ -221,29 +218,17 @@ function getSchedules($stationIDs)
 
     $body["request"] = $stationIDs;
 
-    $body = json_encode($body);
-
-    print "body / request is \n";
-    var_dump($body);
-
-
-
-    $request = $client->post("schedules", array("token" => $token), $body);
+    $request = $client->post("schedules", array("token" => $token), json_encode($body));
     $response = $request->send();
 
     $res = array();
     $res = $response->json();
-
-    var_dump($res);
-    $tt = fgets(STDIN);
 
     if ($res["response"] == "OK")
     {
         /*
          * Mass re-write here; no more zip files; everything is line-oriented.
          */
-
-        //$fileName = $res["filename"];
 
         /*
          * Keep a copy for troubleshooting.
@@ -255,10 +240,8 @@ function getSchedules($stationIDs)
         {
             printMSG("Parsing $a\n");
             var_dump($a);
-            $tt=fgets(STDIN);
+            $tt = fgets(STDIN);
 
-
-            $a = json_decode(file_get_contents($f), TRUE);
             if (isset($a["stationID"]))
             {
                 $stationID = $a["stationID"];
