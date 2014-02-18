@@ -553,6 +553,7 @@ function insertSchedule()
      * Move the schedule into an associative array so that we can process the items per stationID.
      */
 
+    $scheduleJSON = array();
     while (list($key, $item) = each($scheduleTemp))
     {
         $stationID = $item["stationID"];
@@ -571,14 +572,20 @@ function insertSchedule()
         $stationID = $item["xmltvid"];
         printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
 
+        $decodedScheduleData = json_decode($scheduleJSON[$stationID], TRUE);
 
+        //$dbh->beginTransaction();
+
+        while (list($dummy, $schedule) = each($decodedScheduleData))
+        {
+            var_dump($schedule);
+        }
+        $tt = fgets(STDIN);
 
     }
 
-exit;
-    $scheduleJSON = json_decode($item, TRUE);
-    $stationID = $scheduleJSON["stationID"];
-    $dbh->beginTransaction();
+    exit;
+
 
     foreach ($scheduleJSON["programs"] as $v)
     {
