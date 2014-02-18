@@ -388,9 +388,6 @@ function insertJSON(array $jsonProgramstoRetrieve)
                     if (!isset($credit["personId"]))
                     {
                         printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
-                        var_dump($jsonProgram);
-                        $tt = fgets(STDIN);
-
                         continue;
                     }
                     $personID = $credit["personId"];
@@ -424,6 +421,11 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 {
                     $role = $credit["role"];
                     $personID = $credit["personId"];
+                    if (!isset($credit["personId"]))
+                    {
+                        printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
+                        continue;
+                    }
                     $name = $credit["name"];
 
                     if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
