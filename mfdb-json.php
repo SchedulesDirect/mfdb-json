@@ -550,14 +550,14 @@ function insertSchedule()
         {
             $scheduleJSON = json_decode($item, TRUE);
             $stationID = $scheduleJSON["stationID"];
+            $dbh->beginTransaction();
+
             foreach ($scheduleJSON["programs"] as $v)
             {
                 $chanID = $channel["chanid"];
                 $sourceID = $channel["sourceid"];
 
                 printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
-
-                $dbh->beginTransaction();
 
                 /*
                  * A few things need to be set to non-null, so declare them here. Also, quiets some warnings.
@@ -1101,7 +1101,6 @@ function insertSchedule()
                     }
                 }
             }
-
             $dbh->commit();
         }
 
