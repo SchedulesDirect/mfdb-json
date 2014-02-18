@@ -560,6 +560,8 @@ function insertSchedule()
         $tempJSON = json_decode($item, TRUE);
         $stationID = $tempJSON["stationID"];
         $scheduleJSON[$stationID] = $tempJSON;
+        var_dump($scheduleJSON[$stationID]);
+        $tt=fgets(STDIN);
     }
 
     /*
