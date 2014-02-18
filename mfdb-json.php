@@ -239,32 +239,18 @@ function getSchedules($stationIDs)
 
     $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-    print "size of f is " . count($f) . "\n";
-
-    foreach ($f as $v)
+    foreach ($f as $json)
     {
-        print "line is $v";
-        $tt = fgets(STDIN);
-
-        print "decoded is ";
-        $dec = json_decode($v, TRUE);
-        var_dump($dec);
-        $tt=fgets(STDIN);
-
-    }
-
-    $stationID = $res["stationID"];
-
-    print "parsing schedule for $stationID\n";
-
-    foreach ($res["programs"] as $a)
-    {
-        var_dump($a);
-        $tt = fgets(STDIN);
-
+        $item = json_decode($json, TRUE);
+        $stationID = $item["stationID"];
         $downloadedStationIDs[] = $stationID;
 
-        $serverScheduleMD5[$a["md5"]] = $a["programID"];
+        print "parsing schedule for $stationID\n";
+
+        foreach ($item["programs"] as $programData)
+        {
+            $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
+        }
     }
 
     printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.\n");
