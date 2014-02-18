@@ -564,7 +564,7 @@ function insertSchedule()
     VALUES(:chanid,:starttime,:system,:rating)");
 
     $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1
-    AND xmltvid != ''");
+    AND xmltvid != '' ORDER BY xmltvid");
     $getExistingChannels->execute();
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
