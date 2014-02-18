@@ -353,85 +353,76 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
     foreach (glob("$dlProgramTempDir/*.json") as $f)
     {
-        $a = json_decode(file_get_contents($f), TRUE);
+        $a = json_decode(file($f, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES), TRUE);
         var_dump($a);
         $tt = fgets(STDIN);
-    }
 
-
-    while (list($md5, $pid) = each($jsonProgramstoRetrieve))
-    {
-        $counter++;
-        if ($counter % 100 == 0)
+        while (list($md5, $pid) = each($jsonProgramstoRetrieve))
         {
-            printMSG("$counter / $total             \r");
-            $dbh->commit();
-            $dbh->beginTransaction();
-        }
-
-        $fileJSON = file_get_contents("$dlProgramTempDir/$pid.json.txt");
-
-        if ($fileJSON === FALSE)
-        {
-            printMSG("*** ERROR: Could not open file $dlProgramTempDir/$pid.json.txt\n");
-            continue;
-        }
-
-        $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-                                   "json"      => $fileJSON));
-
-        $jsonProgram = json_decode($fileJSON, TRUE);
-
-        if (json_last_error())
-        {
-            printMSG("*** ERROR: JSON decode error $dlProgramTempDir/$pid.json.txt\n");
-            printMSG("$fileJSON\n");
-            continue;
-        }
-
-        if (isset($jsonProgram["castAndCrew"]))
-        {
-            foreach ($jsonProgram["castAndCrew"] as $credit)
+            $counter++;
+            if ($counter % 100 == 0)
             {
-                $role = $credit["role"];
-                $personID = $credit["personID"];
-                $name = $credit["name"];
+                printMSG("$counter / $total             \r");
+                $dbh->commit();
+                $dbh->beginTransaction();
+            }
 
-                if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
-                {
-                    $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
-                }
+            $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
+                                       "json"      => $fileJSON));
 
-                if (!isset($peopleCacheMyth[$name]))
-                {
-                    $insertPersonMyth->execute(array("name" => $name));
-                    $id = $dbh->lastInsertId();
-                    $peopleCacheMyth[$name] = $id;
-                }
+            $jsonProgram = json_decode($fileJSON, TRUE);
 
-                if (!isset($creditCache["$personID-$pid-$role"]))
+            if (json_last_error())
+            {
+                printMSG("*** ERROR: JSON decode error $dlProgramTempDir/$pid.json.txt\n");
+                printMSG("$fileJSON\n");
+                continue;
+            }
+
+            if (isset($jsonProgram["castAndCrew"]))
+            {
+                foreach ($jsonProgram["castAndCrew"] as $credit)
                 {
-                    $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
-                                                   "role"     => $role));
-                    $creditCache["$personID-$pid-$role"] = 1;
+                    $role = $credit["role"];
+                    $personID = $credit["personID"];
+                    $name = $credit["name"];
+
+                    if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
+                    {
+                        $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
+                    }
+
+                    if (!isset($peopleCacheMyth[$name]))
+                    {
+                        $insertPersonMyth->execute(array("name" => $name));
+                        $id = $dbh->lastInsertId();
+                        $peopleCacheMyth[$name] = $id;
+                    }
+
+                    if (!isset($creditCache["$personID-$pid-$role"]))
+                    {
+                        $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
+                                                       "role"     => $role));
+                        $creditCache["$personID-$pid-$role"] = 1;
+                    }
                 }
             }
-        }
 
-        if (isset($jsonProgram["genres"]))
-        {
-            foreach ($jsonProgram["genres"] as $relevance => $genre)
+            if (isset($jsonProgram["genres"]))
             {
-                $insertProgramGenresSD->execute(array("pid"       => $pid,
-                                                      "relevance" => $relevance, "genre" => $genre));
+                foreach ($jsonProgram["genres"] as $relevance => $genre)
+                {
+                    $insertProgramGenresSD->execute(array("pid"       => $pid,
+                                                          "relevance" => $relevance, "genre" => $genre));
+                }
             }
-        }
 
-        if ($debug == FALSE)
-        {
-            unlink("$dlProgramTempDir/$pid.json.txt");
-        }
+            if ($debug == FALSE)
+            {
+                unlink("$dlProgramTempDir/$pid.json.txt");
+            }
 
+        }
     }
 
     if ($debug == FALSE)
