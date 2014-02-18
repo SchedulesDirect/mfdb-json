@@ -174,7 +174,7 @@ else
 printMSG("Status:$statusMessage\n");
 
 $globalStartTime = date("Y-m-d H:i:s", $globalStartTime);
-$get = date("Y-m-d H:i:s");
+$globalEndTime = date("Y-m-d H:i:s");
 
 printMSG("Global. Start Time:$globalStartTime\n");
 printMSG("Global. End Time:$globalEndTime\n");
