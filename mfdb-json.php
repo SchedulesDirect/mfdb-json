@@ -218,6 +218,9 @@ function getSchedules($stationIDs)
 
     $body["request"] = $stationIDs;
 
+    var_dump($body);
+
+
     $request = $client->post("schedules", array("token" => $token), json_encode($body));
     $response = $request->send();
 
@@ -233,11 +236,7 @@ function getSchedules($stationIDs)
 
     print "Writing to $dlSchedTempDir/schedule.json\n";
 
-    file_put_contents("$dlSchedTempDir/schedule.json", $response);
-
-    //print "res is\n\n";
-    //var_dump($res);
-    //$tt=fgets(STDIN);
+//    file_put_contents("$dlSchedTempDir/schedule.json", $response);
 
     $stationID = $res["stationID"];
 
@@ -245,26 +244,12 @@ function getSchedules($stationIDs)
 
     foreach ($res["programs"] as $a)
     {
-        printMSG("Parsing $a\n");
         var_dump($a);
         $tt = fgets(STDIN);
 
-        if (isset($a["stationID"]))
-        {
-            $stationID = $a["stationID"];
-            $downloadedStationIDs[] = $stationID;
+        $downloadedStationIDs[] = $stationID;
 
-            foreach ($a["programs"] as $v)
-            {
-                $serverScheduleMD5[$v["md5"]] = $v["programID"];
-            }
-        }
-        else
-        {
-            print "Received error response from Schedules Direct:\n";
-            print "{$a["message"]}\n";
-            $tt = fgets(STDIN);
-        }
+        $serverScheduleMD5[$a["md5"]] = $a["programID"];
     }
 
     printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.\n");
