@@ -226,6 +226,8 @@ function getSchedules($stationIDs)
 
     $res = $response->json();
 
+    $resBody = $response->getBody();
+
     /*
      * Mass re-write here; no more zip files; everything is line-oriented.
      */
@@ -236,7 +238,11 @@ function getSchedules($stationIDs)
 
     print "Writing to $dlSchedTempDir/schedule.json\n";
 
-//    file_put_contents("$dlSchedTempDir/schedule.json", $response);
+    file_put_contents("$dlSchedTempDir/schedule.json", $resBody);
+
+    var_dump($res);
+    $tt=fgets(STDIN);
+
 
     $stationID = $res["stationID"];
 
