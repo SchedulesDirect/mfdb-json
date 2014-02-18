@@ -231,20 +231,19 @@ function getSchedules($stationIDs)
      * Keep a copy for troubleshooting.
      */
 
+    print "Writing to $dlSchedTempDir/schedule.json\n";
+
     file_put_contents("$dlSchedTempDir/schedule.json", $response);
 
-    print "response is\n\n";
-    var_dump($response);
+    //print "res is\n\n";
+    //var_dump($res);
+    //$tt=fgets(STDIN);
 
-    $tt=fgets(STDIN);
-    print "res is\n\n";
-    var_dump($res);
-    $tt=fgets(STDIN);
+    $stationID = $res["stationID"];
 
+    print "parsing schedule for $stationID\n";
 
-
-
-    foreach ($res as $a)
+    foreach ($res["programs"] as $a)
     {
         printMSG("Parsing $a\n");
         var_dump($a);
