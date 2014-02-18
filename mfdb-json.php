@@ -385,7 +385,16 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 foreach ($jsonProgram["cast"] as $credit)
                 {
                     $role = $credit["role"];
+                    if (!isset($credit["personId"]))
+                    {
+                        printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
+                        var_dump($jsonProgram);
+                        $tt = fgets(STDIN);
+
+                        continue;
+                    }
                     $personID = $credit["personId"];
+
                     $name = $credit["name"];
 
                     if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
