@@ -300,8 +300,6 @@ function getSchedules($stationIDs)
                 json_encode($body));
             $response = $request->send();
 
-            $res = $response->json();
-
             $resBody = $response->getBody();
 
             file_put_contents("$dlProgramTempDir/programs.$i.json", $resBody);
@@ -349,9 +347,17 @@ function insertJSON(array $jsonProgramstoRetrieve)
     $total = count($jsonProgramstoRetrieve);
     printMSG("Performing inserts of JSON data.\n");
 
-    $dbh->beginTransaction();
-    reset($jsonProgramstoRetrieve);
-    while (list($md5, $pid) = each($jsonProgramstoRetrieve)) //foreach ($jsonProgramstoRetrieve as $md5 => $pid)
+//    $dbh->beginTransaction();
+
+    foreach (glob("$dlProgramTempDir/*.json") as $f)
+    {
+        $a = json_decode(file_get_contents($f), TRUE);
+        var_dump($a);
+        $tt = fgets(STDIN);
+    }
+
+
+    while (list($md5, $pid) = each($jsonProgramstoRetrieve))
     {
         $counter++;
         if ($counter % 100 == 0)
