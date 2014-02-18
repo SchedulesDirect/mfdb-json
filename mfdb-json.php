@@ -386,71 +386,93 @@ function insertJSON(array $jsonProgramstoRetrieve)
             $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
                                        "json"      => $item));
 
-            if (isset($jsonProgram["cast"]))
+            $skipPersonID = FALSE;
+
+            if (isset($jsonProgram["genres"]))
             {
-                foreach ($jsonProgram["cast"] as $credit)
+                $relevance = 0; // We're going to assume that at some point we might do something with relevance.
+                foreach ($jsonProgram["genres"] as $g)
                 {
-                    $role = $credit["role"];
-                    if (!isset($credit["personId"]))
+                    switch ($g)
                     {
-                        printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
-                        continue;
+                        case "Adults only":
+                        case "Erotic":
+                            $skipPersonID = TRUE;
+                            break;
                     }
-                    $personID = $credit["personId"];
-
-                    $name = $credit["name"];
-
-                    if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
-                    {
-                        $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
-                    }
-
-                    if (!isset($peopleCacheMyth[$name]))
-                    {
-                        $insertPersonMyth->execute(array("name" => $name));
-                        $id = $dbh->lastInsertId();
-                        $peopleCacheMyth[$name] = $id;
-                    }
-
-                    if (!isset($creditCache["$personID-$pid-$role"]))
-                    {
-                        $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
-                                                       "role"     => $role));
-                        $creditCache["$personID-$pid-$role"] = 1;
-                    }
+                    $insertProgramGenresSD->execute(array("pid"       => $pid,
+                                                          "relevance" => ++$relevance, "genre" => $g));
                 }
             }
 
-            if (isset($jsonProgram["crew"]))
+            if ($skipPersonID == FALSE)
             {
-                foreach ($jsonProgram["crew"] as $credit)
+                if (isset($jsonProgram["cast"]))
                 {
-                    $role = $credit["role"];
-                    if (!isset($credit["personId"]))
+                    foreach ($jsonProgram["cast"] as $credit)
                     {
-                        printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
-                        continue;
-                    }
-                    $personID = $credit["personId"];
-                    $name = $credit["name"];
+                        $role = $credit["role"];
+                        if (!isset($credit["personId"]))
+                        {
+                            printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
+                            continue;
+                        }
+                        $personID = $credit["personId"];
 
-                    if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
-                    {
-                        $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
-                    }
+                        $name = $credit["name"];
 
-                    if (!isset($peopleCacheMyth[$name]))
-                    {
-                        $insertPersonMyth->execute(array("name" => $name));
-                        $id = $dbh->lastInsertId();
-                        $peopleCacheMyth[$name] = $id;
-                    }
+                        if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
+                        {
+                            $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
+                        }
 
-                    if (!isset($creditCache["$personID-$pid-$role"]))
+                        if (!isset($peopleCacheMyth[$name]))
+                        {
+                            $insertPersonMyth->execute(array("name" => $name));
+                            $id = $dbh->lastInsertId();
+                            $peopleCacheMyth[$name] = $id;
+                        }
+
+                        if (!isset($creditCache["$personID-$pid-$role"]))
+                        {
+                            $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
+                                                           "role"     => $role));
+                            $creditCache["$personID-$pid-$role"] = 1;
+                        }
+                    }
+                }
+
+                if (isset($jsonProgram["crew"]))
+                {
+                    foreach ($jsonProgram["crew"] as $credit)
                     {
-                        $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
-                                                       "role"     => $role));
-                        $creditCache["$personID-$pid-$role"] = 1;
+                        $role = $credit["role"];
+                        if (!isset($credit["personId"]))
+                        {
+                            printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
+                            continue;
+                        }
+                        $personID = $credit["personId"];
+                        $name = $credit["name"];
+
+                        if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
+                        {
+                            $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
+                        }
+
+                        if (!isset($peopleCacheMyth[$name]))
+                        {
+                            $insertPersonMyth->execute(array("name" => $name));
+                            $id = $dbh->lastInsertId();
+                            $peopleCacheMyth[$name] = $id;
+                        }
+
+                        if (!isset($creditCache["$personID-$pid-$role"]))
+                        {
+                            $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
+                                                           "role"     => $role));
+                            $creditCache["$personID-$pid-$role"] = 1;
+                        }
                     }
                 }
             }
@@ -459,8 +481,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
             {
                 foreach ($jsonProgram["genres"] as $relevance => $genre)
                 {
-                    $insertProgramGenresSD->execute(array("pid"       => $pid,
-                                                          "relevance" => $relevance, "genre" => $genre));
+
                 }
             }
 
