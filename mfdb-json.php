@@ -550,7 +550,8 @@ function insertSchedule()
     }
 
     /*
-     * Move the schedule into an associative array so that we can process the items per stationID.
+     * Move the schedule into an associative array so that we can process the items per stationID. We're going to
+     * decode this once so that we're not doing it over and over again. May increase memory foootprint though.
      */
 
     $scheduleJSON = array();
@@ -573,28 +574,14 @@ function insertSchedule()
         $stationID = $item["xmltvid"];
         printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
 
-        //$decodedScheduleData = json_decode($scheduleJSON[$stationID], TRUE);
-
         //$dbh->beginTransaction();
 
         while (list($dummy, $schedule) = each($scheduleJSON[$stationID]))
         {
-            var_dump($schedule);
-        }
-        $tt = fgets(STDIN);
-    }
-
-    exit;
-
-
-    foreach ($scheduleJSON["programs"] as $v)
-    {
-        foreach ($existingChannels as $i)
-        {
-
             /*
              * A few things need to be set to non-null, so declare them here. Also, quiets some warnings.
              */
+
             $title = "";
             $ratingSystem = "";
             $rating = "";
@@ -614,7 +601,7 @@ function insertSchedule()
             $isFirst = 0;
             $isLast = 0;
 
-            $programID = $v["programID"];
+            $programID = $schedule["programID"];
             $getProgramInformation->execute(array("pid" => $programID));
             $programJSON = json_decode($getProgramInformation->fetchColumn(), TRUE);
 
@@ -624,9 +611,24 @@ function insertSchedule()
                 continue;
             }
 
-            $md5 = $v["md5"];
-            $air_datetime = $v["airDateTime"];
-            $duration = $v["duration"];
+            $md5 = $schedule["md5"];
+            $air_datetime = $schedule["airDateTime"];
+            $duration = $schedule["duration"];
+
+            print "pid:$programID md5:$md5 adt:$air_datetime $d:$duration\n";
+        }
+        $tt = fgets(STDIN);
+    }
+
+    exit;
+
+
+    foreach ($scheduleJSON["programs"] as $v)
+    {
+        foreach ($existingChannels as $i)
+        {
+
+
 
             $programStartTimeMyth = str_replace("T", " ", $air_datetime);
             $programStartTimeMyth = rtrim($programStartTimeMyth, "Z");
