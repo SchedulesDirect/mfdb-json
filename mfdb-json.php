@@ -231,7 +231,18 @@ function getSchedules($stationIDs)
      * Keep a copy for troubleshooting.
      */
 
-    file_put_contents("$dlSchedTempDir/schedule.json", $res);
+    file_put_contents("$dlSchedTempDir/schedule.json", $response);
+
+    print "response is\n\n";
+    var_dump($response);
+
+    $tt=fgets(STDIN);
+    print "res is\n\n";
+    var_dump($res);
+    $tt=fgets(STDIN);
+
+
+
 
     foreach ($res as $a)
     {
