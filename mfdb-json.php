@@ -19,7 +19,7 @@ require_once "functions.php";
 use Guzzle\Http\Client;
 
 $isBeta = TRUE;
-$debug = FALSE;
+$debug = TRUE;
 $quiet = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
@@ -378,7 +378,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
             }
 
             $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-                                       "json"      => $jsonProgram));
+                                       "json"      => $item));
 
             if (isset($jsonProgram["cast"]))
             {
@@ -449,7 +449,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
             if ($debug == FALSE)
             {
-                unlink("$dlProgramTempDir/$pid.json.txt");
+                unlink("$dlProgramTempDir/$jsonFileToProcess");
             }
         }
     }
