@@ -351,13 +351,14 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
 //    $dbh->beginTransaction();
 
-    foreach (glob("$dlProgramTempDir/*.json") as $f)
+    foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
     {
-        $a = json_decode(file($f, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES), TRUE);
-        var_dump($a);
+        $a = file($jsonFileToProcess);
+        print "size of file is " . count($a) . "\n";
         $tt = fgets(STDIN);
 
-        while (list($md5, $pid) = each($jsonProgramstoRetrieve))
+        while (list($dummy, $item) = each($a))
+        //while (list($md5, $pid) = each($jsonProgramstoRetrieve))
         {
             $counter++;
             if ($counter % 100 == 0)
@@ -367,15 +368,25 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 $dbh->beginTransaction();
             }
 
-            $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-                                       "json"      => $fileJSON));
+            $pid = $item["programID"];
+            $md5 = $item["md5"];
 
-            $jsonProgram = json_decode($fileJSON, TRUE);
+            print "pid:$pid md5:$md5\n";
+
+            //$insertJSON->execute(array("programID" => $pid, "md5" => $md5,
+            //                           "json"      => $item));
+
+            $jsonProgram = json_decode($item, TRUE);
+
+            var_dump($jsonFileToProcess);
+            $tt=fgets(STDIN);
+            exit;
+
 
             if (json_last_error())
             {
-                printMSG("*** ERROR: JSON decode error $dlProgramTempDir/$pid.json.txt\n");
-                printMSG("$fileJSON\n");
+                printMSG("*** ERROR: JSON decode error $dlProgramTempDir/$jsonFileToProcess - $pid\n");
+                printMSG(print_r($item, TRUE));
                 continue;
             }
 
