@@ -221,51 +221,41 @@ function getSchedules($stationIDs)
     $request = $client->post("schedules", array("token" => $token), json_encode($body));
     $response = $request->send();
 
-    $res = array();
     $res = $response->json();
 
-    if ($res["response"] == "OK")
+    /*
+     * Mass re-write here; no more zip files; everything is line-oriented.
+     */
+
+    /*
+     * Keep a copy for troubleshooting.
+     */
+
+    file_put_contents("$dlSchedTempDir/schedule.json", $res);
+
+    foreach ($res as $a)
     {
-        /*
-         * Mass re-write here; no more zip files; everything is line-oriented.
-         */
+        printMSG("Parsing $a\n");
+        var_dump($a);
+        $tt = fgets(STDIN);
 
-        /*
-         * Keep a copy for troubleshooting.
-         */
-
-        file_put_contents("$dlSchedTempDir/schedule.json", $res);
-
-        foreach ($res as $a)
+        if (isset($a["stationID"]))
         {
-            printMSG("Parsing $a\n");
-            var_dump($a);
-            $tt = fgets(STDIN);
+            $stationID = $a["stationID"];
+            $downloadedStationIDs[] = $stationID;
 
-            if (isset($a["stationID"]))
+            foreach ($a["programs"] as $v)
             {
-                $stationID = $a["stationID"];
-                $downloadedStationIDs[] = $stationID;
-
-                foreach ($a["programs"] as $v)
-                {
-                    $serverScheduleMD5[$v["md5"]] = $v["programID"];
-                }
-            }
-            else
-            {
-                print "Received error response from Schedules Direct:\n";
-                print "{$a["message"]}\n";
-                $tt = fgets(STDIN);
+                $serverScheduleMD5[$v["md5"]] = $v["programID"];
             }
         }
+        else
+        {
+            print "Received error response from Schedules Direct:\n";
+            print "{$a["message"]}\n";
+            $tt = fgets(STDIN);
+        }
     }
-    else
-    {
-        printMSG("FATAL: Could not open zip file.\n");
-        exit;
-    }
-
 
     printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.\n");
     printMSG("Retrieving existing MD5 values.\n");
