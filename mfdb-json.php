@@ -236,6 +236,9 @@ function getSchedules($stationIDs)
      * Keep a copy for troubleshooting.
      */
 
+    var_dump($resBody);
+    $tt=fgets(STDIN);
+
     print "Writing to $dlSchedTempDir/schedule.json\n";
 
     file_put_contents("$dlSchedTempDir/schedule.json", $resBody);
