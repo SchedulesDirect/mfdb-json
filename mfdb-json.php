@@ -550,24 +550,15 @@ function insertSchedule()
         {
             $scheduleJSON = json_decode($item, TRUE);
             $stationID = $scheduleJSON["stationID"];
-            foreach($scheduleJSON["programs"] as $program)
+            foreach ($scheduleJSON["programs"] as $v)
             {
-                var_dump($program);
-            }
-            exit;
+                $chanID = $channel["chanid"];
+                $sourceID = $channel["sourceid"];
 
-            $chanID = $channel["chanid"];
-            $sourceID = $channel["sourceid"];
-            $stationID = $channel["xmltvid"];
+                printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
 
-            printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
+                $dbh->beginTransaction();
 
-            $a = json_decode(file_get_contents("$dlSchedTempDir/sched_$stationID.json.txt"), TRUE);
-
-            $dbh->beginTransaction();
-
-            foreach ($a["programs"] as $v)
-            {
                 /*
                  * A few things need to be set to non-null, so declare them here. Also, quiets some warnings.
                  */
