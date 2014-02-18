@@ -349,29 +349,26 @@ function insertJSON(array $jsonProgramstoRetrieve)
     $total = count($jsonProgramstoRetrieve);
     printMSG("Performing inserts of JSON data.\n");
 
-//    $dbh->beginTransaction();
+    $dbh->beginTransaction();
 
     foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
     {
         $a = file($jsonFileToProcess);
-        print "size of file is " . count($a) . "\n";
 
-        while (list($dummy, $item) = each($a))
-        //while (list($md5, $pid) = each($jsonProgramstoRetrieve))
+        while (list($key, $item) = each($a))
         {
             $counter++;
             if ($counter % 100 == 0)
             {
                 printMSG("$counter / $total             \r");
-                //$dbh->commit();
-                //$dbh->beginTransaction();
+                $dbh->commit();
+                $dbh->beginTransaction();
             }
 
             $jsonProgram = json_decode($item, TRUE);
 
             $pid = $jsonProgram["programID"];
             $md5 = $jsonProgram["md5"];
-
 
             if (json_last_error())
             {
@@ -380,9 +377,8 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 continue;
             }
 
-            //$insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-            //                           "json"      => $jsonProgram));
-
+            $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
+                                       "json"      => $jsonProgram));
 
             if (isset($jsonProgram["cast"]))
             {
@@ -455,7 +451,6 @@ function insertJSON(array $jsonProgramstoRetrieve)
             {
                 unlink("$dlProgramTempDir/$pid.json.txt");
             }
-
         }
     }
 
