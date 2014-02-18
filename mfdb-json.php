@@ -548,7 +548,8 @@ function insertSchedule()
 
         while (list($key, $item) = each($a))
         {
-            var_dump($item);
+            $scheduleJSON = json_decode($item, TRUE);
+            var_dump($scheduleJSON);
             $tt = fgets(STDIN);
             exit;
 
