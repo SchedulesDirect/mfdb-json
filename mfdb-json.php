@@ -420,12 +420,12 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 foreach ($jsonProgram["crew"] as $credit)
                 {
                     $role = $credit["role"];
-                    $personID = $credit["personId"];
                     if (!isset($credit["personId"]))
                     {
                         printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
                         continue;
                     }
+                    $personID = $credit["personId"];
                     $name = $credit["name"];
 
                     if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
