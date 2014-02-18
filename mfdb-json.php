@@ -589,6 +589,10 @@ function insertSchedule()
              * Pre-declare what we'll be using to quiet warning about unused variables.
              */
 
+            $isNew = FALSE;
+            $previouslyshown = FALSE;
+
+
             $title = "";
             $ratingSystem = "";
             $rating = "";
@@ -802,16 +806,20 @@ function insertSchedule()
              * Shouldn't be "new" and "repeat"
              */
 
-            if (isset($schedule["repeat"]) AND !$isNew)
+            if (isset($schedule["repeat"]))
             {
-                $isNew = FALSE;
-                $previouslyshown = TRUE;
-            }
-            else
-            {
-                printMSG("*** WARNING pid:$programID has 'new' and 'repeat' set. Open SD ticket:\n");
-                printMSG(print_r($schedule, TRUE) . "\n");
-                $errorWarning = TRUE;
+                if ($isNew)
+                {
+                    printMSG("*** WARNING sid:$stationID pid:$programID has 'new' and 'repeat' set. Open SD ticket:\n");
+                    printMSG(print_r($schedule, TRUE) . "\n");
+                    $errorWarning = TRUE;
+                    $tt=fgets(STDIN);
+                }
+                else
+                {
+                    $isNew = FALSE;
+                    $previouslyshown = TRUE;
+                }
             }
 
             if (isset($schedule["cableInTheClassroom"]))
@@ -1064,50 +1072,50 @@ function insertSchedule()
                 var_dump($programJSON);
             }
 
-/* Bypass the SD-specific insert for now; might be easier to just parse the JSON from the programCache.
-            try
-            {
-                $insertScheduleSD->execute(array(
-                    "stationID"           => $stationID,
-                    "programID"           => $programID,
-                    "md5"                 => $md5,
-                    "air_datetime"        => $air_datetime,
-                    "duration"            => $duration,
-                    "previouslyshown"     => $previouslyshown,
-                    "closecaptioned"      => $isClosedCaption,
-                    "partnumber"          => $partNumber,
-                    "parttotal"           => $numberOfParts,
-                    "first"               => $isFirst,
-                    "last"                => $isLast,
-                    "dvs"                 => $dvs,
-                    "new"                 => $isNew,
-                    "educational"         => $isEducational,
-                    "hdtv"                => $isHDTV,
-                    "3d"                  => $is3d,
-                    "letterbox"           => $isLetterboxed,
-                    "stereo"              => $isStereo,
-                    "dolby"               => $dolbyType,
-                    "dubbed"              => $dubbed,
-                    "dubLanguage"         => $dubbedLanguage,
-                    "subtitled"           => $isSubtitled,
-                    "subtitleLanguage"    => $subtitledLanguage,
-                    "sap"                 => $sap,
-                    "sapLanguage"         => $sapLanguage,
-                    "programLanguage"     => $programLanguage,
-                    "ratingSystem"        => $ratingSystem,
-                    "tvRating"            => $rating,
-                    "dialogRating"        => $dialogRating,
-                    "languageRating"      => $languageRating,
-                    "sexualContentRating" => $sexRating,
-                    "violenceRating"      => $violenceRating,
-                    "fvRating"            => $fvRating));
-            } catch (PDOException $e)
-            {
-                print "Exception: " . $e->getMessage();
-                $debug = TRUE;
-                var_dump($programJSON);
-            }
-*/
+            /* Bypass the SD-specific insert for now; might be easier to just parse the JSON from the programCache.
+                        try
+                        {
+                            $insertScheduleSD->execute(array(
+                                "stationID"           => $stationID,
+                                "programID"           => $programID,
+                                "md5"                 => $md5,
+                                "air_datetime"        => $air_datetime,
+                                "duration"            => $duration,
+                                "previouslyshown"     => $previouslyshown,
+                                "closecaptioned"      => $isClosedCaption,
+                                "partnumber"          => $partNumber,
+                                "parttotal"           => $numberOfParts,
+                                "first"               => $isFirst,
+                                "last"                => $isLast,
+                                "dvs"                 => $dvs,
+                                "new"                 => $isNew,
+                                "educational"         => $isEducational,
+                                "hdtv"                => $isHDTV,
+                                "3d"                  => $is3d,
+                                "letterbox"           => $isLetterboxed,
+                                "stereo"              => $isStereo,
+                                "dolby"               => $dolbyType,
+                                "dubbed"              => $dubbed,
+                                "dubLanguage"         => $dubbedLanguage,
+                                "subtitled"           => $isSubtitled,
+                                "subtitleLanguage"    => $subtitledLanguage,
+                                "sap"                 => $sap,
+                                "sapLanguage"         => $sapLanguage,
+                                "programLanguage"     => $programLanguage,
+                                "ratingSystem"        => $ratingSystem,
+                                "tvRating"            => $rating,
+                                "dialogRating"        => $dialogRating,
+                                "languageRating"      => $languageRating,
+                                "sexualContentRating" => $sexRating,
+                                "violenceRating"      => $violenceRating,
+                                "fvRating"            => $fvRating));
+                        } catch (PDOException $e)
+                        {
+                            print "Exception: " . $e->getMessage();
+                            $debug = TRUE;
+                            var_dump($programJSON);
+                        }
+            */
             if (isset($programJSON["castAndCrew"]))
             {
                 foreach ($programJSON["castAndCrew"] as $credit)
