@@ -296,7 +296,8 @@ function getSchedules($stationIDs)
 
             $counter += count($chunk);
 
-            $request = $client->post("programs", array("token" => $token), json_encode($body));
+            $request = $client->post("programs", array("token" => $token, "Accept-Encoding" => "deflate"),
+                json_encode($body));
             $response = $request->send();
 
             $res = $response->json();
