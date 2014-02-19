@@ -11,7 +11,7 @@
 $isBeta = TRUE;
 $debug = TRUE;
 $done = FALSE;
-$schedulesDirectLineups  = array();
+$schedulesDirectLineups = array();
 $sdStatus = "";
 $username = "";
 $password = "";
@@ -274,11 +274,15 @@ function updateChannelTable($sourceID)
          * lineup file.
          */
 
-/*
- * TODO Check if we need to fix chanid for Antenna lineups.
- */
+        /*
+         * TODO Check if we need to fix chanid for Antenna lineups.
+         */
 
         $transport = "Antenna";
+
+        print "Setting transport to antenna\n";
+
+
     }
 
     if ($json["metadata"]["transport"] == "Cable")
@@ -329,24 +333,33 @@ function updateChannelTable($sourceID)
     {
         $stationID = $mapArray["stationID"];
 
+        print "sid:$stationID\n";
+
         if ($transport == "Antenna")
         {
+            print "Processing Antenna section.\n";
+
             $freqid = $mapArray["uhfVhf"];
             if (isset($mapArray["atscMajor"]))
             {
                 $atscMajor = $mapArray["atscMajor"];
                 $atscMinor = $mapArray["atscMinor"];
                 $channum = "$atscMajor.$atscMinor";
+
+                print "ATSC f:$freqid channum:$channum\n";
+
+
                 $updateChannelTableATSC->execute(array("channum"   => $channum, "sid" => $stationID,
                                                        "atscMajor" => $atscMajor,
                                                        "atscMinor" => $atscMinor));
             }
             else
             {
+
                 $channum = $freqid;
+                print "Analog f:$freqid channum:$channum\n";
                 $updateChannelTableAnalog->execute(array("channum" => ltrim($channum, "0"), "sid" => $stationID,
                                                          "freqID"  => $freqid));
-
             }
         }
 
@@ -675,8 +688,8 @@ function updateLocalLineupCache(array $updatedLineupsToRefresh)
          */
         $stmt = $dbh->prepare("REPLACE INTO SDheadendCache(lineup,json,modified) VALUES(:lineup,:json,:modified)");
 
-        $stmt->execute(array("lineup"   => $k, "modified" => $updatedLineupsToRefresh[$k],
-                             "json" => json_encode($res)));
+        $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
+                             "json"   => json_encode($res)));
     }
 }
 
@@ -722,7 +735,7 @@ function displayLocalVideoSources()
 function getSchedulesDirectLineups()
 {
     global $sdStatus;
-    $schedulesDirectLineups  = array();
+    $schedulesDirectLineups = array();
 
     foreach ($sdStatus["lineups"] as $hv)
     {
