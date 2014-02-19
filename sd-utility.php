@@ -280,10 +280,6 @@ function updateChannelTable($sourceID)
          */
 
         $transport = "Antenna";
-
-        print "Setting transport to antenna\n";
-
-
     }
 
     if ($json["metadata"]["transport"] == "Cable")
