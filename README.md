@@ -3,7 +3,9 @@ mfdb-json
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.02, 2014-01-17
+v0.03, 2014-02-18
+Robert Kulagowski
+grabber@schedulesdirect.org
 
 This program runs as a replacement to mythfilldatabase (for now) and
 downloads data from Schedules Direct using the new JSON format.
@@ -20,8 +22,9 @@ Features:
 - Additional downloaded metadata regarding programs relating to content advisories.
 - Season and Episode information.
 - Logos, fanart, etc.
-- Full support for United States, Canada, Great Britain. Additional
-  countries (Mexico, Latin America, Brazil, Carribean) coming online.
+- Full support for United States, Canada, Great Britain.
+- See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2530 for the
+  complete list of countries with data.
 
 Installation
 ============
@@ -41,9 +44,7 @@ Install Composer:
 
 curl -sS https://getcomposer.org/installer | php
 
-Add Guzzle as a dependency:
-
-php composer.phar require guzzle/guzzle:~3.7
+php composer.phar install
 
 Configuration
 =============
@@ -55,7 +56,7 @@ skip to the next section.
 3. Recording Profiles
 7. Storage Directories
 
-Do not configure Video Sources or Input Connections.
+Do not configure Video Sources or Input Connections!
 
 Exit mythtv-setup. You will be prompted that you haven't set your start
 channel.  Select "No, I know what I'm doing."
@@ -72,83 +73,299 @@ Add your headend to your Schedules Direct JSON-service account.  (Your
 existing Schedules Direct information for the XML service isn't
 automatically copied over, and the service is running on different hosts.)
 
+---
+
+sd-utility.php utility program v0.05/2014-02-17
+Attempting to connect to database.
+Using beta server.
+Schedules Direct username:rkulagow@rocketmail.com
+Schedules Direct password:comp8sync
+Logging into Schedules Direct.
+
+Status messages from Schedules Direct:
+Server: AWS-SD-web.1
+Last data refresh: 2014-02-18T20:39:29Z
+Account expires: 2014-06-28T05:16:29Z
+Max number of headends for your account: 16
+Next suggested connect time: 2014-02-19T15:41:35Z
+
+WARNING: *** No lineups configured at Schedules Direct. ***
+
+WARNING: *** No videosources configured in MythTV. ***
+
+Schedules Direct functions:
+1 Add a lineup to your account at Schedules Direct
+2 Delete a lineup from your account at Schedules Direct
+3 Acknowledge a message
+4 Print a channel table for a lineup
+
+MythTV functions:
+A to Add a new videosource to MythTV
+D to Delete a videosource in MythTV
+L to Link a videosource to a lineup at SD
+R to refresh a videosource with new lineup information
+Q to Quit
+>1
+Three-character ISO-3166-1 alpha3 country code:>USA
+Enter postal code:>60030
+
+headend: 4DTV
+location: USA
+        name: 4DTV
+        Lineup: USA-4DTV-DEFAULT
+
+headend: AFN
+location: USA
+        name: AFN Satellite
+        Lineup: USA-AFN-DEFAULT
+
+headend: C-BAND
+location: USA
+        name: C-Band
+        Lineup: USA-C-BAND-DEFAULT
+
+headend: DISH602
+location: Chicago
+        name: DISH Chicago
+        Lineup: USA-DISH602-DEFAULT
+
+headend: DITV
+location: USA
+        name: DIRECTV
+        Lineup: USA-DITV-DEFAULT
+
+headend: DITV602
+location: Chicago
+        name: DIRECTV Chicago
+        Lineup: USA-DITV602-DEFAULT
+
+headend: ECHOST
+location: USA
+        name: DISH Network
+        Lineup: USA-ECHOST-DEFAULT
+
+headend: GLOBCST
+location: USA
+        name: Globecast World TV
+        Lineup: USA-GLOBCST-DEFAULT
+
+headend: IL57303
+location: Lake Forest
+        name: Comcast Waukegan/Lake Forest Area - Digital
+        Lineup: USA-IL57303-X
+
+headend: IL61078
+location: Grayslake
+        name: Saddlebrook Farms - Cable
+        Lineup: USA-IL61078-DEFAULT
+
+headend: IL63063
+location: Mchenry
+        name: Comcast McHenry & Fox Areas - Digital
+        Lineup: USA-IL63063-X
+
+headend: IL63463
+location: Carpentersville
+        name: Comcast Algonquin/Elgin Areas - Digital
+        Lineup: USA-IL63463-X
+
+headend: IL67050
+location: Chicago
+        name: AT&T U-verse TV - Digital
+        Lineup: USA-IL67050-X
+
+headend: RELAYTV
+location: USA
+        name: RELAYTV
+        Lineup: USA-RELAYTV-DEFAULT
+
+headend: 60030
+location: 60030
+        name: Antenna
+        Lineup: USA-OTA-60030
+
+Lineup to add>
+
+---
+
+Notice that in this particular country / postal code, there are headends,
+and there are lineups within that headend, but there aren't multiple lineups
+in a headend - all devices are either "-DEFAULT" or "-X".
+
+You may see this:
+
+Three-character ISO-3166-1 alpha3 country code:>USA
+Enter postal code:>90210
+
+headend: 4DTV
+location: USA
+        name: 4DTV
+        Lineup: USA-4DTV-DEFAULT
+
+
+(snip)
+
+headend: CA00053
+location: Beverly Hills
+        name: Time Warner Cable - Cable
+        Lineup: USA-CA00053-DEFAULT
+        name: Time Warner Cable - Digital
+        Lineup: USA-CA00053-X
+
+headend: CA61222
+location: Beverly Hills
+        name: Mulholland Estates - Cable
+        Lineup: USA-CA61222-DEFAULT
+
+headend: CA66511
+location: Los Angeles
+        name: AT&T U-verse TV - Digital
+        Lineup: USA-CA66511-X
+
+headend: CA67309
+location: Westchester
+        name: Time Warner Cable - Cable
+        Lineup: USA-CA67309-DEFAULT
+        name: Time Warner Cable - Digital
+        Lineup: USA-CA67309-X
+
+headend: CA67310
+location: Eagle Rock
+        name: Time Warner Cable City of Los Angeles - Cable
+        Lineup: USA-CA67310-DEFAULT
+        name: Time Warner Cable City of Los Angeles - Digital
+        Lineup: USA-CA67310-X
+
+(etc)
+
+Notice that headend CA00053 has multiple lineups, as does CA67309 and CA67310.
+
+You can encounter this overseas:
+Three-character ISO-3166-1 alpha3 country code:>GBR
+Enter postal code:>W2
+
+headend: 0000218
+location: Watford
+        name: Virgin Media Lewisham - Cable
+        Lineup: GBR-0000218-DEFAULT
+        name: Virgin Media Lewisham - Digital
+        Lineup: GBR-0000218-X
+        name: Virgin Media Lewisham - Cable
+        Lineup: GBR-0000218-Y
+
+headend: 0001122
+location: London
+        name: Virgin Media Westminster - Cable
+        Lineup: GBR-0001122-DEFAULT
+        name: Virgin Media Westminster - Digital
+        Lineup: GBR-0001122-X
+        name: Virgin Media Westminster - Cable
+        Lineup: GBR-0001122-Y
+
+(snip)
+
+In any case, the script will ask you which lineup to add.
+
+Lineup to add>USA-IL57303-X
+Message from server: Added lineup.
+
+Status messages from Schedules Direct:
+Server: AWS-SD-web.1
+Last data refresh: 2014-02-18T20:39:29Z
+Account expires: 2014-06-28T05:16:29Z
+Max number of headends for your account: 16
+Next suggested connect time: 2014-02-20T00:29:56Z
+The following lineups are in your account at Schedules Direct:
+
+┌───────────────┬────────────────────┬─────────────────────────┐
+│Lineup         │Last updated        │Update Available?        │
+├───────────────┼────────────────────┼─────────────────────────┤
+│USA-IL57303-X  │2014-02-16T06:49:01Z│                         │
+└───────────────┴────────────────────┴─────────────────────────┘
+
+Repeat this process until you have added the necessary lineups to your
+account.
+
 Create a videosource
 --------------------
 
-sd-utility.php utility program v0.03/2014-01-17
+sd-utility.php utility program v0.05/2014-02-17
 Attempting to connect to database.
 Using beta server.
 Logging into Schedules Direct.
 
 Status messages from Schedules Direct:
-MessageID: 1234567890123456789012 : 2013-11-15T19:49:53Z : This is a test of the message function.
-Server: AWS-micro.1
-Last data refresh: 2014-01-17T16:57:11Z
+Server: AWS-SD-web.1
+Last data refresh: 2014-02-18T20:39:29Z
 Account expires: 2014-06-28T05:16:29Z
-Max number of headends for your account: 3
-Next suggested connect time: 2014-01-18T12:34:47Z
-The following headends are in your account at Schedules Direct:
+Max number of headends for your account: 16
+Next suggested connect time: 2014-02-19T20:28:24Z
+The following lineups are in your account at Schedules Direct:
 
-IL57303  Last Updated: 2014-01-07T20:54:01Z
-PC:60030         Last Updated: 2014-01-07T22:51:18Z
+┌───────────────┬────────────────────┬─────────────────────────┐
+│Lineup         │Last updated        │Update Available?        │
+├───────────────┼────────────────────┼─────────────────────────┤
+│USA-IL57303-X  │2014-02-16T06:49:01Z│                         │
+├───────────────┼────────────────────┼─────────────────────────┤
+│USA-OTA-60030  │2014-02-18T17:36:22Z│                         │
+└───────────────┴────────────────────┴─────────────────────────┘
 
 WARNING: *** No videosources configured in MythTV. ***
 
 Schedules Direct functions:
-1 Add a headend to account at Schedules Direct
-2 Delete a headend from account at Schedules Direct
+1 Add a lineup to your account at Schedules Direct
+2 Delete a lineup from your account at Schedules Direct
 3 Acknowledge a message
-4 Print a channel lineup for a headend
+4 Print a channel table for a lineup
 
 MythTV functions:
 A to Add a new videosource to MythTV
 D to Delete a videosource in MythTV
-L to Link a videosource to a headend at SD
+L to Link a videosource to a lineup at SD
 R to refresh a videosource with new lineup information
 Q to Quit
 >a
 Adding new videosource
 
-Name:>SD JSON
+Name:>Comcast
+
+(status snipped)
+
+Existing sources in MythTV:
+sourceid: 5     name: Comcast       Schedules Direct lineup:
+
 
 =====================================
 
 Now that we've got a videosource configured, you have to link the
-videosource to the headend you've added to your account.
-
-Status messages from Schedules Direct:
-MessageID: 1234567890123456789012 : 2013-11-15T19:49:53Z : This is a test of the message function.
-Server: AWS-micro.1
-Last data refresh: 2014-01-17T16:57:11Z
-Account expires: 2014-06-28T05:16:29Z
-Max number of headends for your account: 3
-Next suggested connect time: 2014-01-18T02:24:00Z
-The following headends are in your account at Schedules Direct:
-
-IL57303  Last Updated: 2014-01-07T20:54:01Z
-PC:60030         Last Updated: 2014-01-07T22:51:18Z
+videosource to the lineup you've added to your account.
 
 Existing sources in MythTV:
-sourceid: 1     name: SD JSON   lineupid:
+sourceid: 5     name: Comcast       Schedules Direct lineup:
 
 Schedules Direct functions:
-1 Add a headend to account at Schedules Direct
-2 Delete a headend from account at Schedules Direct
+1 Add a lineup to your account at Schedules Direct
+2 Delete a lineup from your account at Schedules Direct
 3 Acknowledge a message
-4 Print a channel lineup for a headend
+4 Print a channel table for a lineup
 
 MythTV functions:
 A to Add a new videosource to MythTV
 D to Delete a videosource in MythTV
-L to Link a videosource to a headend at SD
+L to Link a videosource to a lineup at SD
 R to refresh a videosource with new lineup information
 Q to Quit
->l
+
+>L
 Linking Schedules Direct headend to sourceid
 
-sourceid:>1
-lineupid:>IL57303
-Your headend has only one devicetype: X
+MythTV sourceid:>5
+Schedules Direct lineup:>USA-IL57303-X
+
+(status snipped)
+
+Existing sources in MythTV:
+sourceid: 5     name: Comcast       Schedules Direct lineup: USA-IL57303-X
 
 =====================================
 
@@ -156,38 +373,11 @@ Once that's done, you'll need to download the channel mapping using the "R"
 function.  This is also done whenever the utility program tells you that
 there's an update available to the headend.
 
-Status messages from Schedules Direct:
-MessageID: 1234567890123456789012 : 2013-11-15T19:49:53Z : This is a test of the message function.
-Server: AWS-micro.1
-Last data refresh: 2014-01-17T16:57:11Z
-Account expires: 2014-06-28T05:16:29Z
-Max number of headends for your account: 3
-Next suggested connect time: 2014-01-18T09:46:15Z
-The following headends are in your account at Schedules Direct:
+(status deleted)
 
-IL57303  Last Updated: 2014-01-07T20:54:01Z
-PC:60030         Last Updated: 2014-01-07T22:51:18Z
-
-Existing sources in MythTV:
-sourceid: 1     name: SD JSON   lineupid: IL57303:X
-
-Schedules Direct functions:
-1 Add a headend to account at Schedules Direct
-2 Delete a headend from account at Schedules Direct
-3 Acknowledge a message
-4 Print a channel lineup for a headend
-
-MythTV functions:
-A to Add a new videosource to MythTV
-D to Delete a videosource in MythTV
-L to Link a videosource to a headend at SD
-R to refresh a videosource with new lineup information
-Q to Quit
->r
-lineupid:>IL57303
-Headend update for IL57303
-Apply to sourceid:>1
-Updating channel table for sourceid:1
+>R
+Apply to sourceid:>5
+Updating channel table for sourceid:5
 
 Quit out of the utility program.
 
@@ -209,46 +399,51 @@ Exit mythtv-setup
 
 Run the mfdb-json.php script to retrieve the data.
 
-20:45:28:mfdb-json.php developer grabber v0.06/2014-01-17
-20:45:28:Temp directory for Schedules is /tmp/mfdbN6mfYN
-20:45:28:Temp directory for Programs is /tmp/mfdbaziI7w
-20:45:28:Connecting to MythTV database.
-20:45:28:Using beta server.
-20:45:28:Retrieving list of channels to download.
-20:45:28:Logging into Schedules Direct.
-20:45:29:Retrieving server status message.
-20:45:29:MessageID:1234567890123456789012 : 2013-11-15T19:49:53Z : This is a test of the message function.
-20:45:29:Server: AWS-micro.1
-20:45:29:Last data refresh: 2014-01-17T16:57:11Z
-20:45:29:Account expires: 2014-06-28T05:16:29Z
-20:45:29:Max number of headends for your account: 3
-20:45:29:Next suggested connect time: 2014-01-17T22:24:28Z
-20:45:29:Sending schedule request.
-20:45:58:Parsing /tmp/mfdbN6mfYN/sched_10021.json.txt
-20:45:58:Parsing /tmp/mfdbN6mfYN/sched_10035.json.txt
+00:00:49:mfdb-json.php developer grabber v0.07/2014-02-16
+00:00:49:Temp directory for Schedules is /tmp/mfdbo0eoW0
+00:00:49:Temp directory for Programs is /tmp/mfdbRHPKAw
+00:00:49:Connecting to MythTV database.
+00:00:49:Using beta server.
+00:00:49:Retrieving list of channels to download.
+00:00:49:Logging into Schedules Direct.
+00:00:49:Retrieving server status message.
+00:00:49:Server: AWS-SD-web.1
+00:00:49:Last data refresh: 2014-02-18T20:39:29Z
+00:00:49:Account expires: 2014-06-28T05:16:29Z
+00:00:49:Max number of lineups for your account: 16
+00:00:49:Next suggested connect time: 2014-02-19T08:36:44Z
+00:00:49:Sending schedule request.
+00:01:19:There are 32263 programIDs in the upcoming schedule.
+00:01:19:Retrieving existing MD5 values.
+00:01:19:Need to download 247 new or updated programs.
+00:01:19:Maximum programs we're downloading per call: 2000
+00:01:19:Retrieving chunk 1 of 1.
+00:01:20:Performing inserts of JSON data.
+00:01:21:100 / 247
+00:01:21:200 / 247
+00:01:22:Completed local database program updates.
+00:01:22:Inserting schedules.
+00:01:23:Inserting schedule for chanid:4034 sourceid:4 xmltvid:10021
+00:01:23:Inserting schedule for chanid:4050 sourceid:4 xmltvid:10035
+00:01:24:Inserting schedule for chanid:4046 sourceid:4 xmltvid:10051
+00:01:24:Inserting schedule for chanid:4073 sourceid:4 xmltvid:10057
+
 (etc)
 
-20:46:01:There are 39461 programIDs in the upcoming schedule.
-20:46:01:Retrieving existing MD5 values.
-20:46:01:Need to download 39461 new or updated programs.
-20:46:01:Requesting more than 10000 programs. Please be patient.
-20:46:01:Retrieving chunk 1 of 20.
-20:46:26:Retrieving chunk 2 of 20.
-20:50:46:Retrieving chunk 3 of 20.
-20:51:06:Retrieving chunk 4 of 20.
-(etc)
-20:55:25:Performing inserts of JSON data.
-20:58:07:Completed local database program updates.
-20:58:07:Inserting schedules.
-20:58:08:Inserting schedule for chanid:1001 sourceid:1 xmltvid:74348
-20:58:08:Inserting schedule for chanid:1002 sourceid:1 xmltvid:11299
-20:58:09:Inserting schedule for chanid:1003 sourceid:1 xmltvid:12475
-(etc)
+00:04:49:Inserting schedule for chanid:4408 sourceid:4 xmltvid:82541
+00:04:49:Inserting schedule for chanid:4237 sourceid:4 xmltvid:82547
+00:04:49:Inserting schedule for chanid:4139 sourceid:4 xmltvid:84172
+00:04:50:Done inserting schedules.
+00:04:50:Status:Successful.
+00:04:50:Global. Start Time:2014-02-19 00:00:49
+00:04:50:Global. End Time:2014-02-19 00:04:50
+00:04:50:4 minutes 1 seconds.
+00:04:50:Updating status.
+00:04:50:Done.
 
 Once the download / update is done, start mythbackend and see if it's happy. 
 Try to schedule something to record.  If it works, then excellent!  If not,
 let me know what didn't work and I'll take a look.
 
 The scripts will tell you the directories they're using; the raw data files
-are going to be plaintext inside a .zip
-
+are going to be plaintext json.
