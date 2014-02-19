@@ -271,7 +271,7 @@ function updateChannelTable($sourceID)
         /*
          * For antenna lineups, we're not going to delete the existing channel table or dtv_multiplex; we're still
          * going to use the scan, but use the atsc major and minor to correlate what we've scanned with what's in the
-         *  lineup file.
+         * lineup file.
          */
 
 /*
@@ -709,7 +709,7 @@ function displayLocalVideoSources()
         print "\nExisting sources in MythTV:\n";
         foreach ($result as $v)
         {
-            print "sourceid: " . $v["sourceid"] . "\tname: " . $v["name"] . "\tSchedulesDirect lineup: " .
+            print "sourceid: " . $v["sourceid"] . "\tname: " . $v["name"] . "\tSchedules Direct lineup: " .
                 $v["lineupid"] . "\n";
         }
     }
