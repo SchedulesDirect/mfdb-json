@@ -116,6 +116,10 @@ function printStatus()
             updateLocalLineupCache($updatedHeadendsToRefresh);
         }
     }
+    else
+    {
+        print "No lineups configured at Schedules Direct.\n";
+    }
 }
 
 ?>
