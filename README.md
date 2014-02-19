@@ -7,6 +7,9 @@ v0.03, 2014-02-18
 Robert Kulagowski
 grabber@schedulesdirect.org
 
+NOTE: If you are reading this on the github page, switch to raw mode or read
+this file once you've cloned locally. github is going to mess up the formatting.
+
 This program runs as a replacement to mythfilldatabase (for now) and
 downloads data from Schedules Direct using the new JSON format.
 
