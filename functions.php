@@ -85,7 +85,7 @@ function printStatus()
     $getLocalModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:he");
     print "The following lineups are in your account at Schedules Direct:\n\n";
 
-    $he = getSchedulesDirectHeadends();
+    $he = getSchedulesDirectLineups();
 
     $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 20, 25)));
     $lineupData->appendRow(array("Lineup", "Last updated", "Update Available?"));
@@ -112,7 +112,7 @@ function printStatus()
 
         if (count($updatedHeadendsToRefresh))
         {
-            updateLocalHeadendCache($updatedHeadendsToRefresh);
+            updateLocalLineupCache($updatedHeadendsToRefresh);
         }
     }
 }

@@ -11,7 +11,7 @@
 $isBeta = TRUE;
 $debug = TRUE;
 $done = FALSE;
-$schedulesDirectHeadends = array();
+$schedulesDirectLineups  = array();
 $sdStatus = "";
 $username = "";
 $password = "";
@@ -25,7 +25,7 @@ use Guzzle\Http\Client;
 
 $agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
 
-$updatedHeadendsToRefresh = array();
+$updatedLineupsToRefresh = array();
 $needToStoreUserPassword = FALSE;
 
 date_default_timezone_set("UTC");
@@ -174,10 +174,10 @@ while (!$done)
     displayLocalVideoSources();
 
     print "\nSchedules Direct functions:\n";
-    print "1 Add a headend to account at Schedules Direct\n";
-    print "2 Delete a headend from account at Schedules Direct\n";
+    print "1 Add a lineup to your account at Schedules Direct\n";
+    print "2 Delete a lineup from your account at Schedules Direct\n";
     print "3 Acknowledge a message\n";
-    print "4 Print a channel lineup for a headend\n";
+    print "4 Print a channel table for a lineup\n";
 
     print "\nMythTV functions:\n";
     print "A to Add a new videosource to MythTV\n";
@@ -191,10 +191,10 @@ while (!$done)
     switch ($response)
     {
         case "1":
-            addHeadendsToSchedulesDirect();
+            addLineupsToSchedulesDirect();
             break;
         case "2":
-            deleteHeadendFromSchedulesDirect();
+            deleteLineupFromSchedulesDirect();
             break;
         case "3":
             deleteMessageFromSchedulesDirect();
@@ -221,7 +221,7 @@ while (!$done)
             $stmt->execute(array("sid" => $toDelete));
             break;
         case "L":
-            print "Linking Schedules Direct headend to sourceid\n\n";
+            print "Linking Schedules Direct lineup to sourceid\n\n";
             linkSchedulesDirectLineup();
             break;
         case "R":
@@ -462,7 +462,7 @@ function printLineup()
     global $dbh;
 
     /*
-     * First we want to get the headend that we're interested in.
+     * First we want to get the lineup that we're interested in.
      */
 
     $he = strtoupper(readline("Lineup to print:>"));
@@ -520,7 +520,7 @@ function printLineup()
     print $stationData;
 }
 
-function addHeadendsToSchedulesDirect()
+function addLineupsToSchedulesDirect()
 {
     global $client;
     global $token;
@@ -566,7 +566,7 @@ function addHeadendsToSchedulesDirect()
 
     if (substr_count($he, "-") != 2)
     {
-        print "Did not see two hyphens in headend; did you enter it correctly?\n";
+        print "Did not see two hyphens in lineup; did you enter it correctly?\n";
 
         return;
     }
@@ -588,13 +588,13 @@ function addHeadendsToSchedulesDirect()
     }
 }
 
-function deleteHeadendFromSchedulesDirect()
+function deleteLineupFromSchedulesDirect()
 {
     global $client;
     global $token;
-    global $updatedHeadendsToRefresh;
+    global $updatedLineupsToRefresh;
 
-    $toDelete = readline("Headend to Delete:>");
+    $toDelete = readline("Lineup to Delete:>");
 
     $request = $client->delete("lineups/$toDelete", array("token" => $token), array());
     $response = $request->send();
@@ -610,7 +610,7 @@ function deleteHeadendFromSchedulesDirect()
     else
     {
         print "Message from server: {$s["message"]}\n";
-        unset ($updatedHeadendsToRefresh[$toDelete]);
+        unset ($updatedLineupsToRefresh[$toDelete]);
     }
 }
 
@@ -652,19 +652,13 @@ function getLineup($heToGet)
     return $lineup;
 }
 
-function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
+function updateLocalLineupCache(array $updatedLineupsToRefresh)
 {
     global $dbh;
 
-    /*
-     * If we're here, that means that either the lineup has been updated, or it didn't exist at all.
-     * The overall group of lineups in a headend have a modified date based on the "max" of the modified dates
-     * of the lineups in the headend. But we may not be using that particular lineup, so dig deeper...
-     */
-
     print "Checking for updated lineups from Schedules Direct.\n";
 
-    foreach ($updatedHeadendsToRefresh as $k => $v)
+    foreach ($updatedLineupsToRefresh as $k => $v)
     {
         $res = array();
         $res = getLineup($k);
@@ -679,9 +673,9 @@ function updateLocalHeadendCache(array $updatedHeadendsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbh->prepare("REPLACE INTO SDheadendCache(lineup,json,modified) VALUES(:he,:json,:modified)");
+        $stmt = $dbh->prepare("REPLACE INTO SDheadendCache(lineup,json,modified) VALUES(:lineup,:json,:modified)");
 
-        $stmt->execute(array("he"   => $k, "modified" => $updatedHeadendsToRefresh[$k],
+        $stmt->execute(array("lineup"   => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json" => json_encode($res)));
     }
 }
@@ -725,17 +719,17 @@ function displayLocalVideoSources()
     }
 }
 
-function getSchedulesDirectHeadends()
+function getSchedulesDirectLineups()
 {
     global $sdStatus;
-    $schedulesDirectHeadends = array();
+    $schedulesDirectLineups  = array();
 
     foreach ($sdStatus["lineups"] as $hv)
     {
-        $schedulesDirectHeadends[$hv["ID"]] = $hv["modified"];
+        $schedulesDirectLineups [$hv["ID"]] = $hv["modified"];
     }
 
-    return ($schedulesDirectHeadends);
+    return ($schedulesDirectLineups);
 }
 
 ?>
