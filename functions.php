@@ -118,7 +118,7 @@ function printStatus()
     }
     else
     {
-        print "No lineups configured at Schedules Direct.\n";
+        print "\nWARNING: *** No lineups configured at Schedules Direct. ***\n";
     }
 }
 
