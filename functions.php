@@ -87,8 +87,8 @@ function printStatus()
 
     $he = getSchedulesDirectHeadends();
 
-    $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 10, 25)));
-    $lineupData->appendRow(array("Lineup", "Last updated", ""));
+    $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 20, 25)));
+    $lineupData->appendRow(array("Lineup", "Last updated", "Update Available?"));
 
     if (count($he))
     {
@@ -100,7 +100,7 @@ function printStatus()
             if ((count($sdStatus) == 0) OR ($sdStatus[0] < $modified))
             {
                 $updatedHeadendsToRefresh[$id] = $modified;
-                $lineupData->appendRow(array($id, $modified, "*** Update Available ***"));
+                $lineupData->appendRow(array($id, $modified, "***"));
             }
             else
             {
