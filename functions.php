@@ -83,15 +83,16 @@ function printStatus()
     print "Next suggested connect time: $nextConnectTime\n";
 
     $getLocalModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:he");
-    print "The following lineups are in your account at Schedules Direct:\n\n";
 
     $he = getSchedulesDirectLineups();
 
-    $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 20, 25)));
-    $lineupData->appendRow(array("Lineup", "Last updated", "Update Available?"));
-
     if (count($he))
     {
+        print "The following lineups are in your account at Schedules Direct:\n\n";
+
+        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 20, 25)));
+        $lineupData->appendRow(array("Lineup", "Last updated", "Update Available?"));
+
         foreach ($he as $id => $modified)
         {
             $getLocalModified->execute(array("he" => $id));
