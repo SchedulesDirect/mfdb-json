@@ -87,23 +87,28 @@ function printStatus()
 
     $he = getSchedulesDirectHeadends();
 
+    $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 10, 25)));
+    $lineupData->appendRow(array("Lineup", "Last updated", ""));
+
     if (count($he))
     {
         foreach ($he as $id => $modified)
         {
-            $line = "$id\t Last Updated: $modified";
-
             $getLocalModified->execute(array("he" => $id));
-            $sdStatusult = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
+            $sdStatus = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
 
-            if ((count($sdStatusult) == 0) OR ($sdStatusult[0] < $modified))
+            if ((count($sdStatus) == 0) OR ($sdStatus[0] < $modified))
             {
                 $updatedHeadendsToRefresh[$id] = $modified;
-                $line .= " (*** Update Available ***)";
+                $lineupData->appendRow(array($id, $modified, "*** Update Available ***"));
             }
-
-            print "$line\n";
+            else
+            {
+                $lineupData->appendRow(array($id, $modified, ""));
+            }
         }
+
+        print $lineupData;
 
         if (count($updatedHeadendsToRefresh))
         {
