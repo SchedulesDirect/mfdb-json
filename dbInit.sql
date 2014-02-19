@@ -2,18 +2,18 @@ USE mythconverg;
 
 DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,SDprogramrating,SDschedule,SDMessages;
 
- CREATE TABLE `SDprogramCache` (
+CREATE TABLE `SDMessages` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `programID` varchar(64) NOT NULL,
-  `md5` char(22) NOT NULL,
+  `id` char(22) DEFAULT NULL COMMENT 'Required to ACK a message from the server.',
+  `date` char(20) DEFAULT NULL,
+  `message` varchar(512) DEFAULT NULL,
+  `type` char(1) DEFAULT NULL COMMENT 'Message type. G-global, S-service status, U-user specific',
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `json` varchar(4096) NOT NULL,
   PRIMARY KEY (`row`),
-  UNIQUE KEY `pid` (`programID`),
-  KEY `programID` (`programID`)
+  UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
- CREATE TABLE `SDcredits` (
+CREATE TABLE `SDcredits` (
   `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `programID` varchar(64) NOT NULL,
   `role` varchar(100) DEFAULT NULL,
@@ -21,7 +21,7 @@ DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramg
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
- CREATE TABLE `SDheadendCache` (
+CREATE TABLE `SDheadendCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `lineup` varchar(50) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
@@ -36,6 +36,17 @@ CREATE TABLE `SDpeople` (
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`personID`),
   UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `SDprogramCache` (
+  `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `programID` varchar(64) NOT NULL,
+  `md5` char(22) NOT NULL,
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `json` varchar(16384) NOT NULL,
+  PRIMARY KEY (`row`),
+  UNIQUE KEY `pid` (`programID`),
+  KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `SDprogramgenres` (
@@ -71,7 +82,7 @@ CREATE TABLE `SDschedule` (
   `dvs` tinyint(1) DEFAULT '0' COMMENT 'Descriptive Video Service',
   `new` tinyint(1) DEFAULT '0' COMMENT 'New',
   `educational` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Identifies broadcaster-designated Educational/Instructional programming.',
-  `hdtv` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Program is broadcast in high definition. (Country-dependent)',
+  `hdtv` tinyint(1) NOT NULL DEFAULT '0',
   `3d` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Indicates program is in 3-D.',
   `letterbox` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Indicates program is a letterbox version.',
   `stereo` tinyint(1) DEFAULT '0',
@@ -90,26 +101,11 @@ CREATE TABLE `SDschedule` (
   `sexualContentRating` tinyint(1) DEFAULT '0' COMMENT 'FCC content descriptor "S" rating',
   `violenceRating` tinyint(1) DEFAULT '0' COMMENT 'FCC content descriptor "V" rating',
   `fvRating` tinyint(1) DEFAULT '0' COMMENT 'Indicates fantasy violence.',
-  `repeat` tinyint(1) DEFAULT '0' COMMENT 'An encore presentation. For U.S. listings purposes, Repeat is only placed on a second telecast of sporting events.',
-  `citc` tinyint(1) DEFAULT '0' COMMENT 'Cable in the Classroom',
-  `signed` tinyint(1) DEFAULT '0' COMMENT 'Program is supplemented with a person signing for the hearing impaired.',
-  
   UNIQUE KEY `stationid_airdatetime` (`stationID`,`air_datetime`),
   KEY `previouslyshown` (`previouslyshown`),
   KEY `programid` (`programID`),
   KEY `md5` (`md5`),
   KEY `sid` (`stationID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
- CREATE TABLE `SDMessages` (
-  `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `id` char(22) DEFAULT NULL COMMENT 'Required to ACK a message from the server.',
-  `date` char(20) DEFAULT NULL,
-  `message` varchar(512) DEFAULT NULL,
-  `type` char(1) DEFAULT NULL COMMENT 'Message type. G-global, S-service status, U-user specific',
-  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`row`),
-  UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE credits CHANGE role role SET('actor','director','producer','executive_producer','writer',
