@@ -120,7 +120,8 @@ $client->setUserAgent($agentString);
 
 if ($username == "" AND $password == "")
 {
-    $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2' LIMIT 1");
+    $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2'
+    AND password != '' LIMIT 1");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -355,7 +356,6 @@ function updateChannelTable($sourceID)
             }
             else
             {
-
                 $channum = $freqid;
                 print "Analog f:$freqid channum:$channum\n";
                 $updateChannelTableAnalog->execute(array("channum" => ltrim($channum, "0"), "sid" => $stationID,
@@ -713,7 +713,7 @@ function displayLocalVideoSources()
 {
     global $dbh;
 
-    $stmt = $dbh->prepare("SELECT sourceid,name,lineupid FROM videosource");
+    $stmt = $dbh->prepare("SELECT sourceid,name,lineupid FROM videosource ORDER BY sourceid");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
