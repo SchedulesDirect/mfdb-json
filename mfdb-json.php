@@ -119,7 +119,8 @@ else
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
-$stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2' LIMIT 1");
+$stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2'
+AND password != '' LIMIT 1");
 $stmt->execute();
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
