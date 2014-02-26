@@ -330,7 +330,7 @@ function updateChannelTable($sourceID)
     {
         $stationID = $mapArray["stationID"];
 
-        print "sid:$stationID\n";
+        //print "sid:$stationID\n";
 
         if ($transport == "Antenna")
         {
