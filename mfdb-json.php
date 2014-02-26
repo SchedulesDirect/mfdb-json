@@ -253,7 +253,7 @@ function getSchedules($stationIDs)
         $stationID = $item["stationID"];
         $downloadedStationIDs[] = $stationID;
 
-        print "parsing schedule for $stationID\n";
+        print "Parsing schedule for $stationID\n";
 
         foreach ($item["programs"] as $programData)
         {
