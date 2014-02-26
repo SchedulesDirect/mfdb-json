@@ -103,7 +103,7 @@ try
 if ($isBeta)
 {
     # Test server. Things may be broken there.
-    $baseurl = "http://54.84.90.174/20131021/";
+    $baseurl = "http://SD-LB-151222593.us-east-1.elb.amazonaws.com/20131021/";
     print "Using beta server.\n";
     # API must match server version.
     $api = 20131021;
