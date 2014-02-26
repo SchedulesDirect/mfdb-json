@@ -225,7 +225,8 @@ function getSchedules($stationIDs)
 
     $body["request"] = $stationIDs;
 
-    $request = $client->post("schedules", array("token" => $token), json_encode($body));
+    $request = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
+        json_encode($body));
     $response = $request->send();
 
     $res = $response->json();
@@ -305,13 +306,13 @@ function getSchedules($stationIDs)
 
             $counter += count($chunk);
 
-            $request = $client->post("programs", array("token" => $token, "Accept-Encoding" => "deflate"),
+            $request = $client->post("programs", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
                 json_encode($body));
             $response = $request->send();
 
             $resBody = $response->getBody();
 
-            file_put_contents("$dlProgramTempDir/programs.$i.json", $resBody);
+            file_put_contents("$dlProgramTempDir/programs." . substr("00$i", -2) . ".json", $resBody);
         }
     }
 
