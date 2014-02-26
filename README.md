@@ -68,9 +68,9 @@ Next:
 -----
 Run the sd-utility.php script.
 
-If you've never used Schedules Direct before, you will be prompted to enter
-your username and password; otherwise, your username and password will be
-read from the "videosource" table in mythconverg.
+If you've never used the Schedules Direct JSON service before, you will be
+prompted to enter your username and password; otherwise, your username and
+password will be read from the "videosource" table in mythconverg.
 
 Add your headend to your Schedules Direct JSON-service account.  (Your
 existing Schedules Direct information for the XML service isn't
