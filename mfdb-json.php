@@ -241,7 +241,7 @@ function getSchedules($stationIDs)
      * Keep a copy for troubleshooting.
      */
 
-    print "Writing to $dlSchedTempDir/schedule.json\n";
+    printMSG("Writing to $dlSchedTempDir/schedule.json\n");
 
     file_put_contents("$dlSchedTempDir/schedule.json", $resBody);
 
@@ -253,7 +253,7 @@ function getSchedules($stationIDs)
         $stationID = $item["stationID"];
         $downloadedStationIDs[] = $stationID;
 
-        print "Parsing schedule for $stationID\n";
+        printMSG("Parsing schedule for stationID:$stationID\n");
 
         foreach ($item["programs"] as $programData)
         {
