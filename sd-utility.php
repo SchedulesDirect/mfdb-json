@@ -158,6 +158,7 @@ $token = getToken($username, $passwordHash);
 
 if ($token == "ERROR")
 {
+    print "Incorrect username or password. Please check.\n";
     exit;
 }
 elseif ($needToStoreUserPassword)

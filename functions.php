@@ -17,19 +17,11 @@ function getToken($username, $passwordHash)
     try {
         $response = $client->post("token", array(), $body)->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e) {
-        echo 'Uh oh! ' . $e->getMessage();
-        print "status code:" . $e->getCode();
-        exit;
+        if ($e->getCode() == 400)
+        {
+            return("ERROR");
+        }
     }
-
-
-
-
-    ////$response = $request->send();
-
-    //$statusCode = $response->getStatusCode();
-
-    //print "Status code is: $statusCode\n";
 
     $res = array();
     $res = $response->json();
