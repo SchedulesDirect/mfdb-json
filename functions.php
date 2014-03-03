@@ -15,6 +15,10 @@ function getToken($username, $passwordHash)
     $request = $client->post("token", array(), $body);
     $response = $request->send();
 
+    $statusCode = $response->getStatusCode();
+
+    print "Status code is: $statusCode\n";
+
     $res = array();
     $res = $response->json();
 
@@ -24,10 +28,6 @@ function getToken($username, $passwordHash)
         var_dump($response);
         exit;
     }
-
-    var_dump($response);
-
-
 
     if ($res["code"] == 0)
     {
