@@ -12,12 +12,24 @@ function getToken($username, $passwordHash)
 
     $body = json_encode(array("username" => $username, "password" => $passwordHash));
 
-    $request = $client->post("token", array(), $body);
-    $response = $request->send();
+    //$request = $client->post("token", array(), $body);
 
-    $statusCode = $response->getStatusCode();
+    try {
+        $response = $client->post("token", array(), $body)->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        echo 'Uh oh! ' . $e->getMessage();
+        print "status code:" . $e->getCode();
+        exit;
+    }
 
-    print "Status code is: $statusCode\n";
+
+
+
+    ////$response = $request->send();
+
+    //$statusCode = $response->getStatusCode();
+
+    //print "Status code is: $statusCode\n";
 
     $res = array();
     $res = $response->json();
