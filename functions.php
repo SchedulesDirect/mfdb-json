@@ -25,6 +25,10 @@ function getToken($username, $passwordHash)
         exit;
     }
 
+    var_dump($response);
+
+
+
     if ($res["code"] == 0)
     {
         return $res["token"];
