@@ -12,8 +12,6 @@ function getToken($username, $passwordHash)
 
     $body = json_encode(array("username" => $username, "password" => $passwordHash));
 
-    //$request = $client->post("token", array(), $body);
-
     try {
         $response = $client->post("token", array(), $body)->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e) {
