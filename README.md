@@ -1,9 +1,9 @@
-mfdb-json
+fdb-json
 =========
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.03, 2014-02-18
+v0.04, 2014-03-03
 Robert Kulagowski
 grabber@schedulesdirect.org
 
@@ -78,11 +78,11 @@ automatically copied over, and the service is running on different hosts.)
 
 ---
 
-sd-utility.php utility program v0.05/2014-02-17
+sd-utility.php utility program v0.09/2014-03-03
 Attempting to connect to database.
 Using beta server.
 Schedules Direct username:rkulagow@rocketmail.com
-Schedules Direct password:comp8sync
+Schedules Direct password:
 Logging into Schedules Direct.
 
 Status messages from Schedules Direct:
@@ -292,7 +292,7 @@ account.
 Create a videosource
 --------------------
 
-sd-utility.php utility program v0.05/2014-02-17
+sd-utility.php utility program v0.09/2014-03-03
 Attempting to connect to database.
 Using beta server.
 Logging into Schedules Direct.
