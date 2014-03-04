@@ -225,13 +225,19 @@ function getSchedules($stationIDs)
 
     $body["request"] = $stationIDs;
 
-    $request = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-        json_encode($body));
-    $response = $request->send();
+    try {
+        $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
+            json_encode($body))->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        if ($e->getCode() == 400)
+        {
+            return("ERROR");
+        }
+    }
 
-    $res = $response->json();
+    //$res = $response->json();
 
-    $resBody = $response->getBody();
+    $resBody = $response->getBody()->json();
 
     /*
      * Mass re-write here; no more zip files; everything is line-oriented.

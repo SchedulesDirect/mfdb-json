@@ -47,8 +47,15 @@ function getStatus()
     global $client;
     global $sdStatus;
 
-    $request = $client->get("status", array("token" => $token), array());
-    $response = $request->send();
+    try {
+        $response = $client->get("status", array("token" => $token), array())->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        if ($e->getCode() == 400)
+        {
+            return("ERROR");
+        }
+    }
+
     $sdStatus = $response->json();
 
     return $sdStatus;
