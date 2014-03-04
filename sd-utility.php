@@ -170,7 +170,11 @@ elseif ($needToStoreUserPassword)
 
 while (!$done)
 {
-    getStatus();
+    if (getStatus() == "ERROR")
+    {
+        printMSG("Received error from Schedules Direct. Exiting.\n");
+        exit;
+    }
 
     printStatus();
 

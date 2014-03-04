@@ -50,7 +50,7 @@ function getStatus()
     try {
         $response = $client->get("status", array("token" => $token), array())->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e) {
-        if ($e->getCode() == 400)
+        if ($e->getCode() != 200)
         {
             return("ERROR");
         }

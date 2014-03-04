@@ -1327,7 +1327,7 @@ if (isset($v["sap"]))
      * If users start to complain about errors on the insert, it's probably due to a new role type.
      */
 
-    if ($debug)
+    if ($debug && count($roleTable))
     {
         print "Role table:\n";
         var_dump($roleTable);
