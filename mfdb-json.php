@@ -235,13 +235,7 @@ function getSchedules($stationIDs)
         }
     }
 
-    //$res = $response->json();
-
-    $resBody = $response->getBody()->json();
-
-    /*
-     * Mass re-write here; no more zip files; everything is line-oriented.
-     */
+    $resBody = $response->getBody();
 
     /*
      * Keep a copy for troubleshooting.
