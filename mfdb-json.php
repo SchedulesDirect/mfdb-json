@@ -23,8 +23,8 @@ $debug = TRUE;
 $quiet = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
-$scriptVersion = "0.08";
-$scriptDate = "2014-02-26";
+$scriptVersion = "0.09";
+$scriptDate = "2014-03-04";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 
@@ -127,6 +127,7 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if (!count($result))
 {
     printMSG("Fatal Error: Could not read userid and password for schedulesdirect2 grabber from videosource.\n");
+    printMSG("Did you run the sd-utility.php program yet?\n");
     exit;
 }
 
