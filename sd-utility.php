@@ -158,7 +158,8 @@ $token = getToken($username, $passwordHash);
 
 if ($token == "ERROR")
 {
-    print "Incorrect username or password. Please check.\n";
+    printMSG("Got error when attempting to retrieve token from Schedules Direct.\n");
+    printMSG("Check username / password in videosource table.\n");
     exit;
 }
 elseif ($needToStoreUserPassword)

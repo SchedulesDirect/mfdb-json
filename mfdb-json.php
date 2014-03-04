@@ -144,6 +144,14 @@ $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 printMSG("Logging into Schedules Direct.\n");
 $token = getToken($sdUsername, $sdPassword);
+
+if ($token == "ERROR")
+{
+    printMSG("Got error when attempting to retrieve token from Schedules Direct.\n");
+    printMSG("Check username / password in videosource table.\n");
+    exit;
+}
+
 printMSG("Retrieving server status message.\n");
 
 $response = updateStatus();
@@ -226,13 +234,15 @@ function getSchedules($stationIDs)
 
     $body["request"] = $stationIDs;
 
-    try {
+    try
+    {
         $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
             json_encode($body))->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
         if ($e->getCode() == 400)
         {
-            return("ERROR");
+            return ("ERROR");
         }
     }
 
