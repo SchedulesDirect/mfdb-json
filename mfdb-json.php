@@ -604,7 +604,7 @@ function insertSchedule()
         $stationID = $item["xmltvid"];
         printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
 
-        //$dbh->beginTransaction();
+        $dbh->beginTransaction();
 
         while (list($dummy, $schedule) = each($scheduleJSON[$stationID]))
         {
@@ -1193,7 +1193,7 @@ function insertSchedule()
                 }
             }
         }
-        //$dbh->commit();
+        $dbh->commit();
     }
 
     /* These don't seem to be in the On data:
