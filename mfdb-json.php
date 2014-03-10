@@ -386,15 +386,16 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
             $jsonProgram = json_decode($item, TRUE);
 
-            $pid = $jsonProgram["programID"];
-            $md5 = $jsonProgram["md5"];
-
             if (json_last_error())
             {
-                printMSG("*** ERROR: JSON decode error $dlProgramTempDir/$jsonFileToProcess - $pid\n");
+                printMSG("*** ERROR: JSON decode error $jsonFileToProcess\n");
                 printMSG(print_r($item, TRUE));
                 continue;
             }
+
+            $pid = $jsonProgram["programID"];
+            $md5 = $jsonProgram["md5"];
+
 
             $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
                                        "json"      => $item));
