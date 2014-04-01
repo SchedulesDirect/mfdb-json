@@ -30,8 +30,8 @@ $errorWarning = FALSE;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
-date_default_timezone_set(@date_default_timezone_get());
-//date_default_timezone_set("UTC");
+//date_default_timezone_set(@date_default_timezone_get());
+date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
@@ -950,7 +950,7 @@ function insertSchedule()
 
             if (isset($programJSON["descriptions"]["description1000"]))
             {
-                $description = $programJSON["descriptions"]["description1000"];
+                $description = $programJSON["descriptions"]["description1000"]["description"];
             }
             else
             {
