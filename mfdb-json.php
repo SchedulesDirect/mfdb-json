@@ -342,7 +342,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
     $insertPersonSD = $dbh->prepare("INSERT INTO SDpeople(personID,name) VALUES(:personID, :name)
         ON DUPLICATE KEY UPDATE name=:name");
-    $updatePersonSD = $dbh->prepare("UPDATE SDpeople SET name=:name WHERE personID=:person");
+    $updatePersonSD = $dbh->prepare("UPDATE SDpeople SET name=:name WHERE personID=:personID");
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
@@ -473,6 +473,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
                         if (!array_key_exists($personID, $peopleCacheSD))
                         {
                             $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
+                            $peopleCacheSD[$personID] = $name;
                         }
 
                         if ($peopleCacheSD[$personID] != $name)
