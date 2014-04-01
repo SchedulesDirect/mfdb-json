@@ -34,8 +34,7 @@ CREATE TABLE `SDheadendCache` (
 CREATE TABLE `SDpeople` (
   `personID` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
-  PRIMARY KEY (`personID`),
-  UNIQUE KEY `name` (`name`)
+  PRIMARY KEY (`personID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `SDprogramCache` (
