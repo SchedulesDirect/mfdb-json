@@ -436,9 +436,15 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
                         $name = $credit["name"];
 
-                        if (!isset($peopleCacheSD[$personID]) OR $peopleCacheSD[$personID] != $name)
+                        if (!array_key_exists($personID, $peopleCacheSD))
                         {
                             $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
+                            $peopleCacheSD[$personID] = $name;
+                        }
+
+                        if ($peopleCacheSD[$personID] != $name)
+                        {
+                            $updatePersonSD->execute(array("personID" => (int)$personID, "name" => $name));
                         }
 
                         if (!isset($peopleCacheMyth[$name]))
