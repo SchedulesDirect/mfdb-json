@@ -340,8 +340,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
 
-    $insertPersonSD = $dbh->prepare("INSERT INTO SDpeople(personID,name) VALUES(:personID, :name)
-        ON DUPLICATE KEY UPDATE name=:name");
+    $insertPersonSD = $dbh->prepare("INSERT INTO SDpeople(personID,name) VALUES(:personID, :name)");
     $updatePersonSD = $dbh->prepare("UPDATE SDpeople SET name=:name WHERE personID=:personID");
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
