@@ -114,6 +114,9 @@ function printStatus()
 
         foreach ($he as $id => $serverModified)
         {
+            $sdStatus = array();
+            $mythStatus = array();
+
             $getLocalCacheModified->execute(array("he" => $id));
             $sdStatus = $getLocalCacheModified->fetchAll(PDO::FETCH_COLUMN);
             $getVideosourceModified->execute(array("he" => $id));
