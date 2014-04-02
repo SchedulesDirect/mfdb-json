@@ -245,13 +245,6 @@ exit;
 
 function refreshLineup()
 {
-    //$lineup = readline("SD Lineup Name:>");
-    //print "Lineup update for $lineup\n";
-    /*
-     * For now we're just going to grab everything; selecting which channels to update is better left for
-     * other applications, like MythWeb or something like that.
-     */
-
     $sourceID = readline("Apply to sourceid:>");
     if ($sourceID != "")
     {
@@ -335,8 +328,6 @@ function updateChannelTable($sourceID)
     foreach ($json["map"] as $mapArray)
     {
         $stationID = $mapArray["stationID"];
-
-        //print "sid:$stationID\n";
 
         if ($transport == "Antenna")
         {
