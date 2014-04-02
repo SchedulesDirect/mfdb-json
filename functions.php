@@ -12,12 +12,14 @@ function getToken($username, $passwordHash)
 
     $body = json_encode(array("username" => $username, "password" => $passwordHash));
 
-    try {
+    try
+    {
         $response = $client->post("token", array(), $body)->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
         if ($e->getCode() == 400)
         {
-            return("ERROR");
+            return ("ERROR");
         }
     }
 
@@ -47,12 +49,14 @@ function getStatus()
     global $client;
     global $sdStatus;
 
-    try {
+    try
+    {
         $response = $client->get("status", array("token" => $token), array())->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
         if ($e->getCode() != 200)
         {
-            return("ERROR");
+            return ("ERROR");
         }
     }
 
@@ -95,7 +99,8 @@ function printStatus()
     print "Max number of headends for your account: $maxHeadends\n";
     print "Next suggested connect time: $nextConnectTime\n";
 
-    $getLocalModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:he");
+    $getLocalCacheModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:he");
+    $getVideosourceModified = $dbh->prepare("SELECT modified FROM videosource WHERE lineup=:he");
 
     $he = getSchedulesDirectLineups();
 
@@ -103,22 +108,35 @@ function printStatus()
     {
         print "The following lineups are in your account at Schedules Direct:\n\n";
 
-        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 25, 25, 4)));
-        $lineupData->appendRow(array("Lineup", "Local cache update", "MythTV videosource update","New?"));
+        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 20, 20, 25, 4)));
+        $lineupData->appendRow(array("Lineup", "Server modified", "Local cache update", "MythTV videosource update",
+                                     "New?"));
 
-        foreach ($he as $id => $modified)
+        foreach ($he as $id => $serverModified)
         {
-            $getLocalModified->execute(array("he" => $id));
-            $sdStatus = $getLocalModified->fetchAll(PDO::FETCH_COLUMN);
+            $getLocalCacheModified->execute(array("he" => $id));
+            $sdStatus = $getLocalCacheModified->fetchAll(PDO::FETCH_COLUMN);
+            $getVideosourceModified->execute(array("he" => $id));
+            $mythStatus = $getVideosourceModified->fetchAll(PDO::FETCH_COLUMN);
 
-            if ((count($sdStatus) == 0) OR ($sdStatus[0] < $modified))
+            if ((count($sdStatus) == 0) OR ($sdStatus[0] < $serverModified))
             {
-                $updatedHeadendsToRefresh[$id] = $modified;
-                $lineupData->appendRow(array($id, $modified, "***"));
+                if (count($sdStatus) == 0)
+                {
+                    $sdStatus[0] = "";
+                }
+
+                if (count($mythStatus) == 0)
+                {
+                    $mythStatus[0] = "";
+                }
+
+                $updatedHeadendsToRefresh[$id] = $serverModified;
+                $lineupData->appendRow(array($id, $serverModified, $sdStatus[0], $mythStatus[0], "***"));
             }
             else
             {
-                $lineupData->appendRow(array($id, $modified, ""));
+                $lineupData->appendRow(array($id, $serverModified, $sdStatus[0], $mythStatus[0], ""));
             }
         }
 
