@@ -113,3 +113,5 @@ ALTER TABLE credits CHANGE role role SET('actor','director','producer','executiv
 INSERT IGNORE INTO settings(value,data,hostname) VALUES("mythfilldatabaseLastRunStart","",NULL),
 ("mythfilldatabaseLastRunEnd","",NULL),("mythfilldatabaseLastRunStatus","",NULL),("MythFillSuggestedRunTime","",NULL),
 ("DataDirectMessage","",NULL),("SchedulesDirectLastUpdate","",NULL);
+
+ALTER TABLE videosource ADD COLUMN modified CHAR(20) DEFUALT NULL COMMENT 'Track the last time this videosource was updated.';
