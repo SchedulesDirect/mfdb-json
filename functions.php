@@ -116,30 +116,33 @@ function printStatus()
         {
             $sdStatus = array();
             $mythStatus = array();
+            $sd = "";
+            $myth = "";
 
             $getLocalCacheModified->execute(array("he" => $id));
             $sdStatus = $getLocalCacheModified->fetchAll(PDO::FETCH_COLUMN);
+
             $getVideosourceModified->execute(array("he" => $id));
             $mythStatus = $getVideosourceModified->fetchAll(PDO::FETCH_COLUMN);
 
             if ((count($sdStatus) == 0) OR ($sdStatus[0] < $serverModified))
             {
-                if (count($sdStatus) == 0)
+                if (count($sdStatus))
                 {
-                    $sdStatus[0] = "";
+                    $sd = $sdStatus[0];
                 }
 
-                if (count($mythStatus) == 0)
+                if (count($mythStatus))
                 {
-                    $mythStatus[0] = "";
+                    $myth = $mythStatus[0];
                 }
 
                 $updatedHeadendsToRefresh[$id] = $serverModified;
-                $lineupData->appendRow(array($id, $serverModified, $sdStatus[0], $mythStatus[0], "***"));
+                $lineupData->appendRow(array($id, $serverModified, $sd, $myth, "***"));
             }
             else
             {
-                $lineupData->appendRow(array($id, $serverModified, $sdStatus[0], $mythStatus[0], ""));
+                $lineupData->appendRow(array($id, $serverModified, $sd, $myth, ""));
             }
         }
 
