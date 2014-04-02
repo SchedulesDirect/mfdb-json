@@ -103,7 +103,7 @@ function printStatus()
     {
         print "The following lineups are in your account at Schedules Direct:\n\n";
 
-        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 35, 35,4)));
+        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 25, 25, 4)));
         $lineupData->appendRow(array("Lineup", "Local cache update", "MythTV videosource update","New?"));
 
         foreach ($he as $id => $modified)
