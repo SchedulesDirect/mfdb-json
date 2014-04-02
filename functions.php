@@ -100,7 +100,7 @@ function printStatus()
     print "Next suggested connect time: $nextConnectTime\n";
 
     $getLocalCacheModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:he");
-    $getVideosourceModified = $dbh->prepare("SELECT modified FROM videosource WHERE lineup=:he");
+    $getVideosourceModified = $dbh->prepare("SELECT modified FROM videosource WHERE lineupid=:he");
 
     $he = getSchedulesDirectLineups();
 
