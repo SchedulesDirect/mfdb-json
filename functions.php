@@ -24,6 +24,8 @@ function getToken($username, $passwordHash)
         {
             return ("ERROR");
         }
+
+        print "message is " . $e->getMessage() . "\n";
     }
 
     $res = array();
