@@ -17,15 +17,13 @@ function getToken($username, $passwordHash)
         $response = $client->post("token", array(), $body)->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
-        print "e is \n";
-        var_dump($e);
-        print "\n";
-        if ($e->getCode() == 400)
+        print "message is " . $e->getMessage() . "\n";
+        print "code is " . $e->getCode();
+
+        if ($e->getMessage() == "Client error response")
         {
             return ("ERROR");
         }
-
-        print "message is " . $e->getMessage() . "\n";
     }
 
     $res = array();
