@@ -429,7 +429,7 @@ function updateChannelTable($lineup)
     }
 
     $updateVideosourceModified = $dbh->prepare("UPDATE videosource SET modified = :modified WHERE lineupid=:lineup");
-    $updateVideosourceModified->execute(array("sourceid" => $lineup));
+    $updateVideosourceModified->execute(array("lineup" => $lineup, "modified" => $modified));
 
     /*
      * Set the startchan to a non-bogus value.
