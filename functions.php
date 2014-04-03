@@ -19,17 +19,12 @@ function getToken($username, $passwordHash)
     {
         if (strpos($e->getMessage(), "Client error response") !== FALSE)
         {
-            $gotError = TRUE;
+            return ("ERROR");
         }
     }
 
     $res = array();
     $res = $response->json();
-
-    if ($gotError)
-    {
-        return ("ERROR");
-    }
 
     if (json_last_error() != 0)
     {
