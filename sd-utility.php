@@ -150,6 +150,7 @@ else
     {
         $password = readline("Schedules Direct password:");
         $passwordHash = sha1($password);
+        $needToStoreUserPassword = TRUE;
     }
 }
 
