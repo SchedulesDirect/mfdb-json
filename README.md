@@ -1,9 +1,9 @@
-mfdb-json
+fdb-json
 =========
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.04, 2014-03-03
+v0.05, 2014-04-03
 Robert Kulagowski
 grabber@schedulesdirect.org
 
@@ -78,19 +78,17 @@ automatically copied over, and the service is running on different hosts.)
 
 ---
 
-sd-utility.php utility program v0.09/2014-03-03
+sd-utility.php utility program v0.10/2014-04-03
 Attempting to connect to database.
 Using beta server.
-Schedules Direct username:rkulagow@rocketmail.com
-Schedules Direct password:
 Logging into Schedules Direct.
 
 Status messages from Schedules Direct:
 Server: AWS-SD-web.1
-Last data refresh: 2014-02-18T20:39:29Z
+Last data refresh: 2014-04-03T17:13:48Z
 Account expires: 2014-06-28T05:16:29Z
 Max number of headends for your account: 16
-Next suggested connect time: 2014-02-19T15:41:35Z
+Next suggested connect time: 2014-04-04T05:58:57Z
 
 WARNING: *** No lineups configured at Schedules Direct. ***
 
@@ -105,9 +103,10 @@ Schedules Direct functions:
 MythTV functions:
 A to Add a new videosource to MythTV
 D to Delete a videosource in MythTV
-L to Link a videosource to a lineup at SD
+L to Link a videosource to a lineup at Schedules Direct
 R to refresh a videosource with new lineup information
 Q to Quit
+
 >1
 Three-character ISO-3166-1 alpha3 country code:>USA
 Enter postal code:>60030
@@ -274,46 +273,26 @@ Message from server: Added lineup.
 
 Status messages from Schedules Direct:
 Server: AWS-SD-web.1
-Last data refresh: 2014-02-18T20:39:29Z
+Last data refresh: 2014-04-03T17:13:48Z
 Account expires: 2014-06-28T05:16:29Z
 Max number of headends for your account: 16
-Next suggested connect time: 2014-02-20T00:29:56Z
+Next suggested connect time: 2014-04-04T04:41:13Z
 The following lineups are in your account at Schedules Direct:
 
-┌───────────────┬────────────────────┬─────────────────────────┐
-│Lineup         │Last updated        │Update Available?        │
-├───────────────┼────────────────────┼─────────────────────────┤
-│USA-IL57303-X  │2014-02-16T06:49:01Z│                         │
-└───────────────┴────────────────────┴─────────────────────────┘
+┌───────────────┬────────────────────┬─────────────────────────┬────┐
+│Lineup         │Server modified     │MythTV videosource update│New?│
+├───────────────┼────────────────────┼─────────────────────────┼────┤
+│USA-IL57303-X  │2014-04-03T13:50:00Z│                         │*** │
+└───────────────┴────────────────────┴─────────────────────────┴────┘
+Checking for updated lineups from Schedules Direct.
+Retrieving lineup from Schedules Direct.
+Retrieving lineup from Schedules Direct.
 
 Repeat this process until you have added the necessary lineups to your
 account.
 
 Create a videosource
 --------------------
-
-sd-utility.php utility program v0.09/2014-03-03
-Attempting to connect to database.
-Using beta server.
-Logging into Schedules Direct.
-
-Status messages from Schedules Direct:
-Server: AWS-SD-web.1
-Last data refresh: 2014-02-18T20:39:29Z
-Account expires: 2014-06-28T05:16:29Z
-Max number of headends for your account: 16
-Next suggested connect time: 2014-02-19T20:28:24Z
-The following lineups are in your account at Schedules Direct:
-
-┌───────────────┬────────────────────┬─────────────────────────┐
-│Lineup         │Last updated        │Update Available?        │
-├───────────────┼────────────────────┼─────────────────────────┤
-│USA-IL57303-X  │2014-02-16T06:49:01Z│                         │
-├───────────────┼────────────────────┼─────────────────────────┤
-│USA-OTA-60030  │2014-02-18T17:36:22Z│                         │
-└───────────────┴────────────────────┴─────────────────────────┘
-
-WARNING: *** No videosources configured in MythTV. ***
 
 Schedules Direct functions:
 1 Add a lineup to your account at Schedules Direct
@@ -332,19 +311,17 @@ Adding new videosource
 
 Name:>Comcast
 
-(status snipped)
+Status messages from Schedules Direct:
 
-Existing sources in MythTV:
-sourceid: 5     name: Comcast       Schedules Direct lineup:
+<status snipped>
 
+MythTV videosource:
+sourceid: 4     name: Comcast   Schedules Direct lineup:
 
 =====================================
 
 Now that we've got a videosource configured, you have to link the
 videosource to the lineup you've added to your account.
-
-Existing sources in MythTV:
-sourceid: 5     name: Comcast       Schedules Direct lineup:
 
 Schedules Direct functions:
 1 Add a lineup to your account at Schedules Direct
@@ -360,27 +337,45 @@ R to refresh a videosource with new lineup information
 Q to Quit
 
 >L
-Linking Schedules Direct headend to sourceid
+Linking Schedules Direct lineup to sourceid
 
-MythTV sourceid:>5
+MythTV sourceid:>4
 Schedules Direct lineup:>USA-IL57303-X
 
 (status snipped)
 
-Existing sources in MythTV:
-sourceid: 5     name: Comcast       Schedules Direct lineup: USA-IL57303-X
+MythTV videosource:
+sourceid: 4     name: Comcast   Schedules Direct lineup: USA-IL57303-X
 
 =====================================
 
 Once that's done, you'll need to download the channel mapping using the "R"
 function.  This is also done whenever the utility program tells you that
-there's an update available to the headend.
+there's an update available to the headend by putting "***" in the "New"
+column.
 
 (status deleted)
 
 >R
-Apply to sourceid:>5
-Updating channel table for sourceid:5
+Which lineup:>USA-IL57303-X
+Updating channel table for lineup:USA-IL57303-X
+
+Status messages from Schedules Direct:
+Server: AWS-SD-web.1
+Last data refresh: 2014-04-03T17:13:48Z
+Account expires: 2014-06-28T05:16:29Z
+Max number of headends for your account: 16
+Next suggested connect time: 2014-04-04T08:46:21Z
+The following lineups are in your account at Schedules Direct:
+
+┌───────────────┬────────────────────┬─────────────────────────┬────┐
+│Lineup         │Server modified     │MythTV videosource update│New?│
+├───────────────┼────────────────────┼─────────────────────────┼────┤
+│USA-IL57303-X  │2014-04-03T13:50:00Z│2014-04-03T13:50:00Z     │    │
+└───────────────┴────────────────────┴─────────────────────────┴────┘
+Checking for updated lineups from Schedules Direct.
+Retrieving lineup from Schedules Direct.
+Retrieving lineup from Schedules Direct.
 
 Quit out of the utility program.
 
