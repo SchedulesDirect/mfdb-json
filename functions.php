@@ -108,42 +108,43 @@ function printStatus()
     {
         print "The following lineups are in your account at Schedules Direct:\n\n";
 
-        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 20, 20, 25, 4)));
-        $lineupData->appendRow(array("Lineup", "Server modified", "Local cache update", "MythTV videosource update",
-                                     "New?"));
+        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(15, 20, 25, 4)));
+        $lineupData->appendRow(array("Lineup", "Server modified", "MythTV videosource update", "New?"));
 
         foreach ($he as $id => $serverModified)
         {
             $sdStatus = array();
             $mythStatus = array();
-            $sd = "";
-            $myth = "";
+            //$sd = "";
+            $mythModified = "";
 
-            $getLocalCacheModified->execute(array("he" => $id));
-            $sdStatus = $getLocalCacheModified->fetchAll(PDO::FETCH_COLUMN);
+            //$getLocalCacheModified->execute(array("he" => $id));
+            //$sdStatus = $getLocalCacheModified->fetchAll(PDO::FETCH_COLUMN);
 
             $getVideosourceModified->execute(array("he" => $id));
             $mythStatus = $getVideosourceModified->fetchAll(PDO::FETCH_COLUMN);
 
+            /*
             if (count($sdStatus))
             {
                 $sd = $sdStatus[0];
-            }
+            }*/
 
             if (count($mythStatus))
             {
-                $myth = $mythStatus[0];
+                $mythModified = $mythStatus[0];
             }
 
-            //if ((count($sdStatus) == 0) OR ($sdStatus[0] < $myth))
-            if ($serverModified > $myth)
+            if ($serverModified > $mythModified)
             {
                 $updatedHeadendsToRefresh[$id] = $serverModified;
-                $lineupData->appendRow(array($id, $serverModified, $sd, $myth, "***"));
+                //$lineupData->appendRow(array($id, $serverModified, $sd, $myth, "***"));
+                $lineupData->appendRow(array($id, $serverModified, $mythModified, "***"));
             }
             else
             {
-                $lineupData->appendRow(array($id, $serverModified, $sd, $myth, ""));
+                //$lineupData->appendRow(array($id, $serverModified, $sd, $myth, ""));
+                $lineupData->appendRow(array($id, $serverModified, $mythModified, ""));
             }
         }
 
