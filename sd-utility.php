@@ -232,7 +232,11 @@ while (!$done)
             linkSchedulesDirectLineup();
             break;
         case "R":
-            refreshLineup();
+            $lineup = readline("Which lineup:>");
+            if ($lineup != "")
+            {
+                updateChannelTable($lineup);
+            }
             break;
         case "Q":
         default:
@@ -243,28 +247,20 @@ while (!$done)
 
 exit;
 
-function refreshLineup()
-{
-    $sourceID = readline("Apply to sourceid:>");
-    if ($sourceID != "")
-    {
-        updateChannelTable($sourceID);
-    }
-}
-
-function updateChannelTable($sourceID)
+function updateChannelTable($lineup)
 {
     global $dbh;
+    $transport = "";
 
-    $stmt = $dbh->prepare("SELECT lineupid FROM videosource WHERE sourceid=:sourceid");
-    $stmt->execute(array("sourceid" => $sourceID));
-    $lineup = $stmt->fetchColumn();
+    $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid=:lineup");
+    $stmt->execute(array("lineup" => $lineup));
+    $sourceID = $stmt->fetchColumn();
 
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
-    print "Updating channel table for sourceid:$sourceID\n";
+    print "Updating channel table for lineup:$lineup\n";
 
     if ($json["metadata"]["transport"] == "Antenna")
     {
