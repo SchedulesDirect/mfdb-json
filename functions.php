@@ -17,13 +17,6 @@ function getToken($username, $passwordHash)
         $response = $client->post("token", array(), $body)->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
-        print "message is " . $e->getMessage() . "\n";
-        print "code is " . $e->getCode() . "\n";
-
-        print "e message is\n ";
-        var_dump($e->getMessage());
-        $tt=fgets(STDIN);
-
         if (strpos($e->getMessage(), "Client error response") !== FALSE)
         {
             return ("ERROR");
