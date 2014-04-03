@@ -20,7 +20,7 @@ function getToken($username, $passwordHash)
         print "message is " . $e->getMessage() . "\n";
         print "code is " . $e->getCode();
 
-        if ($e->getMessage() == "Client error response")
+        if (strpos($e->getMessage(), "Client error response"))
         {
             return ("ERROR");
         }
