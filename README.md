@@ -1,4 +1,4 @@
-fdb-json
+mfdb-json
 =========
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
