@@ -259,6 +259,7 @@ function updateChannelTable($lineup)
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
+    $modified = $json["metadata"]["modified"];
 
     print "Updating channel table for lineup:$lineup\n";
 
@@ -427,14 +428,17 @@ function updateChannelTable($lineup)
         $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
     }
 
+    $updateVideosourceModified = $dbh->prepare("UPDATE videosource SET modified = :modified WHERE lineupid=:lineup");
+    $updateVideosourceModified->execute(array("sourceid" => $lineup));
+
     /*
      * Set the startchan to a non-bogus value.
      */
+    $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid
+    ORDER BY CAST(channum AS SIGNED) LIMIT 1");
 
     foreach ($s as $sourceID)
     {
-        $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid
-    ORDER BY CAST(channum AS SIGNED) LIMIT 1");
         $stmt->execute(array("sourceid" => $sourceID));
         $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
         if (count($result))
