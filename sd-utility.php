@@ -256,6 +256,12 @@ function updateChannelTable($lineup)
     $stmt->execute(array("lineup" => $lineup));
     $s = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
+    if (count($s) == 0)
+    {
+        print "ERROR: You do not have that lineup locally configured.\n";
+        return;
+    }
+
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
