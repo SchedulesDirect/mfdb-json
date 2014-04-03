@@ -254,7 +254,7 @@ function updateChannelTable($lineup)
 
     $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid=:lineup");
     $stmt->execute(array("lineup" => $lineup));
-    $sourceID = $stmt->fetchColumn();
+    $sourceID = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
