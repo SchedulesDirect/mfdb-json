@@ -38,7 +38,10 @@ function getToken($username, $passwordHash)
         return $res["token"];
     }
 
-    print "Response from schedulesdirect: $response\n";
+    print "Response: {$res["response"]}\n";
+    print "code: {$res["code"]}\n";
+    print "serverID: {$res["serverID"]}\n";
+    print "message: {$res["message"]}\n";
 
     return "ERROR";
 }
