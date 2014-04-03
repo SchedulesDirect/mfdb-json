@@ -24,9 +24,7 @@ function getToken($username, $passwordHash)
         var_dump($e->getMessage());
         $tt=fgets(STDIN);
 
-
-
-        if (strpos($e->getMessage(), "Client error response"))
+        if (strpos($e->getMessage(), "Client error response") !== FALSE)
         {
             return ("ERROR");
         }
