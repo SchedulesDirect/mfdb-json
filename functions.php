@@ -136,7 +136,7 @@ function printStatus()
             }
 
             //if ((count($sdStatus) == 0) OR ($sdStatus[0] < $myth))
-            if ($serverModified < $myth)
+            if ($serverModified > $myth)
             {
                 $updatedHeadendsToRefresh[$id] = $serverModified;
                 $lineupData->appendRow(array($id, $serverModified, $sd, $myth, "***"));
