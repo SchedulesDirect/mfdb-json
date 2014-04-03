@@ -18,7 +18,13 @@ function getToken($username, $passwordHash)
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         print "message is " . $e->getMessage() . "\n";
-        print "code is " . $e->getCode();
+        print "code is " . $e->getCode() . "\n";
+
+        print "e message is\n ";
+        var_dump($e->getMessage());
+        $tt=fgets(STDIN);
+
+
 
         if (strpos($e->getMessage(), "Client error response"))
         {
