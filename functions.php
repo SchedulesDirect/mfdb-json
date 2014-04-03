@@ -135,7 +135,7 @@ function printStatus()
                 $myth = $mythStatus[0];
             }
 
-            if ((count($sdStatus) == 0) OR ($sdStatus[0] < $serverModified))
+            if ((count($sdStatus) == 0) OR ($sdStatus[0] < $myth))
             {
                 $updatedHeadendsToRefresh[$id] = $serverModified;
                 $lineupData->appendRow(array($id, $serverModified, $sd, $myth, "***"));
