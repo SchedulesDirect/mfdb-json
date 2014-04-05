@@ -25,6 +25,7 @@ Features:
 - Full support for United States, Canada, Great Britain.
 - See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2530 for the
   complete list of countries with data.
+- Self-hosted data so not dependent on Tribune's XML servers
 
 Installation
 ============
