@@ -188,8 +188,6 @@ location: 60030
 
 Lineup to add>
 
----
-
 ```
 
 Notice that in this particular country / postal code, there are headends,
@@ -300,10 +298,10 @@ Retrieving lineup from Schedules Direct.
 Repeat this process until you have added the necessary lineups to your
 account.
 
-```
 Create a videosource
 --------------------
 
+```
 Schedules Direct functions:
 1 Add a lineup to your account at Schedules Direct
 2 Delete a lineup from your account at Schedules Direct
@@ -335,6 +333,7 @@ sourceid: 4     name: Comcast   Schedules Direct lineup:
 Now that we've got a videosource configured, you have to link the
 videosource to the lineup you've added to your account.
 
+```
 Schedules Direct functions:
 1 Add a lineup to your account at Schedules Direct
 2 Delete a lineup from your account at Schedules Direct
@@ -358,6 +357,7 @@ Schedules Direct lineup:>USA-IL57303-X
 
 MythTV videosource:
 sourceid: 4     name: Comcast   Schedules Direct lineup: USA-IL57303-X
+```
 
 =====================================
 
@@ -366,6 +366,7 @@ function.  This is also done whenever the utility program tells you that
 there's an update available to the headend by putting "***" in the "New"
 column.
 
+```
 (status deleted)
 
 >R
@@ -388,6 +389,7 @@ The following lineups are in your account at Schedules Direct:
 Checking for updated lineups from Schedules Direct.
 Retrieving lineup from Schedules Direct.
 Retrieving lineup from Schedules Direct.
+```
 
 Quit out of the utility program.
 
@@ -409,6 +411,7 @@ Exit mythtv-setup
 
 Run the mfdb-json.php script to retrieve the data.
 
+```
 00:00:49:mfdb-json.php developer grabber v0.07/2014-02-16
 00:00:49:Temp directory for Schedules is /tmp/mfdbo0eoW0
 00:00:49:Temp directory for Programs is /tmp/mfdbRHPKAw
@@ -450,6 +453,7 @@ Run the mfdb-json.php script to retrieve the data.
 00:04:50:4 minutes 1 seconds.
 00:04:50:Updating status.
 00:04:50:Done.
+```
 
 Once the download / update is done, start mythbackend and see if it's happy. 
 Try to schedule something to record.  If it works, then excellent!  If not,
