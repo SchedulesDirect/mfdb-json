@@ -3,12 +3,9 @@ mfdb-json
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.05, 2014-04-03
+v0.07, 2014-04-05
 Robert Kulagowski
 grabber@schedulesdirect.org
-
-NOTE: If you are reading this on the github page, switch to raw mode or read
-this file once you've cloned locally. github is going to mess up the formatting.
 
 This program runs as a replacement to mythfilldatabase (for now) and
 downloads data from Schedules Direct using the new JSON format.
@@ -28,6 +25,7 @@ Features:
 - Full support for United States, Canada, Great Britain.
 - See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2530 for the
   complete list of countries with data.
+- Self-hosted data so not dependent on Tribune's XML servers
 
 Installation
 ============
@@ -77,7 +75,7 @@ existing Schedules Direct information for the XML service isn't
 automatically copied over, and the service is running on different hosts.)
 
 ---
-
+```
 sd-utility.php utility program v0.10/2014-04-03
 Attempting to connect to database.
 Using beta server.
@@ -188,7 +186,7 @@ location: 60030
 
 Lineup to add>
 
----
+```
 
 Notice that in this particular country / postal code, there are headends,
 and there are lineups within that headend, but there aren't multiple lineups
@@ -196,6 +194,7 @@ in a headend - all devices are either "-DEFAULT" or "-X".
 
 You may see this:
 
+```
 Three-character ISO-3166-1 alpha3 country code:>USA
 Enter postal code:>90210
 
@@ -240,9 +239,13 @@ location: Eagle Rock
 
 (etc)
 
+```
+
 Notice that headend CA00053 has multiple lineups, as does CA67309 and CA67310.
 
 You can encounter this overseas:
+
+```
 Three-character ISO-3166-1 alpha3 country code:>GBR
 Enter postal code:>W2
 
@@ -265,9 +268,11 @@ location: London
         Lineup: GBR-0001122-Y
 
 (snip)
+```
 
 In any case, the script will ask you which lineup to add.
 
+```
 Lineup to add>USA-IL57303-X
 Message from server: Added lineup.
 
@@ -287,6 +292,7 @@ The following lineups are in your account at Schedules Direct:
 Checking for updated lineups from Schedules Direct.
 Retrieving lineup from Schedules Direct.
 Retrieving lineup from Schedules Direct.
+```
 
 Repeat this process until you have added the necessary lineups to your
 account.
@@ -294,6 +300,7 @@ account.
 Create a videosource
 --------------------
 
+```
 Schedules Direct functions:
 1 Add a lineup to your account at Schedules Direct
 2 Delete a lineup from your account at Schedules Direct
@@ -306,7 +313,7 @@ D to Delete a videosource in MythTV
 L to Link a videosource to a lineup at SD
 R to refresh a videosource with new lineup information
 Q to Quit
->a
+>A
 Adding new videosource
 
 Name:>Comcast
@@ -318,11 +325,14 @@ Status messages from Schedules Direct:
 MythTV videosource:
 sourceid: 4     name: Comcast   Schedules Direct lineup:
 
+```
+
 =====================================
 
 Now that we've got a videosource configured, you have to link the
 videosource to the lineup you've added to your account.
 
+```
 Schedules Direct functions:
 1 Add a lineup to your account at Schedules Direct
 2 Delete a lineup from your account at Schedules Direct
@@ -346,6 +356,7 @@ Schedules Direct lineup:>USA-IL57303-X
 
 MythTV videosource:
 sourceid: 4     name: Comcast   Schedules Direct lineup: USA-IL57303-X
+```
 
 =====================================
 
@@ -354,6 +365,7 @@ function.  This is also done whenever the utility program tells you that
 there's an update available to the headend by putting "***" in the "New"
 column.
 
+```
 (status deleted)
 
 >R
@@ -376,6 +388,7 @@ The following lineups are in your account at Schedules Direct:
 Checking for updated lineups from Schedules Direct.
 Retrieving lineup from Schedules Direct.
 Retrieving lineup from Schedules Direct.
+```
 
 Quit out of the utility program.
 
@@ -397,6 +410,7 @@ Exit mythtv-setup
 
 Run the mfdb-json.php script to retrieve the data.
 
+```
 00:00:49:mfdb-json.php developer grabber v0.07/2014-02-16
 00:00:49:Temp directory for Schedules is /tmp/mfdbo0eoW0
 00:00:49:Temp directory for Programs is /tmp/mfdbRHPKAw
@@ -438,6 +452,7 @@ Run the mfdb-json.php script to retrieve the data.
 00:04:50:4 minutes 1 seconds.
 00:04:50:Updating status.
 00:04:50:Done.
+```
 
 Once the download / update is done, start mythbackend and see if it's happy. 
 Try to schedule something to record.  If it works, then excellent!  If not,
