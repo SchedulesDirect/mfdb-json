@@ -950,7 +950,7 @@ function insertSchedule()
 
             if (isset($programJSON["descriptions"]["description1000"]))
             {
-                $description = $programJSON["descriptions"]["description1000"]["description"];
+                $description = $programJSON["descriptions"]["description1000"][0]["description"];
             }
             else
             {
