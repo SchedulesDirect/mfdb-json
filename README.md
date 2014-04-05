@@ -3,7 +3,7 @@ mfdb-json
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.05, 2014-04-03
+v0.06, 2014-04-05
 Robert Kulagowski
 grabber@schedulesdirect.org
 
@@ -77,7 +77,7 @@ existing Schedules Direct information for the XML service isn't
 automatically copied over, and the service is running on different hosts.)
 
 ---
-
+```
 sd-utility.php utility program v0.10/2014-04-03
 Attempting to connect to database.
 Using beta server.
@@ -190,6 +190,7 @@ Lineup to add>
 
 ---
 
+```
 Notice that in this particular country / postal code, there are headends,
 and there are lineups within that headend, but there aren't multiple lineups
 in a headend - all devices are either "-DEFAULT" or "-X".
@@ -240,12 +241,14 @@ location: Eagle Rock
 
 (etc)
 
+```
 Notice that headend CA00053 has multiple lineups, as does CA67309 and CA67310.
 
 You can encounter this overseas:
 Three-character ISO-3166-1 alpha3 country code:>GBR
 Enter postal code:>W2
 
+```
 headend: 0000218
 location: Watford
         name: Virgin Media Lewisham - Cable
@@ -265,9 +268,10 @@ location: London
         Lineup: GBR-0001122-Y
 
 (snip)
-
+```
 In any case, the script will ask you which lineup to add.
 
+```
 Lineup to add>USA-IL57303-X
 Message from server: Added lineup.
 
@@ -287,10 +291,12 @@ The following lineups are in your account at Schedules Direct:
 Checking for updated lineups from Schedules Direct.
 Retrieving lineup from Schedules Direct.
 Retrieving lineup from Schedules Direct.
+```
 
 Repeat this process until you have added the necessary lineups to your
 account.
 
+```
 Create a videosource
 --------------------
 
@@ -318,6 +324,7 @@ Status messages from Schedules Direct:
 MythTV videosource:
 sourceid: 4     name: Comcast   Schedules Direct lineup:
 
+```
 =====================================
 
 Now that we've got a videosource configured, you have to link the
