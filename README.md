@@ -191,12 +191,14 @@ Lineup to add>
 ---
 
 ```
+
 Notice that in this particular country / postal code, there are headends,
 and there are lineups within that headend, but there aren't multiple lineups
 in a headend - all devices are either "-DEFAULT" or "-X".
 
 You may see this:
 
+```
 Three-character ISO-3166-1 alpha3 country code:>USA
 Enter postal code:>90210
 
@@ -242,6 +244,7 @@ location: Eagle Rock
 (etc)
 
 ```
+
 Notice that headend CA00053 has multiple lineups, as does CA67309 and CA67310.
 
 You can encounter this overseas:
@@ -269,6 +272,7 @@ location: London
 
 (snip)
 ```
+
 In any case, the script will ask you which lineup to add.
 
 ```
@@ -325,6 +329,7 @@ MythTV videosource:
 sourceid: 4     name: Comcast   Schedules Direct lineup:
 
 ```
+
 =====================================
 
 Now that we've got a videosource configured, you have to link the
