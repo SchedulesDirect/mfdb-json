@@ -246,10 +246,11 @@ location: Eagle Rock
 Notice that headend CA00053 has multiple lineups, as does CA67309 and CA67310.
 
 You can encounter this overseas:
+
+```
 Three-character ISO-3166-1 alpha3 country code:>GBR
 Enter postal code:>W2
 
-```
 headend: 0000218
 location: Watford
         name: Virgin Media Lewisham - Cable
@@ -314,7 +315,7 @@ D to Delete a videosource in MythTV
 L to Link a videosource to a lineup at SD
 R to refresh a videosource with new lineup information
 Q to Quit
->a
+>A
 Adding new videosource
 
 Name:>Comcast
