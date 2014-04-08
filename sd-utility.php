@@ -41,9 +41,9 @@ $helpText = <<< eol
 The following options are available:
 --beta
 --help\t\t(this text)
---host=\t\tMySQL database hostname
---dbuser=\tUsername to access database
---dbpassword=\tPassword to access database.
+--host=\t\tMySQL database hostname.
+--dbuser=\tUsername for database access.
+--dbpassword=\tPassword for database access.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 eol;
