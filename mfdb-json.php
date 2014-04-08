@@ -609,7 +609,7 @@ function insertSchedule()
      */
 
     $scheduleJSON = array();
-    while (list($key, $item) = each($scheduleTemp))
+    while (list(, $item) = each($scheduleTemp))
     {
         $tempJSON = json_decode($item, TRUE);
         $stationID = $tempJSON["stationID"];
@@ -621,7 +621,7 @@ function insertSchedule()
      */
     $scheduleTemp = array();
 
-    while (list($key, $item) = each($existingChannels))
+    while (list(, $item) = each($existingChannels))
     {
         $chanID = $item["chanid"];
         $sourceID = $item["sourceid"];
@@ -630,7 +630,7 @@ function insertSchedule()
 
         $dbh->beginTransaction();
 
-        while (list($dummy, $schedule) = each($scheduleJSON[$stationID]))
+        while (list(, $schedule) = each($scheduleJSON[$stationID]))
         {
             /*
              * Pre-declare what we'll be using to quiet warning about unused variables.
@@ -824,14 +824,44 @@ function insertSchedule()
                 $isLast = FALSE;
             }
 
-            if (isset($schedule["ratings"]))
+            if (isset($schedule["contentRating"]))
             {
-                foreach ($schedule["ratings"] as $r)
+                foreach ($schedule["contentRating"] as $r)
                 {
                     if ($r["body"] == "USA Parental Rating")
                     {
                         $ratingSystem = "V-CHIP";
                         $rating = $r["code"];
+                    }
+                    if ($r["body"] == "Motion Picture Association of America")
+                    {
+                        $ratingSystem = "MPAA";
+                        $rating = $r["code"];
+                    }
+                }
+            }
+
+            /*
+             * Yes, there may be two different places that ratings exist. But the schedule rating should be used if
+             * it exists, because a program may have different version, some edited for language, etc,
+             * and that's indicated in the schedule.
+             */
+            else
+            {
+                if (isset($programJSON["contentRating"]))
+                {
+                    foreach ($programJSON["contentRating"] as $r)
+                    {
+                        if ($r["body"] == "USA Parental Rating")
+                        {
+                            $ratingSystem = "V-CHIP";
+                            $rating = $r["code"];
+                        }
+                        if ($r["body"] == "Motion Picture Association of America")
+                        {
+                            $ratingSystem = "MPAA";
+                            $rating = $r["code"];
+                        }
                     }
                 }
             }
@@ -1019,12 +1049,6 @@ function insertSchedule()
                 {
                     $starRating = (.5 * substr_count($programJSON["movie"]["starRating"], "*")) +
                         (.125 * substr_count($programJSON["movie"]["starRating"], "+"));
-                }
-
-                if (isset($programJSON["movie"]["mpaaRating"]))
-                {
-                    $ratingSystem = "MPAA";
-                    $rating = $programJSON["movie"]["mpaaRating"];
                 }
             }
 
