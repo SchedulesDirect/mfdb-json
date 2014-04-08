@@ -69,7 +69,9 @@ If you've never used the Schedules Direct JSON service before, you will be
 prompted to enter your username and password; otherwise, your username and
 password will be read from the "videosource" table in mythconverg.
 
-Add your headend to your Schedules Direct JSON-service account.  (Your
+###Add a lineup.
+
+Add your lineup to your Schedules Direct JSON-service account.  (Your
 existing Schedules Direct information for the XML service isn't
 automatically copied over, and the service is running on different hosts.)
 
@@ -102,11 +104,11 @@ D to Delete a videosource in MythTV
 L to Link a videosource to a lineup at Schedules Direct
 R to refresh a videosource with new lineup information
 Q to Quit
-
+```
 >**1**
 Three-character ISO-3166-1 alpha3 country code:>**USA**
 Enter postal code:>**60030**
-
+```
 headend: 4DTV
 location: USA
         name: 4DTV
@@ -192,10 +194,10 @@ in a headend - all devices are either "-DEFAULT" or "-X".
 
 You may see this:
 
-```
-Three-character ISO-3166-1 alpha3 country code:>USA
-Enter postal code:>90210
+Three-character ISO-3166-1 alpha3 country code:>**USA**
+Enter postal code:>**90210**
 
+```
 headend: 4DTV
 location: USA
         name: 4DTV
@@ -243,10 +245,10 @@ Notice that headend CA00053 has multiple lineups, as does CA67309 and CA67310.
 
 You can encounter this overseas:
 
-```
-Three-character ISO-3166-1 alpha3 country code:>GBR
-Enter postal code:>W2
+Three-character ISO-3166-1 alpha3 country code:>**GBR**
+Enter postal code:>**W2**
 
+```
 headend: 0000218
 location: Watford
         name: Virgin Media Lewisham - Cable
@@ -270,8 +272,9 @@ location: London
 
 In any case, the script will ask you which lineup to add.
 
+Lineup to add>**USA-IL57303-X**
+
 ```
-Lineup to add>USA-IL57303-X
 Message from server: Added lineup.
 
 Status messages from Schedules Direct:
