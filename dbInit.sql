@@ -1,5 +1,3 @@
-USE mythconverg;
-
 DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,SDprogramrating,SDschedule,SDMessages;
 
 CREATE TABLE `SDMessages` (
