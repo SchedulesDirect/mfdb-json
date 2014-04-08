@@ -419,7 +419,7 @@ video source you created in the sd-utility script.
 
 Exit mythtv-setup
 
-=====================================
+#Retrieving data
 
 Run the mfdb-json.php script to retrieve the data.
 
