@@ -1,9 +1,13 @@
 #mfdb-json
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
+
 v0.07, 2014-04-05
+
 Robert Kulagowski
+
 grabber@schedulesdirect.org
+
 
 This program runs as a replacement to mythfilldatabase (for now) and
 downloads data from Schedules Direct using the new JSON format.
@@ -23,7 +27,7 @@ downloads data from Schedules Direct using the new JSON format.
 - Full support for United States, Canada, Great Britain.
 - See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2530 for the
   complete list of countries with data.
-- Self-hosted data so not dependent on Tribune's XML servers
+- Self-hosted data, so not dependent on Tribune's XML servers.
 
 #Installation
 
@@ -104,7 +108,7 @@ D to Delete a videosource in MythTV
 L to Link a videosource to a lineup at Schedules Direct
 R to refresh a videosource with new lineup information
 Q to Quit
->
+
 ```
 Type in: **1**
 
@@ -302,7 +306,7 @@ Retrieving lineup from Schedules Direct.
 Repeat this process until you have added the necessary lineups to your
 account.
 
-###Create a videosource
+###Add a videosource
 
 ```
 Schedules Direct functions:
@@ -314,7 +318,7 @@ Schedules Direct functions:
 MythTV functions:
 A to Add a new videosource to MythTV
 D to Delete a videosource in MythTV
-L to Link a videosource to a lineup at SD
+L to Link a videosource to a lineup at Schedules Direct
 R to refresh a videosource with new lineup information
 Q to Quit
 >
@@ -337,8 +341,8 @@ sourceid: 4     name: Comcast   Schedules Direct lineup:
 
 ###Link lineup to MythTV sources
 
-Now that we've got a videosource configured, you have to link the
-videosource to the lineup you've added to your account.
+Now that we've got a videosource configured, you have to link it
+to the lineup you've added to your Schedules Direct account.
 
 ```
 Schedules Direct functions:
@@ -350,7 +354,7 @@ Schedules Direct functions:
 MythTV functions:
 A to Add a new videosource to MythTV
 D to Delete a videosource in MythTV
-L to Link a videosource to a lineup at SD
+L to Link a videosource to a lineup at Schedules Direct
 R to refresh a videosource with new lineup information
 Q to Quit
 
@@ -376,9 +380,6 @@ Once that's done, you'll need to download the channel mapping using the "R"
 function.  This is also done whenever the utility program tells you that
 there's an update available to the headend by putting "***" in the "New"
 column.
-
-```
-(status deleted)
 
 Type in: **R**
 
@@ -419,7 +420,6 @@ video source you created in the sd-utility script.
 Exit mythtv-setup
 
 =====================================
-
 
 Run the mfdb-json.php script to retrieve the data.
 
