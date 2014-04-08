@@ -76,6 +76,23 @@ channel.  Select "No, I know what I'm doing."
 
 Run the sd-utility.php script.
 
+You can run it with **--help** to see the various options.
+
+```
+./sd-utility.php --help
+
+sd-utility.php utility program v0.10/2014-04-03
+
+The following options are available:
+--beta
+--help          (this text)
+--host=         MySQL database hostname.
+--dbuser=       Username for database access.
+--dbpassword=   Password for database access.
+--username=     Schedules Direct username.
+--password=     Schedules Direct password.
+```
+
 If you've never used the Schedules Direct JSON service before, you will be
 prompted to enter your username and password; otherwise, your username and
 password will be read from the "videosource" table in mythconverg.
