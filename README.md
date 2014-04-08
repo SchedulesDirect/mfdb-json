@@ -1,16 +1,14 @@
-mfdb-json
-=========
+#mfdb-json
 
-mythfilldatabase grabber for the Schedules Direct JSON service.
-
-v0.07, 2014-04-05
-Robert Kulagowski
-grabber@schedulesdirect.org
+##mythfilldatabase grabber for the Schedules Direct JSON service.
+##v0.07, 2014-04-05
+##Robert Kulagowski
+##grabber@schedulesdirect.org
 
 This program runs as a replacement to mythfilldatabase (for now) and
 downloads data from Schedules Direct using the new JSON format.
 
-Features:
+#Features:
 
 - only downloads programs that have changes. Your first download may be
   40000 programs, but daily downloads after that will be 2-3000 depending on
@@ -27,8 +25,8 @@ Features:
   complete list of countries with data.
 - Self-hosted data so not dependent on Tribune's XML servers
 
-Installation
-============
+#Installation
+
 Install the prerequisites:
 
 sudo apt-get install git php5-cli php5-curl curl
