@@ -1,9 +1,9 @@
 #mfdb-json
 
-##mythfilldatabase grabber for the Schedules Direct JSON service.
-##v0.07, 2014-04-05
-##Robert Kulagowski
-##grabber@schedulesdirect.org
+mythfilldatabase grabber for the Schedules Direct JSON service.
+v0.07, 2014-04-05
+Robert Kulagowski
+grabber@schedulesdirect.org
 
 This program runs as a replacement to mythfilldatabase (for now) and
 downloads data from Schedules Direct using the new JSON format.
@@ -45,23 +45,24 @@ curl -sS https://getcomposer.org/installer | php
 
 php composer.phar install
 
-Configuration
-=============
+#Configuration
+##MythTV
+
 If you've never run mythtv-setup, configure the following first, otherwise
 skip to the next section.
-
+```
 1. General
 2. Capture cards
 3. Recording Profiles
 7. Storage Directories
-
+```
 Do not configure Video Sources or Input Connections!
 
 Exit mythtv-setup. You will be prompted that you haven't set your start
 channel.  Select "No, I know what I'm doing."
 
-Next:
------
+##mfdb
+
 Run the sd-utility.php script.
 
 If you've never used the Schedules Direct JSON service before, you will be
@@ -72,7 +73,6 @@ Add your headend to your Schedules Direct JSON-service account.  (Your
 existing Schedules Direct information for the XML service isn't
 automatically copied over, and the service is running on different hosts.)
 
----
 ```
 sd-utility.php utility program v0.10/2014-04-03
 Attempting to connect to database.
@@ -103,9 +103,9 @@ L to Link a videosource to a lineup at Schedules Direct
 R to refresh a videosource with new lineup information
 Q to Quit
 
->1
-Three-character ISO-3166-1 alpha3 country code:>USA
-Enter postal code:>60030
+>**1**
+Three-character ISO-3166-1 alpha3 country code:>**USA**
+Enter postal code:>**60030**
 
 headend: 4DTV
 location: USA
