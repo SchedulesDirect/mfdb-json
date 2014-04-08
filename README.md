@@ -106,7 +106,8 @@ R to refresh a videosource with new lineup information
 Q to Quit
 >
 ```
-**1**
+Type in: **1**
+
 Three-character ISO-3166-1 alpha3 country code:>**USA**
 
 Enter postal code:>**60030**
@@ -248,6 +249,7 @@ Notice that headend CA00053 has multiple lineups, as does CA67309 and CA67310.
 You can encounter this overseas:
 
 Three-character ISO-3166-1 alpha3 country code:>**GBR**
+
 Enter postal code:>**W2**
 
 ```
@@ -317,7 +319,7 @@ R to refresh a videosource with new lineup information
 Q to Quit
 >
 ```
-**A**
+Type in: **A**
 
 ```
 Adding new videosource
@@ -354,7 +356,7 @@ Q to Quit
 
 >
 ```
-**L**
+Type in: **L**
 
 ```
 Linking Schedules Direct lineup to sourceid
@@ -378,7 +380,8 @@ column.
 ```
 (status deleted)
 
-**R**
+Type in: **R**
+
 ```
 Which lineup:>USA-IL57303-X
 Updating channel table for lineup:USA-IL57303-X
@@ -398,7 +401,6 @@ The following lineups are in your account at Schedules Direct:
 └───────────────┴────────────────────┴─────────────────────────┴────┘
 Checking for updated lineups from Schedules Direct.
 Retrieving lineup from Schedules Direct.
-Retrieving lineup from Schedules Direct.
 ```
 
 Quit out of the utility program.
@@ -407,11 +409,11 @@ If there are channels you don't want, unset the "visible" state in the
 channel table, because that's what the script will use to determine what
 schedules to download.
 
-=====================================
+##Back to MythTV
 
 Restart mythtv-setup
 
-Go into "5. Input connections" and associate the hardware inputs with the
+Go to "5. Input connections" and associate the hardware inputs with the
 video source you created in the sd-utility script.
 
 Exit mythtv-setup
