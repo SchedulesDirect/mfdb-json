@@ -104,10 +104,13 @@ D to Delete a videosource in MythTV
 L to Link a videosource to a lineup at Schedules Direct
 R to refresh a videosource with new lineup information
 Q to Quit
+>
 ```
->**1**
+**1**
 Three-character ISO-3166-1 alpha3 country code:>**USA**
+
 Enter postal code:>**60030**
+
 ```
 headend: 4DTV
 location: USA
@@ -185,7 +188,6 @@ location: 60030
         Lineup: USA-OTA-60030
 
 Lineup to add>
-
 ```
 
 Notice that in this particular country / postal code, there are headends,
@@ -195,6 +197,7 @@ in a headend - all devices are either "-DEFAULT" or "-X".
 You may see this:
 
 Three-character ISO-3166-1 alpha3 country code:>**USA**
+
 Enter postal code:>**90210**
 
 ```
@@ -202,7 +205,6 @@ headend: 4DTV
 location: USA
         name: 4DTV
         Lineup: USA-4DTV-DEFAULT
-
 
 (snip)
 
@@ -298,8 +300,7 @@ Retrieving lineup from Schedules Direct.
 Repeat this process until you have added the necessary lineups to your
 account.
 
-Create a videosource
---------------------
+###Create a videosource
 
 ```
 Schedules Direct functions:
@@ -314,7 +315,11 @@ D to Delete a videosource in MythTV
 L to Link a videosource to a lineup at SD
 R to refresh a videosource with new lineup information
 Q to Quit
->A
+>
+```
+**A**
+
+```
 Adding new videosource
 
 Name:>Comcast
@@ -328,7 +333,7 @@ sourceid: 4     name: Comcast   Schedules Direct lineup:
 
 ```
 
-=====================================
+###Link lineup to MythTV sources
 
 Now that we've got a videosource configured, you have to link the
 videosource to the lineup you've added to your account.
@@ -347,7 +352,11 @@ L to Link a videosource to a lineup at SD
 R to refresh a videosource with new lineup information
 Q to Quit
 
->L
+>
+```
+**L**
+
+```
 Linking Schedules Direct lineup to sourceid
 
 MythTV sourceid:>4
@@ -359,7 +368,7 @@ MythTV videosource:
 sourceid: 4     name: Comcast   Schedules Direct lineup: USA-IL57303-X
 ```
 
-=====================================
+###Refresh lineup
 
 Once that's done, you'll need to download the channel mapping using the "R"
 function.  This is also done whenever the utility program tells you that
@@ -369,7 +378,8 @@ column.
 ```
 (status deleted)
 
->R
+**R**
+```
 Which lineup:>USA-IL57303-X
 Updating channel table for lineup:USA-IL57303-X
 
