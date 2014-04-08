@@ -39,15 +39,15 @@ sudo apt-get install git php5-cli php5-curl curl
 ###Fedora
 yum -y install git curl curl-devel libcurl libcurl-devel php-common
 
-Clone the code into a local directory:
+###Clone from github
 
 git clone https://github.com/SchedulesDirect/mfdb-json.git
 
-Create the required tables with the dbInit.sql script
+###Create MySQL tables
 
 mysql -umythtv -p < dbInit.sql
 
-Install Composer:
+###Install Composer
 
 curl -sS https://getcomposer.org/installer | php
 
