@@ -33,9 +33,13 @@ downloads data from Schedules Direct using the new JSON format.
 
 Install the prerequisites:
 
+##Ubuntu
 sudo apt-get install git php5-cli php5-curl curl
 
-Start by cloning into a local directory:
+##Fedora
+yum -y install git curl curl-devel libcurl libcurl-devel php-common
+
+Clone the code into a local directory:
 
 git clone https://github.com/SchedulesDirect/mfdb-json.git
 
