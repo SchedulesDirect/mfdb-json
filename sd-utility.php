@@ -93,7 +93,7 @@ try
     $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $dbUser, $dbPassword,
         array(PDO::ATTR_PERSISTENT => true));
     $dbh->exec("SET CHARACTER SET utf8");
-    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e)
 {
     print "Exception with PDO: " . $e->getMessage() . "\n";
@@ -373,12 +373,14 @@ function updateChannelTable($lineup)
                     "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                      VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
+
+
                 try
                 {
                     $stmt->execute(array("chanid"  => (int)($sourceID * 1000) + (int)$channum,
                                          "channum" => ltrim($channum, "0"),
                                          "freqid"  => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
-                } catch (Exception $e)
+                } catch (PDOException $e)
                 {
                     print "Got exception.\n";
                     print "code:" . $e->getCode() . "\n";
