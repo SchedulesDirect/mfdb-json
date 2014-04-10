@@ -602,7 +602,7 @@ function addLineupsToSchedulesDirect()
     {
         $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
         print "********************************************\n";
-        print "\tError response from server\n";
+        print "\tError response from server:\n";
         print "\tCode: {$s["code"]}\n";
         print "\tMessage: {$s["message"]}\n";
         print "\tServer: {$s["serverID"]}\n";
