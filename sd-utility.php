@@ -384,9 +384,9 @@ function updateChannelTable($lineup)
                     {
                         $a = explode("'", $e->getMessage());
                         // print "message: " . $e->getMessage() . "\n";
+                        print "channum is $channum, stationID is $stationID\n";
                         $tt = fgets(STDIN);
                     }
-
                 }
             }
 
