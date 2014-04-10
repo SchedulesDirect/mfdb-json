@@ -260,6 +260,7 @@ function updateChannelTable($lineup)
     if (count($s) == 0)
     {
         print "ERROR: You do not have that lineup locally configured.\n";
+
         return;
     }
 
@@ -588,10 +589,25 @@ function addLineupsToSchedulesDirect()
 
         return;
     }
-
+/*
     $request = $client->put("lineups/$he", array("token" => $token), array());
     $response = $request->send();
     $s = $response->json();
+*/
+    try
+    {
+        $response = $client->put("lineups/$he", array("token" => $token), array());
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        print "Error in putting lineup: " . $e->getBody() . "\n";
+
+        if ($e->getCode() == 400)
+        {
+            return ("ERROR");
+        }
+    }
+
+    $s = $response->getBody();
 
     if ($s["code"])
     {
