@@ -605,6 +605,7 @@ function addLineupsToSchedulesDirect()
         print "Code: {$s["code"]}\n";
         print "Message: {$s["message"]}\n";
         print "Server: {$s["serverID"]}\n";
+        return;
     }
 
     $s = $response->json();
