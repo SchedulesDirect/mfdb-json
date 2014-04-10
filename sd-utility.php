@@ -373,8 +373,6 @@ function updateChannelTable($lineup)
                     "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                      VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
-
-
                 try
                 {
                     $stmt->execute(array("chanid"  => (int)($sourceID * 1000) + (int)$channum,
