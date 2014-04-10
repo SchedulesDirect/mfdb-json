@@ -651,11 +651,14 @@ function addLineupsToSchedulesDirect()
 
 function deleteLineupFromSchedulesDirect()
 {
+    global $dbh;
     global $client;
     global $token;
     global $updatedLineupsToRefresh;
 
-    $toDelete = readline("Lineup to Delete:>");
+    $deleteCache = $dbh->prepare("DELETE FROM SDheadendCache WHERE lineup=:lineup");
+
+    $toDelete = strtoupper(readline("Lineup to Delete:>"));
 
     $request = $client->delete("lineups/$toDelete", array("token" => $token), array());
     $response = $request->send();
@@ -672,6 +675,7 @@ function deleteLineupFromSchedulesDirect()
     {
         print "Message from server: {$s["message"]}\n";
         unset ($updatedLineupsToRefresh[$toDelete]);
+        $deleteCache->execute(array("lineup" => $toDelete));
     }
 }
 
