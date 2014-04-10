@@ -382,10 +382,13 @@ function updateChannelTable($lineup)
                 {
                     if ($e->getCode() == 23000)
                     {
-                        $a = explode("'", $e->getMessage());
-                        // print "message: " . $e->getMessage() . "\n";
-                        print "channum is $channum, stationID is $stationID\n";
-                        $tt = fgets(STDIN);
+                        print "Error inserting data. Duplicate channel number exists?\n";
+                        print "Send email to grabber@schedulesdirect.org with the following:\n\n";
+                        print "Duplicate channel error.\n";
+                        print "Transport: $transport\n";
+                        print "Lineup: $lineup.\n";
+                        print "Channum: $channum\n";
+                        print "stationID: $stationID\n";
                     }
                 }
             }
@@ -417,10 +420,16 @@ function updateChannelTable($lineup)
                                          "freqid" => $channel, "sourceid" => $sourceID, "xmltvid" => $stationID));
                 } catch (PDOException $e)
                 {
-                    print "Got exception.\n";
-                    print "code:" . $e->getCode() . "\n";
-                    print "message: " . $e->getMessage() . "\n";
-                    $tt = fgets(STDIN);
+                    if ($e->getCode() == 23000)
+                    {
+                        print "Error inserting data. Duplicate channel number exists?\n";
+                        print "Send email to grabber@schedulesdirect.org with the following:\n\n";
+                        print "Duplicate channel error.\n";
+                        print "Transport: $transport\n";
+                        print "Lineup: $lineup.\n";
+                        print "Channum: $channel\n";
+                        print "stationID: $stationID\n";
+                    }
                 }
 
                 /*
