@@ -589,39 +589,25 @@ function addLineupsToSchedulesDirect()
 
         return;
     }
-/*
-    $request = $client->put("lineups/$he", array("token" => $token), array());
-    $response = $request->send();
-    $s = $response->json();
-*/
+    /*
+        $request = $client->put("lineups/$he", array("token" => $token), array());
+        $response = $request->send();
+        $s = $response->json();
+    */
     try
     {
         $response = $client->put("lineups/$he", array("token" => $token), array())->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
-        $a = $e->getResponse()->getBody(true);
-        $j = json_decode($a, TRUE);
-        //print "Error in putting lineup:\na is\n$a\n\n " .  . "\n";
-
-        if ($e->getCode() == 400)
-        {
-            return ("ERROR");
-        }
-    }
-
-    $s = $response->json();
-
-    if ($s["code"])
-    {
+        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
         print "Error response from server:\n";
         print "Code: {$s["code"]}\n";
         print "Message: {$s["message"]}\n";
         print "Server: {$s["serverID"]}\n";
     }
-    else
-    {
-        print "Message from server: {$s["message"]}\n";
-    }
+
+    $s = $response->json();
+    print "Message from server: {$s["message"]}\n";
 }
 
 function deleteLineupFromSchedulesDirect()
