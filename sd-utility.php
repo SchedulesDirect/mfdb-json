@@ -579,6 +579,8 @@ function addLineupsToSchedulesDirect()
     print "\n\n";
     $he = strtoupper(readline("Lineup to add>"));
 
+    print "Sending request to server.\n";
+
     if ($he == "")
     {
         return;
@@ -590,11 +592,7 @@ function addLineupsToSchedulesDirect()
 
         return;
     }
-    /*
-        $request = $client->put("lineups/$he", array("token" => $token), array());
-        $response = $request->send();
-        $s = $response->json();
-    */
+
     try
     {
         $response = $client->put("lineups/$he", array("token" => $token), array())->send();
