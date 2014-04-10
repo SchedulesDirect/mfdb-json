@@ -380,14 +380,17 @@ function updateChannelTable($lineup)
                 {
                     if ($e->getCode() == 23000)
                     {
+                        print "\n\n";
                         print "*************************************************************\n";
+                        print "\n\n";
                         print "Error inserting data. Duplicate channel number exists?\n";
                         print "Send email to grabber@schedulesdirect.org with the following:\n\n";
                         print "Duplicate channel error.\n";
                         print "Transport: $transport\n";
-                        print "Lineup: $lineup.\n";
+                        print "Lineup: $lineup\n";
                         print "Channum: $channum\n";
                         print "stationID: $stationID\n";
+                        print "\n\n";
                         print "*************************************************************\n";
                     }
                 }
@@ -422,14 +425,17 @@ function updateChannelTable($lineup)
                 {
                     if ($e->getCode() == 23000)
                     {
+                        print "\n\n";
                         print "*************************************************************\n";
+                        print "\n\n";
                         print "Error inserting data. Duplicate channel number exists?\n";
                         print "Send email to grabber@schedulesdirect.org with the following:\n\n";
                         print "Duplicate channel error.\n";
                         print "Transport: $transport\n";
-                        print "Lineup: $lineup.\n";
-                        print "Channum: $channel\n";
+                        print "Lineup: $lineup\n";
+                        print "Channum: $channum\n";
                         print "stationID: $stationID\n";
+                        print "\n\n";
                         print "*************************************************************\n";
                     }
                 }
