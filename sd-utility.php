@@ -373,9 +373,18 @@ function updateChannelTable($lineup)
                     "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                      VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
-                $stmt->execute(array("chanid"  => (int)($sourceID * 1000) + (int)$channum,
-                                     "channum" => ltrim($channum, "0"),
-                                     "freqid"  => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
+                try
+                {
+                    $stmt->execute(array("chanid"  => (int)($sourceID * 1000) + (int)$channum,
+                                         "channum" => ltrim($channum, "0"),
+                                         "freqid"  => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
+                } catch (PDOException $e)
+                {
+                    print "Got exception.\n";
+                    print "code:" . $e->getCode() . "\n";
+                    print "message: " . $e->getMessage() . "\n";
+                    $tt = fgets(STDIN);
+                }
             }
 
             if ($transport == "QAM")
@@ -612,6 +621,7 @@ function addLineupsToSchedulesDirect()
         print "\tMessage: {$s["message"]}\n";
         print "\tServer: {$s["serverID"]}\n";
         print "********************************************\n";
+
         return;
     }
 
