@@ -577,7 +577,8 @@ function addLineupsToSchedulesDirect()
     }
 
     print "\n\n";
-    $he = readline("Lineup to add>");
+    $he = strtoupper(readline("Lineup to add>"));
+
     if ($he == "")
     {
         return;
