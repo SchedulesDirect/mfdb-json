@@ -338,8 +338,6 @@ function updateChannelTable($lineup)
 
             if ($transport == "Antenna")
             {
-                // print "Processing Antenna section.\n";
-
                 $freqid = $mapArray["uhfVhf"];
                 if (isset($mapArray["atscMajor"]))
                 {
