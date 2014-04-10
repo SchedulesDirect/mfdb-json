@@ -378,7 +378,7 @@ function updateChannelTable($lineup)
                     $stmt->execute(array("chanid"  => (int)($sourceID * 1000) + (int)$channum,
                                          "channum" => ltrim($channum, "0"),
                                          "freqid"  => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
-                } catch (PDOException $e)
+                } catch (Exception $e)
                 {
                     print "Got exception.\n";
                     print "code:" . $e->getCode() . "\n";
