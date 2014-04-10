@@ -599,7 +599,7 @@ function addLineupsToSchedulesDirect()
         $response = $client->put("lineups/$he", array("token" => $token), array())->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
-        print "Error in putting lineup: " . $e->getBody() . "\n";
+        print "Error in putting lineup: " . $e->getResponse() . "\n";
 
         if ($e->getCode() == 400)
         {
@@ -607,7 +607,7 @@ function addLineupsToSchedulesDirect()
         }
     }
 
-    $s = $response->getBody();
+    $s = $response->json();
 
     if ($s["code"])
     {
