@@ -380,10 +380,13 @@ function updateChannelTable($lineup)
                                          "freqid"  => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
                 } catch (PDOException $e)
                 {
-                    print "Got exception.\n";
-                    print "code:" . $e->getCode() . "\n";
-                    print "message: " . $e->getMessage() . "\n";
-                    $tt = fgets(STDIN);
+                    if ($e->getCode() == 23000)
+                    {
+                        $a = explode("'", $e->getMessage());
+                        // print "message: " . $e->getMessage() . "\n";
+                        $tt = fgets(STDIN);
+                    }
+
                 }
             }
 
