@@ -260,6 +260,7 @@ function updateChannelTable($lineup)
     if (count($s) == 0)
     {
         print "ERROR: You do not have that lineup locally configured.\n";
+
         return;
     }
 
@@ -400,8 +401,17 @@ function updateChannelTable($lineup)
                     $virtualChannel = "";
                 }
 
-                $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channel, "channum" => $channel,
-                                     "freqid" => $channel, "sourceid" => $sourceID, "xmltvid" => $stationID));
+                try
+                {
+                    $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channel, "channum" => $channel,
+                                         "freqid" => $channel, "sourceid" => $sourceID, "xmltvid" => $stationID));
+                } catch (PDOException $e)
+                {
+                    print "Got exception.\n";
+                    print "code:" . $e->getCode() . "\n";
+                    print "message: " . $e->getMessage() . "\n";
+                    $tt = fgets(STDIN);
+                }
 
                 /*
                  * Because multiple programs may end up on a single frequency, we only want to insert once, but we want
