@@ -345,7 +345,6 @@ function updateChannelTable($lineup)
                     $atscMinor = $mapArray["atscMinor"];
                     $channum = "$atscMajor.$atscMinor";
 
-                    // print "ATSC f:$freqid channum:$channum\n";
                     $updateChannelTableATSC->execute(array("channum"   => $channum, "sid" => $stationID,
                                                            "atscMajor" => $atscMajor,
                                                            "atscMinor" => $atscMinor));
@@ -353,7 +352,6 @@ function updateChannelTable($lineup)
                 else
                 {
                     $channum = $freqid;
-                    // print "Analog f:$freqid channum:$channum\n";
                     $updateChannelTableAnalog->execute(array("channum" => ltrim($channum, "0"), "sid" => $stationID,
                                                              "freqID"  => $freqid));
                 }
@@ -382,6 +380,7 @@ function updateChannelTable($lineup)
                 {
                     if ($e->getCode() == 23000)
                     {
+                        print "*************************************************************\n";
                         print "Error inserting data. Duplicate channel number exists?\n";
                         print "Send email to grabber@schedulesdirect.org with the following:\n\n";
                         print "Duplicate channel error.\n";
@@ -389,6 +388,7 @@ function updateChannelTable($lineup)
                         print "Lineup: $lineup.\n";
                         print "Channum: $channum\n";
                         print "stationID: $stationID\n";
+                        print "*************************************************************\n";
                     }
                 }
             }
@@ -422,6 +422,7 @@ function updateChannelTable($lineup)
                 {
                     if ($e->getCode() == 23000)
                     {
+                        print "*************************************************************\n";
                         print "Error inserting data. Duplicate channel number exists?\n";
                         print "Send email to grabber@schedulesdirect.org with the following:\n\n";
                         print "Duplicate channel error.\n";
@@ -429,6 +430,7 @@ function updateChannelTable($lineup)
                         print "Lineup: $lineup.\n";
                         print "Channum: $channel\n";
                         print "stationID: $stationID\n";
+                        print "*************************************************************\n";
                     }
                 }
 
