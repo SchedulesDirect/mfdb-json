@@ -338,8 +338,6 @@ function updateChannelTable($lineup)
 
             if ($transport == "Antenna")
             {
-                // print "Processing Antenna section.\n";
-
                 $freqid = $mapArray["uhfVhf"];
                 if (isset($mapArray["atscMajor"]))
                 {
@@ -586,7 +584,10 @@ function addLineupsToSchedulesDirect()
     }
 
     print "\n\n";
-    $he = readline("Lineup to add>");
+    $he = strtoupper(readline("Lineup to add>"));
+
+    print "Sending request to server.\n";
+
     if ($he == "")
     {
         return;
@@ -599,21 +600,23 @@ function addLineupsToSchedulesDirect()
         return;
     }
 
-    $request = $client->put("lineups/$he", array("token" => $token), array());
-    $response = $request->send();
-    $s = $response->json();
+    try
+    {
+        $response = $client->put("lineups/$he", array("token" => $token), array())->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+        print "********************************************\n";
+        print "\tError response from server:\n";
+        print "\tCode: {$s["code"]}\n";
+        print "\tMessage: {$s["message"]}\n";
+        print "\tServer: {$s["serverID"]}\n";
+        print "********************************************\n";
+        return;
+    }
 
-    if ($s["code"])
-    {
-        print "Error response from server:\n";
-        print "Code: {$s["code"]}\n";
-        print "Message: {$s["message"]}\n";
-        print "Server: {$s["serverID"]}\n";
-    }
-    else
-    {
-        print "Message from server: {$s["message"]}\n";
-    }
+    $s = $response->json();
+    print "Message from server: {$s["message"]}\n";
 }
 
 function deleteLineupFromSchedulesDirect()

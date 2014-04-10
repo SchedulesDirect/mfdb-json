@@ -12,7 +12,7 @@
  * We need a bit of memory to process schedules, so request it right at the beginning.
  */
 
-ini_set("memory_limit", "512M");
+ini_set("memory_limit", "768M");
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
