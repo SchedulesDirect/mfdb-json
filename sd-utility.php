@@ -233,7 +233,7 @@ while (!$done)
             linkSchedulesDirectLineup();
             break;
         case "R":
-            $lineup = readline("Which lineup:>");
+            $lineup = strtoupper(readline("Which lineup:>"));
             if ($lineup != "")
             {
                 updateChannelTable($lineup);
