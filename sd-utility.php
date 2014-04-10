@@ -601,10 +601,11 @@ function addLineupsToSchedulesDirect()
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
-        print "Error response from server:\n";
-        print "Code: {$s["code"]}\n";
-        print "Message: {$s["message"]}\n";
-        print "Server: {$s["serverID"]}\n";
+        print "\n***Error response from server***\n";
+        print "\tCode: {$s["code"]}\n";
+        print "\tMessage: {$s["message"]}\n";
+        print "\tServer: {$s["serverID"]}\n";
+        print "**********************************\n";
         return;
     }
 
