@@ -228,6 +228,8 @@ function getSchedules($stationIDs)
     global $dlProgramTempDir;
     global $dlSchedTempDir;
     global $maxProgramsToGet;
+    global $quiet;
+    global $debug;
 
     $dbProgramCache = array();
 
@@ -288,6 +290,18 @@ function getSchedules($stationIDs)
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
     $jsonProgramstoRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
+
+    if ($debug)
+    {
+        $quiet = TRUE;
+        printMSG("dbProgramCache is");
+        printMSG(print_r($dbProgramCache, TRUE));
+        printMSG("serverScheduleMD5 is");
+        printMSG(print_r($serverScheduleMD5, TRUE));
+        printMSG("jsonProrgamstoRetrieve is");
+        printMSG(print_r($jsonProgramstoRetrieve, TRUE));
+        $quiet = FALSE;
+    }
 
     $toRetrieveTotal = count($jsonProgramstoRetrieve);
 
@@ -1424,7 +1438,6 @@ function printMSG($str)
 
 function updateStatus()
 {
-    global $token;
     global $dbh;
 
     $res = getStatus();
