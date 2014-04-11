@@ -74,6 +74,7 @@ foreach ($options as $k => $v)
             print "$agentString\n\n";
             print "$helpText\n";
             exit;
+            break;
         case "dbhost":
             $dbhost = $v;
             break;
