@@ -23,8 +23,8 @@ $debug = TRUE;
 $quiet = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
-$scriptVersion = "0.09";
-$scriptDate = "2014-03-04";
+$scriptVersion = "0.10";
+$scriptDate = "2014-04-11";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 
