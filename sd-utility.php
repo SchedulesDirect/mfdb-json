@@ -775,7 +775,7 @@ function displayLocalVideoSources()
 
     if (count($result))
     {
-        print "\nMythTV videosource:\n";
+        print "\nMythTV local videosources:\n";
         foreach ($result as $v)
         {
             print "sourceid: " . $v["sourceid"] . "\tname: " . $v["name"] . "\tSchedules Direct lineup: " .
