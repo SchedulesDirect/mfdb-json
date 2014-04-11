@@ -590,20 +590,25 @@ function addLineupsToSchedulesDirect()
     print "Enter postal code:";
     $postalcode = strtoupper(readline(">"));
 
-    $request = $client->get("headends", array(), array(
-        "query"   => array("country" => $country, "postalcode" => $postalcode),
-        "headers" => array("token" => $token)));
-
-    $response = $request->send();
-    $headends = $response->json();
-
-    if (isset($headends["code"]))
+    try
     {
-        print "Error!\n";
-        print "code:" . $headends["code"] . " response:" . $headends["response"] . " message:" . $headends["message"] . "\n";
+        $response = $client->get("headends", array(), array(
+            "query"   => array("country" => $country, "postalcode" => $postalcode),
+            "headers" => array("token" => $token)))->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+        print "********************************************\n";
+        print "\tError response from server:\n";
+        print "\tCode: {$s["code"]}\n";
+        print "\tMessage: {$s["message"]}\n";
+        print "\tServer: {$s["serverID"]}\n";
+        print "********************************************\n";
 
         return;
     }
+
+    $headends = $response->json();
 
     foreach ($headends as $he => $details)
     {
@@ -632,6 +637,8 @@ function addLineupsToSchedulesDirect()
 
         return;
     }
+
+    $he = str_replace(" ", "", $he);
 
     try
     {
