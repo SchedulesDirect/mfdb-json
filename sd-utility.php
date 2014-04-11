@@ -16,8 +16,8 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.10";
-$scriptDate = "2014-04-03";
+$scriptVersion = "0.11";
+$scriptDate = "2014-04-11";
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -42,7 +42,7 @@ The following options are available:
 --beta
 --help\t\t(this text)
 --host=\t\tMySQL database hostname.
---dbname\t\tMySQL database name. (Default: mythconverg)
+--dbname\tMySQL database name. (Default: mythconverg)
 --dbuser=\tUsername for database access.
 --dbpassword=\tPassword for database access.
 --username=\tSchedules Direct username.
