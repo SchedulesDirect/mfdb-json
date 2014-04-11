@@ -40,10 +40,21 @@ printMSG("$agentString\n");
 $jsonProgramstoRetrieve = array();
 $peopleCache = array();
 
-$dbuser = "mythtv";
-$dbpassword = "mythtv";
-$dbhost = "localhost";
-$db = "mythconverg";
+$dbUser = "mythtv";
+$dbPassword = "mythtv";
+$dbHost = "localhost";
+$dbName = "mythconverg";
+
+$helpText = <<< eol
+The following options are available:
+--beta
+--help\t\t(this text)
+--dbhost=\texample: --host=192.168.10.10 (Default:$dbhost)\n
+--dbname=\tMySQL database name. (Default: $dbName)
+--dbuser=\tUsername for database access. (Default: $dbUser)
+--dbpassword=\tPassword for database access. (Default: $dbPassword)
+--max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
+eol;
 
 $longoptions = array("beta::", "dbhost::", "dbname::", "dbpassword::", "dbuser::", "debug::", "help::", "max::");
 $options = getopt("h::", $longoptions);
@@ -60,14 +71,8 @@ foreach ($options as $k => $v)
             break;
         case "help":
         case "h":
-            print "The following options are available:\n";
-            print "--beta\n";
-            print "--help\t\t(this text)\n";
-            print "--dbhost=\texample: --host=192.168.10.10 (Default:$dbhost)\n";
-            print "--dbname=\t(Default:$db)\n";
-            print "--dbuser=\tUsername to connect to MythTV database (Default:$dbuser)\n";
-            print "--dbpassword=\tPassword to access MythtTV database (Default:$dbpassword)\n";
-            print "--max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)\n";
+            print "$agentString\n\n";
+            print "$helpText\n";
             exit;
         case "dbhost":
             $dbhost = $v;
@@ -95,10 +100,10 @@ printMSG("Temp directory for Programs is $dlProgramTempDir\n");
 printMSG("Connecting to MythTV database.\n");
 try
 {
-    $dbh = new PDO("mysql:host=$dbhost;dbname=$db;charset=utf8", $dbuser, $dbpassword,
+    $dbh = new PDO("mysql:host=$dbhost;dbname=$dbName;charset=utf8", $dbuser, $dbpassword,
         array(PDO::ATTR_PERSISTENT => true));
     $dbh->exec("SET CHARACTER SET utf8");
-    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e)
 {
     print "Exception with PDO: " . $e->getMessage() . "\n";

@@ -34,17 +34,17 @@ $todayDate = $date->format("Y-m-d");
 
 $dbUser = "mythtv";
 $dbPassword = "mythtv";
-$host = "localhost";
-$db = "mythconverg";
+$dbHost = "localhost";
+$dbName = "mythconverg";
 
 $helpText = <<< eol
 The following options are available:
 --beta
 --help\t\t(this text)
---host=\t\tMySQL database hostname.
---dbname=\tMySQL database name. (Default: $db)
---dbuser=\tUsername for database access.
---dbpassword=\tPassword for database access.
+--host=\t\tMySQL database hostname. (Default: $dbHost)
+--dbname=\tMySQL database name. (Default: $dbName)
+--dbuser=\tUsername for database access. (Default: $dbUser)
+--dbpassword=\tPassword for database access. (Default: $dbPassword)
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 eol;
@@ -69,13 +69,13 @@ foreach ($options as $k => $v)
             print "$helpText\n";
             exit;
         case "host":
-            $host = $v;
+            $dbHost = $v;
             break;
         case "dbpassword":
             $dbPassword = $v;
             break;
         case "dbname":
-            $db = $v;
+            $dbName = $v;
             break;
         case "dbuser":
             $dbUser = $v;
@@ -94,7 +94,7 @@ print "$agentString\n";
 print "Attempting to connect to database.\n";
 try
 {
-    $dbh = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $dbUser, $dbPassword,
+    $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
         array(PDO::ATTR_PERSISTENT => true));
     $dbh->exec("SET CHARACTER SET utf8");
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
