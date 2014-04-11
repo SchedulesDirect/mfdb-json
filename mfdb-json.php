@@ -19,7 +19,7 @@ require_once "functions.php";
 use Guzzle\Http\Client;
 
 $isBeta = TRUE;
-$debug = TRUE;
+$debug = FALSE;
 $quiet = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
