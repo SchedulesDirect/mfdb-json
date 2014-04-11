@@ -437,7 +437,7 @@ function updateChannelTable($lineup)
                         print "Duplicate channel error.\n";
                         print "Transport: $transport\n";
                         print "Lineup: $lineup\n";
-                        print "Channum: $channum\n";
+                        print "Channum: $channel\n";
                         print "stationID: $stationID\n";
                         print "\n\n";
                         print "*************************************************************\n";
@@ -461,7 +461,8 @@ function updateChannelTable($lineup)
         }
 
         /*
-         * Now that we have basic information in the database, we can start filling in other things, like callsigns, etc.
+         * Now that we have basic information in the database, we can start filling in other things, like
+         * callsigns, etc.
          */
     }
 
@@ -670,23 +671,27 @@ function deleteLineupFromSchedulesDirect()
 
     $toDelete = strtoupper(readline("Lineup to Delete:>"));
 
-    $request = $client->delete("lineups/$toDelete", array("token" => $token), array());
-    $response = $request->send();
+    try
+    {
+        $response = $client->delete("lineups/$toDelete", array("token" => $token), array())->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+        print "********************************************\n";
+        print "\tError response from server:\n";
+        print "\tCode: {$s["code"]}\n";
+        print "\tMessage: {$s["message"]}\n";
+        print "\tServer: {$s["serverID"]}\n";
+        print "********************************************\n";
+
+        return;
+    }
+
     $s = $response->json();
 
-    if ($s["code"])
-    {
-        print "Error response from server:\n";
-        print "Code: {$s["code"]}\n";
-        print "Message: {$s["message"]}\n";
-        print "Server: {$s["serverID"]}\n";
-    }
-    else
-    {
-        print "Message from server: {$s["message"]}\n";
-        unset ($updatedLineupsToRefresh[$toDelete]);
-        $deleteCache->execute(array("lineup" => $toDelete));
-    }
+    print "Message from server: {$s["message"]}\n";
+    unset ($updatedLineupsToRefresh[$toDelete]);
+    $deleteCache->execute(array("lineup" => $toDelete));
 }
 
 function deleteMessageFromSchedulesDirect()
@@ -696,21 +701,26 @@ function deleteMessageFromSchedulesDirect()
 
     $toDelete = readline("MessageID to acknowledge:>");
 
-    $request = $client->delete("messages/$toDelete", array("token" => $token), array());
-    $response = $request->send();
-    $res = $response->json();
+    try
+    {
+        $response = $client->delete("messages/$toDelete", array("token" => $token), array())->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+        print "********************************************\n";
+        print "\tError response from server:\n";
+        print "\tCode: {$s["code"]}\n";
+        print "\tMessage: {$s["message"]}\n";
+        print "\tServer: {$s["serverID"]}\n";
+        print "********************************************\n";
 
-    if ($res["code"] == 0)
-    {
-        print "Successfully deleted message.\n";
+        return;
     }
-    else
-    {
-        print "ERROR:Received error response from server:\n";
-        print$res["message"] . "\n\n-----\n";
-        print "Press ENTER to continue.\n";
-        $a = fgets(STDIN);
-    }
+
+    $s = $response->json();
+
+    print "Message from server: {$s["message"]}\n";
+    print "Successfully deleted message.\n";
 }
 
 function getLineup($heToGet)
@@ -720,11 +730,25 @@ function getLineup($heToGet)
 
     print "Retrieving lineup from Schedules Direct.\n";
 
-    $request = $client->get("lineups/$heToGet", array("token" => $token), array());
-    $response = $request->send();
-    $lineup = $response->json();
+    try
+    {
+        $response = $client->get("lineups/$heToGet", array("token" => $token), array())->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+        print "********************************************\n";
+        print "\tError response from server:\n";
+        print "\tCode: {$s["code"]}\n";
+        print "\tMessage: {$s["message"]}\n";
+        print "\tServer: {$s["serverID"]}\n";
+        print "********************************************\n";
 
-    return $lineup;
+        return "";
+    }
+
+    $s = $response->json();
+
+    return $s;
 }
 
 function updateLocalLineupCache(array $updatedLineupsToRefresh)
