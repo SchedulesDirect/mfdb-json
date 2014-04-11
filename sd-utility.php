@@ -624,8 +624,6 @@ function addLineupsToSchedulesDirect()
     print "\n\n";
     $he = strtoupper(readline("Lineup to add>"));
 
-    print "Sending request to server.\n";
-
     if ($he == "")
     {
         return;
@@ -638,6 +636,7 @@ function addLineupsToSchedulesDirect()
         return;
     }
 
+    print "Sending request to server.\n";
     $he = str_replace(" ", "", $he);
 
     try
