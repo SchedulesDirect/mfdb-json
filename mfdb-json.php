@@ -30,7 +30,6 @@ $errorWarning = FALSE;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
-//date_default_timezone_set(@date_default_timezone_get());
 date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");

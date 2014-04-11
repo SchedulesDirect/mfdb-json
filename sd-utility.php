@@ -42,7 +42,7 @@ The following options are available:
 --beta
 --help\t\t(this text)
 --host=\t\tMySQL database hostname.
---dbname=\tMySQL database name. (Default: mythconverg)
+--dbname=\tMySQL database name. (Default: $db)
 --dbuser=\tUsername for database access.
 --dbpassword=\tPassword for database access.
 --username=\tSchedules Direct username.
