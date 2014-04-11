@@ -78,7 +78,7 @@ foreach ($options as $k => $v)
             $dbhost = $v;
             break;
         case "dbname":
-            $db = $v;
+            $dbName = $v;
             break;
         case "dbpassword":
             $dbpassword = $v;
