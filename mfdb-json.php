@@ -37,10 +37,6 @@ $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 
 printMSG("$agentString\n");
-$dlSchedTempDir = tempdir();
-printMSG("Temp directory for Schedules is $dlSchedTempDir\n");
-$dlProgramTempDir = tempdir();
-printMSG("Temp directory for Programs is $dlProgramTempDir\n");
 
 $jsonProgramstoRetrieve = array();
 $peopleCache = array();
@@ -91,6 +87,11 @@ foreach ($options as $k => $v)
             break;
     }
 }
+
+$dlSchedTempDir = tempdir();
+printMSG("Temp directory for Schedules is $dlSchedTempDir\n");
+$dlProgramTempDir = tempdir();
+printMSG("Temp directory for Programs is $dlProgramTempDir\n");
 
 printMSG("Connecting to MythTV database.\n");
 try
