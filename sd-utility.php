@@ -42,13 +42,14 @@ The following options are available:
 --beta
 --help\t\t(this text)
 --host=\t\tMySQL database hostname.
+--dbname\t\tMySQL database name. (Default: mythconverg)
 --dbuser=\tUsername for database access.
 --dbpassword=\tPassword for database access.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 eol;
 
-$longoptions = array("beta::", "debug::", "help::", "host::", "dbpassword::", "dbuser::", "username::",
+$longoptions = array("beta::", "debug::", "help::", "host::", "dbname::", "dbpassword::", "dbuser::", "username::",
                      "password::");
 
 $options = getopt("h::", $longoptions);
@@ -72,6 +73,9 @@ foreach ($options as $k => $v)
             break;
         case "dbpassword":
             $dbPassword = $v;
+            break;
+        case "dbname":
+            $db = $v;
             break;
         case "dbuser":
             $dbUser = $v;
