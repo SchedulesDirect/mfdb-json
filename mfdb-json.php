@@ -49,7 +49,7 @@ $helpText = <<< eol
 The following options are available:
 --beta
 --help\t\t(this text)
---dbhost=\texample: --host=192.168.10.10 (Default:$dbhost)\n
+--dbhost=\texample: --host=192.168.10.10 (Default:$dbHost)\n
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
@@ -76,16 +76,16 @@ foreach ($options as $k => $v)
             exit;
             break;
         case "dbhost":
-            $dbhost = $v;
+            $dbHost = $v;
             break;
         case "dbname":
             $dbName = $v;
             break;
         case "dbpassword":
-            $dbpassword = $v;
+            $dbPassword = $v;
             break;
         case "dbuser":
-            $dbuser = $v;
+            $dbUser = $v;
             break;
         case "max":
             $maxProgramsToGet = $v;
@@ -101,7 +101,7 @@ printMSG("Temp directory for Programs is $dlProgramTempDir\n");
 printMSG("Connecting to MythTV database.\n");
 try
 {
-    $dbh = new PDO("mysql:host=$dbhost;dbname=$dbName;charset=utf8", $dbuser, $dbpassword,
+    $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
         array(PDO::ATTR_PERSISTENT => true));
     $dbh->exec("SET CHARACTER SET utf8");
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -399,7 +399,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
     {
         $a = file($jsonFileToProcess);
 
-        while (list($key, $item) = each($a))
+        while (list(, $item) = each($a))
         {
             $counter++;
             if ($counter % 100 == 0)
@@ -537,7 +537,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
             if ($debug == FALSE)
             {
-                unlink("$dlProgramTempDir/$jsonFileToProcess");
+                unlink("$jsonFileToProcess");
             }
         }
     }
