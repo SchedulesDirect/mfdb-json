@@ -1,0 +1,7 @@
+*.log
+*.lock
+*.phar
+vendor
+.buildpath
+.project
+.settings
