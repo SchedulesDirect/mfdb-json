@@ -70,6 +70,10 @@ skip to the next section.
 ```
 Do not configure Video Sources or Input Connections!
 
+(You will do that later)
+
+If you have an Over-the-Air lineup then you'll need to run a scan.
+
 Exit mythtv-setup. You will be prompted that you haven't set your start
 channel.  Select "No, I know what I'm doing."
 
@@ -442,11 +446,13 @@ Restart mythtv-setup
 Go to "5. Input connections" and associate the hardware inputs with the
 video source you created in the sd-utility script.
 
+You do not need to "Retrieve lineup" or scan for channels.
+
 Exit mythtv-setup
 
 #Retrieving data
 
-Run the mfdb-json.php script to retrieve the data.
+Run the mfdb-json.php script to download schedule data.
 
 ```
 00:00:49:mfdb-json.php developer grabber v0.07/2014-02-16
