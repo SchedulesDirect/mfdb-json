@@ -534,11 +534,11 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
                 }
             }
+        }
 
-            if ($debug == FALSE)
-            {
-                unlink("$dlProgramTempDir/$jsonFileToProcess");
-            }
+        if ($debug == FALSE)
+        {
+            unlink("$jsonFileToProcess");
         }
     }
 
