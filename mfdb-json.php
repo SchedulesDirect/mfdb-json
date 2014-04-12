@@ -49,7 +49,7 @@ $helpText = <<< eol
 The following options are available:
 --beta
 --help\t\t(this text)
---dbhost=\texample: --host=192.168.10.10 (Default:$dbhost)\n
+--dbhost=\texample: --host=192.168.10.10 (Default:$dbHost)\n
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
@@ -404,7 +404,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
             $counter++;
             if ($counter % 100 == 0)
             {
-                printMSG("$counter / $total             \r");
+                printMSG(" $counter / $total             \r");
                 $dbh->commit();
                 $dbh->beginTransaction();
             }
@@ -534,11 +534,11 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
                 }
             }
+        }
 
-            if ($debug == FALSE)
-            {
-                unlink("$dlProgramTempDir/$jsonFileToProcess");
-            }
+        if ($debug == FALSE)
+        {
+            unlink("$jsonFileToProcess");
         }
     }
 
