@@ -595,6 +595,11 @@ function insertSchedule()
     $dbh->exec("DROP TABLE IF EXISTS t_programrating");
     $dbh->exec("CREATE TABLE t_programrating LIKE programrating");
 
+    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='DBSchemaVer'");
+    $stmt->execute();
+    $result = $stmt->fetchColumn();
+    $dbSchema = $result[0];
+
     $insertScheduleSD = $dbh->prepare("INSERT IGNORE INTO t_SDschedule(stationID,programID,md5,air_datetime,duration,
     previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
     dolby,dubbed,dubLanguage,subtitled,subtitleLanguage,sap,sapLanguage,programLanguage,tvRatingSystem,tvRating,
@@ -604,28 +609,47 @@ function insertSchedule()
     :letterbox,:stereo,:dolby,:dubbed,:dubLanguage,:subtitled,:subtitleLanguage,:sap,:sapLanguage,:programLanguage,
     :ratingSystem,:tvRating,:dialogRating,:languageRating,:sexualContentRating,:violenceRating,:fvRating)");
 
-    $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
+    if ($dbSchema > "1318")
+    {
+        /*
+         * program table will have season and episode.
+         */
+        $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
     category,category_type,airdate,stars,previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,
     seriesid,originalairdate,showtype,colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,
     audioprop,subtitletypes,videoprop,season,episode)
-
     VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,:stars,
     :previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,
     :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop,:season,:episode)");
+    }
+    else
+    {
+        /*
+         * No season / episode insert.
+         */
+        $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
+    category,category_type,airdate,stars,previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,
+    seriesid,originalairdate,showtype,colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,
+    audioprop,subtitletypes,videoprop)
+    VALUES(:chanid,:starttime,:endtime,:title,:subtitle,:description,:category,:category_type,:airdate,:stars,
+    :previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,
+    :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
+    :first,:last,:audioprop,:subtitletypes,:videoprop)");
+    }
 
-    $insertCreditMyth = $dbh->prepare("INSERT INTO t_credits(person,chanid,starttime,role)
+    $insertCreditMyth = $dbh->prepare("INSERT INTO t_credits(person, chanid, starttime, role)
     VALUES(:person,:chanid,:starttime,:role)");
 
-    $insertProgramRatingMyth = $dbh->prepare("INSERT INTO t_programrating(chanid,starttime,system,rating)
+    $insertProgramRatingMyth = $dbh->prepare("INSERT INTO t_programrating(chanid, starttime, system, rating)
     VALUES(:chanid,:starttime,:system,:rating)");
 
-    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible=1
-    AND xmltvid != '' ORDER BY xmltvid");
+    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible = 1
+AND xmltvid != '' ORDER BY xmltvid");
     $getExistingChannels->execute();
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
-    $getProgramInformation = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID=:pid");
+    $getProgramInformation = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID =:pid");
 
     $jsonSchedule = array();
 
@@ -1133,47 +1157,93 @@ function insertSchedule()
                 $subtitleTypes = "SIGNED";
             }
 
-            try
+            if ($dbSchema > "1318")
             {
-                $insertSchedule->execute(array(
-                    "chanid"                  => $chanID,
-                    "starttime"               => $programStartTimeMyth,
-                    "endtime"                 => $programEndTimeMyth,
-                    "title"                   => $title,
-                    "subtitle"                => $subTitle,
-                    "description"             => $description,
-                    "category"                => $category,
-                    "category_type"           => $categoryType,
-                    "airdate"                 => $movieYear,
-                    "stars"                   => $starRating,
-                    "previouslyshown"         => $previouslyshown,
-                    "stereo"                  => $isStereo,
-                    "subtitled"               => $isSubtitled,
-                    "hdtv"                    => $isHDTV,
-                    "closecaptioned"          => $isClosedCaption,
-                    "partnumber"              => $partNumber,
-                    "parttotal"               => $numberOfParts,
-                    "seriesid"                => $seriesID,
-                    "originalairdate"         => $oad,
-                    "showtype"                => $showType,
-                    "colorcode"               => $colorCode,
-                    "syndicatedepisodenumber" => $syndicatedEpisodeNumber,
-                    "programid"               => $programID,
-                    "generic"                 => $isGeneric,
-                    "listingsource"           => $sourceID,
-                    "first"                   => $isFirst,
-                    "last"                    => $isLast,
-                    "audioprop"               => $audioprop,
-                    "subtitletypes"           => $subtitleTypes,
-                    "videoprop"               => $videoProperties,
-                    "season"                  => $season,
-                    "episode"                 => $episode
-                ));
-            } catch (PDOException $e)
+                try
+                {
+                    $insertSchedule->execute(array(
+                        "chanid"                  => $chanID,
+                        "starttime"               => $programStartTimeMyth,
+                        "endtime"                 => $programEndTimeMyth,
+                        "title"                   => $title,
+                        "subtitle"                => $subTitle,
+                        "description"             => $description,
+                        "category"                => $category,
+                        "category_type"           => $categoryType,
+                        "airdate"                 => $movieYear,
+                        "stars"                   => $starRating,
+                        "previouslyshown"         => $previouslyshown,
+                        "stereo"                  => $isStereo,
+                        "subtitled"               => $isSubtitled,
+                        "hdtv"                    => $isHDTV,
+                        "closecaptioned"          => $isClosedCaption,
+                        "partnumber"              => $partNumber,
+                        "parttotal"               => $numberOfParts,
+                        "seriesid"                => $seriesID,
+                        "originalairdate"         => $oad,
+                        "showtype"                => $showType,
+                        "colorcode"               => $colorCode,
+                        "syndicatedepisodenumber" => $syndicatedEpisodeNumber,
+                        "programid"               => $programID,
+                        "generic"                 => $isGeneric,
+                        "listingsource"           => $sourceID,
+                        "first"                   => $isFirst,
+                        "last"                    => $isLast,
+                        "audioprop"               => $audioprop,
+                        "subtitletypes"           => $subtitleTypes,
+                        "videoprop"               => $videoProperties,
+                        "season"                  => $season,
+                        "episode"                 => $episode
+                    ));
+                } catch (PDOException $e)
+                {
+                    print "Exception: " . $e->getMessage();
+                    $debug = TRUE;
+                    var_dump($programJSON);
+                }
+            }
+            else
             {
-                print "Exception: " . $e->getMessage();
-                $debug = TRUE;
-                var_dump($programJSON);
+                try
+                {
+                    $insertSchedule->execute(array(
+                        "chanid"                  => $chanID,
+                        "starttime"               => $programStartTimeMyth,
+                        "endtime"                 => $programEndTimeMyth,
+                        "title"                   => $title,
+                        "subtitle"                => $subTitle,
+                        "description"             => $description,
+                        "category"                => $category,
+                        "category_type"           => $categoryType,
+                        "airdate"                 => $movieYear,
+                        "stars"                   => $starRating,
+                        "previouslyshown"         => $previouslyshown,
+                        "stereo"                  => $isStereo,
+                        "subtitled"               => $isSubtitled,
+                        "hdtv"                    => $isHDTV,
+                        "closecaptioned"          => $isClosedCaption,
+                        "partnumber"              => $partNumber,
+                        "parttotal"               => $numberOfParts,
+                        "seriesid"                => $seriesID,
+                        "originalairdate"         => $oad,
+                        "showtype"                => $showType,
+                        "colorcode"               => $colorCode,
+                        "syndicatedepisodenumber" => $syndicatedEpisodeNumber,
+                        "programid"               => $programID,
+                        "generic"                 => $isGeneric,
+                        "listingsource"           => $sourceID,
+                        "first"                   => $isFirst,
+                        "last"                    => $isLast,
+                        "audioprop"               => $audioprop,
+                        "subtitletypes"           => $subtitleTypes,
+                        "videoprop"               => $videoProperties
+                    ));
+                } catch (PDOException $e)
+                {
+                    print "Exception: " . $e->getMessage();
+                    $debug = TRUE;
+                    var_dump($programJSON);
+                }
             }
 
             /* Bypass the SD-specific insert for now; might be easier to just parse the JSON from the programCache.
