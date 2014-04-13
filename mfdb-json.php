@@ -457,6 +457,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
                         if (!isset($credit["personId"]))
                         {
                             printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
+                            $debug = TRUE; // Set it to tr
                             continue;
                         }
                         $personID = $credit["personId"];
@@ -498,6 +499,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
                         if (!isset($credit["personId"]))
                         {
                             printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
+                            $debug = TRUE;
                             continue;
                         }
                         $personID = $credit["personId"];
@@ -548,8 +550,6 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
     if ($debug == FALSE)
     {
-        unlink("$dlProgramTempDir/serverID.txt");
-        unlink("$dlProgramTempDir/programs.json.zip");
         rmdir("$dlProgramTempDir");
     }
 
