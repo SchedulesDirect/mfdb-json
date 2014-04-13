@@ -541,7 +541,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
             if ($debug == FALSE)
             {
-                unlink("$jsonFileToProcess");
+                unlink("$dlProgramTempDir/$jsonFileToProcess");
             }
         }
     }
