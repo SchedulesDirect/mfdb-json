@@ -149,8 +149,8 @@ $globalStartDate = new DateTime();
 
 printMSG("Retrieving list of channels to download.\n");
 //$stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE AND xmltvid != ''");
-$stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) AS s FROM channel WHERE visible=TRUE
-AND xmltvid != '' AND S > 0 GROUP BY xmltvid");
+$stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
+AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
 
 $stmt->execute();
 $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
