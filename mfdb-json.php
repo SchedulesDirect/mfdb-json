@@ -538,11 +538,11 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
                 }
             }
+        }
 
-            if ($debug == FALSE)
-            {
-                unlink($jsonFileToProcess);
-            }
+        if ($debug == FALSE)
+        {
+            unlink($jsonFileToProcess);
         }
     }
 
