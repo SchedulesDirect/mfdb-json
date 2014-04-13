@@ -597,8 +597,7 @@ function insertSchedule()
 
     $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='DBSchemaVer'");
     $stmt->execute();
-    $result = $stmt->fetchColumn();
-    $dbSchema = $result[0];
+    $dbSchema = $stmt->fetchColumn();
 
     $insertScheduleSD = $dbh->prepare("INSERT IGNORE INTO t_SDschedule(stationID,programID,md5,air_datetime,duration,
     previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
