@@ -15,13 +15,42 @@ function getToken($username, $passwordHash)
     try
     {
         $response = $client->post("token", array(), $body)->send();
+    } catch (Guzzle\Http\Exception\ClientErrorResponseException $e)
+    {
+        $errorReq = $e->getRequest();
+        $errorResp = $e->getResponse();
+        $errorMessage = $e->getMessage();
+        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+        return("ERROR");
+    } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
+    {
+        $errorReq = $e->getRequest();
+        $errorResp = $e->getResponse();
+        $errorMessage = $e->getMessage();
+        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+        return("ERROR");
     } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $errorReq = $e->getRequest();
+        $errorResp = $e->getResponse();
+        $errorMessage = $e->getMessage();
+        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+        return("ERROR");
+    } catch (Exception $e)
+    {
+        echo "getToken. HCF. Uncaught exception.\n";
+
+        return ("ERROR");
+    }
+    /*
+    catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         if (strpos($e->getMessage(), "Client error response") !== FALSE)
         {
             return ("ERROR");
         }
     }
+    */
 
     $res = array();
     $res = $response->json();
@@ -162,6 +191,19 @@ function printStatus()
     {
         print "\nWARNING: *** No lineups configured at Schedules Direct. ***\n";
     }
+}
+
+function exceptionErrorDump($errorReq, $errorResp, $errorMessage)
+{
+    print "errorReq\n";
+    print "$errorReq\n\n";
+
+    print "errorResp\n";
+    print "$errorResp\n\n";
+
+    print "errorMessage\n";
+    print "$errorMessage\n\n";
+
 }
 
 ?>

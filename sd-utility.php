@@ -222,8 +222,22 @@ while (!$done)
             {
                 $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
                         VALUES(:name,:userid,:password,'schedulesdirect2')");
-                $stmt->execute(array("name"     => $newName, "userid" => $username,
-                                     "password" => $password));
+                try
+                {
+                    $stmt->execute(array("name"     => $newName, "userid" => $username,
+                                         "password" => $password));
+                } catch (PDOException $e)
+                {
+                    if ($e->getCode() == 23000)
+                    {
+                        print "\n\n";
+                        print "*************************************************************\n";
+                        print "\n\n";
+                        print "Duplicate video source name.\n";
+                        print "\n\n";
+                        print "*************************************************************\n";
+                    }
+                }
             }
             break;
         case "D":
