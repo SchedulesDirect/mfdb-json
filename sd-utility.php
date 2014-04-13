@@ -16,8 +16,8 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.12";
-$scriptDate = "2014-04-11";
+$scriptVersion = "0.13";
+$scriptDate = "2014-04-12";
 
 require_once "vendor/autoload.php";
 require_once "functions.php";

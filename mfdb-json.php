@@ -23,8 +23,8 @@ $debug = FALSE;
 $quiet = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
-$scriptVersion = "0.11";
-$scriptDate = "2014-04-11";
+$scriptVersion = "0.12";
+$scriptDate = "2014-04-12";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 
@@ -299,6 +299,10 @@ function getSchedules($stationIDs)
 
     if ($debug)
     {
+        /*
+         * One user is reporting that after a run, a second run immediately afterwards still has programs that need
+         * to be downloaded. That shouldn't happen, so dump the array to the log file for analysis.
+         */
         $quiet = TRUE;
         printMSG("dbProgramCache is");
         printMSG(print_r($dbProgramCache, TRUE));
