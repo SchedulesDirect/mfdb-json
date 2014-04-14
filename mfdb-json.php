@@ -646,8 +646,8 @@ function insertSchedule()
     $insertProgramRatingMyth = $dbh->prepare("INSERT INTO t_programrating(chanid, starttime, system, rating)
     VALUES(:chanid,:starttime,:system,:rating)");
 
-    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid,xmltvid FROM channel WHERE visible = 1
-AND xmltvid != '' ORDER BY xmltvid");
+    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid, CAST(xmltvid AS UNSIGNED) AS xmltvid FROM channel
+WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     $getExistingChannels->execute();
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
@@ -662,7 +662,7 @@ AND xmltvid != '' ORDER BY xmltvid");
 
     /*
      * Move the schedule into an associative array so that we can process the items per stationID. We're going to
-     * decode this once so that we're not doing it over and over again. May increase memory foootprint though.
+     * decode this once so that we're not doing it over and over again. May increase memory footprint though.
      */
 
     $scheduleJSON = array();
