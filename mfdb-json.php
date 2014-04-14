@@ -220,6 +220,9 @@ $stmt->execute(array("data" => $globalEndTime));
 $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStatus' AND hostname IS NULL");
 $stmt->execute(array("data" => $statusMessage));
 
+printMSG("Sending reschedule request to mythbackend.\n");
+exec("mythutil --resched");
+
 printMSG("Done.\n");
 
 if ($errorWarning)
