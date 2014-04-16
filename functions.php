@@ -52,7 +52,7 @@ function getToken($username, $passwordHash)
         print "\n\n******************************************\n";
         print "Raw headers:\n";
         print $response->getRawHeaders();
-        print "\n\n******************************************\n";
+        print "******************************************\n";
     }
 
     if (json_last_error() != 0)
