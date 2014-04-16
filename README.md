@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.07, 2014-04-05
+v0.08, 2014-04-16
 
 Robert Kulagowski
 
@@ -450,7 +450,7 @@ You do not need to "Retrieve lineup" or scan for channels.
 
 Exit mythtv-setup
 
-#Retrieving data
+#Manually retrieving data
 
 Run the mfdb-json.php script to download schedule data.
 
@@ -504,3 +504,12 @@ let me know what didn't work and I'll take a look.
 
 The scripts will tell you the directories they're using; the raw data files
 are going to be plaintext json.
+
+#Automatically retrieving data
+
+One the manual invocation above runs without issue, you can configure MythTV
+to automatically run the grabber.
+
+There is a script called "mfdb.sh" which was cloned into this directory. 
+Edit and update the script as required for your setup.  The script contains
+comments on what needs to be configured in mythtv-setup.
