@@ -9,6 +9,7 @@
 function getToken($username, $passwordHash)
 {
     global $client;
+    global $debug;
 
     $body = json_encode(array("username" => $username, "password" => $passwordHash));
 
@@ -42,18 +43,16 @@ function getToken($username, $passwordHash)
 
         return ("ERROR");
     }
-    /*
-    catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        if (strpos($e->getMessage(), "Client error response") !== FALSE)
-        {
-            return ("ERROR");
-        }
-    }
-    */
 
     $res = array();
     $res = $response->json();
+
+    if ($debug)
+    {
+        print "Raw headers:\n";
+        print $response->getRawHeaders();
+        print "\n";
+    }
 
     if (json_last_error() != 0)
     {

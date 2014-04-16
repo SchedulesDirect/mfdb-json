@@ -9,15 +9,15 @@
  *
  */
 $isBeta = TRUE;
-$debug = TRUE;
+$debug = FALSE;
 $done = FALSE;
 $schedulesDirectLineups = array();
 $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.13";
-$scriptDate = "2014-04-12";
+$scriptVersion = "0.14";
+$scriptDate = "2014-04-16";
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -40,11 +40,12 @@ $dbName = "mythconverg";
 $helpText = <<< eol
 The following options are available:
 --beta
---help\t\t(this text)
---host=\t\tMySQL database hostname. (Default: $dbHost)
+--debug\t\tEnable debugging. (Default: FALSE)
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
+--help\t\t(this text)
+--host=\t\tMySQL database hostname. (Default: $dbHost)
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 eol;
