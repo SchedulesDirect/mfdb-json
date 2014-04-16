@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Script originally by Bill Meeks.
 # Using mythtv-setup, configure the following:
 #   Automatically update program listings: Checked
 #   Guide data program: <Full path for this script>
