@@ -27,6 +27,7 @@ $scriptVersion = "0.12";
 $scriptDate = "2014-04-12";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
+$station = "";
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
@@ -54,9 +55,11 @@ The following options are available:
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
 --max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
+--station=\t\tDownload the schedule for a single stationID in your lineup.
 eol;
 
-$longoptions = array("beta::", "dbhost::", "dbname::", "dbpassword::", "dbuser::", "debug::", "help::", "max::");
+$longoptions = array("beta::", "dbhost::", "dbname::", "dbpassword::", "dbuser::", "debug::", "help::", "max::",
+                     "station::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -89,6 +92,9 @@ foreach ($options as $k => $v)
             break;
         case "max":
             $maxProgramsToGet = $v;
+            break;
+        case "station":
+            $station = $v;
             break;
     }
 }
@@ -147,12 +153,20 @@ $sdPassword = sha1($result[0]["password"]);
 $globalStartTime = time();
 $globalStartDate = new DateTime();
 
-printMSG("Retrieving list of channels to download.\n");
-//$stmt = $dbh->prepare("SELECT DISTINCT(xmltvid) FROM channel WHERE visible=TRUE AND xmltvid != ''");
-$stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
+if ($station == "")
+{
+    printMSG("Retrieving list of channels to download.\n");
+    $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
 AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
+    $stmt->execute();
+}
+else
+{
+    printMSG("Downloading data only for $station\n");
+    $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE xmltvid=:station");
+    $stmt->execute(array("station" => $station));
+}
 
-$stmt->execute();
 $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 printMSG("Logging into Schedules Direct.\n");
