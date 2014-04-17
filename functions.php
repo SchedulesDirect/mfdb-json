@@ -13,6 +13,11 @@ function getToken($username, $passwordHash)
 
     $body = json_encode(array("username" => $username, "password" => $passwordHash));
 
+    if ($debug)
+    {
+        print "getToken: Sending $body\n";
+    }
+
     try
     {
         $response = $client->post("token", array(), $body)->send();
@@ -39,7 +44,7 @@ function getToken($username, $passwordHash)
         return("ERROR");
     } catch (Exception $e)
     {
-        echo "getToken. HCF. Uncaught exception.\n";
+        print "getToken:HCF. Uncaught exception.\n";
 
         return ("ERROR");
     }
@@ -47,19 +52,21 @@ function getToken($username, $passwordHash)
     $res = array();
     $res = $response->json();
 
+    if (json_last_error() != 0)
+    {
+        print "JSON decode error:\n";
+        var_dump($response);
+        exit;
+    }
+
     if ($debug)
     {
         print "\n\n******************************************\n";
         print "Raw headers:\n";
         print $response->getRawHeaders();
         print "******************************************\n";
-    }
-
-    if (json_last_error() != 0)
-    {
-        print "JSON decode error:\n";
-        var_dump($response);
-        exit;
+        print "getToken:Response:$res\n";
+        print "******************************************\n";
     }
 
     if ($res["code"] == 0)
@@ -77,9 +84,9 @@ function getToken($username, $passwordHash)
 
 function getStatus()
 {
+    global $debug;
     global $token;
     global $client;
-    global $sdStatus;
 
     try
     {
@@ -92,9 +99,19 @@ function getStatus()
         }
     }
 
-    $sdStatus = $response->json();
+    $res = $response->json();
 
-    return $sdStatus;
+    if ($debug)
+    {
+        print "\n\n******************************************\n";
+        print "Raw headers:\n";
+        print $response->getRawHeaders();
+        print "******************************************\n";
+        print "getStatus:Response:$res\n";
+        print "******************************************\n";
+    }
+
+    return $res;
 }
 
 function printStatus()
@@ -147,20 +164,10 @@ function printStatus()
         {
             $sdStatus = array();
             $mythStatus = array();
-            //$sd = "";
             $mythModified = "";
-
-            //$getLocalCacheModified->execute(array("he" => $id));
-            //$sdStatus = $getLocalCacheModified->fetchAll(PDO::FETCH_COLUMN);
 
             $getVideosourceModified->execute(array("he" => $id));
             $mythStatus = $getVideosourceModified->fetchAll(PDO::FETCH_COLUMN);
-
-            /*
-            if (count($sdStatus))
-            {
-                $sd = $sdStatus[0];
-            }*/
 
             if (count($mythStatus))
             {
@@ -170,12 +177,10 @@ function printStatus()
             if ($serverModified > $mythModified)
             {
                 $updatedHeadendsToRefresh[$id] = $serverModified;
-                //$lineupData->appendRow(array($id, $serverModified, $sd, $myth, "***"));
                 $lineupData->appendRow(array($id, $serverModified, $mythModified, "***"));
             }
             else
             {
-                //$lineupData->appendRow(array($id, $serverModified, $sd, $myth, ""));
                 $lineupData->appendRow(array($id, $serverModified, $mythModified, ""));
             }
         }
@@ -203,7 +208,17 @@ function exceptionErrorDump($errorReq, $errorResp, $errorMessage)
 
     print "errorMessage\n";
     print "$errorMessage\n\n";
-
 }
+
+function debugMSG($str)
+{
+    global $fh_error;
+
+    $str = date("H:i:s") . ":$str";
+
+    print "$str";
+    fwrite($fh_error, $str);
+}
+
 
 ?>

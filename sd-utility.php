@@ -32,6 +32,8 @@ date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 
+$fh_error = fopen("$todayDate.debug.log", "a");
+
 $dbUser = "mythtv";
 $dbPassword = "mythtv";
 $dbHost = "localhost";
@@ -599,6 +601,7 @@ function printLineup()
 function addLineupsToSchedulesDirect()
 {
     global $client;
+    global $debug;
     global $token;
 
     print "Three-character ISO-3166-1 alpha3 country code:";
@@ -625,9 +628,15 @@ function addLineupsToSchedulesDirect()
         return;
     }
 
-    $headends = $response->json();
+    $res = $response->json();
 
-    foreach ($headends as $he => $details)
+    if ($debug)
+    {
+        debugMSG("addLineupsToSchedulesDirect:Response:$res\n");
+        debugMSG("Raw headers:\n" . $response->getRawHeaders() . "\n");
+    }
+
+    foreach ($res as $he => $details)
     {
         print "\nheadend: $he\n";
         print "location: {$details["location"]}\n";
@@ -672,13 +681,22 @@ function addLineupsToSchedulesDirect()
         return;
     }
 
-    $s = $response->json();
-    print "Message from server: {$s["message"]}\n";
+    $res = $response->json();
+
+    if ($debug)
+    {
+        debugMSG("addLineupsToSchedulesDirect:Response:$res\n");
+        debugMSG("Raw headers:\n" . $response->getRawHeaders() . "\n");
+    }
+
+
+    print "Message from server: {$res["message"]}\n";
 }
 
 function deleteLineupFromSchedulesDirect()
 {
     global $dbh;
+    global $debug;
     global $client;
     global $token;
     global $updatedLineupsToRefresh;
@@ -703,9 +721,16 @@ function deleteLineupFromSchedulesDirect()
         return;
     }
 
-    $s = $response->json();
+    $res = $response->json();
 
-    print "Message from server: {$s["message"]}\n";
+    if ($debug)
+    {
+        debugMSG("deleteLineupFromSchedulesDirect:Response:$res\n");
+        debugMSG("Raw headers:\n" . $response->getRawHeaders() . "\n");
+    }
+
+
+    print "Message from server: {$res["message"]}\n";
     unset ($updatedLineupsToRefresh[$toDelete]);
     $deleteCache->execute(array("lineup" => $toDelete));
 }
@@ -713,6 +738,7 @@ function deleteLineupFromSchedulesDirect()
 function deleteMessageFromSchedulesDirect()
 {
     global $client;
+    global $debug;
     global $token;
 
     $toDelete = readline("MessageID to acknowledge:>");
@@ -733,15 +759,26 @@ function deleteMessageFromSchedulesDirect()
         return;
     }
 
-    $s = $response->json();
+    $res = $response->json();
 
-    print "Message from server: {$s["message"]}\n";
+    if ($debug)
+    {
+        print "\n\n******************************************\n";
+        print "Raw headers:\n";
+        print $response->getRawHeaders();
+        print "******************************************\n";
+        print "deleteMessageFromSchedulesDirect:Response:$res\n";
+        print "******************************************\n";
+    }
+
+    print "Message from server: {$res["message"]}\n";
     print "Successfully deleted message.\n";
 }
 
 function getLineup($heToGet)
 {
     global $client;
+    global $debug;
     global $token;
 
     print "Retrieving lineup from Schedules Direct.\n";
@@ -762,9 +799,19 @@ function getLineup($heToGet)
         return "";
     }
 
-    $s = $response->json();
+    $res = $response->json();
 
-    return $s;
+    if ($debug)
+    {
+        print "\n\n******************************************\n";
+        print "Raw headers:\n";
+        print $response->getRawHeaders();
+        print "******************************************\n";
+        print "getLineup:Response:$res\n";
+        print "******************************************\n";
+    }
+
+    return $res;
 }
 
 function updateLocalLineupCache(array $updatedLineupsToRefresh)
