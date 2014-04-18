@@ -45,9 +45,10 @@ git clone https://github.com/SchedulesDirect/mfdb-json.git
 
 ###Create MySQL tables
 
-mysql -umythtv -p < dbInit.sql mythconverg
+mysql -umythtv -p mythconverg < dbInit.sql
 
-**NOTE**: If you are not using the default database "mythconverg", then replace the name as necessary.
+**NOTE**: If you are not using the default user "mythtv" or the default
+database of "mythconverg", then replace as necessary.
 
 **NOTE**: If you are not running MySQL locally, use the **-h** parameter to specify the host.
 
