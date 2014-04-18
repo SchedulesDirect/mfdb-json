@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.08, 2014-04-16
+v0.09, 2014-04-18
 
 Robert Kulagowski
 
@@ -86,14 +86,16 @@ You can run it with **--help** to see the various options.
 ```
 ./sd-utility.php --help
 
-sd-utility.php utility program v0.10/2014-04-03
+sd-utility.php utility program v0.14/2014-04-16
 
 The following options are available:
 --beta
+--debug         Enable debugging. (Default: FALSE)
+--dbname=       MySQL database name. (Default: mythconverg)
+--dbuser=       Username for database access. (Default: mythtv)
+--dbpassword=   Password for database access. (Default: mythtv)
 --help          (this text)
---host=         MySQL database hostname.
---dbuser=       Username for database access.
---dbpassword=   Password for database access.
+--host=         MySQL database hostname. (Default: localhost)
 --username=     Schedules Direct username.
 --password=     Schedules Direct password.
 ```
@@ -109,7 +111,6 @@ existing Schedules Direct information for the XML service isn't
 automatically copied over, and the service is running on different hosts.)
 
 ```
-sd-utility.php utility program v0.10/2014-04-03
 Attempting to connect to database.
 Using beta server.
 Logging into Schedules Direct.
