@@ -78,9 +78,12 @@ If you have an Over-the-Air lineup then you'll need to run a scan.
 Exit mythtv-setup. You will be prompted that you haven't set your start
 channel.  Select "No, I know what I'm doing."
 
-##mfdb
+##sd-utility
 
 Run the sd-utility.php script.
+
+This script does some housekeeping functions relating to lineup management
+at Schedules Direct.
 
 You can run it with **--help** to see the various options.
 
