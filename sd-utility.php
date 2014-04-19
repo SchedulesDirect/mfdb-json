@@ -126,6 +126,8 @@ else
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
+checkDatabase();
+
 if ($username == "" AND $password == "")
 {
     $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2'
@@ -894,6 +896,18 @@ function getSchedulesDirectLineups()
     }
 
     return ($schedulesDirectLineups);
+}
+
+function checkDatabase()
+{
+    global $dbh;
+
+    $stmt = $dbh->prepare("DESCRIBE videosource");
+    $stmt->execute();
+    $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    var_dump($columnNames);
+    exit;
 }
 
 ?>
