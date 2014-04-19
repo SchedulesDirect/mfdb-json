@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.09, 2014-04-18
+v0.10, 2014-04-19
 
 Robert Kulagowski
 
@@ -43,15 +43,6 @@ yum -y install git curl curl-devel libcurl libcurl-devel php-common
 
 git clone https://github.com/SchedulesDirect/mfdb-json.git
 
-###Create MySQL tables
-
-mysql -umythtv -p mythconverg < dbInit.sql
-
-**NOTE**: If you are not using the default user "mythtv" or the default
-database of "mythconverg", then replace as necessary.
-
-**NOTE**: If you are not running MySQL locally, use the **-h** parameter to specify the host.
-
 ###Install Composer
 
 curl -sS https://getcomposer.org/installer | php
@@ -84,6 +75,9 @@ Run the sd-utility.php script.
 
 This script does some housekeeping functions relating to lineup management
 at Schedules Direct.
+
+The first time you run the script it will create necessary tables in your
+database.
 
 You can run it with **--help** to see the various options.
 
