@@ -114,10 +114,9 @@ function getStatus()
     return $res;
 }
 
-function printStatus()
+function printStatus($sdStatus)
 {
     global $dbh;
-    global $sdStatus;
     global $updatedHeadendsToRefresh;
 
     print "\nStatus messages from Schedules Direct:\n";
@@ -162,7 +161,6 @@ function printStatus()
 
         foreach ($he as $id => $serverModified)
         {
-            $sdStatus = array();
             $mythStatus = array();
             $mythModified = "";
 

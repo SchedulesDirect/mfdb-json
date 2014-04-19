@@ -179,13 +179,15 @@ elseif ($needToStoreUserPassword)
 
 while (!$done)
 {
-    if (getStatus() == "ERROR")
+    $sdStatus = getStatus();
+
+    if ($sdStatus == "ERROR")
     {
         printMSG("Received error from Schedules Direct. Exiting.\n");
         exit;
     }
 
-    printStatus();
+    printStatus($sdStatus);
 
     displayLocalVideoSources();
 
