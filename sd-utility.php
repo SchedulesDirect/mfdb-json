@@ -17,8 +17,8 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.14";
-$scriptDate = "2014-04-16";
+$scriptVersion = "0.15";
+$scriptDate = "2014-04-19";
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -112,6 +112,8 @@ try
     exit;
 }
 
+checkDatabase();
+
 if ($isBeta)
 {
     # Test server. Things may be broken there.
@@ -132,9 +134,7 @@ $client->setUserAgent($agentString);
 
 if ($test)
 {
-    checkDatabase();
 }
-
 
 if ($username == "" AND $password == "")
 {
@@ -923,6 +923,8 @@ function checkDatabase()
         /*
          * If they didn't have 'modified', assume they need everything.
          */
+
+        print "Creating remaining tables.\n";
 
         $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,
     SDprogramrating,SDschedule,SDMessages");
