@@ -45,6 +45,7 @@ $dbUser = "mythtv";
 $dbPassword = "mythtv";
 $dbHost = "localhost";
 $dbName = "mythconverg";
+$host = "localhost";
 
 $helpText = <<< eol
 The following options are available:
@@ -54,12 +55,13 @@ The following options are available:
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
+--host\tIP address of the MythTV backend (Default: $host)
 --max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --station=\t\tDownload the schedule for a single stationID in your lineup.
 eol;
 
-$longoptions = array("beta::", "dbhost::", "dbname::", "dbpassword::", "dbuser::", "debug::", "help::", "max::",
-                     "station::");
+$longoptions = array("beta::", "dbhost::", "dbname::", "dbpassword::", "dbuser::", "debug::", "help::",
+                     "host::", "max::","station::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -89,6 +91,9 @@ foreach ($options as $k => $v)
             break;
         case "dbuser":
             $dbUser = $v;
+            break;
+        case "host":
+            $host = $v;
             break;
         case "max":
             $maxProgramsToGet = $v;
@@ -1538,6 +1543,8 @@ function printMSG($str)
 function updateStatus()
 {
     global $dbh;
+    global $client;
+    global $host;
 
     $res = getStatus();
 
@@ -1578,6 +1585,13 @@ function updateStatus()
 
     $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='MythFillSuggestedRunTime' AND hostname IS NULL");
     $stmt->execute(array("data" => $nextConnectTime));
+/*
+    $request = $client->post("http://$host:6544/Myth/PutSetting", array(), "Key=MythFillSuggestedRunTime&Value=$nextConnectTime");
+    $response = $request->send();
+*/
+    $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
+        "Key=TestValue&Value=123456");
+    $response = $request->send();
 
     $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
     $stmt->execute(array("data" => "Your subscription expires on $expires."));
