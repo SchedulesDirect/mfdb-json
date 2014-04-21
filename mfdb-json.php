@@ -1590,7 +1590,7 @@ function updateStatus()
     $response = $request->send();
 */
     $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
-        "Key=TestValue&Value=123456");
+        "Key=mythfilldatabaseLastRunStatus&Value=123456");
     $response = $request->send();
 
     $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
