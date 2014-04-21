@@ -61,7 +61,7 @@ The following options are available:
 eol;
 
 $longoptions = array("beta::", "dbhost::", "dbname::", "dbpassword::", "dbuser::", "debug::", "help::",
-                     "host::", "max::","station::");
+                     "host::", "max::", "station::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -1585,12 +1585,12 @@ function updateStatus()
 
     $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='MythFillSuggestedRunTime' AND hostname IS NULL");
     $stmt->execute(array("data" => $nextConnectTime));
-/*
-    $request = $client->post("http://$host:6544/Myth/PutSetting", array(), "Key=MythFillSuggestedRunTime&Value=$nextConnectTime");
-    $response = $request->send();
-*/
+    /*
+        $request = $client->post("http://$host:6544/Myth/PutSetting", array(), "Key=MythFillSuggestedRunTime&Value=$nextConnectTime");
+        $response = $request->send();
+    */
     $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
-        "Key=UserJobDesc2&Value=987654");
+        array("Key" => "UserJobDesc2", "Value" => "987654"));
     $response = $request->send();
 
     $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
