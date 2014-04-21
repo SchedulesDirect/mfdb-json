@@ -1593,6 +1593,11 @@ function updateStatus()
         array("Key" => "UserJobDesc2", "Value" => "987654"));
     $response = $request->send();
 
+    $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
+        array("Key" => "testSetting", "Value" => "this is a test of a new key."));
+    $response = $request->send();
+
+
     $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
     $stmt->execute(array("data" => "Your subscription expires on $expires."));
 
