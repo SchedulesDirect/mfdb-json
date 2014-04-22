@@ -227,7 +227,7 @@ function checkForServiceAPI()
     global $host;
     global $useServiceAPI;
 
-    print "Checking for MythTV Service API\n";
+    print "Checking for MythTV Service API.\n";
 
     try
     {
