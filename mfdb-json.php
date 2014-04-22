@@ -52,17 +52,17 @@ $helpText = <<< eol
 The following options are available:
 --beta
 --help\t\t(this text)
---dbhost=\texample: --host=192.168.10.10 (Default:$dbHost)\n
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
---host\tIP address of the MythTV backend (Default: $host)
+--dbhost=\t\tMySQL database hostname. (Default: $dbHost)
+--host\tIP address of the MythTV backend. (Default: $host)
 --max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --station=\t\tDownload the schedule for a single stationID in your lineup.
 eol;
 
-$longoptions = array("beta::", "dbhost::", "dbname::", "dbpassword::", "dbuser::", "debug::", "help::",
-                     "host::", "max::", "station::");
+$longoptions = array("beta::", "debug::", "help::", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+                     "username::", "password::", "test::", "max::", "station::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -95,6 +95,9 @@ foreach ($options as $k => $v)
             break;
         case "host":
             $host = $v;
+            break;
+        case "test":
+            $test = TRUE;
             break;
         case "max":
             $maxProgramsToGet = $v;
