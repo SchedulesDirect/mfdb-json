@@ -27,21 +27,24 @@ function getToken($username, $passwordHash)
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
-        return("ERROR");
+
+        return ("ERROR");
     } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
     {
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
-        return("ERROR");
+
+        return ("ERROR");
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
-        return("ERROR");
+
+        return ("ERROR");
     } catch (Exception $e)
     {
         print "getToken:HCF. Uncaught exception.\n";
@@ -222,13 +225,43 @@ function checkForServiceAPI()
 {
     global $client;
     global $host;
+    global $useServiceAPI;
 
-    $request = $client->get("http://$host:6544/Myth/GetHostName")->send();
-    $response = $request->getBody();
+    try
+    {
+        $request = $client->get("http://$host:6544/Myth/GetHostName")->send();
+    } catch (Guzzle\Http\Exception\ClientErrorResponseException $e)
+    {
+        $errorReq = $e->getRequest();
+        $errorResp = $e->getResponse();
+        $errorMessage = $e->getMessage();
+        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-    print "response is: $response\n";
+        return ("ERROR");
+    } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
+    {
+        $errorReq = $e->getRequest();
+        $errorResp = $e->getResponse();
+        $errorMessage = $e->getMessage();
+        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-    var_dump($response);
+        return ("ERROR");
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $errorReq = $e->getRequest();
+        $errorResp = $e->getResponse();
+        $errorMessage = $e->getMessage();
+        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+
+        return ("ERROR");
+    } catch (Exception $e)
+    {
+        print "getToken:HCF. Uncaught exception.\n";
+
+        return ("ERROR");
+    }
+
+    $useServiceAPI = TRUE;
 }
 
 ?>
