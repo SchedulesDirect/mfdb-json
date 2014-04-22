@@ -40,6 +40,7 @@ $dbUser = "mythtv";
 $dbPassword = "mythtv";
 $dbHost = "localhost";
 $dbName = "mythconverg";
+$host = "localhost";
 
 $helpText = <<< eol
 The following options are available:
@@ -48,14 +49,15 @@ The following options are available:
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
+--dbhost=\t\tMySQL database hostname. (Default: $dbHost)
 --help\t\t(this text)
---host=\t\tMySQL database hostname. (Default: $dbHost)
+--host\t\tIP address of the MythTV backend. (Default: $host)
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 eol;
 
-$longoptions = array("beta::", "debug::", "help::", "host::", "dbname::", "dbpassword::", "dbuser::", "username::",
-                     "password::", "test::");
+$longoptions = array("beta::", "debug::", "help::", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+                     "username::", "password::", "test::");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -74,17 +76,20 @@ foreach ($options as $k => $v)
             print "$helpText\n";
             exit;
             break;
-        case "host":
-            $dbHost = $v;
-            break;
-        case "dbpassword":
-            $dbPassword = $v;
-            break;
         case "dbname":
             $dbName = $v;
             break;
         case "dbuser":
             $dbUser = $v;
+            break;
+        case "dbpassword":
+            $dbPassword = $v;
+            break;
+        case "dbhost":
+            $dbHost = $v;
+            break;
+        case "host":
+            $host = $v;
             break;
         case "username":
             $username = $v;
