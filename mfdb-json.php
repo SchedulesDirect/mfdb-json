@@ -28,6 +28,7 @@ $scriptDate = "2014-04-12";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 $station = "";
+$useServiceAPI = FALSE;
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
@@ -1545,6 +1546,7 @@ function updateStatus()
     global $dbh;
     global $client;
     global $host;
+    global $useServiceAPI;
 
     $res = getStatus();
 
@@ -1583,37 +1585,35 @@ function updateStatus()
     printMSG("Max number of lineups for your account: $maxLineups\n");
     printMSG("Next suggested connect time: $nextConnectTime\n");
 
-    $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='MythFillSuggestedRunTime' AND hostname IS NULL");
-    $stmt->execute(array("data" => $nextConnectTime));
-    /*
-        $request = $client->post("http://$host:6544/Myth/PutSetting", array(), "Key=MythFillSuggestedRunTime&Value=$nextConnectTime");
-        $response = $request->send();
-    */
-    $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
-        array("Key" => "UserJobDesc2", "Value" => "987654"));
-    $response = $request->send();
-
-    $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
-        array("Key" => "testSetting", "Value" => "this is a test of a new key."));
-    $response = $request->send();
-
-
-    $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
-    $stmt->execute(array("data" => "Your subscription expires on $expires."));
-
-    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='SchedulesDirectLastUpdate'");
-    $result = $stmt->fetchColumn();
-    $getLastUpdate = $result[0];
-
-    if ($res["lastDataUpdate"] == $getLastUpdate)
+    if ($useServiceAPI)
     {
-        return ("No new data on server.");
+        $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
+            array("Key" => "MythFillSuggestedRunTime", "Value" => $nextConnectTime))->send();
+        $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
+            array("Key" => "DataDirectMessage", "Value" => "Your subscription expires on $expires."))->send();
     }
     else
     {
-        $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate'
+        $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value = 'MythFillSuggestedRunTime' AND hostname IS NULL");
+        $stmt->execute(array("data" => $nextConnectTime));
+
+        $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
+        $stmt->execute(array("data" => "Your subscription expires on $expires."));
+
+        $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='SchedulesDirectLastUpdate'");
+        $result = $stmt->fetchColumn();
+        $getLastUpdate = $result[0];
+
+        if ($res["lastDataUpdate"] == $getLastUpdate)
+        {
+            return ("No new data on server.");
+        }
+        else
+        {
+            $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate'
         AND hostname IS NULL");
-        $stmt->execute(array("data" => $res["lastDataUpdate"]));
+            $stmt->execute(array("data" => $res["lastDataUpdate"]));
+        }
     }
 
     return ("");

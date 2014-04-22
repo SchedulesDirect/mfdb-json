@@ -19,6 +19,7 @@ $password = "";
 $passwordHash = "";
 $scriptVersion = "0.15";
 $scriptDate = "2014-04-19";
+$useServiceAPI = FALSE;
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -134,6 +135,7 @@ $client->setUserAgent($agentString);
 
 if ($test)
 {
+    checkForServiceAPI();
 }
 
 if ($username == "" AND $password == "")

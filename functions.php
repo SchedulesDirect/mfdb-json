@@ -218,5 +218,17 @@ function debugMSG($str)
     fwrite($fh_error, $str);
 }
 
+function checkForServiceAPI()
+{
+    global $client;
+    global $host;
+
+    $request = $client->get("http://$host:6544/Myth/GetHostName")->send();
+    $response = $request->getBody();
+
+    print "response is: $response\n";
+
+    var_dump($response);
+}
 
 ?>
