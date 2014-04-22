@@ -2,12 +2,11 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.10, 2014-04-19
+v0.11, 2014-04-22
 
 Robert Kulagowski
 
 grabber@schedulesdirect.org
-
 
 This program runs as a replacement to mythfilldatabase (for now) and
 downloads data from Schedules Direct using the new JSON format.
@@ -60,11 +59,10 @@ skip to the next section.
 3. Recording Profiles
 7. Storage Directories
 ```
-Do not configure Video Sources or Input Connections!
+Do not configure Video Sources or Input Connections - you will do that later.
 
-(You will do that later)
-
-If you have an Over-the-Air lineup then you'll need to run a scan.
+**NOTE**:If you have an Over-the-Air lineup then the instructions are a little more 
+involved; take note of the OTA exceptions in the instructions below.
 
 Exit mythtv-setup. You will be prompted that you haven't set your start
 channel.  Select "No, I know what I'm doing."
@@ -363,7 +361,7 @@ Status messages from Schedules Direct:
 <status snipped>
 
 MythTV videosource:
-sourceid: 4     name: Comcast   Schedules Direct lineup:
+sourceid: 1     name: Comcast   Schedules Direct lineup:
 
 ```
 
@@ -393,21 +391,36 @@ Type in: **L**
 ```
 Linking Schedules Direct lineup to sourceid
 
-MythTV sourceid:>4
+MythTV sourceid:>1
 Schedules Direct lineup:>USA-IL57303-X
 
 (status snipped)
 
 MythTV videosource:
-sourceid: 4     name: Comcast   Schedules Direct lineup: USA-IL57303-X
+sourceid: 1     name: Comcast   Schedules Direct lineup: USA-IL57303-X
 ```
 
 ###Refresh lineup
+####Antenna / Over-the-air
 
-Once that's done, you'll need to download the channel mapping using the "R"
-function.  This is also done whenever the utility program tells you that
-there's an update available to the headend by putting "***" in the "New"
-column.
+For Antenna users, once you've added the appropriate lineup to your
+Schedules Direct account, added a videosource (in this document we will
+assume that you called it "Antenna"), and Linked it, quit out of
+sd-utility.php and restart mythtv-setup.
+
+Go to Input Connections, select your hardware device and select the
+appropriate Video Source.  In this instance, it's "Antenna", because that's
+the name that we created in sd-utility.php
+
+Go to "Scan for channels" and use the defaults. Allow the scan to complete.
+Continue to the next step:
+
+####Non-Antenna lineups.
+
+Once the Antenna scan is complete, or you're using a device which isn't an
+Antenna, you'll need to download the channel mapping using the "R" function. 
+This is also done whenever the utility program tells you that there's an
+update available to the headend by putting "***" in the "New" column.
 
 Type in: **R**
 
@@ -478,16 +491,16 @@ Run the mfdb-json.php script to download schedule data.
 00:01:21:200 / 247
 00:01:22:Completed local database program updates.
 00:01:22:Inserting schedules.
-00:01:23:Inserting schedule for chanid:4034 sourceid:4 xmltvid:10021
-00:01:23:Inserting schedule for chanid:4050 sourceid:4 xmltvid:10035
-00:01:24:Inserting schedule for chanid:4046 sourceid:4 xmltvid:10051
-00:01:24:Inserting schedule for chanid:4073 sourceid:4 xmltvid:10057
+00:01:23:Inserting schedule for chanid:4034 sourceid:1 xmltvid:10021
+00:01:23:Inserting schedule for chanid:4050 sourceid:1 xmltvid:10035
+00:01:24:Inserting schedule for chanid:4046 sourceid:1 xmltvid:10051
+00:01:24:Inserting schedule for chanid:4073 sourceid:1 xmltvid:10057
 
 (etc)
 
-00:04:49:Inserting schedule for chanid:4408 sourceid:4 xmltvid:82541
-00:04:49:Inserting schedule for chanid:4237 sourceid:4 xmltvid:82547
-00:04:49:Inserting schedule for chanid:4139 sourceid:4 xmltvid:84172
+00:04:49:Inserting schedule for chanid:4408 sourceid:1 xmltvid:82541
+00:04:49:Inserting schedule for chanid:4237 sourceid:1 xmltvid:82547
+00:04:49:Inserting schedule for chanid:4139 sourceid:1 xmltvid:84172
 00:04:50:Done inserting schedules.
 00:04:50:Status:Successful.
 00:04:50:Global. Start Time:2014-02-19 00:00:49
