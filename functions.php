@@ -227,6 +227,8 @@ function checkForServiceAPI()
     global $host;
     global $useServiceAPI;
 
+    print "Checking for MythTV Service API\n";
+
     try
     {
         $request = $client->get("http://$host:6544/Myth/GetHostName")->send();
@@ -261,6 +263,7 @@ function checkForServiceAPI()
         return ("ERROR");
     }
 
+    print "Found Service API.\n";
     $useServiceAPI = TRUE;
 }
 
