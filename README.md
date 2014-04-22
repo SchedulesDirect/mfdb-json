@@ -413,9 +413,10 @@ appropriate Video Source.  In this instance, it's "Antenna", because that's
 the name that we created in sd-utility.php
 
 Go to "Scan for channels" and use the defaults. Allow the scan to complete.
-Continue to the next step:
 
-####Non-Antenna lineups.
+Restart sd-utility.php and continue to the next step:
+
+####Antenna lineup post-scan and non-Antenna lineups.
 
 Once the Antenna scan is complete, or you're using a device which isn't an
 Antenna, you'll need to download the channel mapping using the "R" function. 
