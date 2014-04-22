@@ -453,11 +453,18 @@ channel table, because that's what the script will use to determine what
 schedules to download.
 
 ##Back to MythTV
+###Antenna
+
+If you've configured an Antenna lineup above and it's your only lineup, then
+you're actually done at this point.
+
+###All others.
 
 Restart mythtv-setup
 
 Go to "5. Input connections" and associate the hardware inputs with the
-video source you created in the sd-utility script.
+video sources you created in the sd-utility script.  (Other than Antenna,
+because that's already done at this point.)
 
 You do not need to "Retrieve lineup" or scan for channels.
 
@@ -526,3 +533,8 @@ to automatically run the grabber.
 There is a script called "mfdb.sh" which was cloned into this directory. 
 Edit and update the script as required for your setup.  The script contains
 comments on what needs to be configured in mythtv-setup.
+
+It's recommended that you leave everything in the mfdb-json directory; the
+script depends on being able to access the libraries downloaded with
+Composer, so moving the script to /var/lib or somewhere else will break
+things unless you move the entire directory.
