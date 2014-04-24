@@ -34,6 +34,7 @@ date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 
+$fh_log = fopen("$todayDate.log", "a");
 $fh_error = fopen("$todayDate.debug.log", "a");
 
 $dbUser = "mythtv";
@@ -652,8 +653,8 @@ function addLineupsToSchedulesDirect()
 
     if ($debug)
     {
-        debugMSG("addLineupsToSchedulesDirect:Response:$res\n");
-        debugMSG("Raw headers:\n" . $response->getRawHeaders() . "\n");
+        debugMSG("addLineupsToSchedulesDirect:Response:$res");
+        debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
 
     foreach ($res as $he => $details)
@@ -705,10 +706,9 @@ function addLineupsToSchedulesDirect()
 
     if ($debug)
     {
-        debugMSG("addLineupsToSchedulesDirect:Response:$res\n");
-        debugMSG("Raw headers:\n" . $response->getRawHeaders() . "\n");
+        debugMSG("addLineupsToSchedulesDirect:Response:$res");
+        debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
-
 
     print "Message from server: {$res["message"]}\n";
 }
@@ -745,10 +745,9 @@ function deleteLineupFromSchedulesDirect()
 
     if ($debug)
     {
-        debugMSG("deleteLineupFromSchedulesDirect:Response:$res\n");
-        debugMSG("Raw headers:\n" . $response->getRawHeaders() . "\n");
+        debugMSG("deleteLineupFromSchedulesDirect:Response:$res");
+        debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
-
 
     print "Message from server: {$res["message"]}\n";
     unset ($updatedLineupsToRefresh[$toDelete]);

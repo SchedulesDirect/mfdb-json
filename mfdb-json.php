@@ -23,8 +23,8 @@ $debug = FALSE;
 $quiet = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
-$scriptVersion = "0.12";
-$scriptDate = "2014-04-12";
+$scriptVersion = "0.13";
+$scriptDate = "2014-04-23";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 $station = "";
@@ -35,9 +35,11 @@ $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 date_default_timezone_set("UTC");
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
-$fh_log = fopen("$todayDate.log", "a");
 
-printMSG("$agentString\n");
+$fh_log = fopen("$todayDate.log", "a");
+$fh_error = fopen("$todayDate.debug.log", "a");
+
+printMSG("$agentString");
 
 $jsonProgramstoRetrieve = array();
 $peopleCache = array();
@@ -77,8 +79,8 @@ foreach ($options as $k => $v)
             break;
         case "help":
         case "h":
-            print "$agentString\n\n";
-            print "$helpText\n";
+            printMSG("$agentString");
+            printMSG("$helpText");
             exit;
             break;
         case "dbhost":
@@ -109,11 +111,11 @@ foreach ($options as $k => $v)
 }
 
 $dlSchedTempDir = tempdir();
-printMSG("Temp directory for Schedules is $dlSchedTempDir\n");
+printMSG("Temp directory for Schedules is $dlSchedTempDir");
 $dlProgramTempDir = tempdir();
-printMSG("Temp directory for Programs is $dlProgramTempDir\n");
+printMSG("Temp directory for Programs is $dlProgramTempDir");
 
-printMSG("Connecting to MythTV database.\n");
+printMSG("Connecting to MythTV database.");
 try
 {
     $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
@@ -122,7 +124,7 @@ try
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e)
 {
-    print "Exception with PDO: " . $e->getMessage() . "\n";
+    debugMSG("Exception with PDO: " . $e->getMessage());
     exit;
 }
 
@@ -130,15 +132,15 @@ if ($isBeta)
 {
     # Test server. Things may be broken there.
     $baseurl = "https://json.schedulesdirect.org/20131021/";
-    printMSG("Using beta server.\n");
+    printMSG("Using beta server.");
     # API must match server version.
     $api = 20131021;
 }
 else
 {
-    $baseurl = "https://data2.schedulesdirect.org";
-    printMSG("Using production server.\n");
-    $api = 20130709;
+    $baseurl = "https://json.schedulesdirect.org/20131021/";
+    printMSG("Using production server.");
+    $api = 20131021;
 }
 
 $client = new Guzzle\Http\Client($baseurl);
@@ -153,8 +155,8 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (!count($result))
 {
-    printMSG("Fatal Error: Could not read userid and password for schedulesdirect2 grabber from videosource.\n");
-    printMSG("Did you run the sd-utility.php program yet?\n");
+    printMSG("Fatal Error: Could not read userid and password for schedulesdirect2 grabber from videosource.");
+    printMSG("Did you run the sd-utility.php program yet?");
     exit;
 }
 
@@ -166,31 +168,31 @@ $globalStartDate = new DateTime();
 
 if ($station == "")
 {
-    printMSG("Retrieving list of channels to download.\n");
+    printMSG("Retrieving list of channels to download.");
     $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
 AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
     $stmt->execute();
 }
 else
 {
-    printMSG("Downloading data only for $station\n");
+    printMSG("Downloading data only for $station");
     $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE xmltvid=:station");
     $stmt->execute(array("station" => $station));
 }
 
 $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-printMSG("Logging into Schedules Direct.\n");
+printMSG("Logging into Schedules Direct.");
 $token = getToken($sdUsername, $sdPassword);
 
 if ($token == "ERROR")
 {
-    printMSG("Got error when attempting to retrieve token from Schedules Direct.\n");
-    printMSG("Check username / password in videosource table.\n");
+    printMSG("Got error when attempting to retrieve token from Schedules Direct.");
+    printMSG("Check username / password in videosource table.");
     exit;
 }
 
-printMSG("Retrieving server status message.\n");
+printMSG("Retrieving server status message.");
 
 $response = updateStatus();
 
@@ -205,7 +207,7 @@ if ($token != "ERROR" AND $response != "ERROR")
 }
 else
 {
-    print "Error connecting to Schedules Direct.\n";
+    debugMSG("Error connecting to Schedules Direct.");
     $statusMessage = "Error connecting to Schedules Direct.";
 }
 
@@ -220,21 +222,21 @@ else
     $statusMessage = "No new programs to retrieve.";
 }
 
-printMSG("Status:$statusMessage\n");
+printMSG("Status:$statusMessage");
 
 $globalStartTime = date("Y-m-d H:i:s", $globalStartTime);
 $globalEndTime = date("Y-m-d H:i:s");
 
-printMSG("Global. Start Time:$globalStartTime\n");
-printMSG("Global. End Time:$globalEndTime\n");
+printMSG("Global. Start Time:$globalStartTime");
+printMSG("Global. End Time:$globalEndTime");
 $globalSinceStart = $globalStartDate->diff(new DateTime());
 if ($globalSinceStart->h)
 {
     printMSG($globalSinceStart->h . " hour ");
 }
-printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.\n");
+printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.");
 
-printMSG("Updating status.\n");
+printMSG("Updating status.");
 
 $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStart' AND hostname IS NULL");
 $stmt->execute(array("data" => $globalStartTime));
@@ -245,14 +247,23 @@ $stmt->execute(array("data" => $globalEndTime));
 $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStatus' AND hostname IS NULL");
 $stmt->execute(array("data" => $statusMessage));
 
-printMSG("Sending reschedule request to mythbackend.\n");
-exec("mythutil --resched");
+printMSG("Sending reschedule request to mythbackend.");
 
-printMSG("Done.\n");
+if ($useServiceAPI)
+{
+    $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
+        array("Key" => "MythFillSuggestedRunTime", "Value" => $nextConnectTime))->send();
+}
+else
+{
+    exec("mythutil --resched");
+}
+
+printMSG("Done.");
 
 if ($errorWarning)
 {
-    printMSG("NOTE! Errors encountered during processing. Check logs.\n");
+    debugMSG("NOTE! Errors encountered during processing. Check logs.");
 }
 
 exit;
@@ -273,7 +284,7 @@ function getSchedules($stationIDs)
     $downloadedStationIDs = array();
     $serverScheduleMD5 = array();
 
-    printMSG("Sending schedule request.\n");
+    printMSG("Sending schedule request.");
 
     $body["request"] = $stationIDs;
 
@@ -295,7 +306,7 @@ function getSchedules($stationIDs)
      * Keep a copy for troubleshooting.
      */
 
-    printMSG("Writing to $dlSchedTempDir/schedule.json\n");
+    printMSG("Writing to $dlSchedTempDir/schedule.json");
 
     file_put_contents("$dlSchedTempDir/schedule.json", $resBody);
 
@@ -307,7 +318,7 @@ function getSchedules($stationIDs)
         $stationID = $item["stationID"];
         $downloadedStationIDs[] = $stationID;
 
-        printMSG("Parsing schedule for stationID:$stationID\n");
+        printMSG("Parsing schedule for stationID:$stationID");
 
         foreach ($item["programs"] as $programData)
         {
@@ -315,8 +326,8 @@ function getSchedules($stationIDs)
         }
     }
 
-    printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.\n");
-    printMSG("Retrieving existing MD5 values.\n");
+    printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.");
+    printMSG("Retrieving existing MD5 values.");
 
     /*
      * We're going to figure out which programIDs we need to download.
@@ -351,14 +362,14 @@ function getSchedules($stationIDs)
      * either because we didn't have them, or they have different md5's.
      */
 
-    printMSG("Need to download $toRetrieveTotal new or updated programs.\n");
+    printMSG("Need to download $toRetrieveTotal new or updated programs.");
 
     if ($toRetrieveTotal > 10000)
     {
-        printMSG("Requesting more than 10000 programs. Please be patient.\n");
+        printMSG("Requesting more than 10000 programs. Please be patient.");
     }
 
-    printMSG("Maximum programs we're downloading per call: $maxProgramsToGet\n");
+    printMSG("Maximum programs we're downloading per call: $maxProgramsToGet");
 
     if (count($jsonProgramstoRetrieve))
     {
@@ -368,7 +379,7 @@ function getSchedules($stationIDs)
 
         for ($i = 0; $i <= $totalChunks; $i++)
         {
-            printMSG("Retrieving chunk " . ($i + 1) . " of " . ($totalChunks + 1) . ".\n");
+            printMSG("Retrieving chunk " . ($i + 1) . " of " . ($totalChunks + 1) . ".");
             $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
 
@@ -426,7 +437,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
     $counter = 0;
     $total = count($jsonProgramstoRetrieve);
-    printMSG("Performing inserts of JSON data.\n");
+    printMSG("Performing inserts of JSON data.");
 
     $dbh->beginTransaction();
 
@@ -448,8 +459,8 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
             if (json_last_error())
             {
-                printMSG("*** ERROR: JSON decode error $jsonFileToProcess\n");
-                printMSG(print_r($item, TRUE));
+                debugMSG("*** ERROR: JSON decode error $jsonFileToProcess");
+                debugMSG(print_r($item, TRUE));
                 continue;
             }
 
@@ -487,8 +498,8 @@ function insertJSON(array $jsonProgramstoRetrieve)
                         $role = $credit["role"];
                         if (!isset($credit["personId"]))
                         {
-                            printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
-                            $debug = TRUE; // Set it to tr
+                            printMSG("$jsonFileToProcess:$pid does not have a personId.");
+                            $debug = TRUE; // Set it to true
                             continue;
                         }
                         $personID = $credit["personId"];
@@ -529,7 +540,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
                         $role = $credit["role"];
                         if (!isset($credit["personId"]))
                         {
-                            printMSG("$jsonFileToProcess:$pid does not have a personId.\n");
+                            printMSG("$jsonFileToProcess:$pid does not have a personId.");
                             $debug = TRUE;
                             continue;
                         }
@@ -586,7 +597,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
 
     $dbh->commit();
 
-    printMSG("Completed local database program updates.\n");
+    printMSG("Completed local database program updates.");
 }
 
 function insertSchedule()
@@ -609,7 +620,7 @@ function insertSchedule()
 
     $roleTable = array();
 
-    printMSG("Inserting schedules.\n");
+    printMSG("Inserting schedules.");
 
     $dbh->exec("DROP TABLE IF EXISTS t_SDschedule");
     $dbh->exec("CREATE TABLE t_SDschedule LIKE SDschedule");
@@ -708,7 +719,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
         $chanID = $item["chanid"];
         $sourceID = $item["sourceid"];
         $stationID = $item["xmltvid"];
-        printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID\n");
+        printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID");
 
         $dbh->beginTransaction();
 
@@ -790,8 +801,8 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if (json_last_error())
             {
-                printMSG("Error retrieving / decoding $programID from local database. Raw data was:\n");
-                printMSG(print_r($pj, TRUE) . "\n");
+                debugMSG("Error retrieving / decoding $programID from local database. Raw data was:\n");
+                debugMSG(print_r($pj, TRUE));
                 $errorWarning = TRUE;
                 continue;
             }
@@ -971,10 +982,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             {
                 if ($isNew)
                 {
-                    printMSG("*** WARNING sid:$stationID pid:$programID has 'new' and 'repeat' set. Open SD ticket:\n");
-                    printMSG(print_r($schedule, TRUE) . "\n");
+                    debugMSG("*** WARNING sid:$stationID pid:$programID has 'new' and 'repeat' set. Open SD ticket:\n");
+                    debugMSG(print_r($schedule, TRUE));
                     $errorWarning = TRUE;
-                    $tt = fgets(STDIN);
                 }
                 else
                 {
@@ -1047,7 +1057,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if ($title == NULL OR $title == "")
             {
-                printMSG("FATAL ERROR: Empty title? $programID\n");
+                debugMSG("FATAL ERROR: Empty title? $programID");
                 exit;
             }
 
@@ -1111,7 +1121,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     $categoryType = "sports";
                     break;
                 default:
-                    printMSG("FATAL ERROR: $programID has unknown type.\n");
+                    debugMSG("FATAL ERROR: $programID has unknown type.");
                     exit;
                     break;
             }
@@ -1494,11 +1504,11 @@ if (isset($v["sap"]))
 
     if ($debug && count($roleTable))
     {
-        print "Role table:\n";
-        var_dump($roleTable);
+        debugMSG("Role table:\n");
+        debugMSG(print_r($roleTable, TRUE));
     }
 
-    printMSG("Done inserting schedules.\n");
+    printMSG("Done inserting schedules.");
     $dbh->exec("DROP TABLE SDschedule");
     $dbh->exec("RENAME TABLE t_SDschedule TO SDschedule");
 
@@ -1549,30 +1559,30 @@ function updateStatus()
             $msgID = $a["msgID"];
             $msgDate = $a["date"];
             $message = $a["message"];
-            printMSG("MessageID:$msgID : $msgDate : $message\n");
+            printMSG("MessageID:$msgID : $msgDate : $message");
             $updateLocalMessageTable->execute(array("id"   => $msgID, "date" => $msgDate, "message" => $message,
                                                     "type" => "U"));
         }
     }
     else
     {
-        printMSG("Received error response from server!\n");
-        printMSG("ServerID: " . $res["serverID"] . "\n");
-        printMSG("Message: " . $res["message"] . "\n");
-        printMSG("\nFATAL ERROR. Terminating execution.\n");
+        debugMSG("Received error response from server!");
+        debugMSG("ServerID: " . $res["serverID"] . "");
+        debugMSG("Message: " . $res["message"] . "");
+        debugMSG("FATAL ERROR. Terminating execution.");
 
         return ("ERROR");
     }
 
-    printMSG("Server: " . $res["serverID"] . "\n");
-    printMSG("Last data refresh: " . $res["lastDataUpdate"] . "\n");
-    printMSG("Account expires: $expires\n");
-    printMSG("Max number of lineups for your account: $maxLineups\n");
-    printMSG("Next suggested connect time: $nextConnectTime\n");
+    printMSG("Server: {$res["serverID"]}");
+    printMSG("Last data refresh: {$res["lastDataUpdate"]}");
+    printMSG("Account expires: $expires");
+    printMSG("Max number of lineups for your account: $maxLineups");
+    printMSG("Next suggested connect time: $nextConnectTime");
 
     if ($useServiceAPI)
     {
-        printMSG("Updating settings via the Services API.\n");
+        printMSG("Updating settings via the Services API.");
         $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
             array("Key" => "MythFillSuggestedRunTime", "Value" => $nextConnectTime))->send();
         $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
@@ -1596,13 +1606,14 @@ function updateStatus()
         }
         else
         {
-            printMSG("Updating settings using MySQL.\n");
+            printMSG("Updating settings using MySQL.");
             $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate'
         AND hostname IS NULL");
             $stmt->execute(array("data" => $res["lastDataUpdate"]));
-            exec("mythutil --clearcache");
         }
     }
+
+    exec("mythutil --clearcache");
 
     return ("");
 }

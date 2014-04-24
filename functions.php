@@ -211,16 +211,6 @@ function exceptionErrorDump($errorReq, $errorResp, $errorMessage)
     print "$errorMessage\n\n";
 }
 
-function debugMSG($str)
-{
-    global $fh_error;
-
-    $str = date("H:i:s") . ":$str";
-
-    print "$str";
-    fwrite($fh_error, $str);
-}
-
 function checkForServiceAPI()
 {
     global $client;
@@ -267,6 +257,16 @@ function checkForServiceAPI()
     $useServiceAPI = TRUE;
 }
 
+function debugMSG($str)
+{
+    global $fh_error;
+
+    $str = date("H:i:s") . ":$str";
+
+    print "$str\n";
+    fwrite($fh_error, "$str\n");
+}
+
 function printMSG($str)
 {
     global $fh_log;
@@ -286,5 +286,6 @@ function printMSG($str)
     $str = str_replace("\r", "\n", $str);
     fwrite($fh_log, $str);
 }
+
 
 ?>
