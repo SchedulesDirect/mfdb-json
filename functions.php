@@ -48,7 +48,14 @@ function getToken($username, $passwordHash)
     } catch (Exception $e)
     {
         print "getToken:HCF. Uncaught exception.\n";
-        print $e->getMessage();
+        print $e->getMessage() . "\n";
+
+        print "e is \n";
+        var_dump($e);
+
+        print "response is \n";
+        var_dump($response);
+
 
         return ("ERROR");
     }
