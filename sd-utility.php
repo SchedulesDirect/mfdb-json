@@ -17,8 +17,8 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.16";
-$scriptDate = "2014-04-23";
+$scriptVersion = "0.17";
+$scriptDate = "2014-04-24";
 $useServiceAPI = FALSE;
 
 require_once "vendor/autoload.php";
@@ -57,8 +57,8 @@ The following options are available:
 --password=\tSchedules Direct password.
 eol;
 
-$longoptions = array("beta::", "debug::", "help::", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "username::", "password::", "test::");
+$longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+                     "username::", "password::", "test");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
