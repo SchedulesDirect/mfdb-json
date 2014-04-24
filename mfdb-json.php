@@ -60,11 +60,12 @@ The following options are available:
 --dbhost=\t\tMySQL database hostname. (Default: $dbHost)
 --host\tIP address of the MythTV backend. (Default: $host)
 --max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
+--quiet\t\tDon't print to screen; put all output into the logfile.
 --station=\t\tDownload the schedule for a single stationID in your lineup.
 eol;
 
-$longoptions = array("beta::", "debug::", "help::", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "username::", "password::", "test::", "max::", "station::");
+$longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+                     "username::", "password::", "test", "max::", "quiet", "station::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -103,6 +104,9 @@ foreach ($options as $k => $v)
             break;
         case "max":
             $maxProgramsToGet = $v;
+            break;
+        case "quiet":
+            $quiet = TRUE;
             break;
         case "station":
             $station = $v;

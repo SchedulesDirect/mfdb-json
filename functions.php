@@ -250,11 +250,17 @@ function checkForServiceAPI()
 function debugMSG($str)
 {
     global $fh_error;
+    global $quiet;
 
     $str = date("H:i:s") . ":$str";
 
-    print "$str\n";
-    fwrite($fh_error, "$str\n");
+    if (!$quiet)
+    {
+        print "$str";
+    }
+
+    $str = str_replace("\r", "\n", $str);
+    fwrite($fh_error, "$str");
 }
 
 function printMSG($str)
