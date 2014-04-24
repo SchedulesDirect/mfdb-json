@@ -235,34 +235,34 @@ function checkForServiceAPI()
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
-        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return ("ERROR");
+        //exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+        return (FALSE);
     } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
     {
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
-        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return ("ERROR");
+        //exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+        return (FALSE);
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
-        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return ("ERROR");
+        //exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+
+        return (FALSE);
     } catch (Exception $e)
     {
-        print "getToken:HCF. Uncaught exception.\n";
-
-        return ("ERROR");
+        // print "checkForServiceAPI:HCF. Uncaught exception.\n";
+        return (FALSE);
     }
 
     print "Found Service API.\n";
-    $useServiceAPI = TRUE;
+    return(TRUE);
 }
 
 function debugMSG($str)
