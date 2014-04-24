@@ -223,7 +223,6 @@ function checkForServiceAPI()
 {
     global $client;
     global $host;
-    global $useServiceAPI;
 
     print "Checking for MythTV Service API.\n";
 
@@ -232,32 +231,15 @@ function checkForServiceAPI()
         $request = $client->get("http://$host:6544/Myth/GetHostName")->send();
     } catch (Guzzle\Http\Exception\ClientErrorResponseException $e)
     {
-        $errorReq = $e->getRequest();
-        $errorResp = $e->getResponse();
-        $errorMessage = $e->getMessage();
-
-        //exceptionErrorDump($errorReq, $errorResp, $errorMessage);
         return (FALSE);
     } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
     {
-        $errorReq = $e->getRequest();
-        $errorResp = $e->getResponse();
-        $errorMessage = $e->getMessage();
-
-        //exceptionErrorDump($errorReq, $errorResp, $errorMessage);
         return (FALSE);
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
-        $errorReq = $e->getRequest();
-        $errorResp = $e->getResponse();
-        $errorMessage = $e->getMessage();
-
-        //exceptionErrorDump($errorReq, $errorResp, $errorMessage);
-
         return (FALSE);
     } catch (Exception $e)
     {
-        // print "checkForServiceAPI:HCF. Uncaught exception.\n";
         return (FALSE);
     }
 
