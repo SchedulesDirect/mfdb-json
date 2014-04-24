@@ -267,4 +267,24 @@ function checkForServiceAPI()
     $useServiceAPI = TRUE;
 }
 
+function printMSG($str)
+{
+    global $fh_log;
+    global $quiet;
+    global $printTimeStamp;
+
+    if ($printTimeStamp)
+    {
+        $str = date("H:i:s") . ":$str";
+    }
+
+    if (!$quiet)
+    {
+        print "$str";
+    }
+
+    $str = str_replace("\r", "\n", $str);
+    fwrite($fh_log, $str);
+}
+
 ?>

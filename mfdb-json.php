@@ -144,6 +144,8 @@ else
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
+$useServiceAPI = checkForServiceAPI();
+
 $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2'
 AND password != '' LIMIT 1");
 $stmt->execute();
@@ -1524,26 +1526,6 @@ function tempdir()
     }
 }
 
-function printMSG($str)
-{
-    global $fh_log;
-    global $quiet;
-    global $printTimeStamp;
-
-    if ($printTimeStamp)
-    {
-        $str = date("H:i:s") . ":$str";
-    }
-
-    if (!$quiet)
-    {
-        print "$str";
-    }
-
-    $str = str_replace("\r", "\n", $str);
-    fwrite($fh_log, $str);
-}
-
 function updateStatus()
 {
     global $dbh;
@@ -1590,6 +1572,7 @@ function updateStatus()
 
     if ($useServiceAPI)
     {
+        printMSG("Updating settings via the Services API.\n");
         $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
             array("Key" => "MythFillSuggestedRunTime", "Value" => $nextConnectTime))->send();
         $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
@@ -1613,9 +1596,11 @@ function updateStatus()
         }
         else
         {
+            printMSG("Updating settings using MySQL.\n");
             $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate'
         AND hostname IS NULL");
             $stmt->execute(array("data" => $res["lastDataUpdate"]));
+            exec("mythutil --clearcache");
         }
     }
 
