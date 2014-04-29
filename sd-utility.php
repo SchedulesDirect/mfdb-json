@@ -52,7 +52,7 @@ The following options are available:
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
---dbhost=\t\tMySQL database hostname. (Default: $dbHost)
+--dbhost=\tMySQL database hostname. (Default: $dbHost)
 --help\t\t(this text)
 --host\t\tIP address of the MythTV backend. (Default: $host)
 --username=\tSchedules Direct username.
