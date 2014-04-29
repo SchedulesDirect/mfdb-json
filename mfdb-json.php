@@ -57,11 +57,11 @@ The following options are available:
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
---dbhost=\t\tMySQL database hostname. (Default: $dbHost)
---host\tIP address of the MythTV backend. (Default: $host)
+--dbhost=\tMySQL database hostname. (Default: $dbHost)
+--host\t\tIP address of the MythTV backend. (Default: $host)
 --max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --quiet\t\tDon't print to screen; put all output into the logfile.
---station=\t\tDownload the schedule for a single stationID in your lineup.
+--station=\tDownload the schedule for a single stationID in your lineup.
 eol;
 /*'*/
 
