@@ -1588,7 +1588,6 @@ function updateStatus()
             array("Key" => "MythFillSuggestedRunTime", "Value" => $nextConnectTime))->send();
         $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
             array("Key" => "DataDirectMessage", "Value" => "Your subscription expires on $expires."))->send();
-        exec("mythutil --clearcache");
     }
     else
     {
@@ -1614,6 +1613,8 @@ function updateStatus()
             $stmt->execute(array("data" => $res["lastDataUpdate"]));
         }
     }
+
+    exec("mythutil --clearcache"); // Force a clearcache to make sure that everyone is in sync.
 
     return ("");
 }
