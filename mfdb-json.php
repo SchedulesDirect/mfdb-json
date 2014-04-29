@@ -81,7 +81,6 @@ foreach ($options as $k => $v)
             break;
         case "help":
         case "h":
-            printMSG("$agentString");
             printMSG("$helpText");
             exit;
             break;
