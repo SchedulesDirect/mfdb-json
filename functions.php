@@ -244,7 +244,8 @@ function checkForServiceAPI()
     }
 
     print "Found Service API.\n";
-    return(TRUE);
+
+    return (TRUE);
 }
 
 function debugMSG($str)
@@ -252,7 +253,7 @@ function debugMSG($str)
     global $fh_error;
     global $quiet;
 
-    $str = date("H:i:s") . ":$str";
+    $str = date("Y-m-d H:i:s") . ":$str";
 
     if (!$quiet)
     {
@@ -271,7 +272,7 @@ function printMSG($str)
 
     if ($printTimeStamp)
     {
-        $str = date("H:i:s") . ":$str";
+        $str = date("Y-m-d H:i:s") . ":$str";
     }
 
     if (!$quiet)
@@ -282,6 +283,5 @@ function printMSG($str)
     $str = str_replace("\r", "\n", $str);
     fwrite($fh_log, $str);
 }
-
 
 ?>

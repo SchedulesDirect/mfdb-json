@@ -63,6 +63,7 @@ The following options are available:
 --quiet\t\tDon't print to screen; put all output into the logfile.
 --station=\t\tDownload the schedule for a single stationID in your lineup.
 eol;
+/*'*/
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
                      "username::", "password::", "test", "max::", "quiet", "station::");
@@ -253,15 +254,7 @@ $stmt->execute(array("data" => $statusMessage));
 
 printMSG("Sending reschedule request to mythbackend.");
 
-if ($useServiceAPI)
-{
-    $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
-        array("Key" => "MythFillSuggestedRunTime", "Value" => $nextConnectTime))->send();
-}
-else
-{
-    exec("mythutil --resched");
-}
+exec("mythutil --resched");
 
 printMSG("Done.");
 
