@@ -29,10 +29,11 @@ $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 $station = "";
 $useServiceAPI = FALSE;
+$tz = "UTC";
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
 
-date_default_timezone_set("UTC");
+date_default_timezone_set($tz);
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 
@@ -62,11 +63,12 @@ The following options are available:
 --max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --quiet\t\tDon't print to screen; put all output into the logfile.
 --station=\tDownload the schedule for a single stationID in your lineup.
+--timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 eol;
 /*'*/
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "username::", "password::", "test", "max::", "quiet", "station::");
+                     "username::", "password::", "test", "max::", "quiet", "station::", "timezone::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -110,6 +112,9 @@ foreach ($options as $k => $v)
             break;
         case "station":
             $station = $v;
+            break;
+        case "timezone":
+            date_default_timezone_set($v);
             break;
     }
 }

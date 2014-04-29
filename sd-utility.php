@@ -30,7 +30,9 @@ $agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
 $updatedLineupsToRefresh = array();
 $needToStoreUserPassword = FALSE;
 
-date_default_timezone_set("UTC");
+$tz = "UTC";
+
+date_default_timezone_set($tz);
 $date = new DateTime();
 $todayDate = $date->format("Y-m-d");
 
@@ -55,10 +57,11 @@ The following options are available:
 --host\t\tIP address of the MythTV backend. (Default: $host)
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
+--timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 eol;
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "username::", "password::", "test");
+                     "username::", "password::", "test", "timezone::");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -101,6 +104,9 @@ foreach ($options as $k => $v)
             break;
         case "test":
             $test = TRUE;
+            break;
+        case "timezone":
+            date_default_timezone_set($v);
             break;
     }
 }
