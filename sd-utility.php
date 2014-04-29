@@ -54,7 +54,7 @@ The following options are available:
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
 --dbhost=\tMySQL database hostname. (Default: $dbHost)
 --help\t\t(this text)
---host\t\tIP address of the MythTV backend. (Default: $host)
+--host=\t\tIP address of the MythTV backend. (Default: $host)
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)

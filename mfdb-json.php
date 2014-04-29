@@ -59,8 +59,8 @@ The following options are available:
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
 --dbhost=\tMySQL database hostname. (Default: $dbHost)
---host\t\tIP address of the MythTV backend. (Default: $host)
---max\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
+--host=\t\tIP address of the MythTV backend. (Default: $host)
+--max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --quiet\t\tDon't print to screen; put all output into the logfile.
 --station=\tDownload the schedule for a single stationID in your lineup.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
