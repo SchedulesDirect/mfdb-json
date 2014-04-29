@@ -257,11 +257,11 @@ function debugMSG($str)
 
     if (!$quiet)
     {
-        print "$str";
+        print "$str\n";
     }
 
     $str = str_replace("\r", "\n", $str);
-    fwrite($fh_error, "$str");
+    fwrite($fh_error, "$str\n");
 }
 
 function printMSG($str)
@@ -277,11 +277,11 @@ function printMSG($str)
 
     if (!$quiet)
     {
-        print "$str";
+        print "$str\n";
     }
 
     $str = str_replace("\r", "\n", $str);
-    fwrite($fh_log, $str);
+    fwrite($fh_log, "$str\n");
 }
 
 ?>

@@ -23,8 +23,8 @@ $debug = FALSE;
 $quiet = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
-$scriptVersion = "0.14";
-$scriptDate = "2014-04-24";
+$scriptVersion = "0.15";
+$scriptDate = "2014-04-29";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 $station = "";
@@ -798,7 +798,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if (json_last_error())
             {
-                debugMSG("Error retrieving / decoding $programID from local database. Raw data was:\n");
+                debugMSG("Error retrieving / decoding $programID from local database. Raw data was:");
                 debugMSG(print_r($pj, TRUE));
                 $errorWarning = TRUE;
                 continue;
@@ -979,7 +979,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             {
                 if ($isNew)
                 {
-                    debugMSG("*** WARNING sid:$stationID pid:$programID has 'new' and 'repeat' set. Open SD ticket:\n");
+                    debugMSG("*** WARNING sid:$stationID pid:$programID has 'new' and 'repeat' set. Open SD ticket:");
                     debugMSG(print_r($schedule, TRUE));
                     $errorWarning = TRUE;
                 }
@@ -1501,7 +1501,7 @@ if (isset($v["sap"]))
 
     if ($debug && count($roleTable))
     {
-        debugMSG("Role table:\n");
+        debugMSG("Role table:");
         debugMSG(print_r($roleTable, TRUE));
     }
 
@@ -1564,8 +1564,8 @@ function updateStatus()
     else
     {
         debugMSG("Received error response from server!");
-        debugMSG("ServerID: " . $res["serverID"] . "");
-        debugMSG("Message: " . $res["message"] . "");
+        debugMSG("ServerID: {$res["serverID"]}");
+        debugMSG("Message: {$res["message"]}");
         debugMSG("FATAL ERROR. Terminating execution.");
 
         return ("ERROR");

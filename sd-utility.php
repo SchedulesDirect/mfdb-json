@@ -17,8 +17,8 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.17";
-$scriptDate = "2014-04-24";
+$scriptVersion = "0.18";
+$scriptDate = "2014-04-29";
 $useServiceAPI = FALSE;
 
 require_once "vendor/autoload.php";
@@ -202,7 +202,7 @@ while (!$done)
 
     if ($sdStatus == "ERROR")
     {
-        printMSG("Received error from Schedules Direct. Exiting.\n");
+        printMSG("Received error from Schedules Direct. Exiting.");
         exit;
     }
 
