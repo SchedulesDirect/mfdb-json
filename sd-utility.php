@@ -357,7 +357,7 @@ function updateChannelTable($lineup)
             {
                 if ($v["device"] == "Q")
                 {
-                    $qamModified = $v["modified"];
+                    $qamModified = $["modified"];
                 }
             }
 
