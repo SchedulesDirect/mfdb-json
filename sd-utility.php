@@ -649,8 +649,18 @@ function addLineupsToSchedulesDirect()
     print "Three-character ISO-3166-1 alpha3 country code:";
     $country = strtoupper(readline(">"));
 
+    if ($country == "")
+    {
+        return;
+    }
+
     print "Enter postal code:";
     $postalcode = strtoupper(readline(">"));
+
+    if ($postalcode == "")
+    {
+        return;
+    }
 
     try
     {
