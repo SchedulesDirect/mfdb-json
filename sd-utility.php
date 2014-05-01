@@ -387,7 +387,15 @@ function updateChannelTable($lineup)
 
             if ($transport == "Antenna")
             {
-                $freqid = $mapArray["uhfVhf"];
+                if (array_key_exists("uhfVhf", $mapArray))
+                {
+                    $freqid = $mapArray["uhfVhf"];
+                }
+                else
+                {
+                    $freqid = "";
+                }
+
                 if (isset($mapArray["atscMajor"]))
                 {
                     $atscMajor = $mapArray["atscMajor"];
