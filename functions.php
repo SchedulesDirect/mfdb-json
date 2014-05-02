@@ -120,7 +120,9 @@ function getStatus()
         print "Raw headers:\n";
         print $response->getRawHeaders();
         print "******************************************\n";
-        print "getStatus:Response:$res\n";
+        print "getStatus:Response:\n";
+        var_dump($res);
+        print "\n\n";
         print "******************************************\n";
     }
 
