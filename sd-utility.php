@@ -831,7 +831,7 @@ function getLineup($heToGet)
     global $debug;
     global $token;
 
-    print "Retrieving lineup from Schedules Direct.\n";
+    print "Retrieving lineup $heToGet from Schedules Direct.\n";
 
     try
     {
