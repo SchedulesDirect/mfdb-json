@@ -111,6 +111,7 @@ foreach ($options as $k => $v)
     }
 }
 
+print "Using timezone $tz\n";
 print "$agentString\n";
 print "Attempting to connect to database.\n";
 try
@@ -435,7 +436,7 @@ function updateChannelTable($lineup)
             foreach ($json["map"]["1"] as $mapArray)
             {
                 /*
-                 * There may be multiple mappings in the future, but for now assume that they're just one.
+                 * There may be multiple mappings in the future, but for now assume that there's just one.
                  */
                 $dtvMultiplex = array();
 
