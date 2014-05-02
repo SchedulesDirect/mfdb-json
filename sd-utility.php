@@ -839,6 +839,10 @@ function getLineup($heToGet)
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+
+        var_dump($s);
+
+
         print "********************************************\n";
         print "\tError response from server:\n";
         print "\tCode: {$s["code"]}\n";
@@ -857,7 +861,9 @@ function getLineup($heToGet)
         print "Raw headers:\n";
         print $response->getRawHeaders();
         print "******************************************\n";
-        print "getLineup:Response:$res\n";
+        print "getLineup:Response:\n";
+        var_dump($res);
+        print "\n\n";
         print "******************************************\n";
     }
 
