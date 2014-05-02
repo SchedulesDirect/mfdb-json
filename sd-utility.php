@@ -316,7 +316,19 @@ function updateChannelTable($lineup)
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
-    $modified = $json["metadata"]["modified"];
+
+    if (array_key_exists("modified", $json["metadata"]))
+    {
+        $modified = $json["metadata"]["modified"];
+    }
+    else
+    {
+        /*
+         * With QAM, there may be multiple mappings, and therefore multiple modified dates. We'll have to think about
+         *  this some more.
+         */
+        $modified = $json["metadata"][0]["modified"];
+    }
 
     print "Updating channel table for lineup:$lineup\n";
 
@@ -891,7 +903,8 @@ function updateLocalLineupCache(array $updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbh->prepare("REPLACE INTO SDheadendCache(lineup,json,modified) VALUES(:lineup,:json,:modified)");
+        $stmt = $dbh->prepare("INSERT INTO SDheadendCache(lineup,json,modified)
+        VALUES(:lineup,:json,:modified) ON DUPLICATE KEY UPDATE json=:json,modified=:modified");
 
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json"   => json_encode($res)));
