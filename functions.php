@@ -76,7 +76,9 @@ function getToken($username, $passwordHash)
         print "Raw headers:\n";
         print $response->getRawHeaders();
         print "******************************************\n";
-        print "getToken:Response:$res\n";
+        print "getToken:Response:\n";
+        var_dump($res);
+        print "\n\n";
         print "******************************************\n";
     }
 
