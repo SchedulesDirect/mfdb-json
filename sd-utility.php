@@ -304,9 +304,9 @@ function updateChannelTable($lineup)
 
     $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid=:lineup");
     $stmt->execute(array("lineup" => $lineup));
-    $s = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $sID = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-    if (count($s) == 0)
+    if (count($sID) == 0)
     {
         print "ERROR: You do not have that lineup locally configured.\n";
 
@@ -317,22 +317,11 @@ function updateChannelTable($lineup)
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
-    if (array_key_exists("modified", $json["metadata"]))
-    {
-        $modified = $json["metadata"]["modified"];
-    }
-    else
-    {
-        /*
-         * With QAM, there may be multiple mappings, and therefore multiple modified dates. We'll have to think about
-         *  this some more.
-         */
-        $modified = $json["metadata"][0]["modified"];
-    }
+    $modified = $json["metadata"]["modified"];
 
     print "Updating channel table for lineup:$lineup\n";
 
-    foreach ($s as $sourceID)
+    foreach ($sID as $sourceID)
     {
         if ($json["metadata"]["transport"] == "Antenna")
         {
