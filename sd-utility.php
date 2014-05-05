@@ -435,8 +435,6 @@ function updateChannelTable($lineup)
              */
 
 
-
-
         }
 
         /*
@@ -1114,7 +1112,7 @@ function oldQam()
                                          "qamprogram" => $qamProgram,
                                          "stationID"  => $stationID));
     }
-}
+
 }
 
 
