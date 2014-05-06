@@ -491,15 +491,15 @@ function updateChannelTable($lineup)
 
                     if (array_key_exists($toFind, $map))
                     {
-                        $updateChannelTableQAM->execute(array("mplexid"=>$foo["mplexid"],
-                                                              "serviceid"=>$foo["serviceid"]));
+                        $updateChannelTableQAM->execute(array("mplexid"   => $foo["mplexid"],
+                                                              "serviceid" => $foo["serviceid"]));
                     }
-/*
-                    if (array_key_exists($foo, $map))
-                    {
-                        $updateChannelTableQAM->execute(array("stationID" => $map[$foo],
-                                                              "channel"   => $foo));
-                    } */
+                    /*
+                                        if (array_key_exists($foo, $map))
+                                        {
+                                            $updateChannelTableQAM->execute(array("stationID" => $map[$foo],
+                                                                                  "channel"   => $foo));
+                                        } */
                 }
 
                 print "Done updating QAM scan with stationIDs.\n";
