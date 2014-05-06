@@ -471,9 +471,9 @@ function updateChannelTable($lineup)
                 $stmt->execute();
                 $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-                $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sid");
+                $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
                 $stmt->execute(array("sid" => $sourceID));
-                $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
                 mplexid=:mplexid AND serviceid=:serviceid");
@@ -487,11 +487,19 @@ function updateChannelTable($lineup)
 
                 foreach ($existingChannelNumbers as $foo)
                 {
+                    $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
+
+                    if (array_key_exists($toFind, $map))
+                    {
+                        $updateChannelTableQAM->execute(array("mplexid"=>$foo["mplexid"],
+                                                              "serviceid"=>$foo["serviceid"]));
+                    }
+/*
                     if (array_key_exists($foo, $map))
                     {
                         $updateChannelTableQAM->execute(array("stationID" => $map[$foo],
                                                               "channel"   => $foo));
-                    }
+                    } */
                 }
 
                 print "Done updating QAM scan with stationIDs.\n";
