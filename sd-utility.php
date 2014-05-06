@@ -457,8 +457,6 @@ function updateChannelTable($lineup)
                 $qamArray["{$qamEntry["qamFrequency"]}-{$qamEntry["qamProgram"]}"] = $qamEntry["stationID"];
             }
 
-            var_dump($qamArray);
-            $tt = fgets(STDIN);
         }
 
         /*
