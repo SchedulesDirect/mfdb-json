@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.11, 2014-04-22
+v0.12, 2014-05-06
 
 Robert Kulagowski
 
@@ -63,6 +63,8 @@ Do not configure Video Sources or Input Connections - you will do that later.
 
 **NOTE**:If you have an Over-the-Air lineup then the instructions are a little more 
 involved; take note of the OTA exceptions in the instructions below.
+
+**NOTE**:If you have a QAM lineup then take note of the QAM specifics.
 
 Exit mythtv-setup. You will be prompted that you haven't set your start
 channel.  Select "No, I know what I'm doing."
@@ -401,9 +403,9 @@ sourceid: 1     name: Comcast   Schedules Direct lineup: USA-IL57303-X
 ```
 
 ###Refresh lineup
-####Antenna / Over-the-air
+####Antenna / Over-the-air and QAM
 
-For Antenna users, once you've added the appropriate lineup to your
+For Antenna and QAM users, once you've added the appropriate lineup to your
 Schedules Direct account, added a videosource (in this document we will
 assume that you called it "Antenna"), and Linked it, quit out of
 sd-utility.php and restart mythtv-setup.
@@ -416,10 +418,10 @@ Go to "Scan for channels" and use the defaults. Allow the scan to complete.
 
 Restart sd-utility.php and continue to the next step:
 
-####Antenna lineup post-scan and non-Antenna lineups.
+####Antenna/QAM lineup post-scan and non-Antenna lineups.
 
-Once the Antenna scan is complete, or you're using a device which isn't an
-Antenna, you'll need to download the channel mapping using the "R" function. 
+Once the scan is complete, or you're using a device which doesn't require a
+scan, you'll need to download the channel mapping using the "R" function. 
 This is also done whenever the utility program tells you that there's an
 update available to the headend by putting "***" in the "New" column.
 
