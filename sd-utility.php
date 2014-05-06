@@ -438,8 +438,21 @@ function updateChannelTable($lineup)
              * matching step of correlating stationIDs.
              */
 
+            /*
+            $useScan = readline("Do you want to use your existing QAM scan? (Y/n)>");
+            if ($useScan == "")
+            {
+                $useScan = TRUE;
+            }
+            */
+
+            $useScan = TRUE; // Temp override until we think about pushing into dtv_multiplex
+
             if (count($json["qamMappings"]) > 1)
             {
+                /*
+                 * TODO: Work on this some more. Kludgey.
+                 */
                 print "Found more than one QAM mapping for your headend.\n";
                 foreach ($json["qamMappings"] as $m)
                 {
@@ -452,9 +465,16 @@ function updateChannelTable($lineup)
                 $mapToUse = "1";
             }
 
-            foreach ($json["map"][$mapToUse] as $qamEntry)
+            if ($useScan)
             {
-                $qamArray["{$qamEntry["qamFrequency"]}-{$qamEntry["qamProgram"]}"] = $qamEntry["stationID"];
+                $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE channum=:channel");
+
+                foreach ($json["map"][$mapToUse] as $qamEntry)
+                {
+                    print "Updating \n";
+                    $updateChannelTableQAM->execute(array("stationID" => $qamEntry["stationID"],
+                                                          "channel"   => $qamEntry["channel"]));
+                }
             }
 
         }
