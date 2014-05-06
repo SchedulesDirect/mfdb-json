@@ -467,14 +467,31 @@ function updateChannelTable($lineup)
 
             if ($useScan)
             {
+                $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sid");
+                $stmt->execute(array("sid" => $sourceID));
+                $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
                 $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE channum=:channel");
 
-                foreach ($json["map"][$mapToUse] as $qamEntry)
+                foreach ($existingChannelNumbers as $foo)
                 {
-                    print "Updating \n";
-                    $updateChannelTableQAM->execute(array("stationID" => $qamEntry["stationID"],
-                                                          "channel"   => $qamEntry["channel"]));
+                    $key = array_search($foo, $json["map"][$mapToUse]);
+
+                    if ($key !== FALSE)
+                    {
+                        print "Updating channel table.\n";
+                        $updateChannelTableQAM->execute(array("stationID" =>
+                                                                  $json["map"][$mapToUse][$key]["stationID"],
+                                                              "channel"   => $foo));
+                    }
                 }
+            }
+            else
+            {
+                /*
+                 * The user has chosen to not run a QAM scan and just use the values that we're supplying.
+                 * Work-in-progress.
+                 */
             }
 
         }
