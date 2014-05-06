@@ -438,7 +438,27 @@ function updateChannelTable($lineup)
              * matching step of correlating stationIDs.
              */
 
+            if (count($json["qamMappings"]) > 1)
+            {
+                print "Found more than one QAM mapping for your headend.\n";
+                foreach ($json["qamMappings"] as $m)
+                {
+                    print "Mapping: $m\n";
+                }
+                $mapToUse = readline("Which map do you want to use>");
+            }
+            else
+            {
+                $mapToUse = "1";
+            }
 
+            foreach ($json["map"][$mapToUse] as $qamEntry)
+            {
+                $qamArray["{$qamEntry[$qamFrequency]}-{$qamEntry[$qamProgram]}"] = $qamEntry[$stationID];
+            }
+
+            var_dump($qamArray);
+            $tt = fgets(STDIN);
         }
 
         /*
