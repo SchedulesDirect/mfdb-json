@@ -473,15 +473,19 @@ function updateChannelTable($lineup)
 
                 $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE channum=:channel");
 
+                $map = array();
+
+                foreach ($json["map"][$mapToUse] as $foo)
+                {
+                    $map[$foo["channel"]] = $foo["stationID"];
+                }
+
                 foreach ($existingChannelNumbers as $foo)
                 {
-                    $key = array_search($foo, $json["map"][$mapToUse]);
-
-                    if ($key !== FALSE)
+                    if (array_key_exists($foo, $map))
                     {
                         print "Updating channel table.\n";
-                        $updateChannelTableQAM->execute(array("stationID" =>
-                                                                  $json["map"][$mapToUse][$key]["stationID"],
+                        $updateChannelTableQAM->execute(array("stationID" => $map[$foo],
                                                               "channel"   => $foo));
                     }
                 }
