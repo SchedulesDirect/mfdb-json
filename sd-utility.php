@@ -469,7 +469,7 @@ function updateChannelTable($lineup)
             {
                 $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sid");
                 $stmt->execute(array("sid" => $sourceID));
-                $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
                 $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE channum=:channel");
 
