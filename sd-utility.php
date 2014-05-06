@@ -467,17 +467,22 @@ function updateChannelTable($lineup)
 
             if ($useScan)
             {
+                $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
+                $stmt->execute();
+                $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
                 $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sid");
                 $stmt->execute(array("sid" => $sourceID));
                 $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-                $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE channum=:channel");
+                $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
+                mplexid=:mplexid AND serviceid=:serviceid");
 
                 $map = array();
 
                 foreach ($json["map"][$mapToUse] as $foo)
                 {
-                    $map[$foo["channel"]] = $foo["stationID"];
+                    $map["{$foo["qamFrequency"]}-{$foo["qamProgram"]}"] = $foo["stationID"];
                 }
 
                 foreach ($existingChannelNumbers as $foo)
