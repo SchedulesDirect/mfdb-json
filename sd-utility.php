@@ -454,7 +454,7 @@ function updateChannelTable($lineup)
 
             foreach ($json["map"][$mapToUse] as $qamEntry)
             {
-                $qamArray["{$qamEntry[$qamFrequency]}-{$qamEntry[$qamProgram]}"] = $qamEntry[$stationID];
+                $qamArray["{$qamEntry["qamFrequency"]}-{$qamEntry["qamProgram"]}"] = $qamEntry["stationID"];
             }
 
             var_dump($qamArray);
