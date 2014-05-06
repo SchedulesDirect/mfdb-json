@@ -337,6 +337,11 @@ function updateChannelTable($lineup)
              */
 
             $transport = "Antenna";
+            $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
+    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
+
+            $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
+    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=0 AND atsc_minor_chan=0 AND freqID=:freqID");
         }
 
         if ($json["metadata"]["transport"] == "Cable")
@@ -346,11 +351,10 @@ function updateChannelTable($lineup)
             $stmt->execute(array("sourceid" => $sourceID));
         }
 
-        $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
-    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
-
-        $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
-    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=0 AND atsc_minor_chan=0 AND freqID=:freqID");
+        if ($json["metadata"]["transport"] == "QAM")
+        {
+            $transport = "QAM";
+        }
 
         if ($transport != "QAM")
         {
