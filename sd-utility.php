@@ -518,6 +518,11 @@ function updateChannelTable($lineup)
                 $stmt = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
                      VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
 
+                $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'
+                AND sourceid=:sourceid");
+                $stmt->execute(array("sourceid" => $sourceID));
+                $dtvMultiplex = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
                 foreach ($json["map"][$mapToUse] as $mapArray)
                 {
                     $stationID = $mapArray["stationID"];
