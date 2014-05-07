@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.12, 2014-05-06
+v0.13, 2014-05-07
 
 Robert Kulagowski
 
@@ -405,14 +405,20 @@ sourceid: 1     name: Comcast   Schedules Direct lineup: USA-IL57303-X
 ###Refresh lineup
 ####Antenna / Over-the-air and QAM
 
-For Antenna and QAM users, once you've added the appropriate lineup to your
-Schedules Direct account, added a videosource (in this document we will
-assume that you called it "Antenna"), and Linked it, quit out of
-sd-utility.php and restart mythtv-setup.
+QAM users have the option of running a scan using mythtv-setup and having
+the utility program update the channel table, or skip the scan and just use
+the QAM tuning information directly.  If you are using the tuning
+information directly you can skip to the next step; you'll be asked which
+method you'd like to use in the "R" step.
+
+For Antenna and QAM users who will run a scan, once you've added the
+appropriate lineup to your Schedules Direct account, added a videosource (in
+this document we will assume that you called it "Antenna"), and Linked it,
+quit out of sd-utility.php and restart mythtv-setup.
 
 Go to Input Connections, select your hardware device and select the
 appropriate Video Source.  In this instance, it's "Antenna", because that's
-the name that we created in sd-utility.php
+the name that we created in sd-utility.php for the OTA scan.
 
 Go to "Scan for channels" and use the defaults. Allow the scan to complete.
 
@@ -447,6 +453,18 @@ The following lineups are in your account at Schedules Direct:
 Checking for updated lineups from Schedules Direct.
 Retrieving lineup from Schedules Direct.
 ```
+
+If you're using QAM, you'll see:
+```
+Which lineup:>USA-AL56879-QAM
+Updating channel table for lineup:USA-AL56879-QAM
+You can:
+1. Exit this program and run a QAM scan using mythtv-setup then use the QAM lineup to populate stationIDs. (Default)
+2. Use the QAM lineup information directly.
+```
+
+Select "1" if you're just going to update a mythtv-setup scan with stationIDs.
+Select "2" if you want the utility program to do everything.
 
 Quit out of the utility program.
 
