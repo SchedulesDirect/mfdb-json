@@ -438,15 +438,14 @@ function updateChannelTable($lineup)
              * matching step of correlating stationIDs.
              */
 
-            /*
-            $useScan = readline("Do you want to use your existing QAM scan? (Y/n)>");
+            print "You can:\n";
+            print "1. Run a QAM scan using mythtv-setup then use the QAM lineup to populate stationIDs.\n";
+            print "2. Use the QAM lineup information directly.\n";
+            $useScan = readline("Do you have an existing QAM scan? (Y/n)>");
             if ($useScan == "")
             {
                 $useScan = TRUE;
             }
-            */
-
-            $useScan = TRUE; // Temp override until we think about pushing into dtv_multiplex
 
             if (count($json["qamMappings"]) > 1)
             {
@@ -505,6 +504,75 @@ function updateChannelTable($lineup)
                  * The user has chosen to not run a QAM scan and just use the values that we're supplying.
                  * Work-in-progress.
                  */
+
+                $channelInsertQAM =
+                    $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
+        WHERE xmltvid=:stationID");
+                $insertDTVMultiplex = $dbh->prepare
+                    ("INSERT INTO dtv_multiplex
+        (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
+        VALUES
+        (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
+
+
+                $stmt = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
+                     VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
+
+                foreach ($json["map"][$mapToUse] as $mapArray)
+                {
+                    $stationID = $mapArray["stationID"];
+                    $qamType = $mapArray["qamType"];
+                    $qamProgram = $mapArray["qamProgram"];
+                    $qamFreq = $mapArray["qamFreq"];
+                    $channel = $mapArray["channel"];
+
+                    if (isset($mapArray["virtualChannel"]))
+                    {
+                        $virtualChannel = $mapArray["virtualChannel"];
+                    }
+                    else
+                    {
+                        $virtualChannel = "";
+                    }
+
+                    try
+                    {
+                        $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channel, "channum" => $channel,
+                                             "freqid" => $channel, "sourceid" => $sourceID, "xmltvid" => $stationID));
+                    } catch (PDOException $e)
+                    {
+                        if ($e->getCode() == 23000)
+                        {
+                            print "\n\n";
+                            print "*************************************************************\n";
+                            print "\n\n";
+                            print "Error inserting data. Duplicate channel number exists?\n";
+                            print "Send email to grabber@schedulesdirect.org with the following:\n\n";
+                            print "Duplicate channel error.\n";
+                            print "Transport: $transport\n";
+                            print "Lineup: $lineup\n";
+                            print "Channum: $channel\n";
+                            print "stationID: $stationID\n";
+                            print "\n\n";
+                            print "*************************************************************\n";
+                        }
+                    }
+
+                    /*
+                     * Because multiple programs may end up on a single frequency, we only want to insert once, but we want
+                     * to track the mplexid assigned when we do the insert, because that might be used more than once.
+                     */
+
+                    if (!isset($dtvMultiplex[$qamFreq]))
+                    {
+                        $insertDTVMultiplex->execute(array("sourceid" => $sourceID, "freq" => $qamFreq));
+                        $dtvMultiplex[$qamFreq] = $dbh->lastInsertId();
+                    }
+
+                    $channelInsertQAM->execute(array("mplexid"    => $dtvMultiplex[$qamFreq],
+                                                     "qamprogram" => $qamProgram,
+                                                     "stationID"  => $stationID));
+                }
             }
         }
 
@@ -1102,90 +1170,6 @@ function checkDatabase()
     ('DataDirectMessage','',NULL),
     ('SchedulesDirectLastUpdate','',NULL)");
 }
-
-function oldQam()
-{
-    /*
-                 * Insert QAM information.
-                 */
-
-    foreach ($json["map"]["1"] as $mapArray)
-    {
-        /*
-         * There may be multiple mappings in the future, but for now assume that there's just one.
-         */
-        $dtvMultiplex = array();
-
-        $channelInsertQAM =
-            $dbh->prepare("UPDATE channel SET tvformat='ATSC',visible='1',mplexid=:mplexid,serviceid=:qamprogram
-        WHERE xmltvid=:stationID");
-        $insertDTVMultiplex = $dbh->prepare
-            ("INSERT INTO dtv_multiplex
-        (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
-        VALUES
-        (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
-
-
-        $stmt = $dbh->prepare(
-            "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
-             VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
-
-        $stationID = $mapArray["stationID"];
-        $qamType = $mapArray["qamType"];
-        $qamProgram = $mapArray["qamProgram"];
-        $qamFreq = $mapArray["qamFreq"];
-        $channel = $mapArray["channel"];
-
-        if (isset($mapArray["virtualChannel"]))
-        {
-            $virtualChannel = $mapArray["virtualChannel"];
-        }
-        else
-        {
-            $virtualChannel = "";
-        }
-
-        try
-        {
-            $stmt->execute(array("chanid" => (int)($sourceID * 1000) + (int)$channel, "channum" => $channel,
-                                 "freqid" => $channel, "sourceid" => $sourceID, "xmltvid" => $stationID));
-        } catch (PDOException $e)
-        {
-            if ($e->getCode() == 23000)
-            {
-                print "\n\n";
-                print "*************************************************************\n";
-                print "\n\n";
-                print "Error inserting data. Duplicate channel number exists?\n";
-                print "Send email to grabber@schedulesdirect.org with the following:\n\n";
-                print "Duplicate channel error.\n";
-                print "Transport: $transport\n";
-                print "Lineup: $lineup\n";
-                print "Channum: $channel\n";
-                print "stationID: $stationID\n";
-                print "\n\n";
-                print "*************************************************************\n";
-            }
-        }
-
-        /*
-         * Because multiple programs may end up on a single frequency, we only want to insert once, but we want
-         * to track the mplexid assigned when we do the insert, because that might be used more than once.
-         */
-
-        if (!isset($dtvMultiplex[$qamFreq]))
-        {
-            $insertDTVMultiplex->execute(array("sourceid" => $sourceID, "freq" => $qamFreq));
-            $dtvMultiplex[$qamFreq] = $dbh->lastInsertId();
-        }
-
-        $channelInsertQAM->execute(array("mplexid"    => $dtvMultiplex[$qamFreq],
-                                         "qamprogram" => $qamProgram,
-                                         "stationID"  => $stationID));
-    }
-
-}
-
 
 ?>
 
