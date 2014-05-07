@@ -532,7 +532,7 @@ function updateChannelTable($lineup)
                     $stationID = $mapArray["stationID"];
                     $qamType = $mapArray["qamType"];
                     $qamProgram = $mapArray["qamProgram"];
-                    $qamFreq = $mapArray["qamFreq"];
+                    $qamFreq = $mapArray["qamFrequency"];
                     $channel = $mapArray["channel"];
 
                     if (isset($mapArray["virtualChannel"]))
