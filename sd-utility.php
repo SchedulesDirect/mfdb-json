@@ -439,16 +439,20 @@ function updateChannelTable($lineup)
              */
 
             print "You can:\n";
-            print "1. Run a QAM scan using mythtv-setup then use the QAM lineup to populate stationIDs.\n";
+            print "1. Exit this program and run a QAM scan using mythtv-setup then use the QAM lineup to populate stationIDs. (Default)\n";
             print "2. Use the QAM lineup information directly.\n";
-            $useScan = readline("Do you have an existing QAM scan? (Y/n)>");
+            $useScan = readline("Which do you want to do? (1 or 2)>");
             if ($useScan == "")
             {
                 $useScan = TRUE;
             }
-            if (strtolower($useScan) == "n")
+            if ($useScan == "2")
             {
                 $useScan = FALSE;
+            }
+            else
+            {
+                $useScan = TRUE;
             }
 
             if (count($json["qamMappings"]) > 1)
