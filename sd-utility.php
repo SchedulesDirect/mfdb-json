@@ -446,6 +446,10 @@ function updateChannelTable($lineup)
             {
                 $useScan = TRUE;
             }
+            if (strtolower($useScan) == "n")
+            {
+                $useScan = FALSE;
+            }
 
             if (count($json["qamMappings"]) > 1)
             {
