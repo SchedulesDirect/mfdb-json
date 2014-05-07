@@ -582,6 +582,7 @@ function updateChannelTable($lineup)
                         }
                     }
                 }
+            print "Done inserting QAM tuning information directly into tables.\n";
             }
         }
 
