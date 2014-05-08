@@ -58,10 +58,11 @@ The following options are available:
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
+--version\tPrint version information.
 eol;
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "username::", "password::", "test", "timezone::");
+                     "username::", "password::", "test", "timezone::", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -107,6 +108,10 @@ foreach ($options as $k => $v)
             break;
         case "timezone":
             date_default_timezone_set($v);
+            break;
+        case "version":
+            print "$agentString\n\n";
+            exit;
             break;
     }
 }
@@ -584,7 +589,7 @@ function updateChannelTable($lineup)
                         }
                     }
                 }
-            print "Done inserting QAM tuning information directly into tables.\n";
+                print "Done inserting QAM tuning information directly into tables.\n";
             }
         }
 
