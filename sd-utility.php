@@ -17,8 +17,8 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.19";
-$scriptDate = "2014-05-07";
+$scriptVersion = "0.20";
+$scriptDate = "2014-05-08";
 $useServiceAPI = FALSE;
 
 require_once "vendor/autoload.php";
@@ -512,6 +512,8 @@ function updateChannelTable($lineup)
                  * The user has chosen to not run a QAM scan and just use the values that we're supplying.
                  * Work-in-progress.
                  */
+
+                print "Inserting QAM data into tables.\n";
 
                 $insertDTVMultiplex = $dbh->prepare
                     ("INSERT INTO dtv_multiplex
