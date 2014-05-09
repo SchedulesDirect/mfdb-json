@@ -28,7 +28,7 @@ use Guzzle\Http\Client;
 $agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
 
 $updatedLineupsToRefresh = array();
-$needToStoreUserPassword = FALSE;
+$needToStoreLogin = FALSE;
 
 $tz = "UTC";
 
