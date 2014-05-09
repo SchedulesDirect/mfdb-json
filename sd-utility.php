@@ -157,39 +157,33 @@ if ($test)
 {
 }
 
-if ($username == "" AND $password == "")
-{
-    $stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2'
-    AND password != '' LIMIT 1");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$userLoginInformation = getSchedulesDirectLoginFromDB();
+list($usernameFromDB, $passwordFromDB) = json_decode($userLoginInformation);
 
-    if (isset($result[0]["userid"]))
+if ($username == "")
+{
+    if ($usernameFromDB == "")
     {
-        $username = $result[0]["userid"];
-        $userPassword = $result[0]["password"];
-        $passwordHash = sha1($userPassword);
+        $username = readline("Schedules Direct username:");
+        $needToStoreUsername = TRUE;
     }
     else
     {
-        $username = readline("Schedules Direct username:");
-        $password = readline("Schedules Direct password:");
-        $passwordHash = sha1($password);
-        $needToStoreUserPassword = TRUE;
+        $username = $usernameFromDB;
     }
 }
-else
-{
-    if ($username == "")
-    {
-        $username = readline("Schedules Direct username:");
-    }
 
-    if ($password == "")
+if ($password == "")
+{
+    if ($passwordFromDB == "")
     {
         $password = readline("Schedules Direct password:");
         $passwordHash = sha1($password);
         $needToStoreUserPassword = TRUE;
+    }
+    else
+    {
+        $password = $passwordFromDB;
     }
 }
 
@@ -202,7 +196,14 @@ if ($token == "ERROR")
     print("Check username / password in videosource table, or check if you entered it incorrectly when typing.\n");
     exit;
 }
-elseif ($needToStoreUserPassword)
+
+if ($needToStoreUsername)
+{
+    $stmt = $dbh->prepare("INSERT INTO videosource(userid,password) VALUES(:username,:userpassword)");
+    $stmt = $dbh->
+}
+
+if ($needToStoreUserPassword)
 {
     $stmt = $dbh->prepare("UPDATE videosource SET userid=:user,password=:password WHERE password IS NULL");
     $stmt->execute(array("user" => $username, "password" => $password));
@@ -1186,6 +1187,42 @@ function checkDatabase()
     ('MythFillSuggestedRunTime','',NULL),
     ('DataDirectMessage','',NULL),
     ('SchedulesDirectLastUpdate','',NULL)");
+}
+
+function getSchedulesDirectLoginFromDB()
+{
+    global $dbh;
+
+    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='schedulesdirectLogin'");
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    if (isset($result[0]))
+    {
+        return ($result);
+    }
+    else
+    {
+        return ("");
+    }
+}
+
+function putSchedulesDirectLoginIntoDB($usernameAndPassword)
+{
+    global $dbh;
+
+    $isInDB = getSchedulesDirectLoginFromDB();
+
+    if ($isInDB == "")
+    {
+        $stmt = $dbh->prepare("INSERT INTO settings(value, :data) VALUES ('schedulesdirectLogin', :json)");
+        $stmt->execute(array("json" => $usernameAndPassword));
+    }
+    else
+    {
+        $stmt = $dbh->prepare("UPDATE settings SET data=:json WHERE value='schedulesdirectLogin'");
+        $stmt->execute(array("json" => $usernameAndPassword));
+    }
 }
 
 ?>
