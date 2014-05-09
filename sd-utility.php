@@ -189,6 +189,10 @@ if ($password == "")
         $passwordHash = sha1($password);
     }
 }
+else
+{
+    $passwordHash = sha1($password);
+}
 
 print "Logging into Schedules Direct.\n";
 $token = getToken($username, $passwordHash);
