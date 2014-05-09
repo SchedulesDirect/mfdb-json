@@ -1212,9 +1212,9 @@ function putSchedulesDirectLoginIntoDB($usernameAndPassword)
 {
     global $dbh;
 
-    $isInDB = getSchedulesDirectLoginFromDB();
+    $isInDB = checkSchedulesDirectLoginFromDB();
 
-    if ($isInDB == "")
+    if ($isInDB === FALSE)
     {
         $stmt = $dbh->prepare("INSERT INTO settings(value, :data) VALUES ('schedulesdirectLogin', :json)");
         $stmt->execute(array("json" => $usernameAndPassword));
@@ -1223,6 +1223,24 @@ function putSchedulesDirectLoginIntoDB($usernameAndPassword)
     {
         $stmt = $dbh->prepare("UPDATE settings SET data=:json WHERE value='schedulesdirectLogin'");
         $stmt->execute(array("json" => $usernameAndPassword));
+    }
+}
+
+function checkSchedulesDirectLoginFromDB()
+{
+    global $dbh;
+
+    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='schedulesdirectLogin'");
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    if (isset($result[0]))
+    {
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
     }
 }
 
