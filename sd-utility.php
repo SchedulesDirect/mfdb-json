@@ -158,7 +158,9 @@ if ($test)
 }
 
 $userLoginInformation = getSchedulesDirectLoginFromDB();
-list($usernameFromDB, $passwordFromDB) = json_decode($userLoginInformation, TRUE);
+$responseJSON = json_decode($userLoginInformation, TRUE);
+$usernameFromDB = $responseJSON["username"];
+$passwordFromDB = $responseJSON["password"];
 
 if ($username == "")
 {
