@@ -17,7 +17,7 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.21";
+$scriptVersion = "0.22";
 $scriptDate = "2014-05-09";
 $useServiceAPI = FALSE;
 
@@ -452,14 +452,10 @@ function updateChannelTable($lineup)
              */
 
             print "You can:\n";
-            print "1. Exit this program and run a QAM scan using mythtv-setup then use the QAM lineup to populate stationIDs. (Default)\n";
-            print "2. Use the QAM lineup information directly.\n";
+            print "1. Exit this program and run a QAM scan using mythtv-setup then use the QAM lineup to populate stationIDs.\n";
+            print "2. Use the QAM lineup information directly. (Default)\n";
             $useScan = readline("Which do you want to do? (1 or 2)>");
-            if ($useScan == "")
-            {
-                $useScan = TRUE;
-            }
-            if ($useScan == "2")
+            if ($useScan == "" OR $useScan == "2")
             {
                 $useScan = FALSE;
             }
