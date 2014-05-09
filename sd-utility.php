@@ -165,7 +165,7 @@ if ($username == "")
     if ($usernameFromDB == "")
     {
         $username = readline("Schedules Direct username:");
-        $needToStoreUsername = TRUE;
+        $needToStoreLogin = TRUE;
     }
     else
     {
@@ -179,11 +179,12 @@ if ($password == "")
     {
         $password = readline("Schedules Direct password:");
         $passwordHash = sha1($password);
-        $needToStoreUserPassword = TRUE;
+        $needToStoreLogin = TRUE;
     }
     else
     {
         $password = $passwordFromDB;
+        $passwordHash = sha1($password);
     }
 }
 
@@ -197,16 +198,11 @@ if ($token == "ERROR")
     exit;
 }
 
-if ($needToStoreUsername)
+if ($needToStoreLogin)
 {
-    $stmt = $dbh->prepare("INSERT INTO videosource(userid,password) VALUES(:username,:userpassword)");
-    $stmt = $dbh->
-}
-
-if ($needToStoreUserPassword)
-{
-    $stmt = $dbh->prepare("UPDATE videosource SET userid=:user,password=:password WHERE password IS NULL");
-    $stmt->execute(array("user" => $username, "password" => $password));
+    $userInformation["username"] = $username;
+    $userInformation["password"] = $password;
+    putSchedulesDirectLoginIntoDB(json_encode($userInformation));
 }
 
 while (!$done)
