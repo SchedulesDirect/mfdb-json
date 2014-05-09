@@ -1197,7 +1197,7 @@ function getSchedulesDirectLoginFromDB()
 
     if (isset($result[0]))
     {
-        return ($result);
+        return ($result[0]);
     }
     else
     {
