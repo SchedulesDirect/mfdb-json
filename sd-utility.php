@@ -174,6 +174,10 @@ if ($username == "")
         $username = $usernameFromDB;
     }
 }
+else
+{
+    $needToStoreLogin = TRUE;
+}
 
 if ($password == "")
 {
@@ -192,6 +196,7 @@ if ($password == "")
 else
 {
     $passwordHash = sha1($password);
+    $needToStoreLogin = TRUE;
 }
 
 print "Logging into Schedules Direct.\n";
