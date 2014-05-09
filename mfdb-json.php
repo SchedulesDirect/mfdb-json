@@ -23,8 +23,8 @@ $debug = FALSE;
 $quiet = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
-$scriptVersion = "0.16";
-$scriptDate = "2014-05-05";
+$scriptVersion = "0.17";
+$scriptDate = "2014-05-09";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 $station = "";
@@ -68,7 +68,7 @@ eol;
 /*'*/
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "username::", "password::", "test", "max::", "quiet", "station::", "timezone::");
+                     "test", "max::", "quiet", "station::", "timezone::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -157,20 +157,17 @@ $client->setUserAgent($agentString);
 
 $useServiceAPI = checkForServiceAPI();
 
-$stmt = $dbh->prepare("SELECT userid,password FROM videosource WHERE xmltvgrabber='schedulesdirect2'
-AND password != '' LIMIT 1");
-$stmt->execute();
-$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$userLoginInformation = getSchedulesDirectLoginFromDB();
+$responseJSON = json_decode($userLoginInformation, TRUE);
+$sdUsername = $responseJSON["username"];
+$sdPassword = sha1($responseJSON["password"]);
 
-if (!count($result))
+if ($sdUsername == "")
 {
-    printMSG("Fatal Error: Could not read userid and password for schedulesdirect2 grabber from videosource.");
+    printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
     printMSG("Did you run the sd-utility.php program yet?");
     exit;
 }
-
-$sdUsername = $result[0]["userid"];
-$sdPassword = sha1($result[0]["password"]);
 
 $globalStartTime = time();
 $globalStartDate = new DateTime();
@@ -197,7 +194,7 @@ $token = getToken($sdUsername, $sdPassword);
 if ($token == "ERROR")
 {
     printMSG("Got error when attempting to retrieve token from Schedules Direct.");
-    printMSG("Check username / password in videosource table.");
+    printMSG("Check username / password in settings table.");
     exit;
 }
 

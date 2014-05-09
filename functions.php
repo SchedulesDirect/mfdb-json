@@ -288,4 +288,25 @@ function printMSG($str)
     fwrite($fh_log, "$str\n");
 }
 
+function getSchedulesDirectLoginFromDB()
+{
+    global $dbh;
+
+    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='schedulesdirectLogin'");
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    if (isset($result[0]))
+    {
+        return ($result[0]);
+    }
+    else
+    {
+        $foo["username"] = "";
+        $foo["password"] = "";
+
+        return (json_encode($foo));
+    }
+}
+
 ?>

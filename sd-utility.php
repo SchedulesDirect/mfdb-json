@@ -17,8 +17,8 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.20";
-$scriptDate = "2014-05-08";
+$scriptVersion = "0.21";
+$scriptDate = "2014-05-09";
 $useServiceAPI = FALSE;
 
 require_once "vendor/autoload.php";
@@ -1194,27 +1194,6 @@ function checkDatabase()
     ('MythFillSuggestedRunTime','',NULL),
     ('DataDirectMessage','',NULL),
     ('SchedulesDirectLastUpdate','',NULL)");
-}
-
-function getSchedulesDirectLoginFromDB()
-{
-    global $dbh;
-
-    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='schedulesdirectLogin'");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-    if (isset($result[0]))
-    {
-        return ($result[0]);
-    }
-    else
-    {
-        $foo["username"] = "";
-        $foo["password"] = "";
-
-        return (json_encode($foo));
-    }
 }
 
 function putSchedulesDirectLoginIntoDB($usernameAndPassword)
