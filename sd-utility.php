@@ -1199,7 +1199,10 @@ function getSchedulesDirectLoginFromDB()
     }
     else
     {
-        return ("");
+        $foo["username"] = "";
+        $foo["password"] = "";
+
+        return (json_encode($foo));
     }
 }
 
