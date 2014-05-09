@@ -1216,7 +1216,7 @@ function putSchedulesDirectLoginIntoDB($usernameAndPassword)
 
     if ($isInDB === FALSE)
     {
-        $stmt = $dbh->prepare("INSERT INTO settings(value, :data) VALUES ('schedulesdirectLogin', :json)");
+        $stmt = $dbh->prepare("INSERT INTO settings(value, data) VALUES ('schedulesdirectLogin', :json)");
         $stmt->execute(array("json" => $usernameAndPassword));
     }
     else
