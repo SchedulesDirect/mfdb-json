@@ -214,6 +214,10 @@ if ($needToStoreLogin)
     $userInformation["username"] = $username;
     $userInformation["password"] = $password;
     putSchedulesDirectLoginIntoDB(json_encode($userInformation));
+
+    $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
+    password=:password WHERE xmltvgrabber='schedulesdirect2'");
+    $stmt->execute(array("username" => $username, "password" => $password));
 }
 
 while (!$done)
