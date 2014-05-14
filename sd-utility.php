@@ -243,6 +243,7 @@ while (!$done)
     print "\nMythTV functions:\n";
     print "A to Add a new videosource to MythTV\n";
     print "D to Delete a videosource in MythTV\n";
+    print "I to download channel Icons into MythTV\n";
     print "L to Link a videosource to a lineup at Schedules Direct\n";
     print "R to refresh a videosource with new lineup information\n";
     print "Q to Quit\n";
@@ -294,6 +295,9 @@ while (!$done)
             $stmt->execute(array("sid" => $toDelete));
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sid");
             $stmt->execute(array("sid" => $toDelete));
+            break;
+        case "I":
+            getChannelIcons();
             break;
         case "L":
             print "Linking Schedules Direct lineup to sourceid\n\n";
@@ -606,12 +610,13 @@ function refreshChannelTable($lineup)
          * callsigns, etc.
          */
 
-        $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
+        $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign,icon=:icon WHERE xmltvid=:stationID");
 
         foreach ($json["stations"] as $stationArray)
         {
             $stationID = $stationArray["stationID"];
             $callsign = $stationArray["callsign"];
+            $iconFileName = "";
 
             if (array_key_exists("name", $stationArray))
             {
@@ -625,7 +630,14 @@ function refreshChannelTable($lineup)
                 $name = "";
             }
 
-            $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
+            if (array_key_exists("logo", $stationArray))
+            {
+                checkForNewIcon($stationArray);
+
+            }
+
+            $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID,
+                                 "icon" => $iconFileName));
         }
 
         $updateVideosourceModified = $dbh->prepare("UPDATE videosource SET modified = :modified WHERE lineupid=:lineup");
@@ -1234,6 +1246,32 @@ function checkSchedulesDirectLoginFromDB()
     {
         return FALSE;
     }
+}
+
+function getChannelIcons()
+{
+    global $dbh;
+
+
+}
+
+function checkForNewIcon($data)
+{
+    global $dbh;
+
+    $a = explode("/", $data["logo"]);
+    $iconFileName = end($a);
+
+    $md5 = $data["md5"];
+    $dimension = $data["dimension"];
+
+    $stmt = $dbh->prepare("SELECT md5 FROM SDimageCache WHERE item=:item and dimension=:dimension");
+    $stmt->execute(array("item" => $iconFileName, "dimension" => $dimension));
+
+    $result = $stmt->fetchColumn();
+
+    $tt = fgets(STDIN);
+
 }
 
 ?>
