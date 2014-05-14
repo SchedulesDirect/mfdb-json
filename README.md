@@ -47,6 +47,21 @@ INSERT IGNORE INTO settings(value, data, hostname)
     ('SchedulesDirectLastUpdate','',NULL);
 ```
 
+If you are NOT running a new installation, execute the following in MySQL.
+
+```
+CREATE TABLE `SDimageCache` (
+  `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `item` varchar(128) NOT NULL,
+  `md5` char(22) NOT NULL,
+  `dimension` varchar(128) NOT NULL,
+  `type` char(1) NOT NULL,
+  PRIMARY KEY (`row`),
+  UNIQUE KEY `id` (`item`,`dimension`),
+  KEY `type` (`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+
 #Installation
 
 Install the prerequisites:
