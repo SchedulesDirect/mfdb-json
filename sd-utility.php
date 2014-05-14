@@ -303,7 +303,7 @@ while (!$done)
             $lineup = strtoupper(readline("Which lineup:>"));
             if ($lineup != "")
             {
-                updateChannelTable($lineup);
+                refreshChannelTable($lineup);
             }
             break;
         case "Q":
@@ -315,7 +315,7 @@ while (!$done)
 
 exit;
 
-function updateChannelTable($lineup)
+function refreshChannelTable($lineup)
 {
     global $dbh;
     $transport = "";
