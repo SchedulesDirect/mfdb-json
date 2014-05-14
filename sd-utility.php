@@ -628,7 +628,7 @@ function refreshChannelTable($lineup)
 
             if (array_key_exists("logo", $stationArray))
             {
-                checkForNewIcon($stationArray);
+                checkForNewIcon($stationArray["logo"]);
 
             }
 
@@ -1253,7 +1253,7 @@ function checkForNewIcon($data)
 {
     global $dbh;
 
-    $a = explode("/", $data["logo"]["URL"]);
+    $a = explode("/", $data["URL"]);
     $iconFileName = end($a);
 
     $md5 = $data["md5"];
