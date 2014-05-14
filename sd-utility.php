@@ -25,9 +25,6 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
-$httpRequest = new HttpRequest;
-$httpRequest->setOptions(array('connecttimeout' => 10, 'timeout' => 10));
-
 $agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
 
 $updatedLineupsToRefresh = array();
@@ -1275,6 +1272,7 @@ function checkForNewIcon($data)
          */
 
         printMSG("Fetching logo $iconFileName");
+/*
         $httpRequest->setUrl($data["URL"]);
 
         try
@@ -1301,8 +1299,8 @@ function checkForNewIcon($data)
         }
 
         $response = $httpRequest->getResponseBody();
-
-        file_put_contents("/home/mythtv/.mythtv/channels/$iconFileName", $response);
+*/
+        file_put_contents("/home/mythtv/.mythtv/channels/$iconFileName", file_get_contents($data["URL"]));
 
         $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,dimension,md5) VALUES(:item,:dimension,:md5)
         ON DUPLICATE KEY UPDATE md5=:md5");
