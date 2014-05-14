@@ -1259,7 +1259,7 @@ function checkForNewIcon($data)
 {
     global $dbh;
 
-    $a = explode("/", $data["logo"]);
+    $a = explode("/", $data["logo"]["URL"]);
     $iconFileName = end($a);
 
     $md5 = $data["md5"];
