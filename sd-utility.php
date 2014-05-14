@@ -17,7 +17,7 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.24";
+$scriptVersion = "0.25";
 $scriptDate = "2014-05-14";
 $useServiceAPI = FALSE;
 
