@@ -1275,7 +1275,8 @@ function checkForNewIcon($data)
 
         file_put_contents("/tmp/$iconFileName", file_get_contents($data["URL"]));
 
-        $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,dimension,md5) VALUES(:item,:dimension,:md5)
+        $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,dimension,md5,type)
+        VALUES(:item,:dimension,:md5,'L')
         ON DUPLICATE KEY UPDATE md5=:md5");
         $updateSDimageCache->execute(array("item" => $iconFileName, "dimension" => $dimension, "md5" => $md5));
     }
