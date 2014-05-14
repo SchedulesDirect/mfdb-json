@@ -1265,7 +1265,6 @@ function checkSchedulesDirectLoginFromDB()
 function checkForNewIcon($data)
 {
     global $dbh;
-    global $httpRequest;
 
     $a = explode("/", $data["URL"]);
     $iconFileName = end($a);
