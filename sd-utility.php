@@ -865,6 +865,11 @@ function deleteLineupFromSchedulesDirect()
 
     $toDelete = strtoupper(readline("Lineup to Delete:>"));
 
+    if ($toDelete == "")
+    {
+        return;
+    }
+
     try
     {
         $response = $client->delete("lineups/$toDelete", array("token" => $token), array())->send();
