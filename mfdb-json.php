@@ -1135,10 +1135,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                  * MythTV uses a system where 4 stars would be a "1.0".
                  */
 
-                if (isset($programJSON["movie"]["starRating"]))
+                if (isset($programJSON["movie"]["qualityRating"]))
                 {
-                    $starRating = (.5 * substr_count($programJSON["movie"]["starRating"], "*")) +
-                        (.125 * substr_count($programJSON["movie"]["starRating"], "+"));
+                    $starRating = $programJSON["movie"]["qualityRating"]["rating"];
                 }
             }
 
@@ -1500,7 +1499,7 @@ if (isset($v["sap"]))
      * If users start to complain about errors on the insert, it's probably due to a new role type.
      */
 
-    if ($debug && count($roleTable))
+    if ($debug AND count($roleTable))
     {
         debugMSG("Role table:");
         debugMSG(print_r($roleTable, TRUE));

@@ -228,7 +228,7 @@ function checkForServiceAPI()
     global $client;
     global $host;
 
-    print "Checking for MythTV Service API.\n";
+    printMSG("Checking for MythTV Service API.");
 
     try
     {
@@ -247,7 +247,7 @@ function checkForServiceAPI()
         return (FALSE);
     }
 
-    print "Found Service API.\n";
+    printMSG("Found Service API.");
 
     return (TRUE);
 }
