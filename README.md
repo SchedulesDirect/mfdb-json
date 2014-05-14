@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.14, 2014-05-14
+v0.15, 2014-05-14
 
 Robert Kulagowski
 
