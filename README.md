@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.13, 2014-05-07
+v0.14, 2014-05-14
 
 Robert Kulagowski
 
@@ -27,6 +27,25 @@ downloads data from Schedules Direct using the new JSON format.
 - See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2530 for the
   complete list of countries with data.
 - Self-hosted data, so not dependent on Tribune's XML servers.
+
+#NOTE
+
+There's a bug in v0.23 and earlier of sd-utility.php. If you're running an
+affected version, run the following in MySQL:
+
+```
+DELETE FROM settings WHERE VALUE IN('mythfilldatabaseLastRunStart',
+        'mythfilldatabaseLastRunEnd','mythfilldatabaseLastRunStatus','MythFillSuggestedRunTime',
+        'MythFillSuggestedRunTime','MythFillSuggestedRunTime');
+
+INSERT IGNORE INTO settings(value, data, hostname)
+    VALUES('mythfilldatabaseLastRunStart', '',NULL),
+    ('mythfilldatabaseLastRunEnd','',NULL),
+    ('mythfilldatabaseLastRunStatus','',NULL),
+    ('MythFillSuggestedRunTime','',NULL),
+    ('DataDirectMessage','',NULL),
+    ('SchedulesDirectLastUpdate','',NULL);
+```
 
 #Installation
 
