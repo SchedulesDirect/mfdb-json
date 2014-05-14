@@ -1272,35 +1272,8 @@ function checkForNewIcon($data)
          */
 
         printMSG("Fetching logo $iconFileName");
-/*
-        $httpRequest->setUrl($data["URL"]);
 
-        try
-        {
-            $httpRequest->send();
-        } catch (HttpException $ex)
-        {
-            try
-            {
-                sleep(1); // Sleep for a second and then try again.
-                $httpRequest->send();
-            } catch (HttpException $ex)
-            {
-                $response_code = $httpRequest->getResponseCode();
-                if ($response_code != 200)
-                {
-                    debugMSG("Response code:$response_code\n");
-                    debugMSG("checkForNewIcon->double failure; HTTP Exception while fetching from AWS:\n");
-                    debugMSG("$ex\n");
-
-                    return (array(TRUE, "", ""));
-                }
-            }
-        }
-
-        $response = $httpRequest->getResponseBody();
-*/
-        file_put_contents("/home/mythtv/.mythtv/channels/$iconFileName", file_get_contents($data["URL"]));
+        file_put_contents("/tmp/$iconFileName", file_get_contents($data["URL"]));
 
         $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,dimension,md5) VALUES(:item,:dimension,:md5)
         ON DUPLICATE KEY UPDATE md5=:md5");
