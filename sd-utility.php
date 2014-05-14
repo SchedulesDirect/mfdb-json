@@ -17,7 +17,7 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.24";
+$scriptVersion = "0.25";
 $scriptDate = "2014-05-14";
 $useServiceAPI = FALSE;
 
@@ -1086,7 +1086,7 @@ function checkDatabase()
         print "Creating remaining tables.\n";
 
         $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,
-    SDprogramrating,SDschedule,SDMessages");
+    SDprogramrating,SDschedule,SDMessages,SDimageCache");
 
         $stmt = $dbh->exec("CREATE TABLE `SDMessages` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -1211,6 +1211,19 @@ function checkDatabase()
     ('DataDirectMessage','',NULL),
     ('SchedulesDirectLastUpdate','',NULL)");
     }
+
+    $stmt = $dbh->exec("CREATE TABLE `SDimageCache` (
+`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `item` varchar(128) NOT NULL,
+  `md5` char(22) NOT NULL,
+  `dimension` varchar(128) NOT NULL,
+  `type` char(1) NOT NULL,
+  PRIMARY KEY (`row`),
+  UNIQUE KEY `id` (`item`,`dimension`),
+  KEY `type` (`type`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8");
+
+
 }
 
 function putSchedulesDirectLoginIntoDB($usernameAndPassword)
@@ -1275,7 +1288,8 @@ function checkForNewIcon($data)
 
         file_put_contents("/tmp/$iconFileName", file_get_contents($data["URL"]));
 
-        $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,dimension,md5) VALUES(:item,:dimension,:md5)
+        $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,dimension,md5,type)
+        VALUES(:item,:dimension,:md5,'L')
         ON DUPLICATE KEY UPDATE md5=:md5");
         $updateSDimageCache->execute(array("item" => $iconFileName, "dimension" => $dimension, "md5" => $md5));
     }
