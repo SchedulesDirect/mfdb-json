@@ -1137,7 +1137,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
                 if (isset($programJSON["movie"]["qualityRating"]))
                 {
-                    $starRating = $programJSON["movie"]["qualityRating"]["rating"];
+                    $starRating = $programJSON["movie"]["qualityRating"][0]["rating"];
                 }
             }
 
