@@ -25,6 +25,9 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
+$httpRequest = new HttpRequest;
+$httpRequest->setOptions(array('connecttimeout' => 10, 'timeout' => 10));
+
 $agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
 
 $updatedLineupsToRefresh = array();
@@ -1252,6 +1255,7 @@ function checkSchedulesDirectLoginFromDB()
 function checkForNewIcon($data)
 {
     global $dbh;
+    global $httpRequest;
 
     $a = explode("/", $data["URL"]);
     $iconFileName = end($a);
@@ -1264,8 +1268,46 @@ function checkForNewIcon($data)
 
     $result = $stmt->fetchColumn();
 
-    $tt = fgets(STDIN);
+    if ($result === FALSE OR $result != $md5)
+    {
+        /*
+         * We don't already have this icon, or it's different, so it will have to be fetched.
+         */
 
+        printMSG("Fetching logo $iconFileName");
+        $httpRequest->setUrl($data["URL"]);
+
+        try
+        {
+            $httpRequest->send();
+        } catch (HttpException $ex)
+        {
+            try
+            {
+                sleep(1); // Sleep for a second and then try again.
+                $httpRequest->send();
+            } catch (HttpException $ex)
+            {
+                $response_code = $httpRequest->getResponseCode();
+                if ($response_code != 200)
+                {
+                    debugMSG("Response code:$response_code\n");
+                    debugMSG("checkForNewIcon->double failure; HTTP Exception while fetching from AWS:\n");
+                    debugMSG("$ex\n");
+
+                    return (array(TRUE, "", ""));
+                }
+            }
+        }
+
+        $response = $httpRequest->getResponseBody();
+
+        file_put_contents("/home/mythtv/.mythtv/channels/$iconFileName", $response);
+
+        $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,dimension,md5) VALUES(:item,:dimension,:md5)
+        ON DUPLICATE KEY UPDATE md5=:md5");
+        $updateSDimageCache->execute(array("item" => $iconFileName, "dimension" => $dimension, "md5" => $md5));
+    }
 }
 
 ?>
