@@ -1086,7 +1086,7 @@ function checkDatabase()
         print "Creating remaining tables.\n";
 
         $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,
-    SDprogramrating,SDschedule,SDMessages");
+    SDprogramrating,SDschedule,SDMessages,SDimageCache");
 
         $stmt = $dbh->exec("CREATE TABLE `SDMessages` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -1211,6 +1211,19 @@ function checkDatabase()
     ('DataDirectMessage','',NULL),
     ('SchedulesDirectLastUpdate','',NULL)");
     }
+
+    $stmt = $dbh->exec("CREATE TABLE `SDimageCache` (
+`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `item` varchar(128) NOT NULL,
+  `md5` char(22) NOT NULL,
+  `dimension` varchar(128) NOT NULL,
+  `type` char(1) NOT NULL,
+  PRIMARY KEY (`row`),
+  UNIQUE KEY `id` (`item`,`dimension`),
+  KEY `type` (`type`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8");
+
+
 }
 
 function putSchedulesDirectLoginIntoDB($usernameAndPassword)
