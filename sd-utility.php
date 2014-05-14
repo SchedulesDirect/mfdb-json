@@ -17,8 +17,8 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.23";
-$scriptDate = "2014-05-09";
+$scriptVersion = "0.24";
+$scriptDate = "2014-05-14";
 $useServiceAPI = FALSE;
 
 require_once "vendor/autoload.php";
@@ -1181,19 +1181,23 @@ function checkDatabase()
   KEY `md5` (`md5`),
   KEY `sid` (`stationID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-    }
 
-    $stmt = $dbh->exec("ALTER TABLE credits CHANGE role role SET('actor','director','producer','executive_producer',
+        $stmt = $dbh->exec("ALTER TABLE credits CHANGE role role SET('actor','director','producer','executive_producer',
     'writer','guest_star','host','adapter','presenter','commentator','guest','musical_guest','judge',
     'correspondent','contestant')");
 
-    $stmt = $dbh->exec("INSERT IGNORE INTO settings(value, data, hostname)
+        $stmt = $dbh->exec("DELETE FROM settings WHERE VALUE IN('mythfilldatabaseLastRunStart',
+        'mythfilldatabaseLastRunEnd','mythfilldatabaseLastRunStatus','MythFillSuggestedRunTime',
+        'MythFillSuggestedRunTime','MythFillSuggestedRunTime')");
+
+        $stmt = $dbh->exec("INSERT IGNORE INTO settings(value, data, hostname)
     VALUES('mythfilldatabaseLastRunStart', '',NULL),
     ('mythfilldatabaseLastRunEnd','',NULL),
     ('mythfilldatabaseLastRunStatus','',NULL),
     ('MythFillSuggestedRunTime','',NULL),
     ('DataDirectMessage','',NULL),
     ('SchedulesDirectLastUpdate','',NULL)");
+    }
 }
 
 function putSchedulesDirectLoginIntoDB($usernameAndPassword)
