@@ -243,7 +243,6 @@ while (!$done)
     print "\nMythTV functions:\n";
     print "A to Add a new videosource to MythTV\n";
     print "D to Delete a videosource in MythTV\n";
-    print "I to download channel Icons into MythTV\n";
     print "L to Link a videosource to a lineup at Schedules Direct\n";
     print "R to refresh a videosource with new lineup information\n";
     print "Q to Quit\n";
@@ -295,9 +294,6 @@ while (!$done)
             $stmt->execute(array("sid" => $toDelete));
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sid");
             $stmt->execute(array("sid" => $toDelete));
-            break;
-        case "I":
-            getChannelIcons();
             break;
         case "L":
             print "Linking Schedules Direct lineup to sourceid\n\n";
@@ -1246,13 +1242,6 @@ function checkSchedulesDirectLoginFromDB()
     {
         return FALSE;
     }
-}
-
-function getChannelIcons()
-{
-    global $dbh;
-
-
 }
 
 function checkForNewIcon($data)
