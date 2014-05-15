@@ -20,6 +20,7 @@ $passwordHash = "";
 $scriptVersion = "0.25";
 $scriptDate = "2014-05-14";
 $useServiceAPI = FALSE;
+$channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -55,6 +56,7 @@ The following options are available:
 --dbhost=\tMySQL database hostname. (Default: $dbHost)
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
+--logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
@@ -62,7 +64,7 @@ The following options are available:
 eol;
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "username::", "password::", "test", "timezone::", "version");
+                     "logo::", "username::", "password::", "test", "timezone::", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -95,6 +97,9 @@ foreach ($options as $k => $v)
             break;
         case "host":
             $host = $v;
+            break;
+        case "logo":
+            $channelLogoDirectory = $v;
             break;
         case "username":
             $username = $v;
@@ -1265,6 +1270,7 @@ function checkSchedulesDirectLoginFromDB()
 function checkForNewIcon($data)
 {
     global $dbh;
+    global $channelLogoDirectory;
 
     $a = explode("/", $data["URL"]);
     $iconFileName = end($a);
@@ -1285,7 +1291,7 @@ function checkForNewIcon($data)
 
         printMSG("Fetching logo $iconFileName");
 
-        file_put_contents("/tmp/$iconFileName", file_get_contents($data["URL"]));
+        file_put_contents("$channelLogoDirectory/$iconFileName", file_get_contents($data["URL"]));
 
         $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,dimension,md5,type)
         VALUES(:item,:dimension,:md5,'L')
