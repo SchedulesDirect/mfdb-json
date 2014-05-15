@@ -1213,7 +1213,7 @@ function checkDatabase()
         'mythfilldatabaseLastRunEnd','mythfilldatabaseLastRunStatus','MythFillSuggestedRunTime',
         'MythFillSuggestedRunTime','MythFillSuggestedRunTime','MythFillDatabaseArgs')");
 
-        $stmt = $dbh->exec("INSERT IGNORE INTO settings(value, data, hostname)
+        $stmt = $dbh->exec("INSERT INTO settings(value, data, hostname)
     VALUES('mythfilldatabaseLastRunStart', '',NULL),
     ('mythfilldatabaseLastRunEnd','',NULL),
     ('mythfilldatabaseLastRunStatus','',NULL),
@@ -1232,6 +1232,8 @@ function checkDatabase()
   UNIQUE KEY `id` (`item`,`dimension`),
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
+        $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
 
         $stmt = $dbh->exec("INSERT INTO settings(value,data) VALUES('SchedulesDirectJSONschemaVersion','26')");
     }
