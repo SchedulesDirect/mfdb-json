@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.15, 2014-05-14
+v0.16, 2014-05-15
 
 Robert Kulagowski
 
@@ -27,40 +27,6 @@ downloads data from Schedules Direct using the new JSON format.
 - See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2530 for the
   complete list of countries with data.
 - Self-hosted data, so not dependent on Tribune's XML servers.
-
-#NOTE
-
-There's a bug in v0.23 and earlier of sd-utility.php. If you're running an
-affected version, run the following in MySQL:
-
-```
-DELETE FROM settings WHERE VALUE IN('mythfilldatabaseLastRunStart',
-        'mythfilldatabaseLastRunEnd','mythfilldatabaseLastRunStatus','MythFillSuggestedRunTime',
-        'MythFillSuggestedRunTime','MythFillSuggestedRunTime');
-
-INSERT IGNORE INTO settings(value, data, hostname)
-    VALUES('mythfilldatabaseLastRunStart', '',NULL),
-    ('mythfilldatabaseLastRunEnd','',NULL),
-    ('mythfilldatabaseLastRunStatus','',NULL),
-    ('MythFillSuggestedRunTime','',NULL),
-    ('DataDirectMessage','',NULL),
-    ('SchedulesDirectLastUpdate','',NULL);
-```
-
-If you are NOT running a new installation, execute the following in MySQL.
-
-```
-CREATE TABLE `SDimageCache` (
-  `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `item` varchar(128) NOT NULL,
-  `md5` char(22) NOT NULL,
-  `dimension` varchar(128) NOT NULL,
-  `type` char(1) NOT NULL,
-  PRIMARY KEY (`row`),
-  UNIQUE KEY `id` (`item`,`dimension`),
-  KEY `type` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-```
 
 #Installation
 
