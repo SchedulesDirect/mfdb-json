@@ -1077,12 +1077,19 @@ function checkDatabase()
 
     if ($result === FALSE)
     {
-        /*
-         * User has never run the grabber before.
-         */
-        print "Adding 'modified' field to videosource.\n";
-        $stmt = $dbh->exec("ALTER TABLE videosource ADD COLUMN modified CHAR(20) DEFAULT NULL
+        $stmt = $dbh->prepare("DESCRIBE videosource");
+        $stmt->execute();
+        $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if (!in_array("modified", $columnNames))
+        {
+            /*
+             * For users that have already been using the grabber, modified has already been added.
+             */
+            print "Adding 'modified' field to videosource.\n";
+            $stmt = $dbh->exec("ALTER TABLE videosource ADD COLUMN modified CHAR(20) DEFAULT NULL
         COMMENT 'Track the last time this videosource was updated.'");
+        }
 
         print "Creating remaining tables.\n";
 
