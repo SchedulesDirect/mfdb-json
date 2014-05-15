@@ -12,6 +12,7 @@ $isBeta = FALSE;
 $debug = FALSE;
 $done = FALSE;
 $test = FALSE;
+$skipChannelLogo = FALSE;
 $schedulesDirectLineups = array();
 $sdStatus = "";
 $username = "";
@@ -57,6 +58,7 @@ The following options are available:
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
+--skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
@@ -64,7 +66,7 @@ The following options are available:
 eol;
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "logo::", "username::", "password::", "test", "timezone::", "version");
+                     "logo::", "skiplogo", "username::", "password::", "test", "timezone::", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -100,6 +102,9 @@ foreach ($options as $k => $v)
             break;
         case "logo":
             $channelLogoDirectory = $v;
+            break;
+        case "skiplogo":
+            $skipChannelLogo = TRUE;
             break;
         case "username":
             $username = $v;
@@ -137,6 +142,21 @@ try
 }
 
 checkDatabase();
+
+if ($skipChannelLogo === FALSE)
+{
+    if (!file_exists($channelLogoDirectory))
+    {
+        $result = mkdir($channelLogoDirectory);
+
+        if ($result === FALSE)
+        {
+            print "Could not create $channelLogoDirectory\n";
+            print "Use --logo to specify directory, or --skiplogo to bypass channel logos.\n";
+            exit;
+        }
+    }
+}
 
 if ($isBeta)
 {
@@ -323,6 +343,8 @@ exit;
 function refreshChannelTable($lineup)
 {
     global $dbh;
+    global $skipChannelLogo;
+
     $transport = "";
 
     $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid=:lineup");
@@ -632,7 +654,10 @@ function refreshChannelTable($lineup)
 
             if (array_key_exists("logo", $stationArray))
             {
-                checkForNewIcon($stationID, $stationArray["logo"]);
+                if ($skipChannelLogo === FALSE)
+                {
+                    checkForChannelIcon($stationID, $stationArray["logo"]);
+                }
             }
 
             $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
@@ -1283,7 +1308,7 @@ function checkSchedulesDirectLoginFromDB()
     }
 }
 
-function checkForNewIcon($stationID, $data)
+function checkForChannelIcon($stationID, $data)
 {
     global $dbh;
     global $channelLogoDirectory;
