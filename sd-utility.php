@@ -147,7 +147,7 @@ if ($skipChannelLogo === FALSE)
 {
     if (!file_exists($channelLogoDirectory))
     {
-        $result = mkdir($channelLogoDirectory);
+        $result = @mkdir($channelLogoDirectory);
 
         if ($result === FALSE)
         {
