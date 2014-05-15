@@ -863,7 +863,8 @@ function deleteLineupFromSchedulesDirect()
     global $token;
     global $updatedLineupsToRefresh;
 
-    $deleteCache = $dbh->prepare("DELETE FROM SDheadendCache WHERE lineup=:lineup");
+    $deleteFromLocalCache = $dbh->prepare("DELETE FROM SDheadendCache WHERE lineup=:lineup");
+    $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
 
     $toDelete = strtoupper(readline("Lineup to Delete:>"));
 
@@ -898,7 +899,8 @@ function deleteLineupFromSchedulesDirect()
 
     print "Message from server: {$res["message"]}\n";
     unset ($updatedLineupsToRefresh[$toDelete]);
-    $deleteCache->execute(array("lineup" => $toDelete));
+    $deleteFromLocalCache->execute(array("lineup" => $toDelete));
+    $removeFromVideosource->execute(array("lineup" => $toDelete));
 }
 
 function deleteMessageFromSchedulesDirect()
