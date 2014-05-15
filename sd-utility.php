@@ -17,8 +17,8 @@ $sdStatus = "";
 $username = "";
 $password = "";
 $passwordHash = "";
-$scriptVersion = "0.25";
-$scriptDate = "2014-05-14";
+$scriptVersion = "0.26";
+$scriptDate = "2014-05-15";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 
@@ -611,13 +611,12 @@ function refreshChannelTable($lineup)
          * callsigns, etc.
          */
 
-        $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign,icon=:icon WHERE xmltvid=:stationID");
+        $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
 
         foreach ($json["stations"] as $stationArray)
         {
             $stationID = $stationArray["stationID"];
             $callsign = $stationArray["callsign"];
-            $iconFileName = "";
 
             if (array_key_exists("name", $stationArray))
             {
@@ -633,11 +632,10 @@ function refreshChannelTable($lineup)
 
             if (array_key_exists("logo", $stationArray))
             {
-                checkForNewIcon($stationArray["logo"]);
+                checkForNewIcon($stationID, $stationArray["logo"]);
             }
 
-            $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID,
-                                 "icon" => $iconFileName));
+            $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
         }
 
         $updateVideosourceModified = $dbh->prepare("UPDATE videosource SET modified = :modified WHERE lineupid=:lineup");
@@ -1073,19 +1071,18 @@ function checkDatabase()
 {
     global $dbh;
 
-    $stmt = $dbh->prepare("DESCRIBE videosource");
+    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
     $stmt->execute();
-    $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $result = $stmt->fetchColumn();
 
-    if (!in_array("modified", $columnNames))
+    if ($result === FALSE)
     {
+        /*
+         * User has never run the grabber before.
+         */
         print "Adding 'modified' field to videosource.\n";
         $stmt = $dbh->exec("ALTER TABLE videosource ADD COLUMN modified CHAR(20) DEFAULT NULL
         COMMENT 'Track the last time this videosource was updated.'");
-
-        /*
-         * If they didn't have 'modified', assume they need everything.
-         */
 
         print "Creating remaining tables.\n";
 
@@ -1205,7 +1202,7 @@ function checkDatabase()
 
         $stmt = $dbh->exec("DELETE FROM settings WHERE VALUE IN('mythfilldatabaseLastRunStart',
         'mythfilldatabaseLastRunEnd','mythfilldatabaseLastRunStatus','MythFillSuggestedRunTime',
-        'MythFillSuggestedRunTime','MythFillSuggestedRunTime')");
+        'MythFillSuggestedRunTime','MythFillSuggestedRunTime','MythFillDatabaseArgs')");
 
         $stmt = $dbh->exec("INSERT IGNORE INTO settings(value, data, hostname)
     VALUES('mythfilldatabaseLastRunStart', '',NULL),
@@ -1213,11 +1210,11 @@ function checkDatabase()
     ('mythfilldatabaseLastRunStatus','',NULL),
     ('MythFillSuggestedRunTime','',NULL),
     ('DataDirectMessage','',NULL),
+    ('MythFillDatabaseArgs','',NULL),
     ('SchedulesDirectLastUpdate','',NULL)");
-    }
 
-    $stmt = $dbh->exec("CREATE TABLE `SDimageCache` (
-`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        $stmt = $dbh->exec("CREATE TABLE `SDimageCache` (
+  `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `item` varchar(128) NOT NULL,
   `md5` char(22) NOT NULL,
   `dimension` varchar(128) NOT NULL,
@@ -1225,8 +1222,17 @@ function checkDatabase()
   PRIMARY KEY (`row`),
   UNIQUE KEY `id` (`item`,`dimension`),
   KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8");
+) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
+        $stmt = $dbh->exec("INSERT INTO settings(value,data) VALUES('SchedulesDirectJSONschemaVersion','26')");
+    }
+
+    if ($result == "27")
+    {
+        /*
+         * Do whatever. Stub.
+         */
+    }
 
 }
 
@@ -1290,7 +1296,7 @@ function checkForNewIcon($stationID, $data)
          * We don't already have this icon, or it's different, so it will have to be fetched.
          */
 
-        printMSG("Fetching logo $iconFileName");
+        printMSG("Fetching logo $iconFileName for station $stationID");
 
         file_put_contents("$channelLogoDirectory/$iconFileName", file_get_contents($data["URL"]));
 
