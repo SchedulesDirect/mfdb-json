@@ -634,7 +634,6 @@ function refreshChannelTable($lineup)
             if (array_key_exists("logo", $stationArray))
             {
                 checkForNewIcon($stationArray["logo"]);
-
             }
 
             $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID,
@@ -1267,7 +1266,7 @@ function checkSchedulesDirectLoginFromDB()
     }
 }
 
-function checkForNewIcon($data)
+function checkForNewIcon($stationID, $data)
 {
     global $dbh;
     global $channelLogoDirectory;
@@ -1277,6 +1276,8 @@ function checkForNewIcon($data)
 
     $md5 = $data["md5"];
     $dimension = $data["dimension"];
+
+    $updateChannelTable = $dbh->prepare("UPDATE channel SET icon=:icon WHERE xmltvid=:stationID");
 
     $stmt = $dbh->prepare("SELECT md5 FROM SDimageCache WHERE item=:item and dimension=:dimension");
     $stmt->execute(array("item" => $iconFileName, "dimension" => $dimension));
@@ -1297,6 +1298,7 @@ function checkForNewIcon($data)
         VALUES(:item,:dimension,:md5,'L')
         ON DUPLICATE KEY UPDATE md5=:md5");
         $updateSDimageCache->execute(array("item" => $iconFileName, "dimension" => $dimension, "md5" => $md5));
+        $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));
     }
 }
 
