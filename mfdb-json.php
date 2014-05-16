@@ -40,8 +40,6 @@ $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 $fh_error = fopen("$todayDate.debug.log", "a");
 
-printMSG("$agentString");
-
 $jsonProgramstoRetrieve = array();
 $peopleCache = array();
 
@@ -83,6 +81,7 @@ foreach ($options as $k => $v)
             break;
         case "help":
         case "h":
+            printMSG("$agentString");
             printMSG("$helpText");
             exit;
             break;
@@ -118,6 +117,8 @@ foreach ($options as $k => $v)
             break;
     }
 }
+
+printMSG("$agentString");
 
 $dlSchedTempDir = tempdir();
 printMSG("Temp directory for Schedules is $dlSchedTempDir");
