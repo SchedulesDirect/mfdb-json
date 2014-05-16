@@ -223,7 +223,7 @@ else
     $statusMessage = "Error connecting to Schedules Direct.";
 }
 
-if (count($jsonProgramstoRetrieve))
+if (count($jsonProgramstoRetrieve) OR $forceDownload === TRUE)
 {
     insertJSON($jsonProgramstoRetrieve);
     insertSchedule();
