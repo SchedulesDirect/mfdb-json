@@ -21,6 +21,7 @@ use Guzzle\Http\Client;
 $isBeta = TRUE;
 $debug = FALSE;
 $quiet = FALSE;
+$forceDownload = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
 $scriptVersion = "0.17";
@@ -57,6 +58,7 @@ The following options are available:
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
 --dbhost=\tMySQL database hostname. (Default: $dbHost)
+--force\t\tForce download of schedules. (Default: FALSE)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --quiet\t\tDon't print to screen; put all output into the logfile.
@@ -66,7 +68,7 @@ eol;
 /*'*/
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "test", "max::", "quiet", "station::", "timezone::");
+                     "force", "test", "max::", "quiet", "station::", "timezone::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -99,6 +101,9 @@ foreach ($options as $k => $v)
             break;
         case "host":
             $host = $v;
+            break;
+        case "force":
+            $forceDownload = TRUE;
             break;
         case "test":
             $test = TRUE;
@@ -203,7 +208,7 @@ printMSG("Retrieving server status message.");
 
 $response = updateStatus();
 
-if ($response == "No new data on server.")
+if ($response == "No new data on server." AND $forceDownload === FALSE)
 {
     $statusMessage = "No new programs to retrieve.";
 }
