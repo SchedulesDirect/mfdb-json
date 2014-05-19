@@ -17,7 +17,9 @@ $skipChannelLogo = FALSE;
 $schedulesDirectLineups = array();
 $sdStatus = "";
 $username = "";
+$usernameFromDB = "";
 $password = "";
+$passwordFromDB = "";
 $passwordHash = "";
 $scriptVersion = "0.26";
 $scriptDate = "2014-05-15";
@@ -133,20 +135,24 @@ foreach ($options as $k => $v)
 
 print "Using timezone $tz\n";
 print "$agentString\n";
-print "Attempting to connect to database.\n";
-try
-{
-    $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
-        array(PDO::ATTR_PERSISTENT => true));
-    $dbh->exec("SET CHARACTER SET utf8");
-    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e)
-{
-    print "Exception with PDO: " . $e->getMessage() . "\n";
-    exit;
-}
 
-checkDatabase();
+if ($isMythTV)
+{
+    print "Attempting to connect to database.\n";
+    try
+    {
+        $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
+            array(PDO::ATTR_PERSISTENT => true));
+        $dbh->exec("SET CHARACTER SET utf8");
+        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e)
+    {
+        print "Exception with PDO: " . $e->getMessage() . "\n";
+        exit;
+    }
+
+    checkDatabase();
+}
 
 if ($skipChannelLogo === FALSE)
 {
@@ -181,16 +187,15 @@ else
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
-$useServiceAPI = checkForServiceAPI();
-
-if ($test)
+if ($isMythTV)
 {
-}
+    $useServiceAPI = checkForServiceAPI();
 
-$userLoginInformation = getSchedulesDirectLoginFromDB();
-$responseJSON = json_decode($userLoginInformation, TRUE);
-$usernameFromDB = $responseJSON["username"];
-$passwordFromDB = $responseJSON["password"];
+    $userLoginInformation = getSchedulesDirectLoginFromDB();
+    $responseJSON = json_decode($userLoginInformation, TRUE);
+    $usernameFromDB = $responseJSON["username"];
+    $passwordFromDB = $responseJSON["password"];
+}
 
 if ($username == "")
 {
@@ -239,7 +244,7 @@ if ($token == "ERROR")
     exit;
 }
 
-if ($needToStoreLogin)
+if ($needToStoreLogin AND $isMythTV)
 {
     $userInformation["username"] = $username;
     $userInformation["password"] = $password;
@@ -262,7 +267,10 @@ while (!$done)
 
     printStatus($sdStatus);
 
-    displayLocalVideoSources();
+    if ($isMythTV)
+    {
+        displayLocalVideoSources();
+    }
 
     print "\nSchedules Direct functions:\n";
     print "1 Add a lineup to your account at Schedules Direct\n";
@@ -270,12 +278,15 @@ while (!$done)
     print "3 Acknowledge a message\n";
     print "4 Print a channel table for a lineup\n";
 
-    print "\nMythTV functions:\n";
-    print "A to Add a new videosource to MythTV\n";
-    print "D to Delete a videosource in MythTV\n";
-    print "L to Link a videosource to a lineup at Schedules Direct\n";
-    print "R to refresh a videosource with new lineup information\n";
-    print "Q to Quit\n";
+    if ($isMythTV)
+    {
+        print "\nMythTV functions:\n";
+        print "A to Add a new videosource to MythTV\n";
+        print "D to Delete a videosource in MythTV\n";
+        print "L to Link a videosource to a lineup at Schedules Direct\n";
+        print "R to refresh a videosource with new lineup information\n";
+        print "Q to Quit\n";
+    }
 
     $response = strtoupper(readline(">"));
 
