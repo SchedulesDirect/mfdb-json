@@ -30,6 +30,7 @@ $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 $station = "";
 $useServiceAPI = FALSE;
+$isMythTV = TRUE;
 $tz = "UTC";
 
 $agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
@@ -60,6 +61,7 @@ The following options are available:
 --dbhost=\tMySQL database hostname. (Default: $dbHost)
 --force\t\tForce download of schedules. (Default: FALSE)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
+--nomyth\t\tDon't execute any MythTV specific functions. (Default: FALSE)
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --quiet\t\tDon't print to screen; put all output into the logfile.
 --station=\tDownload the schedule for a single stationID in your lineup.
@@ -68,7 +70,7 @@ eol;
 /*'*/
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "force", "test", "max::", "quiet", "station::", "timezone::");
+                     "force", "test", "nomyth", "max::", "quiet", "station::", "timezone::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -108,6 +110,9 @@ foreach ($options as $k => $v)
         case "test":
             $test = TRUE;
             break;
+        case "nomyth":
+            $isMythTV = FALSE;
+            break;
         case "max":
             $maxProgramsToGet = $v;
             break;
@@ -130,17 +135,20 @@ printMSG("Temp directory for Schedules is $dlSchedTempDir");
 $dlProgramTempDir = tempdir();
 printMSG("Temp directory for Programs is $dlProgramTempDir");
 
-printMSG("Connecting to MythTV database.");
-try
+if ($isMythTV)
 {
-    $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
-        array(PDO::ATTR_PERSISTENT => true));
-    $dbh->exec("SET CHARACTER SET utf8");
-    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e)
-{
-    debugMSG("Exception with PDO: " . $e->getMessage());
-    exit;
+    printMSG("Connecting to MythTV database.");
+    try
+    {
+        $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
+            array(PDO::ATTR_PERSISTENT => true));
+        $dbh->exec("SET CHARACTER SET utf8");
+        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e)
+    {
+        debugMSG("Exception with PDO: " . $e->getMessage());
+        exit;
+    }
 }
 
 if ($isBeta)
@@ -163,36 +171,50 @@ $client->setUserAgent($agentString);
 
 $useServiceAPI = checkForServiceAPI();
 
-$userLoginInformation = getSchedulesDirectLoginFromDB();
-$responseJSON = json_decode($userLoginInformation, TRUE);
-$sdUsername = $responseJSON["username"];
-$sdPassword = sha1($responseJSON["password"]);
-
-if ($sdUsername == "")
+if ($isMythTV)
 {
-    printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
-    printMSG("Did you run the sd-utility.php program yet?");
-    exit;
+    $userLoginInformation = getSchedulesDirectLoginFromDB();
+    $responseJSON = json_decode($userLoginInformation, TRUE);
+    $sdUsername = $responseJSON["username"];
+    $sdPassword = sha1($responseJSON["password"]);
+
+    if ($sdUsername == "")
+    {
+        printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
+        printMSG("Did you run the sd-utility.php program yet?");
+        exit;
+    }
 }
 
 $globalStartTime = time();
 $globalStartDate = new DateTime();
 
-if ($station == "")
+if ($station == "" AND $isMythTV)
 {
     printMSG("Retrieving list of channels to download.");
     $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
 AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
     $stmt->execute();
+    $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 }
-else
+
+if ($station != "" AND $isMythTV)
 {
     printMSG("Downloading data only for $station");
     $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE xmltvid=:station");
     $stmt->execute(array("station" => $station));
+    $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 }
 
-$stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
+if (!$isMythTV)
+{
+    /*
+     * Stub. Read in a configuration file that contains username, password and stationIDs.
+     */
+
+    printMSG("Opening sd.conf");
+    exit;
+}
 
 printMSG("Logging into Schedules Direct.");
 $token = getToken($sdUsername, $sdPassword);
