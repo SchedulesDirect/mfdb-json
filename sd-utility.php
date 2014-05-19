@@ -12,6 +12,7 @@ $isBeta = FALSE;
 $debug = FALSE;
 $done = FALSE;
 $test = FALSE;
+$isMythTV = TRUE;
 $skipChannelLogo = FALSE;
 $schedulesDirectLineups = array();
 $sdStatus = "";
@@ -58,6 +59,7 @@ The following options are available:
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
+--nomyth\t\tDon't execute any MythTV specific functions. (Default: FALSE)
 --skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
@@ -66,7 +68,7 @@ The following options are available:
 eol;
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "logo::", "skiplogo", "username::", "password::", "test", "timezone::", "version");
+                     "logo::", "nomyth", "skiplogo", "username::", "password::", "test", "timezone::", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -102,6 +104,9 @@ foreach ($options as $k => $v)
             break;
         case "logo":
             $channelLogoDirectory = $v;
+            break;
+        case "nomyth":
+            $isMythTV = FALSE;
             break;
         case "skiplogo":
             $skipChannelLogo = TRUE;
