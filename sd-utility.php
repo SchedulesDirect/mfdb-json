@@ -707,7 +707,18 @@ function linkSchedulesDirectLineup()
     global $dbh;
 
     $sid = readline("MythTV sourceid:>");
+
+    if ($sid == "")
+    {
+        return;
+    }
+
     $he = strtoupper(readline("Schedules Direct lineup:>"));
+
+    if ($he == "")
+    {
+        return;
+    }
 
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:he");
     $stmt->execute(array("he" => $he));
