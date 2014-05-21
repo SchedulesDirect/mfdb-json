@@ -61,7 +61,7 @@ The following options are available:
 --dbhost=\tMySQL database hostname. (Default: $dbHost)
 --force\t\tForce download of schedules. (Default: FALSE)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
---nomyth\t\tDon't execute any MythTV specific functions. (Default: FALSE)
+--nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --quiet\t\tDon't print to screen; put all output into the logfile.
 --station=\tDownload the schedule for a single stationID in your lineup.
