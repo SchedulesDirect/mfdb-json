@@ -61,7 +61,7 @@ The following options are available:
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
---nomyth\t\tDon't execute any MythTV specific functions. (Default: FALSE)
+--nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
 --skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
@@ -707,7 +707,18 @@ function linkSchedulesDirectLineup()
     global $dbh;
 
     $sid = readline("MythTV sourceid:>");
+
+    if ($sid == "")
+    {
+        return;
+    }
+
     $he = strtoupper(readline("Schedules Direct lineup:>"));
+
+    if ($he == "")
+    {
+        return;
+    }
 
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:he");
     $stmt->execute(array("he" => $he));
