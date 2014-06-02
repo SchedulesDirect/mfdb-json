@@ -172,10 +172,10 @@ if ($skipChannelLogo === FALSE)
 if ($isBeta)
 {
     # Test server. Things may be broken there.
-    $baseurl = "https://json.schedulesdirect.org/20131021/";
+    $baseurl = "https://json.schedulesdirect.org/20140530/";
     print "Using beta server.\n";
     # API must match server version.
-    $api = 20131021;
+    $api = 20140530;
 }
 else
 {
