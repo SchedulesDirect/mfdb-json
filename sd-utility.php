@@ -8,7 +8,7 @@
  * grabber@schedulesdirect.org
  *
  */
-$isBeta = FALSE;
+$isBeta = TRUE;
 $debug = FALSE;
 $done = FALSE;
 $test = FALSE;
@@ -21,8 +21,8 @@ $usernameFromDB = "";
 $password = "";
 $passwordFromDB = "";
 $passwordHash = "";
-$scriptVersion = "0.26";
-$scriptDate = "2014-05-15";
+$scriptVersion = "0.01";
+$scriptDate = "2014-06-12";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 
