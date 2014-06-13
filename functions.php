@@ -171,8 +171,8 @@ function printStatus($sdStatus)
     {
         print "The following lineups are in your account at Schedules Direct:\n\n";
 
-        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(20, 20, 25, 4)));
-        $lineupData->appendRow(array("Lineup", "Server modified", "MythTV videosource update", "New?"));
+        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(20, 20, 25, 7)));
+        $lineupData->appendRow(array("Lineup", "Server modified", "MythTV videosource update", "Status"));
 
         foreach ($he as $id => $serverModified)
         {
@@ -190,12 +190,19 @@ function printStatus($sdStatus)
             if ($serverModified > $mythModified)
             {
                 $updatedHeadendsToRefresh[$id] = $serverModified;
-                $lineupData->appendRow(array($id, $serverModified, $mythModified, "***"));
+                $lineupData->appendRow(array($id, $serverModified, $mythModified, "Updated"));
+                continue;
             }
-            else
+/*
+            if ($heStatus[$he] == "D")
             {
-                $lineupData->appendRow(array($id, $serverModified, $mythModified, ""));
+                $lineupData->appendRow(array($id, $serverModified, $mythModified, "DELETED"));
+                continue;
             }
+*/
+
+            $lineupData->appendRow(array($id, $serverModified, $mythModified, ""));
+
         }
 
         print $lineupData;
