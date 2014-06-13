@@ -21,8 +21,8 @@ $usernameFromDB = "";
 $password = "";
 $passwordFromDB = "";
 $passwordHash = "";
-$scriptVersion = "0.26";
-$scriptDate = "2014-05-15";
+$scriptVersion = "0.27";
+$scriptDate = "2014-06-13";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 
@@ -613,9 +613,17 @@ function refreshChannelTable($lineup)
                         $virtualChannel = "";
                     }
 
+                    /*
+                     * In order to insert a unique channel ID, we need to make sure that "39_1" and "39_2" map to two
+                     * different values. Old code resulted in 39_1 -> 39, then 39_2 had a collision because it also
+                     * turned into "39"
+                     */
+
+                    $strippedChannel = str_replace(array("-", "_"), "", $channel);
+
                     try
                     {
-                        $channelInsert->execute(array("chanid"    => (int)($sourceID * 1000) + (int)$channel,
+                        $channelInsert->execute(array("chanid"    => (int)($sourceID * 1000) + (int)$strippedChannel,
                                                       "channum"   => $channel,
                                                       "freqid"    => $channel, "sourceid" => $sourceID,
                                                       "xmltvid"   => $stationID,
