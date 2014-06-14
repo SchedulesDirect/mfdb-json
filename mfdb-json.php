@@ -24,8 +24,8 @@ $quiet = FALSE;
 $forceDownload = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
-$scriptVersion = "0.17";
-$scriptDate = "2014-05-09";
+$scriptVersion = "0.18";
+$scriptDate = "2014-06-14";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 $station = "";
@@ -343,6 +343,15 @@ function getSchedules($stationIDs)
         $item = json_decode($json, TRUE);
         $stationID = $item["stationID"];
         $downloadedStationIDs[] = $stationID;
+
+        if (array_key_exists("code", $item))
+        {
+            if ($item["code"] == 404)
+            {
+                print "{$item["message"]}\n";
+                continue;
+            }
+        }
 
         printMSG("Parsing schedule for stationID:$stationID");
 
