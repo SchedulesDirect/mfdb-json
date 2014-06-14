@@ -348,7 +348,7 @@ function getSchedules($stationIDs)
         {
             if ($item["code"] == 404)
             {
-                print "{$item["message"]}\n";
+                printMSG($item["message"]);
                 continue;
             }
         }
@@ -359,6 +359,11 @@ function getSchedules($stationIDs)
         {
             $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
         }
+    }
+
+    if (count($serverScheduleMD5) == 0)
+    {
+        printMSG("No programs in upcoming schedule?");
     }
 
     printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.");
