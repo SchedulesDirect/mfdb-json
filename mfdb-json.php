@@ -154,10 +154,10 @@ if ($isMythTV)
 if ($isBeta)
 {
     # Test server. Things may be broken there.
-    $baseurl = "https://json.schedulesdirect.org/20131021/";
+    $baseurl = "http://ec2-54-209-234-71.compute-1.amazonaws.com/20140530/";
     printMSG("Using beta server.");
     # API must match server version.
-    $api = 20131021;
+    $api = 20140530;
 }
 else
 {
