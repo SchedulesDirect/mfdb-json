@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.16, 2014-05-15
+v0.17, 2014-07-17
 
 Robert Kulagowski
 
@@ -410,6 +410,19 @@ the utility program update the channel table, or skip the scan and just use
 the QAM tuning information directly.  If you are using the tuning
 information directly you can skip to the next step; you'll be asked which
 method you'd like to use in the "R" step.
+
+If you have QAM, but it didn't appear in the list of lineups available in
+your headend, please run the scan in mythtv-setup, then see
+
+http://forums.schedulesdirect.org/viewtopic.php?f=3&t=1211
+
+The utility program will extract the scanned QAM information from your
+database.  Send the file to
+
+qam-info@schedulesdirect.org
+
+Once we have the scan, we will correlate the station names and create a -QAM
+lineup for you.
 
 For Antenna and QAM users who will run a scan, once you've added the
 appropriate lineup to your Schedules Direct account, added a videosource (in
