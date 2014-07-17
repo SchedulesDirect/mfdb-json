@@ -22,7 +22,7 @@ $password = "";
 $passwordFromDB = "";
 $passwordHash = "";
 $scriptVersion = "0.01";
-$scriptDate = "2014-06-12";
+$scriptDate = "2014-07-09";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 
@@ -172,7 +172,7 @@ if ($skipChannelLogo === FALSE)
 if ($isBeta)
 {
     # Test server. Things may be broken there.
-    $baseurl = "https://json.schedulesdirect.org/20140530/";
+    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
     print "Using beta server.\n";
     # API must match server version.
     $api = 20140530;
