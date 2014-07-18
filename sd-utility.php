@@ -147,7 +147,7 @@ if ($isMythTV)
         $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e)
     {
-        var_dump($e->errorInfo());
+        var_dump($e->errorInfo);
 
         print "Could not connect to database: " . $e->getMessage() . "\n";
         print "If you're running the grabber as standalone, use --nomyth\n";
