@@ -138,7 +138,7 @@ print "$agentString\n";
 
 if ($isMythTV)
 {
-    print "Attempting to connect to database.\n";
+    print "Attempting to connect to MythTV database.\n";
     try
     {
         $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
@@ -147,7 +147,8 @@ if ($isMythTV)
         $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e)
     {
-        print "Exception with PDO: " . $e->getMessage() . "\n";
+        print "Could not connect to database: " . $e->getMessage() . "\n";
+        print "If you're running the grabber as standalone, use --nomyth\n";
         exit;
     }
 
