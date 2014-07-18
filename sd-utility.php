@@ -149,7 +149,7 @@ if ($isMythTV)
     {
         if ($e->getCode() == 2002)
         {
-            print "Could not connect to database: " . $e->getMessage() . "\n";
+            print "Could not connect to database:\n" . $e->getMessage() . "\n";
             print "If you're running the grabber as standalone, use --nomyth\n";
             exit;
         }
