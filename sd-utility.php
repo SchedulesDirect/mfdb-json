@@ -284,6 +284,7 @@ while (!$done)
         print "\nMythTV functions:\n";
         print "A to Add a new videosource to MythTV\n";
         print "D to Delete a videosource in MythTV\n";
+        print "E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct\n";
         print "L to Link a videosource to a lineup at Schedules Direct\n";
         print "R to refresh a videosource with new lineup information\n";
         print "Q to Quit\n";
@@ -336,6 +337,13 @@ while (!$done)
             $stmt->execute(array("sid" => $toDelete));
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sid");
             $stmt->execute(array("sid" => $toDelete));
+            break;
+        case "E":
+            $sourceIDtoExtract = readline("Which sourceid do you want to extract:>");
+            if ($sourceIDtoExtract != "")
+            {
+                extractData($sourceIDtoExtract);
+            }
             break;
         case "L":
             print "Linking Schedules Direct lineup to sourceid\n\n";
@@ -1378,6 +1386,59 @@ function checkForChannelIcon($stationID, $data)
         $updateSDimageCache->execute(array("item" => $iconFileName, "dimension" => $dimension, "md5" => $md5));
         $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));
     }
+}
+
+function extractData($sourceIDtoExtract)
+{
+    /*
+     * Pulls data from the scanned table and preps it for sending to Schedules Direct.
+     */
+
+    global $dbh;
+    global $todayDate;
+
+    $extractArray = array();
+
+    $stmt = $dbh->prepare("SELECT lineupid from videosource where sourceid=:sid");
+    $stmt->execute(array("sid" => $sourceIDtoExtract));
+    $lineupName = $stmt->fetchColumn();
+
+    $stmt = $dbh->prepare("SELECT channum, callsign, xmltvid, mplexid, serviceid FROM channel where sourceid=:sid");
+    $stmt->execute(array("sid" => $sourceIDtoExtract));
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $getFrequency = $dbh->prepare("SELECT frequency FROM dtv_multiplex WHERE mplexid=:mplexid");
+
+    if (count($result) == 0)
+    {
+        /*
+         * Dump an error message and return.
+         */
+    }
+
+    $fhExtract = fopen("$lineupName.extract.conf", "a");
+
+    fwrite($fhExtract, "# jsonextract v0.01 $todayDate $lineupName\n");
+
+    foreach ($result as $v)
+    {
+        $getFrequency->execute(array("mplexid" => $v["mplexid"]));
+        $freq = $getFrequency->fetchColumn();
+
+        $extractArray[] = array("chanNum" => $v["channum"], "callSign" => $v["callsign"], "xmltvid" => $v["xmltvid"],
+                                "mplexid" => $v["mplexid"], "serviceid" => $v["serviceid"], "frequency" => $freq[0]);
+
+    }
+
+    $json = json_encode($extractArray);
+
+    fwrite($fhExtract, $json . "\n");
+
+    print "JSON is \n$json\n";
+
+    /*
+     * TODO: send json automatically.
+     */
 }
 
 ?>
