@@ -975,17 +975,11 @@ function deleteLineupFromSchedulesDirect()
     $deleteFromLocalCache = $dbh->prepare("DELETE FROM SDheadendCache WHERE lineup=:lineup");
     $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
 
-    $toDelete = strtoupper(readline("Lineup to Delete (# or lineup):>"));
+    $toDelete = getLineupFromNumber(strtoupper(readline("Lineup to Delete (# or lineup):>")));
 
     if ($toDelete == "")
     {
         return;
-    }
-
-    if (strlen($toDelete) < 3)
-    {
-        $toDelete = $lineupArray[$toDelete]["lineup"];
-        print "Deleting lineup $toDelete\n";
     }
 
     try
@@ -1499,5 +1493,28 @@ function extractData($sourceIDtoExtract)
      */
 }
 
-?>
+function getLineupFromNumber($numberOrLineup)
+{
+    global $lineupArray;
 
+    if (strlen($numberOrLineup) < 3)
+    {
+        $foo = (int)$numberOrLineup;
+
+        if (!array_key_exists($foo, $lineupArray))
+        {
+            return "";
+        }
+        else
+        {
+            return $lineupArray[$numberOrLineup]["lineup"];
+        }
+    }
+    else
+    {
+        return ($numberOrLineup); //We're actually just returning the name of the array.
+    }
+
+}
+
+?>
