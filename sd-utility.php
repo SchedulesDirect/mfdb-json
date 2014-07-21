@@ -25,6 +25,7 @@ $scriptVersion = "0.01";
 $scriptDate = "2014-07-09";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
+$lineupArray = array();
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -1159,9 +1160,12 @@ function getSchedulesDirectLineups()
     global $sdStatus;
     $schedulesDirectLineups = array();
 
+    $counter = "0";
+
     foreach ($sdStatus["lineups"] as $hv)
     {
-        $schedulesDirectLineups [$hv["ID"]] = $hv["modified"];
+        $counter++;
+        $schedulesDirectLineups[$counter] = array("lineup" => $hv["ID"], "modified" => $hv["modified"]);
     }
 
     return ($schedulesDirectLineups);

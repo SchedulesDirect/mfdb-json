@@ -133,6 +133,7 @@ function printStatus($sdStatus)
 {
     global $dbh;
     global $updatedHeadendsToRefresh;
+    global $lineupArray;
 
     print "\nStatus messages from Schedules Direct:\n";
 
@@ -174,10 +175,11 @@ function printStatus($sdStatus)
         $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
         $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update", "Status"));
 
-        $counter = 0;
-
-        foreach ($lineupArray as $lineup => $serverModified)
+        foreach ($lineupArray as $lineupNumber => $v)
         {
+            $lineup = $v["lineup"];
+            $serverModified = $v["modified"];
+
             $getVideosourceModified->execute(array("lineup" => $lineup));
             $mythModified = $getVideosourceModified->fetchColumn();
 
@@ -186,12 +188,10 @@ function printStatus($sdStatus)
                 $mythModified = "";
             }
 
-            $counter++;
-
             if ($serverModified > $mythModified)
             {
                 $updatedHeadendsToRefresh[$lineup] = $serverModified;
-                $lineupData->appendRow(array("$counter", $lineup, $serverModified, $mythModified, "Updated"));
+                $lineupData->appendRow(array($lineupNumber, $lineup, $serverModified, $mythModified, "Updated"));
                 continue;
             }
             /*
@@ -202,7 +202,7 @@ function printStatus($sdStatus)
                         }
             */
 
-            $lineupData->appendRow(array("$counter", $lineup, $serverModified, $mythModified, ""));
+            $lineupData->appendRow(array($lineupNumber, $lineup, $serverModified, $mythModified, ""));
 
         }
 
