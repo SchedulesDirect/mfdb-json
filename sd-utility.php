@@ -884,7 +884,8 @@ function addLineupsToSchedulesDirect()
             $name = $v["name"];
             $lineup = end(explode("/", $v["uri"]));
             $lineupArray[$counter] = $lineup;
-            print "\t#$counter name: $name\n";
+            print "\t#$counter:\n";
+            print "\tname: $name\n";
             print "\tLineup: $lineup\n";
         }
     }
