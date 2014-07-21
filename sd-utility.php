@@ -726,7 +726,6 @@ function refreshChannelTable($lineup)
 function linkSchedulesDirectLineup()
 {
     global $dbh;
-    global $lineupArray;
 
     $sid = readline("MythTV sourceid:>");
 
@@ -735,16 +734,11 @@ function linkSchedulesDirectLineup()
         return;
     }
 
-    $lineup = strtoupper(readline("Schedules Direct lineup (# or lineup):>"));
+    $lineup = getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
 
     if ($lineup == "")
     {
         return;
-    }
-
-    if (strlen($lineup) < 3)
-    {
-        $lineup = $lineupArray[$lineup];
     }
 
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
@@ -763,22 +757,16 @@ function linkSchedulesDirectLineup()
 function printLineup()
 {
     global $dbh;
-    global $lineupArray;
 
     /*
      * First we want to get the lineup that we're interested in.
      */
 
-    $lineup = strtoupper(readline("Lineup to print (# or lineup):>"));
+    $lineup = getLineupFromNumber(strtoupper(readline("Lineup to print (# or lineup):>")));
 
     if ($lineup == "")
     {
         return;
-    }
-
-    if (strlen($lineup) < 3)
-    {
-        $lineup = $lineupArray[$lineup];
     }
 
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
@@ -847,7 +835,8 @@ function addLineupsToSchedulesDirect()
     global $client;
     global $debug;
     global $token;
-    global $lineupArray;
+
+    $sdLineupArray = array();
 
     print "Three-character ISO-3166-1 alpha3 country code:";
     $country = strtoupper(readline(">"));
@@ -902,7 +891,7 @@ function addLineupsToSchedulesDirect()
             $counter++;
             $name = $v["name"];
             $lineup = end(explode("/", $v["uri"]));
-            $lineupArray[$counter] = $lineup;
+            $sdLineupArray[$counter] = $lineup;
             print "\t#$counter:\n";
             print "\tname: $name\n";
             print "\tLineup: $lineup\n";
@@ -919,7 +908,7 @@ function addLineupsToSchedulesDirect()
 
     if (strlen($lineup) < 3)
     {
-        $lineup = $lineupArray[$lineup];
+        $lineup = $sdLineupArray[$lineup];
     }
     else
     {
@@ -970,7 +959,6 @@ function deleteLineupFromSchedulesDirect()
     global $client;
     global $token;
     global $updatedLineupsToRefresh;
-    global $lineupArray;
 
     $deleteFromLocalCache = $dbh->prepare("DELETE FROM SDheadendCache WHERE lineup=:lineup");
     $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
