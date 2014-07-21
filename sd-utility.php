@@ -733,15 +733,15 @@ function linkSchedulesDirectLineup()
         return;
     }
 
-    $he = strtoupper(readline("Schedules Direct lineup:>"));
+    $lineup = strtoupper(readline("Schedules Direct lineup:>"));
 
-    if ($he == "")
+    if ($lineup == "")
     {
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:he");
-    $stmt->execute(array("he" => $he));
+    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
+    $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
     if (!count($response))
@@ -749,8 +749,8 @@ function linkSchedulesDirectLineup()
         return;
     }
 
-    $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:he WHERE sourceid=:sid");
-    $stmt->execute(array("he" => $he, "sid" => $sid));
+    $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:lineup WHERE sourceid=:sid");
+    $stmt->execute(array("he" => $lineup, "sid" => $sid));
 }
 
 function printLineup()
