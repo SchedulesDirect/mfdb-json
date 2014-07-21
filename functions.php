@@ -174,7 +174,7 @@ function printStatus($sdStatus)
         $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
         $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update", "Status"));
 
-        $counter = 0;
+        $counter = "0";
 
         foreach ($lineupArray as $lineup => $serverModified)
         {
