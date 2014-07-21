@@ -872,7 +872,7 @@ function addLineupsToSchedulesDirect()
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
 
-    $counter = 0;
+    $counter = "0";
 
     foreach ($res as $he => $details)
     {
