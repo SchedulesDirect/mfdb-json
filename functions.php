@@ -181,6 +181,11 @@ function printStatus($sdStatus)
             $getVideosourceModified->execute(array("lineup" => $lineup));
             $mythModified = $getVideosourceModified->fetchColumn();
 
+            if ($mythModified === FALSE)
+            {
+                $mythModified = "";
+            }
+
             $counter++;
 
             if ($serverModified > $mythModified)
@@ -197,7 +202,7 @@ function printStatus($sdStatus)
                         }
             */
 
-            $lineupData->appendRow(array((string)$counter, $lineup, $serverModified, $mythModified, ""));
+            $lineupData->appendRow(array("$counter", $lineup, $serverModified, $mythModified, ""));
 
         }
 
