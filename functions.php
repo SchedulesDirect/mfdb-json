@@ -174,34 +174,30 @@ function printStatus($sdStatus)
         $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
         $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update", "Status"));
 
-        foreach ($lineupArray as $id => $serverModified)
+        $counter = 0;
+
+        foreach ($lineupArray as $lineup => $serverModified)
         {
-            $mythStatus = array();
-            $mythModified = "";
+            $getVideosourceModified->execute(array("lineup" => $lineup));
+            $mythModified = $getVideosourceModified->fetchColumn();
 
-            $getVideosourceModified->execute(array("lineup" => $id));
-            $mythStatus = $getVideosourceModified->fetchColumn;
-
-            if (count($mythStatus))
-            {
-                $mythModified = $mythStatus[0];
-            }
+            $counter++;
 
             if ($serverModified > $mythModified)
             {
-                $updatedHeadendsToRefresh[$id] = $serverModified;
-                $lineupData->appendRow(array($id, $serverModified, $mythModified, "Updated"));
+                $updatedHeadendsToRefresh[$lineup] = $serverModified;
+                $lineupData->appendRow(array($counter, $lineup, $serverModified, $mythModified, "Updated"));
                 continue;
             }
-/*
-            if ($heStatus[$he] == "D")
-            {
-                $lineupData->appendRow(array($id, $serverModified, $mythModified, "DELETED"));
-                continue;
-            }
-*/
+            /*
+                        if ($heStatus[$he] == "D")
+                        {
+                            $lineupData->appendRow(array($id, $serverModified, $mythModified, "DELETED"));
+                            continue;
+                        }
+            */
 
-            $lineupData->appendRow(array($id, $serverModified, $mythModified, ""));
+            $lineupData->appendRow(array($counter, $lineup, $serverModified, $mythModified, ""));
 
         }
 
