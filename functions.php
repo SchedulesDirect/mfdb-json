@@ -186,7 +186,7 @@ function printStatus($sdStatus)
             if ($serverModified > $mythModified)
             {
                 $updatedHeadendsToRefresh[$lineup] = $serverModified;
-                $lineupData->appendRow(array((string)$counter, $lineup, $serverModified, $mythModified, "Updated"));
+                $lineupData->appendRow(array("$counter", $lineup, $serverModified, $mythModified, "Updated"));
                 continue;
             }
             /*
