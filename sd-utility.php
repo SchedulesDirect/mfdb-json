@@ -750,7 +750,7 @@ function linkSchedulesDirectLineup()
     }
 
     $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:lineup WHERE sourceid=:sid");
-    $stmt->execute(array("he" => $lineup, "sid" => $sid));
+    $stmt->execute(array("lineup" => $lineup, "sid" => $sid));
 }
 
 function printLineup()
