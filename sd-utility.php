@@ -176,7 +176,7 @@ if ($skipChannelLogo === FALSE)
 if ($isBeta)
 {
     # Test server. Things may be broken there.
-    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
+    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/index.php/20140530/";
     print "Using beta server.\n";
     # API must match server version.
     $api = 20140530;
