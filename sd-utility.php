@@ -898,7 +898,7 @@ function addLineupsToSchedulesDirect()
         return;
     }
 
-    if (is_integer((int)$lineup))
+    if (strlen($lineup) < 3)
     {
         $lineup = $lineupArray[$lineup];
     }
