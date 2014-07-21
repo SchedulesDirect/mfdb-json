@@ -1045,7 +1045,12 @@ function getLineup($heToGet)
         $res = $response->json();
     } catch (Guzzle\Common\Exception\RuntimeException $e)
     {
-        var_dump($e);
+        $message = $e->getMessage();
+        $code = $e->getCode();
+        print "Message is $message\n";
+        print "code is $code\n";
+        $tt=fgets(STDIN);
+
     }
 
     if ($debug)
