@@ -828,6 +828,7 @@ function addLineupsToSchedulesDirect()
     global $client;
     global $debug;
     global $token;
+    global $lineupArray;
 
     print "Three-character ISO-3166-1 alpha3 country code:";
     $country = strtoupper(readline(">"));
@@ -871,26 +872,37 @@ function addLineupsToSchedulesDirect()
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
 
+    $counter = 0;
+
     foreach ($res as $he => $details)
     {
         print "\nheadend: $he\n";
         print "location: {$details["location"]}\n";
         foreach ($details["lineups"] as $v)
         {
-            print "\tname: {$v["name"]}\n";
-            print "\tLineup: " . end(explode("/", $v["uri"])) . "\n";
+            $counter++;
+            $name = $v["name"];
+            $lineup = end(explode("/", $v["uri"]));
+            $lineupArray[$counter] = $lineup;
+            print "\t#$counter name: $name\n";
+            print "\tLineup: $lineup\n";
         }
     }
 
     print "\n\n";
-    $he = strtoupper(readline("Lineup to add>"));
+    $lineup = strtoupper(readline("Lineup to add (# or lineup)>"));
 
-    if ($he == "")
+    if ($lineup == "")
     {
         return;
     }
 
-    if (substr_count($he, "-") != 2)
+    if (is_integer($lineup))
+    {
+        $lineup = $lineupArray[$lineup];
+    }
+
+    if (substr_count($lineup, "-") != 2)
     {
         print "Did not see two hyphens in lineup; did you enter it correctly?\n";
 
@@ -898,11 +910,11 @@ function addLineupsToSchedulesDirect()
     }
 
     print "Sending request to server.\n";
-    $he = str_replace(" ", "", $he);
+    $lineup = str_replace(" ", "", $lineup);
 
     try
     {
-        $response = $client->put("lineups/$he", array("token" => $token), array())->send();
+        $response = $client->put("lineups/$lineup", array("token" => $token), array())->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
@@ -1050,6 +1062,7 @@ function getLineup($heToGet)
          */
         $message = $e->getMessage();
         print "Received error: $message\n";
+
         return "";
     }
 
