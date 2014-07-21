@@ -726,6 +726,7 @@ function refreshChannelTable($lineup)
 function linkSchedulesDirectLineup()
 {
     global $dbh;
+    global $lineupArray;
 
     $sid = readline("MythTV sourceid:>");
 
@@ -734,11 +735,16 @@ function linkSchedulesDirectLineup()
         return;
     }
 
-    $lineup = strtoupper(readline("Schedules Direct lineup:>"));
+    $lineup = strtoupper(readline("Schedules Direct lineup (# or lineup):>"));
 
     if ($lineup == "")
     {
         return;
+    }
+
+    if (strlen($lineup) < 3)
+    {
+        $lineup = $lineupArray[$lineup];
     }
 
     $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
@@ -757,14 +763,26 @@ function linkSchedulesDirectLineup()
 function printLineup()
 {
     global $dbh;
+    global $lineupArray;
 
     /*
      * First we want to get the lineup that we're interested in.
      */
 
-    $he = strtoupper(readline("Lineup to print:>"));
-    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:he");
-    $stmt->execute(array("he" => $he));
+    $lineup = strtoupper(readline("Lineup to print (# or lineup):>"));
+
+    if ($lineup == "")
+    {
+        return;
+    }
+
+    if (strlen($lineup) < 3)
+    {
+        $lineup = $lineupArray[$lineup];
+    }
+
+    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
+    $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
     if (!count($response))
