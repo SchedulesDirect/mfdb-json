@@ -1040,7 +1040,13 @@ function getLineup($heToGet)
         return "";
     }
 
-    $res = $response->json();
+    try
+    {
+        $res = $response->json();
+    } catch (Guzzle\Common\Exception\RuntimeException $e)
+    {
+        var_dump($e);
+    }
 
     if ($debug)
     {
