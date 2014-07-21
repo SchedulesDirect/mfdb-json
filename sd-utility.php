@@ -1040,17 +1040,17 @@ function deleteMessageFromSchedulesDirect()
     print "Successfully deleted message.\n";
 }
 
-function getLineup($heToGet)
+function getLineup($lineupToGet)
 {
     global $client;
     global $debug;
     global $token;
 
-    print "Retrieving lineup $heToGet from Schedules Direct.\n";
+    print "Retrieving lineup $lineupToGet from Schedules Direct.\n";
 
     try
     {
-        $response = $client->get("lineups/$heToGet", array("token" => $token), array())->send();
+        $response = $client->get("lineups/$lineupToGet", array("token" => $token), array())->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
