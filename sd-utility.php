@@ -970,15 +970,21 @@ function deleteLineupFromSchedulesDirect()
     global $client;
     global $token;
     global $updatedLineupsToRefresh;
+    global $lineupArray;
 
     $deleteFromLocalCache = $dbh->prepare("DELETE FROM SDheadendCache WHERE lineup=:lineup");
     $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
 
-    $toDelete = strtoupper(readline("Lineup to Delete:>"));
+    $toDelete = strtoupper(readline("Lineup to Delete (# or lineup):>"));
 
     if ($toDelete == "")
     {
         return;
+    }
+
+    if (strlen($toDelete < 3))
+    {
+        $toDelete = $lineupArray[$toDelete];
     }
 
     try
