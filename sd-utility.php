@@ -984,7 +984,7 @@ function deleteLineupFromSchedulesDirect()
 
     if (strlen($toDelete) < 3)
     {
-        $toDelete = $lineupArray[$toDelete];
+        $toDelete = $lineupArray[$toDelete]["lineup"];
         print "Deleting lineup $toDelete\n";
     }
 
