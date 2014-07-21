@@ -162,25 +162,25 @@ function printStatus($sdStatus)
     print "Max number of headends for your account: $maxHeadends\n";
     print "Next suggested connect time: $nextConnectTime\n";
 
-    $getLocalCacheModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:he");
-    $getVideosourceModified = $dbh->prepare("SELECT modified FROM videosource WHERE lineupid=:he");
+    $getLocalCacheModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:lineup");
+    $getVideosourceModified = $dbh->prepare("SELECT modified FROM videosource WHERE lineupid=:lineup");
 
-    $he = getSchedulesDirectLineups();
+    $lineupArray = getSchedulesDirectLineups();
 
-    if (count($he))
+    if (count($lineupArray))
     {
         print "The following lineups are in your account at Schedules Direct:\n\n";
 
-        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(20, 20, 25, 7)));
-        $lineupData->appendRow(array("Lineup", "Server modified", "MythTV videosource update", "Status"));
+        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
+        $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update", "Status"));
 
-        foreach ($he as $id => $serverModified)
+        foreach ($lineupArray as $id => $serverModified)
         {
             $mythStatus = array();
             $mythModified = "";
 
-            $getVideosourceModified->execute(array("he" => $id));
-            $mythStatus = $getVideosourceModified->fetchAll(PDO::FETCH_COLUMN);
+            $getVideosourceModified->execute(array("lineup" => $id));
+            $mythStatus = $getVideosourceModified->fetchColumn;
 
             if (count($mythStatus))
             {
