@@ -1030,9 +1030,6 @@ function getLineup($heToGet)
     {
         $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
 
-        var_dump($s);
-
-
         print "********************************************\n";
         print "\tError response from server:\n";
         print "\tCode: {$s["code"]}\n";
