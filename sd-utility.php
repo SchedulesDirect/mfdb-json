@@ -891,7 +891,7 @@ function addLineupsToSchedulesDirect()
     }
 
     print "\n\n";
-    $lineup = strtoupper(readline("Lineup to add (# or lineup)>"));
+    $lineup = readline("Lineup to add (# or lineup)>");
 
     if ($lineup == "")
     {
@@ -901,6 +901,10 @@ function addLineupsToSchedulesDirect()
     if (is_integer($lineup))
     {
         $lineup = $lineupArray[$lineup];
+    }
+    else
+    {
+        $lineup = strtoupper($lineup);
     }
 
     if (substr_count($lineup, "-") != 2)
