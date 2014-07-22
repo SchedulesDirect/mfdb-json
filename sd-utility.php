@@ -1120,6 +1120,8 @@ function updateLocalLineupCache(array $updatedLineupsToRefresh)
 
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json"   => json_encode($res)));
+
+        unset ($updatedLineupsToRefresh[$k]);
     }
 }
 
