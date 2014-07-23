@@ -357,7 +357,17 @@ function getSchedules($stationIDs)
 
         foreach ($item["programs"] as $programData)
         {
-            $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
+            if (array_key_exists("md5", $programData))
+            {
+                $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
+            }
+            else
+            {
+                $quiet = FALSE;
+                printMSG("FATAL ERROR: no MD5 value for program. Open ticket with Schedules Direct.");
+                printMSG("s:$stationID\n\njson:$json\n\nitem\n\n" . print_r($item, TRUE) . "\n\n");
+                exit;
+            }
         }
     }
 
