@@ -838,6 +838,26 @@ function addLineupsToSchedulesDirect()
 
     $sdLineupArray = array();
 
+    $arrayCountriesWithOnePostalCode = array(
+        "BLZ" => "BZ",
+        "COL" => "CO",
+        "GUY" => "GY",
+        "HND" => "HN",
+        "PAN" => "PA",
+        "AIA" => "AI-2640",
+        "ATG" => "AG",
+        "ABW" => "AW",
+        "BHS" => "BS",
+        "BES" => "BQ",
+        "CUW" => "CW",
+        "DMA" => "DM",
+        "GRD" => "GD",
+        "MAF" => "97150",
+        "KNA" => "KN",
+        "LCA" => "LC",
+        "TTO" => "TT",
+        "TCA" => "TKCA1ZZ");
+
     print "Three-character ISO-3166-1 alpha3 country code:";
     $country = strtoupper(readline(">"));
 
@@ -846,12 +866,15 @@ function addLineupsToSchedulesDirect()
         return;
     }
 
-    print "Enter postal code:";
-    $postalcode = strtoupper(readline(">"));
-
-    if ($postalcode == "")
+    if (array_key_exists($country, $arrayCountriesWithOnePostalCode))
     {
-        return;
+        print "Only one valid postal code for this country: {$arrayCountriesWithOnePostalCode[$country]}\n";
+        $postalcode = $arrayCountriesWithOnePostalCode[$country];
+    }
+    else
+    {
+        print "Enter postal code:";
+        $postalcode = strtoupper(readline(">"));
     }
 
     try
