@@ -298,6 +298,10 @@ while (!$done)
 
     switch ($response)
     {
+        case "0":
+            $lineup = readline("Lineup to add>");
+            directAddLineup($lineup);
+            break;
         case "1":
             addLineupsToSchedulesDirect();
             break;
@@ -937,6 +941,49 @@ function addLineupsToSchedulesDirect()
     {
         $lineup = strtoupper($lineup);
     }
+
+    if (substr_count($lineup, "-") != 2)
+    {
+        print "Did not see two hyphens in lineup; did you enter it correctly?\n";
+
+        return;
+    }
+
+    print "Sending request to server.\n";
+    $lineup = str_replace(" ", "", $lineup);
+
+    try
+    {
+        $response = $client->put("lineups/$lineup", array("token" => $token), array())->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+        print "********************************************\n";
+        print "\tError response from server:\n";
+        print "\tCode: {$s["code"]}\n";
+        print "\tMessage: {$s["message"]}\n";
+        print "\tServer: {$s["serverID"]}\n";
+        print "********************************************\n";
+
+        return;
+    }
+
+    $res = $response->json();
+
+    if ($debug)
+    {
+        debugMSG("addLineupsToSchedulesDirect:Response:$res");
+        debugMSG("Raw headers:\n" . $response->getRawHeaders());
+    }
+
+    print "Message from server: {$res["message"]}\n";
+}
+
+function directAddLineup($lineup)
+{
+    global $debug;
+    global $client;
+    global $token;
 
     if (substr_count($lineup, "-") != 2)
     {
