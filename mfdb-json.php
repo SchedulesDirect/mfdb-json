@@ -42,7 +42,7 @@ $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 $fh_error = fopen("$todayDate.debug.log", "a");
 
-$jsonProgramstoRetrieve = array();
+$jsonProgramsToRetrieve = array();
 $peopleCache = array();
 
 $dbUser = "mythtv";
@@ -237,7 +237,7 @@ if ($response == "No new data on server." AND $forceDownload === FALSE)
 
 if ($token != "ERROR" AND $response != "ERROR")
 {
-    $jsonProgramstoRetrieve = getSchedules($stationIDs);
+    $jsonProgramsToRetrieve = getSchedules($stationIDs);
 }
 else
 {
@@ -245,9 +245,9 @@ else
     $statusMessage = "Error connecting to Schedules Direct.";
 }
 
-if (count($jsonProgramstoRetrieve) OR $forceDownload === TRUE)
+if (count($jsonProgramsToRetrieve) OR $forceDownload === TRUE)
 {
-    insertJSON($jsonProgramstoRetrieve);
+    insertJSON($jsonProgramsToRetrieve);
     insertSchedule();
     $statusMessage = "Successful.";
 }
@@ -294,7 +294,7 @@ if ($errorWarning)
 
 exit;
 
-function getSchedules($stationIDs)
+function getSchedules($stationIDsToFetch)
 {
     global $client;
     global $dbh;
@@ -312,12 +312,18 @@ function getSchedules($stationIDs)
 
     printMSG("Sending schedule request.");
 
-    $body["request"] = $stationIDs;
+    // $body["request"] = $stationIDs;
 
     try
     {
+        //$response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
+//            json_encode($body))->send();
+
         $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-            json_encode($body))->send();
+            json_encode($stationIDsToFetch))->send();
+
+
+
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         if ($e->getCode() == 400)
@@ -373,7 +379,7 @@ function getSchedules($stationIDs)
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $jsonProgramstoRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
+    $jsonProgramsToRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
 
     if ($debug)
     {
@@ -387,11 +393,11 @@ function getSchedules($stationIDs)
         printMSG("serverScheduleMD5 is");
         printMSG(print_r($serverScheduleMD5, TRUE));
         printMSG("jsonProrgamstoRetrieve is");
-        printMSG(print_r($jsonProgramstoRetrieve, TRUE));
+        printMSG(print_r($jsonProgramsToRetrieve, TRUE));
         $quiet = FALSE;
     }
 
-    $toRetrieveTotal = count($jsonProgramstoRetrieve);
+    $toRetrieveTotal = count($jsonProgramsToRetrieve);
 
     /*
      * Now we've got an array of programIDs that we need to download in $toRetrieve,
@@ -407,7 +413,7 @@ function getSchedules($stationIDs)
 
     printMSG("Maximum programs we're downloading per call: $maxProgramsToGet");
 
-    if (count($jsonProgramstoRetrieve))
+    if (count($jsonProgramsToRetrieve))
     {
         $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
 
@@ -417,7 +423,7 @@ function getSchedules($stationIDs)
         {
             printMSG("Retrieving chunk " . ($i + 1) . " of " . ($totalChunks + 1) . ".");
             $startOffset = $i * $maxProgramsToGet;
-            $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
+            $chunk = array_slice($jsonProgramsToRetrieve, $startOffset, $maxProgramsToGet);
 
             $body["request"] = $chunk;
 
@@ -433,10 +439,10 @@ function getSchedules($stationIDs)
         }
     }
 
-    return ($jsonProgramstoRetrieve);
+    return ($jsonProgramsToRetrieve);
 }
 
-function insertJSON(array $jsonProgramstoRetrieve)
+function insertJSON(array $jsonProgramsToRetrieve)
 {
     global $dbh;
     global $dlProgramTempDir;
@@ -472,7 +478,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
     $creditCache = array_flip($creditCache);
 
     $counter = 0;
-    $total = count($jsonProgramstoRetrieve);
+    $total = count($jsonProgramsToRetrieve);
     printMSG("Performing inserts of JSON data.");
 
     $dbh->beginTransaction();
