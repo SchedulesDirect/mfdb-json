@@ -313,24 +313,24 @@ function getSchedules($stationIDsToFetch)
 
     printMSG("Sending schedule request.");
 
-    // $body["request"] = $stationIDs;
-
     try
     {
-        //$response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-//            json_encode($body))->send();
-
         $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
             json_encode($stationIDsToFetch))->send();
-
-
-
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
+        print "BadResponseException in getSchedules.\n";
+        var_dump($e);
+
         if ($e->getCode() == 400)
         {
             return ("ERROR");
         }
+    } catch (Exception $e)
+    {
+        print "Other exception in getSchedules.\n";
+        var_dump($e);
+        exit;
     }
 
     $resBody = $response->getBody();
