@@ -22,7 +22,7 @@ $password = "";
 $passwordFromDB = "";
 $passwordHash = "";
 $scriptVersion = "0.01";
-$scriptDate = "2014-07-09";
+$scriptDate = "2014-08-07";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 $lineupArray = array();
@@ -278,10 +278,11 @@ while (!$done)
     }
 
     print "\nSchedules Direct functions:\n";
-    print "1 Add a lineup to your account at Schedules Direct\n";
-    print "2 Delete a lineup from your account at Schedules Direct\n";
-    print "3 Acknowledge a message\n";
-    print "4 Print a channel table for a lineup\n";
+    print "1 Add a known lineupID to your account at Schedules Direct\n";
+    print "2 Search for a lineup to add to your account at Schedules Direct\n";
+    print "3 Delete a lineup from your account at Schedules Direct\n";
+    print "4 Acknowledge a message\n";
+    print "5 Print a channel table for a lineup\n";
 
     if ($isMythTV)
     {
@@ -298,20 +299,20 @@ while (!$done)
 
     switch ($response)
     {
-        case "0":
+        case "1":
             $lineup = readline("Lineup to add>");
             directAddLineup($lineup);
             break;
-        case "1":
+        case "2":
             addLineupsToSchedulesDirect();
             break;
-        case "2":
+        case "3":
             deleteLineupFromSchedulesDirect();
             break;
-        case "3":
+        case "4":
             deleteMessageFromSchedulesDirect();
             break;
-        case "4":
+        case "5":
             printLineup();
             break;
         case "A":
