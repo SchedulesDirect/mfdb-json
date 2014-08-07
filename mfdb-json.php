@@ -525,7 +525,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 }
             }
 
-            if ($skipPersonID == FALSE)
+            if ($skipPersonID === FALSE)
             {
                 if (isset($jsonProgram["cast"]))
                 {
@@ -620,13 +620,13 @@ function insertJSON(array $jsonProgramstoRetrieve)
             }
         }
 
-        if ($debug == FALSE)
+        if ($debug === FALSE)
         {
             unlink($jsonFileToProcess);
         }
     }
 
-    if ($debug == FALSE)
+    if ($debug === FALSE)
     {
         rmdir("$dlProgramTempDir");
     }

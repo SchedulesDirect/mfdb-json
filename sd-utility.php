@@ -359,7 +359,7 @@ while (!$done)
             linkSchedulesDirectLineup();
             break;
         case "R":
-            $lineup = strtoupper(readline("Which lineup:>"));
+            $lineup = getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
             if ($lineup != "")
             {
                 refreshChannelTable($lineup);
