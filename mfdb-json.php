@@ -306,6 +306,7 @@ function getSchedules($stationIDsToFetch)
     global $debug;
 
     $dbProgramCache = array();
+    $response = "";
 
     $downloadedStationIDs = array();
     $serverScheduleMD5 = array();
