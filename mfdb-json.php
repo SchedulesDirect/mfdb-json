@@ -69,7 +69,7 @@ The following options are available:
 eol;
 /*'*/
 
-$longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+$longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
                      "force", "test", "nomyth", "max::", "quiet", "station::", "timezone::");
 $options = getopt("h::", $longoptions);
 
@@ -77,9 +77,6 @@ foreach ($options as $k => $v)
 {
     switch ($k)
     {
-        case "beta":
-            $isBeta = TRUE;
-            break;
         case "debug":
             $debug = TRUE;
             break;
