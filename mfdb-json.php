@@ -33,7 +33,22 @@ $useServiceAPI = FALSE;
 $isMythTV = TRUE;
 $tz = "UTC";
 
-$agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
+if ($isBeta)
+{
+    # Test server. Things may be broken there.
+    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
+    printMSG("Using beta server.");
+    # API must match server version.
+    $api = 20140530;
+}
+else
+{
+    $baseurl = "https://json.schedulesdirect.org/20131021/";
+    printMSG("Using production server.");
+    $api = 20131021;
+}
+
+$agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$scriptDate";
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -67,9 +82,8 @@ The following options are available:
 --station=\tDownload the schedule for a single stationID in your lineup.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 eol;
-/*'*/
 
-$longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+$longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
                      "force", "test", "nomyth", "max::", "quiet", "station::", "timezone::");
 $options = getopt("h::", $longoptions);
 
@@ -77,9 +91,6 @@ foreach ($options as $k => $v)
 {
     switch ($k)
     {
-        case "beta":
-            $isBeta = TRUE;
-            break;
         case "debug":
             $debug = TRUE;
             break;
