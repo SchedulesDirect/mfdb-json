@@ -21,8 +21,8 @@ $usernameFromDB = "";
 $password = "";
 $passwordFromDB = "";
 $passwordHash = "";
-$scriptVersion = "0.01";
-$scriptDate = "2014-08-07";
+$scriptVersion = "0.02";
+$scriptDate = "2014-08-11";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 $lineupArray = array();
@@ -31,7 +31,22 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
-$agentString = "sd-utility.php utility program v$scriptVersion/$scriptDate";
+if ($isBeta)
+{
+    # Test server. Things may be broken there.
+    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
+    print "Using beta server.\n";
+    # API must match server version.
+    $api = 20140530;
+}
+else
+{
+    $baseurl = "https://json.schedulesdirect.org/20131021/";
+    print "Using production server.\n";
+    $api = 20131021;
+}
+
+$agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
 
 $updatedLineupsToRefresh = array();
 $needToStoreLogin = FALSE;
@@ -53,7 +68,6 @@ $host = "localhost";
 
 $helpText = <<< eol
 The following options are available:
---beta
 --debug\t\tEnable debugging. (Default: FALSE)
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
@@ -70,7 +84,7 @@ The following options are available:
 --version\tPrint version information.
 eol;
 
-$longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+$longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
                      "logo::", "nomyth", "skiplogo", "username::", "password::", "test", "timezone::", "version");
 
 $options = getopt("h::", $longoptions);
@@ -78,9 +92,6 @@ foreach ($options as $k => $v)
 {
     switch ($k)
     {
-        case "beta":
-            $isBeta = TRUE;
-            break;
         case "debug":
             $debug = TRUE;
             break;
@@ -172,21 +183,6 @@ if ($skipChannelLogo === FALSE)
             exit;
         }
     }
-}
-
-if ($isBeta)
-{
-    # Test server. Things may be broken there.
-    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
-    print "Using beta server.\n";
-    # API must match server version.
-    $api = 20140530;
-}
-else
-{
-    $baseurl = "https://json.schedulesdirect.org/20131021/";
-    print "Using production server.\n";
-    $api = 20131021;
 }
 
 $client = new Guzzle\Http\Client($baseurl);
