@@ -18,7 +18,7 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
-$isBeta = TRUE;
+$isBeta = FALSE;
 $debug = FALSE;
 $quiet = FALSE;
 $forceDownload = FALSE;
@@ -68,7 +68,6 @@ $host = "localhost";
 
 $helpText = <<< eol
 The following options are available:
---beta
 --help\t\t(this text)
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
