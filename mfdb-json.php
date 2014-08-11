@@ -33,7 +33,22 @@ $useServiceAPI = FALSE;
 $isMythTV = TRUE;
 $tz = "UTC";
 
-$agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
+if ($isBeta)
+{
+    # Test server. Things may be broken there.
+    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
+    printMSG("Using beta server.");
+    # API must match server version.
+    $api = 20140530;
+}
+else
+{
+    $baseurl = "https://json.schedulesdirect.org/20131021/";
+    printMSG("Using production server.");
+    $api = 20131021;
+}
+
+$agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$scriptDate";
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -146,21 +161,6 @@ if ($isMythTV)
         debugMSG("Exception with PDO: " . $e->getMessage());
         exit;
     }
-}
-
-if ($isBeta)
-{
-    # Test server. Things may be broken there.
-    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
-    printMSG("Using beta server.");
-    # API must match server version.
-    $api = 20140530;
-}
-else
-{
-    $baseurl = "https://json.schedulesdirect.org/20131021/";
-    printMSG("Using production server.");
-    $api = 20131021;
 }
 
 $client = new Guzzle\Http\Client($baseurl);
