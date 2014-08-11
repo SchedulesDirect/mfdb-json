@@ -423,12 +423,12 @@ function getSchedules($stationIDsToFetch)
             $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramsToRetrieve, $startOffset, $maxProgramsToGet);
 
-            $body["request"] = $chunk;
+            // $body["request"] = $chunk;
 
             $counter += count($chunk);
 
             $request = $client->post("programs", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-                json_encode($body));
+                json_encode($chunk));
             $response = $request->send();
 
             $resBody = $response->getBody();
