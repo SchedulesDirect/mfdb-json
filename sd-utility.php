@@ -21,8 +21,8 @@ $usernameFromDB = "";
 $password = "";
 $passwordFromDB = "";
 $passwordHash = "";
-$scriptVersion = "0.02";
-$scriptDate = "2014-08-11";
+$scriptVersion = "0.03";
+$scriptDate = "2014-08-12";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 $lineupArray = array();
@@ -287,7 +287,7 @@ while (!$done)
         print "D to Delete a videosource in MythTV\n";
         print "E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct\n";
         print "L to Link a videosource to a lineup at Schedules Direct\n";
-        print "R to refresh a videosource with new lineup information\n";
+        print "U to update a videosource by downloading from Schedules Direct\n";
         print "Q to Quit\n";
     }
 
@@ -354,11 +354,11 @@ while (!$done)
             print "Linking Schedules Direct lineup to sourceid\n\n";
             linkSchedulesDirectLineup();
             break;
-        case "R":
+        case "U":
             $lineup = getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
             if ($lineup != "")
             {
-                refreshChannelTable($lineup);
+                updateChannelTable($lineup);
             }
             break;
         case "Q":
@@ -370,7 +370,7 @@ while (!$done)
 
 exit;
 
-function refreshChannelTable($lineup)
+function updateChannelTable($lineup)
 {
     global $dbh;
     global $skipChannelLogo;
