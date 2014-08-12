@@ -33,6 +33,13 @@ $useServiceAPI = FALSE;
 $isMythTV = TRUE;
 $tz = "UTC";
 
+date_default_timezone_set($tz);
+$date = new DateTime();
+$todayDate = $date->format("Y-m-d");
+
+$fh_log = fopen("$todayDate.log", "a");
+$fh_error = fopen("$todayDate.debug.log", "a");
+
 if ($isBeta)
 {
     # Test server. Things may be broken there.
@@ -49,13 +56,6 @@ else
 }
 
 $agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$scriptDate";
-
-date_default_timezone_set($tz);
-$date = new DateTime();
-$todayDate = $date->format("Y-m-d");
-
-$fh_log = fopen("$todayDate.log", "a");
-$fh_error = fopen("$todayDate.debug.log", "a");
 
 $jsonProgramstoRetrieve = array();
 $peopleCache = array();
