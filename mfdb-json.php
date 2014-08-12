@@ -444,7 +444,9 @@ function insertJSON(array $jsonProgramsToRetrieve)
 {
     global $dbh;
     global $dlProgramTempDir;
-    global $debug;
+    //global $debug;
+
+    $debug = TRUE;
 
     $insertJSON = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
