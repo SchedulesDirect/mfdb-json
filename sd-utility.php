@@ -21,8 +21,8 @@ $usernameFromDB = "";
 $password = "";
 $passwordFromDB = "";
 $passwordHash = "";
-$scriptVersion = "0.28";
-$scriptDate = "2014-08-11";
+$scriptVersion = "0.29";
+$scriptDate = "2014-08-12";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 
