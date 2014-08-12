@@ -30,6 +30,18 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
+$updatedLineupsToRefresh = array();
+$needToStoreLogin = FALSE;
+
+$tz = "UTC";
+
+date_default_timezone_set($tz);
+$date = new DateTime();
+$todayDate = $date->format("Y-m-d");
+
+$fh_log = fopen("$todayDate.log", "a");
+$fh_error = fopen("$todayDate.debug.log", "a");
+
 if ($isBeta)
 {
     # Test server. Things may be broken there.
@@ -46,18 +58,6 @@ else
 }
 
 $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
-
-$updatedLineupsToRefresh = array();
-$needToStoreLogin = FALSE;
-
-$tz = "UTC";
-
-date_default_timezone_set($tz);
-$date = new DateTime();
-$todayDate = $date->format("Y-m-d");
-
-$fh_log = fopen("$todayDate.log", "a");
-$fh_error = fopen("$todayDate.debug.log", "a");
 
 $dbUser = "mythtv";
 $dbPassword = "mythtv";
