@@ -24,7 +24,7 @@ $quiet = FALSE;
 $forceDownload = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
-$scriptVersion = "0.20";
+$scriptVersion = "0.21";
 $scriptDate = "2014-08-13";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
@@ -328,6 +328,10 @@ function getSchedules($stationIDtoGet)
     {
         print "Requesting stationIDs:\n";
         var_dump($stationIDtoGet);
+        print "body is\n";
+        var_dump($body);
+        print "\nbody(json) is\n";
+        print json_encode($body) . "\n";
     }
 
     try
