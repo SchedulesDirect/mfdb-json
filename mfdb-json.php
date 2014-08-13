@@ -304,7 +304,7 @@ if ($errorWarning)
 
 exit;
 
-function getSchedules($stationIDs)
+function getSchedules($stationIDtoGet)
 {
     global $client;
     global $dbh;
@@ -322,7 +322,13 @@ function getSchedules($stationIDs)
 
     printMSG("Sending schedule request.");
 
-    $body["request"] = $stationIDs;
+    $body["request"] = $stationIDtoGet;
+
+    if ($debug)
+    {
+        print "Requesting stationIDs:\n";
+        var_dump($stationIDtoGet);
+    }
 
     try
     {
