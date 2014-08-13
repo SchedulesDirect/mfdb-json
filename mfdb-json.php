@@ -142,9 +142,9 @@ foreach ($options as $k => $v)
 
 printMSG("$agentString");
 
-$dlSchedTempDir = tempdir();
+$dlSchedTempDir = tempdir("schedules");
 printMSG("Temp directory for Schedules is $dlSchedTempDir");
-$dlProgramTempDir = tempdir();
+$dlProgramTempDir = tempdir("programs");
 printMSG("Temp directory for Programs is $dlProgramTempDir");
 
 if ($isMythTV)
@@ -1573,9 +1573,18 @@ if (isset($v["sap"]))
     $dbh->exec("RENAME TABLE t_programrating TO programrating");
 }
 
-function tempdir()
+function tempdir($type)
 {
-    $tempfile = tempnam(sys_get_temp_dir(), "mfdb");
+    if ($type == "programs")
+    {
+        $tempfile = tempnam(sys_get_temp_dir(), "mfdb_programs_");
+    }
+
+    if ($type == "schedules")
+    {
+        $tempfile = tempnam(sys_get_temp_dir(), "mfdb_schedules_");
+    }
+
     if (file_exists($tempfile))
     {
         unlink($tempfile);
