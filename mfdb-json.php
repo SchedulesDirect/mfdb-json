@@ -350,6 +350,15 @@ function getSchedules($stationIDsToFetch)
 
         printMSG("Parsing schedule for stationID:$stationID");
 
+        if (!array_key_exists("programs", $item))
+        {
+            printMSG("WARNING: JSON does not contain any program elements.\n");
+            printMSG("Send the following to grabber@schedulesdirect.org\n");
+            var_dump($item);
+            printMSG("$json\n\n");
+            exit;
+        }
+
         foreach ($item["programs"] as $programData)
         {
             if (array_key_exists("md5", $programData))
