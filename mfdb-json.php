@@ -334,6 +334,13 @@ function getSchedules($stationIDs)
         {
             return ("ERROR");
         }
+        else
+        {
+            print "Got error retrieving schedules from Schedules Direct.\n";
+            print $e->getMessage() . "\n";
+            exit;
+        }
+
     }
 
     $resBody = $response->getBody();
