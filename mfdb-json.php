@@ -783,7 +783,8 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
         $dbh->beginTransaction();
 
-        while (list(, $schedule) = each($scheduleJSON[$stationID]))
+        //while (list(, $schedule) = each($scheduleJSON[$stationID]))
+        foreach ($scheduleJSON[$stationID] as $schedule)
         {
             /*
              * Pre-declare what we'll be using to quiet warning about unused variables.
