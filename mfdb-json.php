@@ -772,12 +772,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
         $stationID = $item["xmltvid"];
         printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID");
 
-        if ($stationID == "32645")
-        {
-            // Determine why only one instance gets inserted.
-            print "Break here.\n";
-        }
-
         $dbh->beginTransaction();
 
         //while (list(, $schedule) = each($scheduleJSON[$stationID]))
