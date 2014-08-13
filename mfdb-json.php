@@ -418,7 +418,7 @@ function getSchedules($stationIDsToFetch)
         printMSG("Requesting more than 10000 programs. Please be patient.");
     }
 
-    printMSG("Maximum programs we're downloading per call: $maxProgramsToGet");
+    printMSG("Maximum number of programs we're downloading per call: $maxProgramsToGet");
 
     if (count($jsonProgramsToRetrieve))
     {
