@@ -792,9 +792,13 @@ function printLineup()
             {
                 $chanMap[$v["stationID"]] = "{$v["atscMajor"]}.{$v["atscMinor"]}";
             }
-            else
+            elseif (array_key_exists("uhfVhf", $v))
             {
                 $chanMap[$v["stationID"]] = $v["uhfVhf"];
+            }
+            else
+            {
+                $chanMap[$v["stationID"]] = 0; //Not sure what the correct thing to use here is at this time.
             }
         }
     }
