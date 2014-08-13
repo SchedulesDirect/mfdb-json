@@ -340,7 +340,6 @@ function getSchedules($stationIDs)
             print $e->getMessage() . "\n";
             exit;
         }
-
     }
 
     $resBody = $response->getBody();
