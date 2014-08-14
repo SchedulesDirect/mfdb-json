@@ -504,6 +504,11 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 $dbh->beginTransaction();
             }
 
+            if ($item == "")
+            {
+                continue;
+            }
+
             $jsonProgram = json_decode($item, TRUE);
 
             if (json_last_error())
