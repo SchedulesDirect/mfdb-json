@@ -21,7 +21,7 @@ $usernameFromDB = "";
 $password = "";
 $passwordFromDB = "";
 $passwordHash = "";
-$scriptVersion = "0.04";
+$scriptVersion = "0.05";
 $scriptDate = "2014-08-14";
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
@@ -1552,6 +1552,10 @@ function extractData($sourceIDtoExtract)
     /*
      * TODO: send json automatically.
      */
+
+    fclose($fhExtract);
+
+    print "Please send $lineupName.extract.conf to grabber@schedulesdirect.org\n";
 }
 
 function getLineupFromNumber($numberOrLineup)
