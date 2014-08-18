@@ -1295,9 +1295,12 @@ function checkDatabase()
         }
 
         $result = setting("schedulesdirectLogin");
-        $stmt = $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
 
-        setting("SchedulesDirectLogin", $result);
+        if ($result)
+        {
+            $stmt = $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
+            setting("SchedulesDirectLogin", $result);
+        }
 
         print "Creating remaining tables.\n";
 
