@@ -355,7 +355,11 @@ function setting()
     }
     else
     {
-        $stmt = $dbh->prepare("UPDATE settings SET data=:value WHERE key=:key");
+        $stmt = $dbh->prepare("UPDATE settings SET data=:value WHERE value=:key");
+        /*
+         * This would be a whole lot less obtuse if settings table had two columns:
+         * "keyColumn" and "valueColumn".
+         */
     }
 
     $stmt->execute(array("key" => $key, "value" => $value));
