@@ -192,11 +192,14 @@ if ($isMythTV)
 {
     $useServiceAPI = checkForServiceAPI();
 
-    //$userLoginInformation = getSchedulesDirectLoginFromDB();
     $userLoginInformation = setting("a_SchedulesDirectLogin");
-    $responseJSON = json_decode($userLoginInformation, TRUE);
-    $usernameFromDB = $responseJSON["username"];
-    $passwordFromDB = $responseJSON["password"];
+
+    if ($userLoginInformation !== FALSE)
+    {
+        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
+    }
 }
 
 if ($username == "")
@@ -250,6 +253,7 @@ if ($needToStoreLogin AND $isMythTV)
 {
     $userInformation["username"] = $username;
     $userInformation["password"] = $password;
+
     putSchedulesDirectLoginIntoDB(json_encode($userInformation));
 
     $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
@@ -1453,34 +1457,16 @@ function putSchedulesDirectLoginIntoDB($usernameAndPassword)
 {
     global $dbh;
 
-    $isInDB = checkSchedulesDirectLoginFromDB();
+    $isInDB = setting("SchedulesDirectLogin");
 
     if ($isInDB === FALSE)
     {
-        setting("schedulesdirectLogin", $usernameAndPassword);
+        setting("SchedulesDirectLogin", $usernameAndPassword);
     }
     else
     {
-        $stmt = $dbh->prepare("UPDATE settings SET data=:json WHERE value='schedulesdirectLogin'");
+        $stmt = $dbh->prepare("UPDATE settings SET data=:json WHERE value='SchedulesDirectLogin'");
         $stmt->execute(array("json" => $usernameAndPassword));
-    }
-}
-
-function checkSchedulesDirectLoginFromDB()
-{
-    global $dbh;
-
-    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='schedulesdirectLogin'");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-    if (isset($result[0]))
-    {
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
     }
 }
 
