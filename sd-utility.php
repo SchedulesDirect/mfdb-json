@@ -1289,9 +1289,9 @@ function checkDatabase()
 
             $bar = json_encode($foo);
 
-            $result = setting("localLineupLastModified", $bar);
+            setting("localLineupLastModified", $bar);
 
-            //$stmt = $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
+            $stmt = $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
         }
 
         $result = setting("schedulesdirectLogin");
