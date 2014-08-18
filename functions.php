@@ -187,9 +187,16 @@ function printStatus($sdStatus)
             $lineup = $v["lineup"];
             $serverModified = $v["modified"];
 
-            if (array_key_exists($lineup, $videosourceModifiedArray))
+            if (count($videosourceModifiedArray))
             {
-                $mythModified = $videosourceModifiedArray[$lineup];
+                if (array_key_exists($lineup, $videosourceModifiedArray))
+                {
+                    $mythModified = $videosourceModifiedArray[$lineup];
+                }
+                else
+                {
+                    $mythModified = "";
+                }
             }
             else
             {
