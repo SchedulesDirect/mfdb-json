@@ -1285,10 +1285,15 @@ function checkDatabase()
             $stmt->execute();
             $existingLineups = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
+            $foo = array();
+            foreach ($existingLineups as $lineup => $modified)
+            {
+                $foo[] = array("lineup" => $lineup, "lastModified" => $modified);
+            }
+
+            $bar = json_encode($foo);
+
             $stmt = $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
-
-            $a = json_encode($existingLineups);
-
 
         }
 
