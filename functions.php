@@ -332,7 +332,7 @@ function setting()
         {
             if ($result[0] == "")
             {
-                return 0;
+                return FALSE;
             }
             else
             {
@@ -341,14 +341,23 @@ function setting()
         }
         else
         {
-            return 0;
+            return FALSE;
         }
     }
 
     $value = func_get_arg(1);
 
-    $stmt = $dbh->prepare("INSERT INTO settings(value,data) VALUES(:key,:value)
-        ON DUPLICATE KEY UPDATE data = :value");
+    $keyAlreadyExists = setting($key);
+
+    if (!$keyAlreadyExists)
+    {
+        $stmt = $dbh->prepare("INSERT INTO settings(value,data) VALUES(:key,:value)");
+    }
+    else
+    {
+        $stmt = $dbh->prepare("UPDATE settings SET data=:value WHERE key=:key");
+    }
+
     $stmt->execute(array("key" => $key, "value" => $value));
 
     return;
