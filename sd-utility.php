@@ -1259,20 +1259,37 @@ function checkDatabase()
     $stmt->execute();
     $result = $stmt->fetchColumn();
 
-    if ($result === FALSE)
+    if ($result === FALSE OR $result == "26")
     {
         $stmt = $dbh->prepare("DESCRIBE videosource");
         $stmt->execute();
         $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if (!in_array("modified", $columnNames))
+        if (in_array("modified", $columnNames))
         {
             /*
              * For users that have already been using the grabber, modified has already been added.
              */
+
+            /*
+             * We're going to store modified in the settings table so that we're not modifying a core MythTV table.
+             */
+
+            /*
             print "Adding 'modified' field to videosource.\n";
             $stmt = $dbh->exec("ALTER TABLE videosource ADD COLUMN modified CHAR(20) DEFAULT NULL
         COMMENT 'Track the last time this videosource was updated.'");
+*/
+
+            $stmt = $dbh->prepare("SELECT lineupid, modified FROM videosource");
+            $stmt->execute();
+            $existingLineups = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            $stmt = $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
+
+            $a = json_encode($existingLineups);
+
+
         }
 
         print "Creating remaining tables.\n";
@@ -1417,10 +1434,10 @@ function checkDatabase()
 
         $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
 
-        $stmt = $dbh->exec("INSERT INTO settings(value,data) VALUES('SchedulesDirectJSONschemaVersion','26')");
+        $stmt = $dbh->exec("INSERT INTO settings(value,data) VALUES('SchedulesDirectJSONschemaVersion','27')");
     }
 
-    if ($result == "27")
+    if ($result == "26")
     {
         /*
          * Do whatever. Stub.
