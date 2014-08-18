@@ -164,7 +164,14 @@ function printStatus($sdStatus)
     print "Next suggested connect time: $nextConnectTime\n";
 
     $getLocalCacheModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:lineup");
-    $getVideosourceModified = $dbh->prepare("SELECT modified FROM videosource WHERE lineupid=:lineup");
+
+    $videosourceModifiedArray = array();
+    $videosourceModifiedJSON = setting("localLineupLastModified");
+
+    if ($videosourceModifiedJSON)
+    {
+        $videosourceModifiedArray = json_decode($videosourceModifiedJSON, TRUE);
+    }
 
     $lineupArray = getSchedulesDirectLineups();
 
@@ -180,10 +187,11 @@ function printStatus($sdStatus)
             $lineup = $v["lineup"];
             $serverModified = $v["modified"];
 
-            $getVideosourceModified->execute(array("lineup" => $lineup));
-            $mythModified = $getVideosourceModified->fetchColumn();
-
-            if ($mythModified === FALSE)
+            if (array_key_exists($lineup, $videosourceModifiedArray))
+            {
+                $mythModified = $videosourceModifiedArray[$lineup];
+            }
+            else
             {
                 $mythModified = "";
             }

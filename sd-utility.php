@@ -706,7 +706,7 @@ function updateChannelTable($lineup)
             $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
         }
 
-        $lineupLastModifiedJSON = setting("SchedulesDirectLineupLastModified");
+        $lineupLastModifiedJSON = setting("localLineupLastModified");
 
         $updateVideosourceModified = $dbh->prepare("UPDATE videosource SET modified = :modified WHERE lineupid=:lineup");
         $updateVideosourceModified->execute(array("lineup" => $lineup, "modified" => $modified));
@@ -1289,7 +1289,7 @@ function checkDatabase()
 
             $bar = json_encode($foo);
 
-            $result = setting("SchedulesDirectLineupLastModified", $bar);
+            $result = setting("localLineupLastModified", $bar);
 
             //$stmt = $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
         }
