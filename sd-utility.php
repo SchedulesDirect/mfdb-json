@@ -701,6 +701,8 @@ function updateChannelTable($lineup)
             $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
         }
 
+        $lineupLastModifiedJSON = setting("SchedulesDirectLineupLastModified");
+
         $updateVideosourceModified = $dbh->prepare("UPDATE videosource SET modified = :modified WHERE lineupid=:lineup");
         $updateVideosourceModified->execute(array("lineup" => $lineup, "modified" => $modified));
 
@@ -1255,11 +1257,9 @@ function checkDatabase()
 {
     global $dbh;
 
-    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
-    $stmt->execute();
-    $result = $stmt->fetchColumn();
+    $schemaVersion = setting("SchedulesDirectJSONschemaVersion");
 
-    if ($result === FALSE OR $result == "26")
+    if ($schemaVersion === FALSE OR $schemaVersion == "26")
     {
         $stmt = $dbh->prepare("DESCRIBE videosource");
         $stmt->execute();
@@ -1268,18 +1268,9 @@ function checkDatabase()
         if (in_array("modified", $columnNames))
         {
             /*
-             * For users that have already been using the grabber, modified has already been added.
+             * We're going to store lineup modification dates in the settings table so that we're not
+             * modifying a core MythTV table. But first we'll pull the existing information out.
              */
-
-            /*
-             * We're going to store modified in the settings table so that we're not modifying a core MythTV table.
-             */
-
-            /*
-            print "Adding 'modified' field to videosource.\n";
-            $stmt = $dbh->exec("ALTER TABLE videosource ADD COLUMN modified CHAR(20) DEFAULT NULL
-        COMMENT 'Track the last time this videosource was updated.'");
-*/
 
             $stmt = $dbh->prepare("SELECT lineupid, modified FROM videosource");
             $stmt->execute();
@@ -1293,9 +1284,13 @@ function checkDatabase()
 
             $bar = json_encode($foo);
 
-            $stmt = $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
+            $result = setting("SchedulesDirectLineupLastModified", $bar);
 
+            //$stmt = $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
         }
+
+        $result = setting("schedulesdirectLogin");
+        setting("SchedulesDirectLogin", $result);
 
         print "Creating remaining tables.\n";
 
@@ -1439,10 +1434,10 @@ function checkDatabase()
 
         $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
 
-        $stmt = $dbh->exec("INSERT INTO settings(value,data) VALUES('SchedulesDirectJSONschemaVersion','27')");
+        setting("SchedulesDirectJSONschemaVersion", "27");
     }
 
-    if ($result == "26")
+    if ($schemaVersion == "26")
     {
         /*
          * Do whatever. Stub.
@@ -1459,8 +1454,7 @@ function putSchedulesDirectLoginIntoDB($usernameAndPassword)
 
     if ($isInDB === FALSE)
     {
-        $stmt = $dbh->prepare("INSERT INTO settings(value, data) VALUES ('schedulesdirectLogin', :json)");
-        $stmt->execute(array("json" => $usernameAndPassword));
+        setting("schedulesdirectLogin", $usernameAndPassword);
     }
     else
     {
@@ -1601,7 +1595,6 @@ function getLineupFromNumber($numberOrLineup)
     {
         return ($numberOrLineup); //We're actually just returning the name of the array.
     }
-
 }
 
 ?>

@@ -299,9 +299,7 @@ function getSchedulesDirectLoginFromDB()
 {
     global $dbh;
 
-    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='schedulesdirectLogin'");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $result = setting("SchedulesDirectLogin");
 
     if (isset($result[0]))
     {
@@ -316,4 +314,45 @@ function getSchedulesDirectLoginFromDB()
     }
 }
 
-?>
+function setting()
+{
+    /*
+     * If there is one argument, then we're reading from the database. If there are two,
+     * then we're writing to the database.
+     */
+
+    global $dbh;
+
+    $key = func_get_arg(0);
+
+    if (func_num_args() == 1)
+    {
+        $stmt = $dbh->prepare("SELECT data FROM settings WHERE value = :key");
+        $stmt->execute(array("key" => $key));
+        $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        if (count($result))
+        {
+            if ($result[0] == "")
+            {
+                return 0;
+            }
+            else
+            {
+                return $result[0];
+            }
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    $value = func_get_arg(1);
+
+    $stmt = $dbh->prepare("INSERT INTO settings(value,data) VALUES(:key,:value)
+        ON DUPLICATE KEY UPDATE data = :value");
+    $stmt->execute(array("key" => $key, "value" => $value));
+
+    return;
+}
+
