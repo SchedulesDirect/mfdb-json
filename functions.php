@@ -131,7 +131,6 @@ function getStatus()
 
 function printStatus($sdStatus)
 {
-    global $dbh;
     global $updatedHeadendsToRefresh;
     global $lineupArray;
 
@@ -162,8 +161,6 @@ function printStatus($sdStatus)
     print "Account expires: $expires\n";
     print "Max number of headends for your account: $maxHeadends\n";
     print "Next suggested connect time: $nextConnectTime\n";
-
-    $getLocalCacheModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:lineup");
 
     $videosourceModifiedArray = array();
     $videosourceModifiedJSON = setting("localLineupLastModified");

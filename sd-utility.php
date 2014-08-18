@@ -393,7 +393,7 @@ function updateChannelTable($lineup)
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
+    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -756,7 +756,7 @@ function linkSchedulesDirectLineup()
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
+    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -784,7 +784,7 @@ function printLineup()
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
+    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -1045,7 +1045,7 @@ function deleteLineupFromSchedulesDirect()
     global $token;
     global $updatedLineupsToRefresh;
 
-    $deleteFromLocalCache = $dbh->prepare("DELETE FROM SDheadendCache WHERE lineup=:lineup");
+    $deleteFromLocalCache = $dbh->prepare("DELETE FROM SDlineupCache WHERE lineup=:lineup");
     $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
 
     $toDelete = getLineupFromNumber(strtoupper(readline("Lineup to Delete (# or lineup):>")));
@@ -1179,7 +1179,7 @@ function getLineup($lineupToGet)
     return $res;
 }
 
-function updateLocalLineupCache(array $updatedLineupsToRefresh)
+function updateLocalLineupCache($updatedLineupsToRefresh)
 {
     global $dbh;
 
@@ -1200,7 +1200,7 @@ function updateLocalLineupCache(array $updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbh->prepare("INSERT INTO SDheadendCache(lineup,json,modified)
+        $stmt = $dbh->prepare("INSERT INTO SDlineupCache(lineup,json,modified)
         VALUES(:lineup,:json,:modified) ON DUPLICATE KEY UPDATE json=:json,modified=:modified");
 
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
@@ -1311,7 +1311,7 @@ function checkDatabase()
 
         print "Creating remaining tables.\n";
 
-        $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,
+        $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
     SDprogramrating,SDschedule,SDMessages,SDimageCache");
 
         $stmt = $dbh->exec("CREATE TABLE `SDMessages` (
@@ -1333,7 +1333,7 @@ function checkDatabase()
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDheadendCache` (
+        $stmt = $dbh->exec("CREATE TABLE `SDlineupCache` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `lineup` varchar(50) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
