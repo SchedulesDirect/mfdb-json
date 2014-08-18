@@ -707,9 +707,16 @@ function updateChannelTable($lineup)
         }
 
         $lineupLastModifiedJSON = setting("localLineupLastModified");
+        $lineupLastModifiedArray = array();
 
-        $updateVideosourceModified = $dbh->prepare("UPDATE videosource SET modified = :modified WHERE lineupid=:lineup");
-        $updateVideosourceModified->execute(array("lineup" => $lineup, "modified" => $modified));
+        if (count($lineupLastModifiedJSON))
+        {
+            $lineupLastModifiedArray = json_decode($lineupLastModifiedJSON, TRUE);
+        }
+
+        $lineupLastModifiedArray[$lineup] = $modified;
+
+        setting("localLineupLastModified", json_encode($lineupLastModifiedArray));
 
         /*
          * Set the startchan to a non-bogus value.
