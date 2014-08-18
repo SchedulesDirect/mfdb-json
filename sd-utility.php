@@ -192,7 +192,8 @@ if ($isMythTV)
 {
     $useServiceAPI = checkForServiceAPI();
 
-    $userLoginInformation = getSchedulesDirectLoginFromDB();
+    //$userLoginInformation = getSchedulesDirectLoginFromDB();
+    $userLoginInformation = setting("a_SchedulesDirectLogin");
     $responseJSON = json_decode($userLoginInformation, TRUE);
     $usernameFromDB = $responseJSON["username"];
     $passwordFromDB = $responseJSON["password"];
@@ -1290,6 +1291,8 @@ function checkDatabase()
         }
 
         $result = setting("schedulesdirectLogin");
+        $stmt = $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
+
         setting("SchedulesDirectLogin", $result);
 
         print "Creating remaining tables.\n";

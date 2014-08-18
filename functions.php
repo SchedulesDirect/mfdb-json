@@ -297,8 +297,6 @@ function printMSG($str)
 
 function getSchedulesDirectLoginFromDB()
 {
-    global $dbh;
-
     $result = setting("SchedulesDirectLogin");
 
     if (isset($result[0]))
