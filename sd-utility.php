@@ -192,7 +192,7 @@ if ($isMythTV)
 {
     $useServiceAPI = checkForServiceAPI();
 
-    $userLoginInformation = setting("a_SchedulesDirectLogin");
+    $userLoginInformation = setting("SchedulesDirectLogin");
 
     if ($userLoginInformation !== FALSE)
     {
