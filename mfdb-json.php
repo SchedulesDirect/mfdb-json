@@ -84,10 +84,9 @@ The following options are available:
 --station=\tDownload the schedule for a single stationID in your lineup.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 eol;
-/*'*/
 
 $longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "force", "test", "nomyth", "max::", "quiet", "station::", "timezone::");
+                     "force", "nomyth", "max::", "quiet", "station::", "timezone::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -163,15 +162,9 @@ if ($isMythTV)
         debugMSG("Exception with PDO: " . $e->getMessage());
         exit;
     }
-}
 
-$client = new Guzzle\Http\Client($baseurl);
-$client->setUserAgent($agentString);
+    $useServiceAPI = checkForServiceAPI();
 
-$useServiceAPI = checkForServiceAPI();
-
-if ($isMythTV)
-{
     $userLoginInformation = setting("SchedulesDirectLogin");
 
     if ($userLoginInformation !== FALSE)
@@ -196,27 +189,53 @@ else
         $usernameFromDB = $responseJSON["username"];
         $passwordFromDB = $responseJSON["password"];
     }
+    else
+    {
+        printMSG("FATAL: Could not read Schedules Direct login information from sd.json.conf file.");
+        printMSG("Did you run the sd-utility.php program yet?");
+        exit;
+    }
 }
+
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
 
 $globalStartTime = time();
 $globalStartDate = new DateTime();
 
-if ($station == "" AND $isMythTV)
+if ($isMythTV)
 {
-    printMSG("Retrieving list of channels to download.");
-    $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
+    if ($station == "")
+    {
+        printMSG("Retrieving list of channels to download.");
+        $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
 AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
-    $stmt->execute();
-    $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $stmt->execute();
+        $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+    else
+    {
+        printMSG("Downloading data only for $station");
+        $stationIDs[] = $station;
+    }
+}
+else
+{
+    if (file_exists("sd.json.stations.conf"))
+    {
+        $stationIDs = file("sd.json.stations.conf");
+    }
+    elseif ($station != "")
+    {
+        $stationIDs[] = $station;
+    }
+    else
+    {
+        printMSG("Nothing to do: did not find file sd.json.stations.conf and no station to retrieve passed as parameter.");
+        exit;
+    }
 }
 
-if ($station != "" AND $isMythTV)
-{
-    printMSG("Downloading data only for $station");
-    $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE xmltvid=:station");
-    $stmt->execute(array("station" => $station));
-    $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
-}
 
 printMSG("Logging into Schedules Direct.");
 $token = getToken($usernameFromDB, sha1($passwordFromDB));
