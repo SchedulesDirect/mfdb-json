@@ -32,6 +32,8 @@ $station = "";
 $useServiceAPI = FALSE;
 $isMythTV = TRUE;
 $tz = "UTC";
+$usernameFromDB = "";
+$passwordFromDB = "";
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -217,7 +219,7 @@ if (!$isMythTV)
 }
 
 printMSG("Logging into Schedules Direct.");
-$token = getToken($usernameFromDB, $passwordFromDB);
+$token = getToken($usernameFromDB, sha1($passwordFromDB));
 
 if ($token == "ERROR")
 {
