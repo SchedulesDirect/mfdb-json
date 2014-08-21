@@ -187,6 +187,16 @@ if ($isMythTV)
         exit;
     }
 }
+else
+{
+    if (file_exists("sd.json.conf"))
+    {
+        $userLoginInformation = file("sd.json.conf");
+        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
+    }
+}
 
 $globalStartTime = time();
 $globalStartDate = new DateTime();
@@ -206,16 +216,6 @@ if ($station != "" AND $isMythTV)
     $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE xmltvid=:station");
     $stmt->execute(array("station" => $station));
     $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
-}
-
-if (!$isMythTV)
-{
-    /*
-     * Stub. Read in a configuration file that contains username, password and stationIDs.
-     */
-
-    printMSG("Opening sd.conf");
-    exit;
 }
 
 printMSG("Logging into Schedules Direct.");
