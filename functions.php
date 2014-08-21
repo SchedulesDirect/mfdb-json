@@ -6,7 +6,7 @@
  * Time: 2:22 AM
  */
 
-$scriptVersion = "0.06-test.02";
+$scriptVersion = "0.06-test.03";
 $scriptDate = "2014-08-21";
 
 function getToken($username, $passwordHash)

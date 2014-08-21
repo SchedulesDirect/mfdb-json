@@ -296,7 +296,7 @@ while (!$done)
         print "D to Delete a videosource in MythTV\n";
         print "E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct\n";
         print "L to Link a videosource to a lineup at Schedules Direct\n";
-        print "R to refresh a videosource with new lineup information\n";
+        print "U to update a videosource by downloading from Schedules Direct\n";
         print "Q to Quit\n";
     }
 
@@ -359,11 +359,11 @@ while (!$done)
             print "Linking Schedules Direct lineup to sourceid\n\n";
             linkSchedulesDirectLineup();
             break;
-        case "R":
-            $lineup = strtoupper(readline("Which lineup:>"));
+        case "U":
+            $lineup = getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
             if ($lineup != "")
             {
-                refreshChannelTable($lineup);
+                updateChannelTable($lineup);
             }
             break;
         case "Q":
@@ -375,7 +375,7 @@ while (!$done)
 
 exit;
 
-function refreshChannelTable($lineup)
+function updateChannelTable($lineup)
 {
     global $dbh;
     global $skipChannelLogo;
@@ -1510,7 +1510,6 @@ function getLineupFromNumber($numberOrLineup)
     {
         return ($numberOrLineup); //We're actually just returning the name of the array.
     }
-
 }
 
 ?>
