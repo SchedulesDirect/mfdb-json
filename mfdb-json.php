@@ -170,12 +170,15 @@ $useServiceAPI = checkForServiceAPI();
 
 if ($isMythTV)
 {
-    $userLoginInformation = getSchedulesDirectLoginFromDB();
-    $responseJSON = json_decode($userLoginInformation, TRUE);
-    $sdUsername = $responseJSON["username"];
-    $sdPassword = sha1($responseJSON["password"]);
+    $userLoginInformation = setting("SchedulesDirectLogin");
 
-    if ($sdUsername == "")
+    if ($userLoginInformation !== FALSE)
+    {
+        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
+    }
+    else
     {
         printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
         printMSG("Did you run the sd-utility.php program yet?");
@@ -214,7 +217,7 @@ if (!$isMythTV)
 }
 
 printMSG("Logging into Schedules Direct.");
-$token = getToken($sdUsername, $sdPassword);
+$token = getToken($usernameFromDB, $passwordFromDB);
 
 if ($token == "ERROR")
 {
