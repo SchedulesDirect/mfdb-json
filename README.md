@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.17, 2014-07-17
+v0.18, 2014-08-14
 
 Robert Kulagowski
 
@@ -10,6 +10,8 @@ grabber@schedulesdirect.org
 
 This program runs as a replacement to mythfilldatabase (for now) and
 downloads data from Schedules Direct using the new JSON format.
+
+This file describes API 20140530.
 
 #Features:
 
@@ -125,16 +127,18 @@ WARNING: *** No lineups configured at Schedules Direct. ***
 WARNING: *** No videosources configured in MythTV. ***
 
 Schedules Direct functions:
-1 Add a lineup to your account at Schedules Direct
-2 Delete a lineup from your account at Schedules Direct
-3 Acknowledge a message
-4 Print a channel table for a lineup
+1 Add a known lineupID to your account at Schedules Direct
+2 Search for a lineup to add to your account at Schedules Direct
+3 Delete a lineup from your account at Schedules Direct
+4 Acknowledge a message
+5 Print a channel table for a lineup
 
 MythTV functions:
 A to Add a new videosource to MythTV
 D to Delete a videosource in MythTV
+E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct
 L to Link a videosource to a lineup at Schedules Direct
-R to refresh a videosource with new lineup information
+U to update a videosource by downloading from Schedules Direct
 Q to Quit
 
 ```
@@ -338,18 +342,20 @@ account.
 
 ```
 Schedules Direct functions:
-1 Add a lineup to your account at Schedules Direct
-2 Delete a lineup from your account at Schedules Direct
-3 Acknowledge a message
-4 Print a channel table for a lineup
+1 Add a known lineupID to your account at Schedules Direct
+2 Search for a lineup to add to your account at Schedules Direct
+3 Delete a lineup from your account at Schedules Direct
+4 Acknowledge a message
+5 Print a channel table for a lineup
 
 MythTV functions:
 A to Add a new videosource to MythTV
 D to Delete a videosource in MythTV
+E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct
 L to Link a videosource to a lineup at Schedules Direct
-R to refresh a videosource with new lineup information
+U to update a videosource by downloading from Schedules Direct
 Q to Quit
->
+
 ```
 Type in: **A**
 
@@ -374,16 +380,18 @@ to the lineup you've added to your Schedules Direct account.
 
 ```
 Schedules Direct functions:
-1 Add a lineup to your account at Schedules Direct
-2 Delete a lineup from your account at Schedules Direct
-3 Acknowledge a message
-4 Print a channel table for a lineup
+1 Add a known lineupID to your account at Schedules Direct
+2 Search for a lineup to add to your account at Schedules Direct
+3 Delete a lineup from your account at Schedules Direct
+4 Acknowledge a message
+5 Print a channel table for a lineup
 
 MythTV functions:
 A to Add a new videosource to MythTV
 D to Delete a videosource in MythTV
+E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct
 L to Link a videosource to a lineup at Schedules Direct
-R to refresh a videosource with new lineup information
+U to update a videosource by downloading from Schedules Direct
 Q to Quit
 
 >
@@ -444,7 +452,7 @@ scan, you'll need to download the channel mapping using the "R" function.
 This is also done whenever the utility program tells you that there's an
 update available to the headend by putting "***" in the "New" column.
 
-Type in: **R**
+Type in: **U**
 
 ```
 Which lineup:>USA-IL57303-X

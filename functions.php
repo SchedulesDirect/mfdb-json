@@ -131,7 +131,6 @@ function getStatus()
 
 function printStatus($sdStatus)
 {
-    global $dbh;
     global $updatedHeadendsToRefresh;
     global $lineupArray;
 
@@ -163,8 +162,13 @@ function printStatus($sdStatus)
     print "Max number of headends for your account: $maxHeadends\n";
     print "Next suggested connect time: $nextConnectTime\n";
 
-    $getLocalCacheModified = $dbh->prepare("SELECT modified FROM SDheadendCache WHERE lineup=:lineup");
-    $getVideosourceModified = $dbh->prepare("SELECT modified FROM videosource WHERE lineupid=:lineup");
+    $videosourceModifiedArray = array();
+    $videosourceModifiedJSON = setting("localLineupLastModified");
+
+    if ($videosourceModifiedJSON)
+    {
+        $videosourceModifiedArray = json_decode($videosourceModifiedJSON, TRUE);
+    }
 
     $lineupArray = getSchedulesDirectLineups();
 
@@ -180,10 +184,18 @@ function printStatus($sdStatus)
             $lineup = $v["lineup"];
             $serverModified = $v["modified"];
 
-            $getVideosourceModified->execute(array("lineup" => $lineup));
-            $mythModified = $getVideosourceModified->fetchColumn();
-
-            if ($mythModified === FALSE)
+            if (count($videosourceModifiedArray))
+            {
+                if (array_key_exists($lineup, $videosourceModifiedArray))
+                {
+                    $mythModified = $videosourceModifiedArray[$lineup];
+                }
+                else
+                {
+                    $mythModified = "";
+                }
+            }
+            else
             {
                 $mythModified = "";
             }
@@ -295,25 +307,58 @@ function printMSG($str)
     fwrite($fh_log, "$str\n");
 }
 
-function getSchedulesDirectLoginFromDB()
+function setting()
 {
+    /*
+     * If there is one argument, then we're reading from the database. If there are two,
+     * then we're writing to the database.
+     */
+
     global $dbh;
 
-    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='schedulesdirectLogin'");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $key = func_get_arg(0);
 
-    if (isset($result[0]))
+    if (func_num_args() == 1)
     {
-        return ($result[0]);
+        $stmt = $dbh->prepare("SELECT data FROM settings WHERE value = :key");
+        $stmt->execute(array("key" => $key));
+        $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        if (count($result))
+        {
+            if ($result[0] == "")
+            {
+                return FALSE;
+            }
+            else
+            {
+                return $result[0];
+            }
+        }
+        else
+        {
+            return FALSE;
+        }
+    }
+
+    $value = func_get_arg(1);
+
+    $keyAlreadyExists = setting($key);
+
+    if (!$keyAlreadyExists)
+    {
+        $stmt = $dbh->prepare("INSERT INTO settings(value,data) VALUES(:key,:value)");
     }
     else
     {
-        $foo["username"] = "";
-        $foo["password"] = "";
-
-        return (json_encode($foo));
+        $stmt = $dbh->prepare("UPDATE settings SET data=:value WHERE value=:key");
+        /*
+         * This would be a whole lot less obtuse if settings table had two columns:
+         * "keyColumn" and "valueColumn".
+         */
     }
+
+    $stmt->execute(array("key" => $key, "value" => $value));
+
+    return;
 }
 
-?>

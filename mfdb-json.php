@@ -24,16 +24,16 @@ $quiet = FALSE;
 $forceDownload = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
-$scriptVersion = "0.17";
-$scriptDate = "2014-05-09";
+$scriptVersion = "0.06-test.00";
+$scriptDate = "2014-08-21";
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 $station = "";
 $useServiceAPI = FALSE;
 $isMythTV = TRUE;
 $tz = "UTC";
-
-$agentString = "mfdb-json.php developer grabber v$scriptVersion/$scriptDate";
+$usernameFromDB = "";
+$passwordFromDB = "";
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -42,7 +42,24 @@ $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 $fh_error = fopen("$todayDate.debug.log", "a");
 
-$jsonProgramstoRetrieve = array();
+if ($isBeta)
+{
+    # Test server. Things may be broken there.
+    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
+    printMSG("Using beta server.");
+    # API must match server version.
+    $api = 20140530;
+}
+else
+{
+    $baseurl = "https://json.schedulesdirect.org/20131021/";
+    printMSG("Using production server.");
+    $api = 20131021;
+}
+
+$agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$scriptDate";
+
+$jsonProgramsToRetrieve = array();
 $peopleCache = array();
 
 $dbUser = "mythtv";
@@ -69,7 +86,7 @@ The following options are available:
 eol;
 /*'*/
 
-$longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+$longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
                      "force", "test", "nomyth", "max::", "quiet", "station::", "timezone::");
 $options = getopt("h::", $longoptions);
 
@@ -77,9 +94,6 @@ foreach ($options as $k => $v)
 {
     switch ($k)
     {
-        case "beta":
-            $isBeta = TRUE;
-            break;
         case "debug":
             $debug = TRUE;
             break;
@@ -130,9 +144,9 @@ foreach ($options as $k => $v)
 
 printMSG("$agentString");
 
-$dlSchedTempDir = tempdir();
+$dlSchedTempDir = tempdir("schedules");
 printMSG("Temp directory for Schedules is $dlSchedTempDir");
-$dlProgramTempDir = tempdir();
+$dlProgramTempDir = tempdir("programs");
 printMSG("Temp directory for Programs is $dlProgramTempDir");
 
 if ($isMythTV)
@@ -151,21 +165,6 @@ if ($isMythTV)
     }
 }
 
-if ($isBeta)
-{
-    # Test server. Things may be broken there.
-    $baseurl = "http://ec2-54-209-234-71.compute-1.amazonaws.com/20140530/";
-    printMSG("Using beta server.");
-    # API must match server version.
-    $api = 20140530;
-}
-else
-{
-    $baseurl = "https://json.schedulesdirect.org/20131021/";
-    printMSG("Using production server.");
-    $api = 20131021;
-}
-
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
@@ -173,16 +172,29 @@ $useServiceAPI = checkForServiceAPI();
 
 if ($isMythTV)
 {
-    $userLoginInformation = getSchedulesDirectLoginFromDB();
-    $responseJSON = json_decode($userLoginInformation, TRUE);
-    $sdUsername = $responseJSON["username"];
-    $sdPassword = sha1($responseJSON["password"]);
+    $userLoginInformation = setting("SchedulesDirectLogin");
 
-    if ($sdUsername == "")
+    if ($userLoginInformation !== FALSE)
+    {
+        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
+    }
+    else
     {
         printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
         printMSG("Did you run the sd-utility.php program yet?");
         exit;
+    }
+}
+else
+{
+    if (file_exists("sd.json.conf"))
+    {
+        $userLoginInformation = file("sd.json.conf");
+        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
     }
 }
 
@@ -206,18 +218,8 @@ if ($station != "" AND $isMythTV)
     $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
 }
 
-if (!$isMythTV)
-{
-    /*
-     * Stub. Read in a configuration file that contains username, password and stationIDs.
-     */
-
-    printMSG("Opening sd.conf");
-    exit;
-}
-
 printMSG("Logging into Schedules Direct.");
-$token = getToken($sdUsername, $sdPassword);
+$token = getToken($usernameFromDB, sha1($passwordFromDB));
 
 if ($token == "ERROR")
 {
@@ -237,7 +239,7 @@ if ($response == "No new data on server." AND $forceDownload === FALSE)
 
 if ($token != "ERROR" AND $response != "ERROR")
 {
-    $jsonProgramstoRetrieve = getSchedules($stationIDs);
+    $jsonProgramsToRetrieve = getSchedules($stationIDs);
 }
 else
 {
@@ -245,9 +247,9 @@ else
     $statusMessage = "Error connecting to Schedules Direct.";
 }
 
-if (count($jsonProgramstoRetrieve) OR $forceDownload === TRUE)
+if (count($jsonProgramsToRetrieve) OR $forceDownload === TRUE)
 {
-    insertJSON($jsonProgramstoRetrieve);
+    insertJSON($jsonProgramsToRetrieve);
     insertSchedule();
     $statusMessage = "Successful.";
 }
@@ -294,7 +296,7 @@ if ($errorWarning)
 
 exit;
 
-function getSchedules($stationIDs)
+function getSchedules($stationIDsToFetch)
 {
     global $client;
     global $dbh;
@@ -306,24 +308,31 @@ function getSchedules($stationIDs)
     global $debug;
 
     $dbProgramCache = array();
+    $response = "";
 
     $downloadedStationIDs = array();
     $serverScheduleMD5 = array();
 
     printMSG("Sending schedule request.");
 
-    $body["request"] = $stationIDs;
-
     try
     {
         $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-            json_encode($body))->send();
+            json_encode($stationIDsToFetch))->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
+        print "BadResponseException in getSchedules.\n";
+        var_dump($e);
+
         if ($e->getCode() == 400)
         {
             return ("ERROR");
         }
+    } catch (Exception $e)
+    {
+        print "Other exception in getSchedules.\n";
+        var_dump($e);
+        exit;
     }
 
     $resBody = $response->getBody();
@@ -345,6 +354,15 @@ function getSchedules($stationIDs)
         $downloadedStationIDs[] = $stationID;
 
         printMSG("Parsing schedule for stationID:$stationID");
+
+        if (!array_key_exists("programs", $item))
+        {
+            printMSG("WARNING: JSON does not contain any program elements.\n");
+            printMSG("Send the following to grabber@schedulesdirect.org\n");
+            var_dump($item);
+            printMSG("$json\n\n");
+            exit;
+        }
 
         foreach ($item["programs"] as $programData)
         {
@@ -373,7 +391,7 @@ function getSchedules($stationIDs)
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $jsonProgramstoRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
+    $jsonProgramsToRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
 
     if ($debug)
     {
@@ -381,17 +399,15 @@ function getSchedules($stationIDs)
          * One user is reporting that after a run, a second run immediately afterwards still has programs that need
          * to be downloaded. That shouldn't happen, so dump the array to the log file for analysis.
          */
-        $quiet = TRUE;
         printMSG("dbProgramCache is");
         printMSG(print_r($dbProgramCache, TRUE));
         printMSG("serverScheduleMD5 is");
         printMSG(print_r($serverScheduleMD5, TRUE));
         printMSG("jsonProrgamstoRetrieve is");
-        printMSG(print_r($jsonProgramstoRetrieve, TRUE));
-        $quiet = FALSE;
+        printMSG(print_r($jsonProgramsToRetrieve, TRUE));
     }
 
-    $toRetrieveTotal = count($jsonProgramstoRetrieve);
+    $toRetrieveTotal = count($jsonProgramsToRetrieve);
 
     /*
      * Now we've got an array of programIDs that we need to download in $toRetrieve,
@@ -405,9 +421,9 @@ function getSchedules($stationIDs)
         printMSG("Requesting more than 10000 programs. Please be patient.");
     }
 
-    printMSG("Maximum programs we're downloading per call: $maxProgramsToGet");
+    printMSG("Maximum number of programs we're downloading per call: $maxProgramsToGet");
 
-    if (count($jsonProgramstoRetrieve))
+    if (count($jsonProgramsToRetrieve))
     {
         $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
 
@@ -417,14 +433,12 @@ function getSchedules($stationIDs)
         {
             printMSG("Retrieving chunk " . ($i + 1) . " of " . ($totalChunks + 1) . ".");
             $startOffset = $i * $maxProgramsToGet;
-            $chunk = array_slice($jsonProgramstoRetrieve, $startOffset, $maxProgramsToGet);
-
-            $body["request"] = $chunk;
+            $chunk = array_slice($jsonProgramsToRetrieve, $startOffset, $maxProgramsToGet);
 
             $counter += count($chunk);
 
             $request = $client->post("programs", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-                json_encode($body));
+                json_encode($chunk));
             $response = $request->send();
 
             $resBody = $response->getBody();
@@ -433,14 +447,16 @@ function getSchedules($stationIDs)
         }
     }
 
-    return ($jsonProgramstoRetrieve);
+    return ($jsonProgramsToRetrieve);
 }
 
-function insertJSON(array $jsonProgramstoRetrieve)
+function insertJSON(array $jsonProgramsToRetrieve)
 {
     global $dbh;
     global $dlProgramTempDir;
-    global $debug;
+    //global $debug;
+
+    $debug = TRUE;
 
     $insertJSON = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
@@ -472,7 +488,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
     $creditCache = array_flip($creditCache);
 
     $counter = 0;
-    $total = count($jsonProgramstoRetrieve);
+    $total = count($jsonProgramsToRetrieve);
     printMSG("Performing inserts of JSON data.");
 
     $dbh->beginTransaction();
@@ -489,6 +505,11 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 printMSG("$counter / $total             \r");
                 $dbh->commit();
                 $dbh->beginTransaction();
+            }
+
+            if ($item == "")
+            {
+                continue;
             }
 
             $jsonProgram = json_decode($item, TRUE);
@@ -525,7 +546,7 @@ function insertJSON(array $jsonProgramstoRetrieve)
                 }
             }
 
-            if ($skipPersonID == FALSE)
+            if ($skipPersonID === FALSE)
             {
                 if (isset($jsonProgram["cast"]))
                 {
@@ -620,13 +641,13 @@ function insertJSON(array $jsonProgramstoRetrieve)
             }
         }
 
-        if ($debug == FALSE)
+        if ($debug === FALSE)
         {
             unlink($jsonFileToProcess);
         }
     }
 
-    if ($debug == FALSE)
+    if ($debug === FALSE)
     {
         rmdir("$dlProgramTempDir");
     }
@@ -759,6 +780,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
         $dbh->beginTransaction();
 
+        reset($scheduleJSON[$stationID]);
         while (list(, $schedule) = each($scheduleJSON[$stationID]))
         {
             /*
@@ -1557,9 +1579,18 @@ if (isset($v["sap"]))
     $dbh->exec("RENAME TABLE t_programrating TO programrating");
 }
 
-function tempdir()
+function tempdir($type)
 {
-    $tempfile = tempnam(sys_get_temp_dir(), "mfdb");
+    if ($type == "programs")
+    {
+        $tempfile = tempnam(sys_get_temp_dir(), "mfdb_programs_");
+    }
+
+    if ($type == "schedules")
+    {
+        $tempfile = tempnam(sys_get_temp_dir(), "mfdb_schedules_");
+    }
+
     if (file_exists($tempfile))
     {
         unlink($tempfile);
