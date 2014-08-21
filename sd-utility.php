@@ -84,7 +84,7 @@ The following options are available:
 eol;
 
 $longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "logo::", "nomyth", "skiplogo", "username::", "password::", "test", "timezone::", "version");
+                     "logo::", "nomyth", "skiplogo", "username::", "password::", "timezone::", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
