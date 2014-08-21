@@ -234,7 +234,6 @@ else
     }
 }
 
-
 printMSG("Logging into Schedules Direct.");
 $token = getToken($usernameFromDB, sha1($passwordFromDB));
 
@@ -264,15 +263,30 @@ else
     $statusMessage = "Error connecting to Schedules Direct.";
 }
 
-if (count($jsonProgramsToRetrieve) OR $forceDownload === TRUE)
+if ($isMythTV)
 {
-    insertJSON($jsonProgramsToRetrieve);
-    insertSchedule();
-    $statusMessage = "Successful.";
+    if (count($jsonProgramsToRetrieve) OR $forceDownload === TRUE)
+    {
+        insertJSON($jsonProgramsToRetrieve);
+        insertSchedule();
+        $statusMessage = "Successful.";
+    }
+    else
+    {
+        $statusMessage = "No new programs to retrieve.";
+    }
 }
 else
 {
-    $statusMessage = "No new programs to retrieve.";
+    if (file_exists("sd.json.programs.conf"))
+    {
+
+    }
+    else
+    {
+        printMSG("Nothing to do: Not running MythTV and did not find sd.json.programs.conf");
+        exit;
+    }
 }
 
 printMSG("Status:$statusMessage");
@@ -323,6 +337,7 @@ function getSchedules($stationIDsToFetch)
     global $maxProgramsToGet;
     global $quiet;
     global $debug;
+    global $isMythTV;
 
     $dbProgramCache = array();
     $response = "";
@@ -361,6 +376,11 @@ function getSchedules($stationIDsToFetch)
     printMSG("Writing to $dlSchedTempDir/schedule.json");
 
     file_put_contents("$dlSchedTempDir/schedule.json", $resBody);
+
+    if (!$isMythTV)
+    {
+        return ("");
+    }
 
     $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
