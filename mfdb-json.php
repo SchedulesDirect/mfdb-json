@@ -399,14 +399,12 @@ function getSchedules($stationIDsToFetch)
          * One user is reporting that after a run, a second run immediately afterwards still has programs that need
          * to be downloaded. That shouldn't happen, so dump the array to the log file for analysis.
          */
-        $quiet = TRUE;
         printMSG("dbProgramCache is");
         printMSG(print_r($dbProgramCache, TRUE));
         printMSG("serverScheduleMD5 is");
         printMSG(print_r($serverScheduleMD5, TRUE));
         printMSG("jsonProrgamstoRetrieve is");
         printMSG(print_r($jsonProgramsToRetrieve, TRUE));
-        $quiet = FALSE;
     }
 
     $toRetrieveTotal = count($jsonProgramsToRetrieve);
