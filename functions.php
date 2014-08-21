@@ -307,23 +307,6 @@ function printMSG($str)
     fwrite($fh_log, "$str\n");
 }
 
-function getSchedulesDirectLoginFromDB()
-{
-    $result = setting("SchedulesDirectLogin");
-
-    if (isset($result[0]))
-    {
-        return ($result[0]);
-    }
-    else
-    {
-        $foo["username"] = "";
-        $foo["password"] = "";
-
-        return (json_encode($foo));
-    }
-}
-
 function setting()
 {
     /*
