@@ -201,6 +201,16 @@ if ($isMythTV)
         $passwordFromDB = $responseJSON["password"];
     }
 }
+else
+{
+    if (file_exists("sd.json.conf"))
+    {
+        $userLoginInformation = file("sd.json.conf");
+        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
+    }
+}
 
 if ($username == "")
 {
@@ -249,16 +259,27 @@ if ($token == "ERROR")
     exit;
 }
 
-if ($needToStoreLogin AND $isMythTV)
+if ($needToStoreLogin)
 {
     $userInformation["username"] = $username;
     $userInformation["password"] = $password;
 
-    putSchedulesDirectLoginIntoDB(json_encode($userInformation));
+    $credentials = json_encode($userInformation);
 
-    $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
+    if ($isMythTV)
+    {
+        putSchedulesDirectLoginIntoDB($credentials);
+
+        $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
     password=:password WHERE xmltvgrabber='schedulesdirect2'");
-    $stmt->execute(array("username" => $username, "password" => $password));
+        $stmt->execute(array("username" => $username, "password" => $password));
+    }
+    else
+    {
+        $fh = fopen("sd.json.conf", "w");
+        fwrite($fh, "$credentials\n");
+        fclose($fh);
+    }
 }
 
 while (!$done)
