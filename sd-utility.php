@@ -11,7 +11,6 @@
 $isBeta = TRUE;
 $debug = FALSE;
 $done = FALSE;
-$test = FALSE;
 $isMythTV = TRUE;
 $skipChannelLogo = FALSE;
 $schedulesDirectLineups = array();
@@ -71,7 +70,7 @@ The following options are available:
 eol;
 
 $longoptions = array("beta", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "logo::", "nomyth", "skiplogo", "username::", "password::", "test", "timezone::", "version");
+                     "logo::", "nomyth", "skiplogo", "username::", "password::", "timezone::", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -120,9 +119,6 @@ foreach ($options as $k => $v)
         case "password":
             $password = $v;
             $passwordHash = sha1($v);
-            break;
-        case "test":
-            $test = TRUE;
             break;
         case "timezone":
             date_default_timezone_set($v);
