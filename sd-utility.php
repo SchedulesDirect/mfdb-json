@@ -203,7 +203,8 @@ if ($isMythTV)
 {
     $useServiceAPI = checkForServiceAPI();
 
-    $userLoginInformation = getSchedulesDirectLoginFromDB();
+    $userLoginInformation = setting("SchedulesDirectLogin");
+
     $responseJSON = json_decode($userLoginInformation, TRUE);
     $usernameFromDB = $responseJSON["username"];
     $passwordFromDB = $responseJSON["password"];
