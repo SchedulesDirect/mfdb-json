@@ -186,7 +186,7 @@ else
     if (file_exists("sd.json.conf"))
     {
         $userLoginInformation = file("sd.json.conf");
-        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $responseJSON = json_decode($userLoginInformation[0], TRUE);
         $usernameFromDB = $responseJSON["username"];
         $passwordFromDB = $responseJSON["password"];
     }
@@ -246,7 +246,14 @@ $token = getToken($usernameFromDB, sha1($passwordFromDB));
 if ($token == "ERROR")
 {
     printMSG("Got error when attempting to retrieve token from Schedules Direct.");
-    printMSG("Check username / password in settings table.");
+    if ($isMythTV)
+    {
+        printMSG("Check username / password in settings table.");
+    }
+    else
+    {
+        printMSG("Check username / password in sd.json.conf file.");
+    }
     exit;
 }
 
