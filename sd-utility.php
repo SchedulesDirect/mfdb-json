@@ -1190,29 +1190,49 @@ function checkDatabase()
 {
     global $dbh;
 
-    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
-    $stmt->execute();
-    $result = $stmt->fetchColumn();
+    $schemaVersion = setting("SchedulesDirectJSONschemaVersion");
 
-    if ($result === FALSE)
+    if ($schemaVersion === FALSE OR $schemaVersion == "26")
     {
         $stmt = $dbh->prepare("DESCRIBE videosource");
         $stmt->execute();
         $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if (!in_array("modified", $columnNames))
+        if (in_array("modified", $columnNames))
         {
             /*
-             * For users that have already been using the grabber, modified has already been added.
+             * We're going to store lineup modification dates in the settings table so that we're not
+             * modifying a core MythTV table. But first we'll pull the existing information out.
              */
-            print "Adding 'modified' field to videosource.\n";
-            $stmt = $dbh->exec("ALTER TABLE videosource ADD COLUMN modified CHAR(20) DEFAULT NULL
-        COMMENT 'Track the last time this videosource was updated.'");
+
+            $stmt = $dbh->prepare("SELECT lineupid, modified FROM videosource");
+            $stmt->execute();
+            $existingLineups = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            $foo = array();
+            foreach ($existingLineups as $lineup => $modified)
+            {
+                $foo[] = array("lineup" => $lineup, "lastModified" => $modified);
+            }
+
+            $bar = json_encode($foo);
+
+            setting("localLineupLastModified", $bar);
+
+            $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
+        }
+
+        $result = setting("schedulesdirectLogin");
+
+        if ($result)
+        {
+            $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
+            setting("SchedulesDirectLogin", $result);
         }
 
         print "Creating remaining tables.\n";
 
-        $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDheadendCache,SDpeople,SDprogramgenres,
+        $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
     SDprogramrating,SDschedule,SDMessages,SDimageCache");
 
         $stmt = $dbh->exec("CREATE TABLE `SDMessages` (
@@ -1234,7 +1254,7 @@ function checkDatabase()
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDheadendCache` (
+        $stmt = $dbh->exec("CREATE TABLE `SDlineupCache` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `lineup` varchar(50) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
@@ -1352,18 +1372,16 @@ function checkDatabase()
 
         $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
 
-        $stmt = $dbh->exec("INSERT INTO settings(value,data) VALUES('SchedulesDirectJSONschemaVersion','26')");
+        setting("SchedulesDirectJSONschemaVersion", "27");
     }
 
-    if ($result == "27")
+    if ($schemaVersion == "26")
     {
         /*
          * Do whatever. Stub.
          */
     }
-
 }
-
 function putSchedulesDirectLoginIntoDB($usernameAndPassword)
 {
     global $dbh;
