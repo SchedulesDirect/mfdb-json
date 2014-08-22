@@ -1662,8 +1662,11 @@ function updateStatus()
 
     $res = getStatus();
 
-    $updateLocalMessageTable = $dbh->prepare("INSERT INTO SDMessages(id,date,message,type)
+    if ($isMythTV)
+    {
+        $updateLocalMessageTable = $dbh->prepare("INSERT INTO SDMessages(id,date,message,type)
     VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
+    }
 
     if ($res["code"] == 0)
     {
