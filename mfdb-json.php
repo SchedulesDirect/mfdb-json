@@ -17,6 +17,8 @@ ini_set("memory_limit", "768M");
 require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
 
 $isBeta = TRUE;
 $debug = FALSE;
@@ -194,9 +196,6 @@ else
         exit;
     }
 }
-
-$client = new Guzzle\Http\Client($baseurl);
-$client->setUserAgent($agentString);
 
 $globalStartTime = time();
 $globalStartDate = new DateTime();
