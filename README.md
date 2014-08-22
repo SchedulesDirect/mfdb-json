@@ -2,23 +2,24 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.18, 2014-08-14
+v0.19, 2014-08-22
 
 Robert Kulagowski
 
 grabber@schedulesdirect.org
 
-This program runs as a replacement to mythfilldatabase (for now) and
-downloads data from Schedules Direct using the new JSON format.
+These programs can be used as a replacement to mythfilldatabase and
+for downloading data from Schedules Direct using the new JSON format.
 
 This file describes API 20140530.
 
 #Features:
-
+##Mythtv-only
 - only downloads programs that have changes. Your first download may be
   40000 programs, but daily downloads after that will be 2-3000 depending on
   how many channels you have.  If the same program is broadcast on multiple
   channels, it's still only downloaded once.
+##All
 - QAM tuning information.
 - program-specific language information. (A program that's being broadcast
   in Mandarin will have a Mandarin tag associated with it)
@@ -29,6 +30,25 @@ This file describes API 20140530.
 - See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2530 for the
   complete list of countries with data.
 - Self-hosted data, so not dependent on Tribune's XML servers.
+
+If the two scripts are called with the **--nomyth** parameter, then certain
+functionality changes.  Rather than reading username and password from the
+mythconverg database, the scripts will look for a file called "sd.json.conf"
+
+**NOTE**: the password is stored as plaintext.
+
+mfdb-json.php may be called with **--nomyth** as well, in which case you
+must specify --schedule and/or --program
+
+The list of stationIDs you wish to retrieve must be in
+"sd.json.stations.conf".  One stationID per line.
+
+The list of programs you wish to retrieve must be in
+"sd.json.programs.conf".  One programID per line.
+
+This functionality only exists as a demonstration or for developers; the
+rest of the documentation assumes that the user is running the programs to
+populate MythTV data.
 
 #Installation
 
@@ -78,26 +98,31 @@ Run the sd-utility.php script.
 This script does some housekeeping functions relating to lineup management
 at Schedules Direct.
 
+If called with the **--nomyth** parameter, then MythTV-specific functions will not be used.
+
 The first time you run the script it will create necessary tables in your
-database.
+MythTV database.
 
 You can run it with **--help** to see the various options.
 
 ```
-./sd-utility.php --help
-
-sd-utility.php utility program v0.14/2014-04-16
+sd-utility.php utility program API:20140530 v0.06-test.08/2014-08-22
 
 The following options are available:
---beta
 --debug         Enable debugging. (Default: FALSE)
 --dbname=       MySQL database name. (Default: mythconverg)
 --dbuser=       Username for database access. (Default: mythtv)
 --dbpassword=   Password for database access. (Default: mythtv)
+--dbhost=       MySQL database hostname. (Default: localhost)
 --help          (this text)
---host=         MySQL database hostname. (Default: localhost)
+--host=         IP address of the MythTV backend. (Default: localhost)
+--logo=         Directory where channel logos are stored (Default: /home/mythtv/.mythtv/channels)
+--nomyth        Don't execute any MythTV specific functions. (Default: FALSE)
+--skiplogo      Don't download channel logos.
 --username=     Schedules Direct username.
 --password=     Schedules Direct password.
+--timezone=     Set the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:UTC)
+--version       Print version information.
 ```
 
 If you've never used the Schedules Direct JSON service before, you will be
