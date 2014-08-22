@@ -136,7 +136,7 @@ function printStatus($sdStatus)
 {
     global $updatedHeadendsToRefresh;
     global $lineupArray;
-    global $isMyth;
+    global $isMythTV;
 
     print "\nStatus messages from Schedules Direct:\n";
 
@@ -168,7 +168,7 @@ function printStatus($sdStatus)
 
     $videosourceModifiedArray = array();
 
-    if ($isMyth)
+    if ($isMythTV)
     {
         $videosourceModifiedJSON = setting("localLineupLastModified");
 
@@ -184,45 +184,60 @@ function printStatus($sdStatus)
     {
         print "The following lineups are in your account at Schedules Direct:\n\n";
 
-        $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
-        $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update", "Status"));
+        if ($isMythTV)
+        {
+            $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
+            $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update", "Status"));
+        }
+        else
+        {
+            $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20)));
+            $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
+        }
 
         foreach ($lineupArray as $lineupNumber => $v)
         {
             $lineup = $v["lineup"];
             $serverModified = $v["modified"];
 
-            if (count($videosourceModifiedArray))
+            if ($isMythTV)
             {
-                if (array_key_exists($lineup, $videosourceModifiedArray))
+                if (count($videosourceModifiedArray))
                 {
-                    $mythModified = $videosourceModifiedArray[$lineup];
+                    if (array_key_exists($lineup, $videosourceModifiedArray))
+                    {
+                        $mythModified = $videosourceModifiedArray[$lineup];
+                    }
+                    else
+                    {
+                        $mythModified = "";
+                    }
                 }
                 else
                 {
                     $mythModified = "";
                 }
+
+                if ($serverModified > $mythModified)
+                {
+                    $updatedHeadendsToRefresh[$lineup] = $serverModified;
+                    $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, "Updated"));
+                    continue;
+                }
+                /*
+                            if ($heStatus[$he] == "D")
+                            {
+                                $lineupData->appendRow(array($id, $serverModified, $mythModified, "DELETED"));
+                                continue;
+                            }
+                */
+
+                $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
             }
             else
             {
-                $mythModified = "";
+                $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
             }
-
-            if ($serverModified > $mythModified)
-            {
-                $updatedHeadendsToRefresh[$lineup] = $serverModified;
-                $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, "Updated"));
-                continue;
-            }
-            /*
-                        if ($heStatus[$he] == "D")
-                        {
-                            $lineupData->appendRow(array($id, $serverModified, $mythModified, "DELETED"));
-                            continue;
-                        }
-            */
-
-            $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
         }
 
         print $lineupData;
