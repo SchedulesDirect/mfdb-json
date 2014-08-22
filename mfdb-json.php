@@ -308,6 +308,7 @@ else
     {
         $jsonProgramsToRetrieve = file("sd.json.programs.conf");
         fetchPrograms($jsonProgramsToRetrieve);
+        $statusMessage = "Successful.";
     }
     else
     {
@@ -330,20 +331,23 @@ if ($globalSinceStart->h)
 }
 printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.");
 
-printMSG("Updating status.");
+if ($isMythTV)
+{
+    printMSG("Updating status.");
 
-$stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStart' AND hostname IS NULL");
-$stmt->execute(array("data" => $globalStartTime));
+    $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStart' AND hostname IS NULL");
+    $stmt->execute(array("data" => $globalStartTime));
 
-$stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunEnd' AND hostname IS NULL");
-$stmt->execute(array("data" => $globalEndTime));
+    $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunEnd' AND hostname IS NULL");
+    $stmt->execute(array("data" => $globalEndTime));
 
-$stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStatus' AND hostname IS NULL");
-$stmt->execute(array("data" => $statusMessage));
+    $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStatus' AND hostname IS NULL");
+    $stmt->execute(array("data" => $statusMessage));
 
-printMSG("Sending reschedule request to mythbackend.");
+    printMSG("Sending reschedule request to mythbackend.");
 
-exec("mythutil --resched");
+    exec("mythutil --resched");
+}
 
 printMSG("Done.");
 
