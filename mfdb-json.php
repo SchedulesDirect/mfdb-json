@@ -210,6 +210,12 @@ if ($isMythTV)
 AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
         $stmt->execute();
         $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if (!count($stationIDs))
+        {
+            printMSG("Error: no channels retrieved from database. Check channel table.");
+            exit;
+        }
     }
     else
     {
