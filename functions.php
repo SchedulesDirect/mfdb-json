@@ -136,6 +136,7 @@ function printStatus($sdStatus)
 {
     global $updatedHeadendsToRefresh;
     global $lineupArray;
+    global $isMyth;
 
     print "\nStatus messages from Schedules Direct:\n";
 
@@ -166,7 +167,11 @@ function printStatus($sdStatus)
     print "Next suggested connect time: $nextConnectTime\n";
 
     $videosourceModifiedArray = array();
-    $videosourceModifiedJSON = setting("localLineupLastModified");
+
+    if ($isMyth)
+    {
+        $videosourceModifiedJSON = setting("localLineupLastModified");
+    }
 
     if ($videosourceModifiedJSON)
     {
