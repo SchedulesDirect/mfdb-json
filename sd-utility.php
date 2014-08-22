@@ -1202,6 +1202,12 @@ function getLineup($lineupToGet)
 function updateLocalLineupCache($updatedLineupsToRefresh)
 {
     global $dbh;
+    global $isMythTV;
+
+    if (!$isMythTV)
+    {
+        return;
+    }
 
     print "Checking for updated lineups from Schedules Direct.\n";
 
