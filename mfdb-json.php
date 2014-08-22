@@ -306,7 +306,7 @@ else
 {
     if (file_exists("sd.json.programs.conf") AND $useProgramFile)
     {
-        $jsonProgramsToRetrieve = trim(file("sd.json.programs.conf"));
+        $jsonProgramsToRetrieve = file("sd.json.programs.conf");
         fetchPrograms($jsonProgramsToRetrieve);
     }
     else
