@@ -171,11 +171,11 @@ function printStatus($sdStatus)
     if ($isMyth)
     {
         $videosourceModifiedJSON = setting("localLineupLastModified");
-    }
 
-    if ($videosourceModifiedJSON)
-    {
-        $videosourceModifiedArray = json_decode($videosourceModifiedJSON, TRUE);
+        if ($videosourceModifiedJSON)
+        {
+            $videosourceModifiedArray = json_decode($videosourceModifiedJSON, TRUE);
+        }
     }
 
     $lineupArray = getSchedulesDirectLineups();
