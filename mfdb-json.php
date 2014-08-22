@@ -27,6 +27,8 @@ $printTimeStamp = TRUE;
 $maxProgramsToGet = 2000;
 $errorWarning = FALSE;
 $station = "";
+$useScheduleFile = FALSE;
+$useProgramFile = FALSE;
 $useServiceAPI = FALSE;
 $isMythTV = TRUE;
 $tz = "UTC";
@@ -80,14 +82,17 @@ The following options are available:
 --force\t\tForce download of schedules. (Default: FALSE)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
+    Must specify --schedule and/or --program
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
+--program\tDownload programs based on programIDs in sd.json.programs.conf file.
 --quiet\t\tDon't print to screen; put all output into the logfile.
 --station=\tDownload the schedule for a single stationID in your lineup.
+--schedule\tDownload schedules based on stationIDs in sd.json.stations.conf file.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 eol;
 
 $longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "force", "nomyth", "max::", "quiet", "station::", "timezone::");
+                     "force", "nomyth", "max::", "program", "quiet", "station::", "schedule", "timezone::");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -121,17 +126,20 @@ foreach ($options as $k => $v)
         case "force":
             $forceDownload = TRUE;
             break;
-        case "test":
-            $test = TRUE;
-            break;
         case "nomyth":
             $isMythTV = FALSE;
             break;
         case "max":
             $maxProgramsToGet = $v;
             break;
+        case "program":
+            $useProgramFile = TRUE;
+            break;
         case "quiet":
             $quiet = TRUE;
+            break;
+        case "schedule":
+            $useScheduleFile = TRUE;
             break;
         case "station":
             $station = $v;
@@ -225,7 +233,7 @@ AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
 }
 else
 {
-    if (file_exists("sd.json.stations.conf"))
+    if (file_exists("sd.json.stations.conf") AND $useScheduleFile)
     {
         $stationIDs = file("sd.json.stations.conf");
     }
@@ -235,7 +243,7 @@ else
     }
     else
     {
-        printMSG("Nothing to do: did not find file sd.json.stations.conf and no station to retrieve passed as parameter.");
+        printMSG("Nothing to do: did not find file sd.json.stations.conf or no station to retrieve passed as parameter.");
         exit;
     }
 }
@@ -269,6 +277,7 @@ if ($response == "No new data on server." AND $forceDownload === FALSE)
 if ($token != "ERROR" AND $response != "ERROR")
 {
     $jsonProgramsToRetrieve = getSchedules($stationIDs);
+    fetchPrograms($jsonProgramsToRetrieve);
 }
 else
 {
@@ -291,9 +300,10 @@ if ($isMythTV)
 }
 else
 {
-    if (file_exists("sd.json.programs.conf"))
+    if (file_exists("sd.json.programs.conf") AND $useProgramFile)
     {
-
+        $jsonProgramsToRetrieve = trim(file("sd.json.programs.conf"));
+        fetchPrograms($jsonProgramsToRetrieve);
     }
     else
     {
@@ -345,9 +355,7 @@ function getSchedules($stationIDsToFetch)
     global $client;
     global $dbh;
     global $token;
-    global $dlProgramTempDir;
     global $dlSchedTempDir;
-    global $maxProgramsToGet;
     global $quiet;
     global $debug;
     global $isMythTV;
@@ -456,6 +464,16 @@ function getSchedules($stationIDsToFetch)
         printMSG("jsonProrgamstoRetrieve is");
         printMSG(print_r($jsonProgramsToRetrieve, TRUE));
     }
+
+    return ($jsonProgramsToRetrieve);
+}
+
+function fetchPrograms($jsonProgramsToRetrieve)
+{
+    global $client;
+    global $token;
+    global $maxProgramsToGet;
+    global $dlProgramTempDir;
 
     $toRetrieveTotal = count($jsonProgramsToRetrieve);
 
