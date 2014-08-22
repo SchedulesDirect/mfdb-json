@@ -308,8 +308,9 @@ while (!$done)
         print "E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct\n";
         print "L to Link a videosource to a lineup at Schedules Direct\n";
         print "U to update a videosource by downloading from Schedules Direct\n";
-        print "Q to Quit\n";
     }
+
+    print "Q to Quit\n";
 
     $response = strtoupper(readline(">"));
 
