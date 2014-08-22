@@ -1658,6 +1658,7 @@ function updateStatus()
     global $client;
     global $host;
     global $useServiceAPI;
+    global $isMythTV;
 
     $res = getStatus();
 
@@ -1676,8 +1677,12 @@ function updateStatus()
             $msgDate = $a["date"];
             $message = $a["message"];
             printMSG("MessageID:$msgID : $msgDate : $message");
-            $updateLocalMessageTable->execute(array("id"   => $msgID, "date" => $msgDate, "message" => $message,
-                                                    "type" => "U"));
+            if ($isMythTV)
+            {
+                $updateLocalMessageTable->execute(array("id"      => $msgID, "date" => $msgDate,
+                                                        "message" => $message,
+                                                        "type"    => "U"));
+            }
         }
     }
     else
@@ -1706,30 +1711,36 @@ function updateStatus()
     }
     else
     {
-        $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value = 'MythFillSuggestedRunTime' AND hostname IS NULL");
-        $stmt->execute(array("data" => $nextConnectTime));
-
-        $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
-        $stmt->execute(array("data" => "Your subscription expires on $expires."));
-
-        $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='SchedulesDirectLastUpdate'");
-        $result = $stmt->fetchColumn();
-        $getLastUpdate = $result[0];
-
-        if ($res["lastDataUpdate"] == $getLastUpdate)
+        if ($isMythTV)
         {
-            return ("No new data on server.");
-        }
-        else
-        {
-            printMSG("Updating settings using MySQL.");
-            $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate'
+            $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value = 'MythFillSuggestedRunTime' AND hostname IS NULL");
+            $stmt->execute(array("data" => $nextConnectTime));
+
+            $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
+            $stmt->execute(array("data" => "Your subscription expires on $expires."));
+
+            $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='SchedulesDirectLastUpdate'");
+            $result = $stmt->fetchColumn();
+            $getLastUpdate = $result[0];
+
+            if ($res["lastDataUpdate"] == $getLastUpdate)
+            {
+                return ("No new data on server.");
+            }
+            else
+            {
+                printMSG("Updating settings using MySQL.");
+                $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate'
         AND hostname IS NULL");
-            $stmt->execute(array("data" => $res["lastDataUpdate"]));
+                $stmt->execute(array("data" => $res["lastDataUpdate"]));
+            }
         }
     }
 
-    exec("mythutil --clearcache"); // Force a clearcache to make sure that everyone is in sync.
+    if ($isMythTV)
+    {
+        exec("mythutil --clearcache"); // Force a clearcache to make sure that everyone is in sync.
+    }
 
     return ("");
 }
