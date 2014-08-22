@@ -179,21 +179,6 @@ if ($skipChannelLogo === FALSE)
     }
 }
 
-if ($isBeta)
-{
-    # Test server. Things may be broken there.
-    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
-    print "Using beta server.\n";
-    # API must match server version.
-    $api = 20140530;
-}
-else
-{
-    $baseurl = "https://json.schedulesdirect.org/20131021/";
-    print "Using production server.\n";
-    $api = 20131021;
-}
-
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
@@ -203,9 +188,22 @@ if ($isMythTV)
 
     $userLoginInformation = setting("SchedulesDirectLogin");
 
-    $responseJSON = json_decode($userLoginInformation, TRUE);
-    $usernameFromDB = $responseJSON["username"];
-    $passwordFromDB = $responseJSON["password"];
+    if ($userLoginInformation !== FALSE)
+    {
+        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
+    }
+}
+else
+{
+    if (file_exists("sd.json.conf"))
+    {
+        $userLoginInformation = file("sd.json.conf");
+        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
+    }
 }
 
 if ($username == "")
@@ -255,15 +253,27 @@ if ($token == "ERROR")
     exit;
 }
 
-if ($needToStoreLogin AND $isMythTV)
+if ($needToStoreLogin)
 {
     $userInformation["username"] = $username;
     $userInformation["password"] = $password;
-    putSchedulesDirectLoginIntoDB(json_encode($userInformation));
 
-    $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
+    $credentials = json_encode($userInformation);
+
+    if ($isMythTV)
+    {
+        putSchedulesDirectLoginIntoDB($credentials);
+
+        $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
     password=:password WHERE xmltvgrabber='schedulesdirect2'");
-    $stmt->execute(array("username" => $username, "password" => $password));
+        $stmt->execute(array("username" => $username, "password" => $password));
+    }
+    else
+    {
+        $fh = fopen("sd.json.conf", "w");
+        fwrite($fh, "$credentials\n");
+        fclose($fh);
+    }
 }
 
 while (!$done)
@@ -284,10 +294,11 @@ while (!$done)
     }
 
     print "\nSchedules Direct functions:\n";
-    print "1 Add a lineup to your account at Schedules Direct\n";
-    print "2 Delete a lineup from your account at Schedules Direct\n";
-    print "3 Acknowledge a message\n";
-    print "4 Print a channel table for a lineup\n";
+    print "1 Add a known lineupID to your account at Schedules Direct\n";
+    print "2 Search for a lineup to add to your account at Schedules Direct\n";
+    print "3 Delete a lineup from your account at Schedules Direct\n";
+    print "4 Acknowledge a message\n";
+    print "5 Print a channel table for a lineup\n";
 
     if ($isMythTV)
     {
@@ -305,15 +316,19 @@ while (!$done)
     switch ($response)
     {
         case "1":
-            addLineupsToSchedulesDirect();
+            $lineup = readline("Lineup to add>");
+            directAddLineup($lineup);
             break;
         case "2":
-            deleteLineupFromSchedulesDirect();
+            addLineupsToSchedulesDirect();
             break;
         case "3":
-            deleteMessageFromSchedulesDirect();
+            deleteLineupFromSchedulesDirect();
             break;
         case "4":
+            deleteMessageFromSchedulesDirect();
+            break;
+        case "5":
             printLineup();
             break;
         case "A":
@@ -393,7 +408,7 @@ function updateChannelTable($lineup)
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
+    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -706,8 +721,17 @@ function updateChannelTable($lineup)
             $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
         }
 
-        $updateVideosourceModified = $dbh->prepare("UPDATE videosource SET modified = :modified WHERE lineupid=:lineup");
-        $updateVideosourceModified->execute(array("lineup" => $lineup, "modified" => $modified));
+        $lineupLastModifiedJSON = setting("localLineupLastModified");
+        $lineupLastModifiedArray = array();
+
+        if (count($lineupLastModifiedJSON))
+        {
+            $lineupLastModifiedArray = json_decode($lineupLastModifiedJSON, TRUE);
+        }
+
+        $lineupLastModifiedArray[$lineup] = $modified;
+
+        setting("localLineupLastModified", json_encode($lineupLastModifiedArray));
 
         /*
          * Set the startchan to a non-bogus value.
@@ -747,7 +771,7 @@ function linkSchedulesDirectLineup()
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
+    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -775,7 +799,7 @@ function printLineup()
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDheadendCache WHERE lineup=:lineup");
+    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -797,9 +821,13 @@ function printLineup()
             {
                 $chanMap[$v["stationID"]] = "{$v["atscMajor"]}.{$v["atscMinor"]}";
             }
-            else
+            elseif (array_key_exists("uhfVhf", $v))
             {
                 $chanMap[$v["stationID"]] = $v["uhfVhf"];
+            }
+            else
+            {
+                $chanMap[$v["stationID"]] = 0; //Not sure what the correct thing to use here is at this time.
             }
         }
     }
@@ -844,6 +872,26 @@ function addLineupsToSchedulesDirect()
 
     $sdLineupArray = array();
 
+    $arrayCountriesWithOnePostalCode = array(
+        "BLZ" => "BZ",
+        "COL" => "CO",
+        "GUY" => "GY",
+        "HND" => "HN",
+        "PAN" => "PA",
+        "AIA" => "AI-2640",
+        "ATG" => "AG",
+        "ABW" => "AW",
+        "BHS" => "BS",
+        "BES" => "BQ",
+        "CUW" => "CW",
+        "DMA" => "DM",
+        "GRD" => "GD",
+        "MAF" => "97150",
+        "KNA" => "KN",
+        "LCA" => "LC",
+        "TTO" => "TT",
+        "TCA" => "TKCA1ZZ");
+
     print "Three-character ISO-3166-1 alpha3 country code:";
     $country = strtoupper(readline(">"));
 
@@ -852,74 +900,125 @@ function addLineupsToSchedulesDirect()
         return;
     }
 
-    print "Enter postal code:";
-    $postalcode = strtoupper(readline(">"));
-
-    if ($postalcode == "")
+    if (array_key_exists($country, $arrayCountriesWithOnePostalCode))
     {
-        return;
-    }
-
-    try
-    {
-        $response = $client->get("headends", array(), array(
-            "query"   => array("country" => $country, "postalcode" => $postalcode),
-            "headers" => array("token" => $token)))->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
-        print "********************************************\n";
-        print "\tError response from server:\n";
-        print "\tCode: {$s["code"]}\n";
-        print "\tMessage: {$s["message"]}\n";
-        print "\tServer: {$s["serverID"]}\n";
-        print "********************************************\n";
-
-        return;
-    }
-
-    $res = $response->json();
-
-    if ($debug)
-    {
-        debugMSG("addLineupsToSchedulesDirect:Response:$res");
-        debugMSG("Raw headers:\n" . $response->getRawHeaders());
-    }
-
-    $counter = "0";
-
-    foreach ($res as $he => $details)
-    {
-        print "\nheadend: $he\n";
-        print "location: {$details["location"]}\n";
-        foreach ($details["lineups"] as $v)
-        {
-            $counter++;
-            $name = $v["name"];
-            $lineup = end(explode("/", $v["uri"]));
-            $sdLineupArray[$counter] = $lineup;
-            print "\t#$counter:\n";
-            print "\tname: $name\n";
-            print "\tLineup: $lineup\n";
-        }
-    }
-
-    print "\n\n";
-    $lineup = readline("Lineup to add (# or lineup)>");
-
-    if ($lineup == "")
-    {
-        return;
-    }
-
-    if (strlen($lineup) < 3)
-    {
-        $lineup = $sdLineupArray[$lineup];
+        print "Only one valid postal code for this country: {$arrayCountriesWithOnePostalCode[$country]}\n";
+        $postalcode = $arrayCountriesWithOnePostalCode[$country];
     }
     else
     {
-        $lineup = strtoupper($lineup);
+        print "Enter postal code:";
+        $postalcode = strtoupper(readline(">"));
+
+        if ($postalcode == "")
+        {
+            return;
+        }
+
+        try
+        {
+            $response = $client->get("headends", array(), array(
+                "query"   => array("country" => $country, "postalcode" => $postalcode),
+                "headers" => array("token" => $token)))->send();
+        } catch (Guzzle\Http\Exception\BadResponseException $e)
+        {
+            $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+            print "********************************************\n";
+            print "\tError response from server:\n";
+            print "\tCode: {$s["code"]}\n";
+            print "\tMessage: {$s["message"]}\n";
+            print "\tServer: {$s["serverID"]}\n";
+            print "********************************************\n";
+
+            return;
+        }
+
+        $res = $response->json();
+
+        if ($debug)
+        {
+            debugMSG("addLineupsToSchedulesDirect:Response:$res");
+            debugMSG("Raw headers:\n" . $response->getRawHeaders());
+        }
+
+        $counter = "0";
+
+        foreach ($res as $he => $details)
+        {
+            print "\nheadend: $he\n";
+            print "location: {$details["location"]}\n";
+            foreach ($details["lineups"] as $v)
+            {
+                $counter++;
+                $name = $v["name"];
+                $lineup = end(explode("/", $v["uri"]));
+                $sdLineupArray[$counter] = $lineup;
+                print "\t#$counter:\n";
+                print "\tname: $name\n";
+                print "\tLineup: $lineup\n";
+            }
+        }
+
+        print "\n\n";
+        $lineup = readline("Lineup to add (# or lineup)>");
+
+        if ($lineup == "")
+        {
+            return;
+        }
+
+        if (strlen($lineup) < 3)
+        {
+            $lineup = $sdLineupArray[$lineup];
+        }
+        else
+        {
+            $lineup = strtoupper($lineup);
+        }
+
+        if (substr_count($lineup, "-") != 2)
+        {
+            print "Did not see two hyphens in lineup; did you enter it correctly?\n";
+
+            return;
+        }
+
+        print "Sending request to server.\n";
+        $lineup = str_replace(" ", "", $lineup);
+
+        try
+        {
+            $response = $client->put("lineups/$lineup", array("token" => $token), array())->send();
+        } catch (Guzzle\Http\Exception\BadResponseException $e)
+        {
+            $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+            print "********************************************\n";
+            print "\tError response from server:\n";
+            print "\tCode: {$s["code"]}\n";
+            print "\tMessage: {$s["message"]}\n";
+            print "\tServer: {$s["serverID"]}\n";
+            print "********************************************\n";
+
+            return;
+        }
+
+        $res = $response->json();
+
+        if ($debug)
+        {
+            debugMSG("addLineupsToSchedulesDirect:Response:$res");
+            debugMSG("Raw headers:\n" . $response->getRawHeaders());
+        }
+
+        print "Message from server: {$res["message"]}\n";
     }
+}
+
+function directAddLineup($lineup)
+{
+    global $debug;
+    global $client;
+    global $token;
 
     if (substr_count($lineup, "-") != 2)
     {
@@ -966,7 +1065,7 @@ function deleteLineupFromSchedulesDirect()
     global $token;
     global $updatedLineupsToRefresh;
 
-    $deleteFromLocalCache = $dbh->prepare("DELETE FROM SDheadendCache WHERE lineup=:lineup");
+    $deleteFromLocalCache = $dbh->prepare("DELETE FROM SDlineupCache WHERE lineup=:lineup");
     $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
 
     $toDelete = getLineupFromNumber(strtoupper(readline("Lineup to Delete (# or lineup):>")));
@@ -1100,7 +1199,7 @@ function getLineup($lineupToGet)
     return $res;
 }
 
-function updateLocalLineupCache(array $updatedLineupsToRefresh)
+function updateLocalLineupCache($updatedLineupsToRefresh)
 {
     global $dbh;
 
@@ -1121,7 +1220,7 @@ function updateLocalLineupCache(array $updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbh->prepare("INSERT INTO SDheadendCache(lineup,json,modified)
+        $stmt = $dbh->prepare("INSERT INTO SDlineupCache(lineup,json,modified)
         VALUES(:lineup,:json,:modified) ON DUPLICATE KEY UPDATE json=:json,modified=:modified");
 
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
@@ -1381,40 +1480,23 @@ function checkDatabase()
          * Do whatever. Stub.
          */
     }
+
 }
+
 function putSchedulesDirectLoginIntoDB($usernameAndPassword)
 {
     global $dbh;
 
-    $isInDB = checkSchedulesDirectLoginFromDB();
+    $isInDB = setting("SchedulesDirectLogin");
 
     if ($isInDB === FALSE)
     {
-        $stmt = $dbh->prepare("INSERT INTO settings(value, data) VALUES ('schedulesdirectLogin', :json)");
-        $stmt->execute(array("json" => $usernameAndPassword));
+        setting("SchedulesDirectLogin", $usernameAndPassword);
     }
     else
     {
-        $stmt = $dbh->prepare("UPDATE settings SET data=:json WHERE value='schedulesdirectLogin'");
+        $stmt = $dbh->prepare("UPDATE settings SET data=:json WHERE value='SchedulesDirectLogin'");
         $stmt->execute(array("json" => $usernameAndPassword));
-    }
-}
-
-function checkSchedulesDirectLoginFromDB()
-{
-    global $dbh;
-
-    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='schedulesdirectLogin'");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-    if (isset($result[0]))
-    {
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
     }
 }
 
@@ -1491,8 +1573,10 @@ function extractData($sourceIDtoExtract)
         $getFrequency->execute(array("mplexid" => $v["mplexid"]));
         $freq = $getFrequency->fetchColumn();
 
-        $extractArray[] = array("chanNum" => $v["channum"], "callSign" => $v["callsign"], "xmltvid" => $v["xmltvid"],
-                                "mplexid" => $v["mplexid"], "serviceid" => $v["serviceid"], "frequency" => $freq[0]);
+        $extractArray[] = array("chanNum"   => $v["channum"], "callSign" => $v["callsign"],
+                                "xmltvid"   => $v["xmltvid"],
+                                "mplexid"   => $v["mplexid"], "serviceid" => $v["serviceid"],
+                                "frequency" => $freq[0]);
 
     }
 
@@ -1505,6 +1589,10 @@ function extractData($sourceIDtoExtract)
     /*
      * TODO: send json automatically.
      */
+
+    fclose($fhExtract);
+
+    print "Please send $lineupName.extract.conf to grabber@schedulesdirect.org\n";
 }
 
 function getLineupFromNumber($numberOrLineup)
