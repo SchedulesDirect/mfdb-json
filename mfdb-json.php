@@ -34,6 +34,7 @@ $isMythTV = TRUE;
 $tz = "UTC";
 $usernameFromDB = "";
 $passwordFromDB = "";
+$stationIDs = array();
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -276,8 +277,11 @@ if ($response == "No new data on server." AND $forceDownload === FALSE)
 
 if ($token != "ERROR" AND $response != "ERROR")
 {
-    $jsonProgramsToRetrieve = getSchedules($stationIDs);
-    fetchPrograms($jsonProgramsToRetrieve);
+    if (count($stationIDs))
+    {
+        $jsonProgramsToRetrieve = getSchedules($stationIDs);
+        fetchPrograms($jsonProgramsToRetrieve);
+    }
 }
 else
 {
