@@ -200,7 +200,7 @@ else
     if (file_exists("sd.json.conf"))
     {
         $userLoginInformation = file("sd.json.conf");
-        $responseJSON = json_decode($userLoginInformation, TRUE);
+        $responseJSON = json_decode($userLoginInformation[0], TRUE);
         $usernameFromDB = $responseJSON["username"];
         $passwordFromDB = $responseJSON["password"];
     }
