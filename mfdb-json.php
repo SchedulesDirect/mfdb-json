@@ -17,8 +17,6 @@ ini_set("memory_limit", "768M");
 require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
-$client = new Guzzle\Http\Client($baseurl);
-$client->setUserAgent($agentString);
 
 $isBeta = TRUE;
 $debug = FALSE;
@@ -58,6 +56,9 @@ else
 }
 
 $agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$scriptDate";
+
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
 
 $jsonProgramsToRetrieve = array();
 $peopleCache = array();
