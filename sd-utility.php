@@ -457,7 +457,7 @@ function updateChannelTable($lineup)
 
     if (count($sID) == 0)
     {
-        print "ERROR: You do not have that lineup locally configured.\n";
+        print "ERROR: Can't update channel table; lineup not associated with a videosource.\n";
 
         return;
     }
