@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.19, 2014-08-22
+v0.20, 2014-09-05
 
 Robert Kulagowski
 
@@ -106,9 +106,10 @@ MythTV database.
 You can run it with **--help** to see the various options.
 
 ```
-sd-utility.php utility program API:20140530 v0.06-test.08/2014-08-22
+sd-utility.php utility program API:20140530 v0.07-test.03/2014-09-05
 
 The following options are available:
+--countries     The list of countries that have data.
 --debug         Enable debugging. (Default: FALSE)
 --dbname=       MySQL database name. (Default: mythconverg)
 --dbuser=       Username for database access. (Default: mythtv)
@@ -169,7 +170,7 @@ Q to Quit
 ```
 Type in: **1**
 
-Three-character ISO-3166-1 alpha3 country code:>**USA**
+Three-character ISO-3166-1 alpha3 country code (? to list available countries):>**USA**
 
 Enter postal code:>**60030**
 
@@ -258,7 +259,7 @@ in a headend - all devices are either "-DEFAULT" or "-X".
 
 You may see this:
 
-Three-character ISO-3166-1 alpha3 country code:>**USA**
+Three-character ISO-3166-1 alpha3 country code (? to list available countries):>>**USA**
 
 Enter postal code:>**90210**
 
@@ -307,9 +308,9 @@ location: Eagle Rock
 
 Notice that headend CA00053 has multiple lineups, as does CA67309 and CA67310.
 
-You can encounter this overseas:
+You can encounter the following outside of North America:
 
-Three-character ISO-3166-1 alpha3 country code:>**GBR**
+Three-character ISO-3166-1 alpha3 country code (? to list available countries):>**GBR**
 
 Enter postal code:>**W2**
 
@@ -339,29 +340,38 @@ In any case, the script will ask you which lineup to add.
 
 Lineup to add>**USA-IL57303-X**
 
-```
-Message from server: Added lineup.
-
-Status messages from Schedules Direct:
-Server: AWS-SD-web.1
-Last data refresh: 2014-04-03T17:13:48Z
-Account expires: 2014-06-28T05:16:29Z
-Max number of headends for your account: 16
-Next suggested connect time: 2014-04-04T04:41:13Z
-The following lineups are in your account at Schedules Direct:
-
-┌───────────────┬────────────────────┬─────────────────────────┬────┐
-│Lineup         │Server modified     │MythTV videosource update│New?│
-├───────────────┼────────────────────┼─────────────────────────┼────┤
-│USA-IL57303-X  │2014-04-03T13:50:00Z│                         │*** │
-└───────────────┴────────────────────┴─────────────────────────┴────┘
-Checking for updated lineups from Schedules Direct.
-Retrieving lineup from Schedules Direct.
-Retrieving lineup from Schedules Direct.
-```
-
 Repeat this process until you have added the necessary lineups to your
 account.
+
+```
+Status messages from Schedules Direct:
+Server: 20140530.t2.1
+Last data refresh: 2014-09-05T17:22:22Z
+Account expires: 2015-06-28T05:16:29Z
+Max number of headends for your account: 16
+Next suggested connect time: 2014-09-06T15:23:59Z
+The following lineups are in your account at Schedules Direct:
+
+┌──────┬────────────────────┬────────────────────┬─────────────────────────┬───────┐
+│Number│Lineup              │Server modified     │MythTV videosource update│Status │
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│1     │BES-0000044-DEFAULT │2014-09-02T18:34:18Z│                         │Updated│
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│2     │CAN-OTA-L5H3J2      │2014-09-05T16:48:09Z│2014-09-03T14:11:24Z     │Updated│
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│3     │TCA-0003402-X       │2014-09-05T19:24:54Z│                         │Updated│
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│4     │USA-IL57303-X       │2014-09-05T16:47:30Z│2014-08-19T04:19:31Z     │Updated│
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│5     │USA-WA61851-X       │2014-09-05T16:47:30Z│                         │Updated│
+└──────┴────────────────────┴────────────────────┴─────────────────────────┴───────┘
+Checking for updated lineups from Schedules Direct.
+Retrieving lineup BES-0000044-DEFAULT from Schedules Direct.
+Retrieving lineup CAN-OTA-L5H3J2 from Schedules Direct.
+Retrieving lineup TCA-0003402-X from Schedules Direct.
+Retrieving lineup USA-IL57303-X from Schedules Direct.
+Retrieving lineup USA-WA61851-X from Schedules Direct.
+```
 
 ###Add a videosource
 
@@ -484,20 +494,33 @@ Which lineup:>USA-IL57303-X
 Updating channel table for lineup:USA-IL57303-X
 
 Status messages from Schedules Direct:
-Server: AWS-SD-web.1
-Last data refresh: 2014-04-03T17:13:48Z
-Account expires: 2014-06-28T05:16:29Z
+Server: 20140530.t2.1
+Last data refresh: 2014-09-05T17:22:22Z
+Account expires: 2015-06-28T05:16:29Z
 Max number of headends for your account: 16
-Next suggested connect time: 2014-04-04T08:46:21Z
+Next suggested connect time: 2014-09-06T15:23:59Z
 The following lineups are in your account at Schedules Direct:
 
-┌───────────────┬────────────────────┬─────────────────────────┬────┐
-│Lineup         │Server modified     │MythTV videosource update│New?│
-├───────────────┼────────────────────┼─────────────────────────┼────┤
-│USA-IL57303-X  │2014-04-03T13:50:00Z│2014-04-03T13:50:00Z     │    │
-└───────────────┴────────────────────┴─────────────────────────┴────┘
+┌──────┬────────────────────┬────────────────────┬─────────────────────────┬───────┐
+│Number│Lineup              │Server modified     │MythTV videosource update│Status │
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│1     │BES-0000044-DEFAULT │2014-09-02T18:34:18Z│                         │Updated│
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│2     │CAN-OTA-L5H3J2      │2014-09-05T16:48:09Z│2014-09-03T14:11:24Z     │Updated│
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│3     │TCA-0003402-X       │2014-09-05T19:24:54Z│                         │Updated│
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│4     │USA-IL57303-X       │2014-09-05T16:47:30Z│2014-08-19T04:19:31Z     │       │
+├──────┼────────────────────┼────────────────────┼─────────────────────────┼───────┤
+│5     │USA-WA61851-X       │2014-09-05T16:47:30Z│                         │Updated│
+└──────┴────────────────────┴────────────────────┴─────────────────────────┴───────┘
 Checking for updated lineups from Schedules Direct.
-Retrieving lineup from Schedules Direct.
+Retrieving lineup BES-0000044-DEFAULT from Schedules Direct.
+Retrieving lineup CAN-OTA-L5H3J2 from Schedules Direct.
+Retrieving lineup TCA-0003402-X from Schedules Direct.
+Retrieving lineup USA-IL57303-X from Schedules Direct.
+Retrieving lineup USA-WA61851-X from Schedules Direct.
+
 ```
 
 If you're using QAM, you'll see:
