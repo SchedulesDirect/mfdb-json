@@ -951,7 +951,6 @@ function addLineupsToSchedulesDirect()
 
     while (!$done)
     {
-
         print "Three-character ISO-3166-1 alpha3 country code (? to list available countries):";
         $country = strtoupper(readline(">"));
 
@@ -984,104 +983,104 @@ function addLineupsToSchedulesDirect()
         {
             return;
         }
-
-        try
-        {
-            $response = $client->get("headends", array(), array(
-                "query"   => array("country" => $country, "postalcode" => $postalcode),
-                "headers" => array("token" => $token)))->send();
-        } catch (Guzzle\Http\Exception\BadResponseException $e)
-        {
-            $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
-            print "********************************************\n";
-            print "\tError response from server:\n";
-            print "\tCode: {$s["code"]}\n";
-            print "\tMessage: {$s["message"]}\n";
-            print "\tServer: {$s["serverID"]}\n";
-            print "********************************************\n";
-
-            return;
-        }
-
-        $res = $response->json();
-
-        if ($debug)
-        {
-            debugMSG("addLineupsToSchedulesDirect:Response:$res");
-            debugMSG("Raw headers:\n" . $response->getRawHeaders());
-        }
-
-        $counter = "0";
-
-        foreach ($res as $he => $details)
-        {
-            print "\nheadend: $he\n";
-            print "location: {$details["location"]}\n";
-            foreach ($details["lineups"] as $v)
-            {
-                $counter++;
-                $name = $v["name"];
-                $lineup = end(explode("/", $v["uri"]));
-                $sdLineupArray[$counter] = $lineup;
-                print "\t#$counter:\n";
-                print "\tname: $name\n";
-                print "\tLineup: $lineup\n";
-            }
-        }
-
-        print "\n\n";
-        $lineup = readline("Lineup to add (# or lineup)>");
-
-        if ($lineup == "")
-        {
-            return;
-        }
-
-        if (strlen($lineup) < 3)
-        {
-            $lineup = $sdLineupArray[$lineup];
-        }
-        else
-        {
-            $lineup = strtoupper($lineup);
-        }
-
-        if (substr_count($lineup, "-") != 2)
-        {
-            print "Did not see two hyphens in lineup; did you enter it correctly?\n";
-
-            return;
-        }
-
-        print "Sending request to server.\n";
-        $lineup = str_replace(" ", "", $lineup);
-
-        try
-        {
-            $response = $client->put("lineups/$lineup", array("token" => $token), array())->send();
-        } catch (Guzzle\Http\Exception\BadResponseException $e)
-        {
-            $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
-            print "********************************************\n";
-            print "\tError response from server:\n";
-            print "\tCode: {$s["code"]}\n";
-            print "\tMessage: {$s["message"]}\n";
-            print "\tServer: {$s["serverID"]}\n";
-            print "********************************************\n";
-
-            return;
-        }
-
-        $res = $response->json();
-
-        if ($debug)
-        {
-            debugMSG("addLineupsToSchedulesDirect:Response:$res");
-            debugMSG("Raw headers:\n" . $response->getRawHeaders());
-        }
-
-        print "Message from server: {$res["message"]}\n";
     }
+
+    try
+    {
+        $response = $client->get("headends", array(), array(
+            "query"   => array("country" => $country, "postalcode" => $postalcode),
+            "headers" => array("token" => $token)))->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+        print "********************************************\n";
+        print "\tError response from server:\n";
+        print "\tCode: {$s["code"]}\n";
+        print "\tMessage: {$s["message"]}\n";
+        print "\tServer: {$s["serverID"]}\n";
+        print "********************************************\n";
+
+        return;
+    }
+
+    $res = $response->json();
+
+    if ($debug)
+    {
+        debugMSG("addLineupsToSchedulesDirect:Response:$res");
+        debugMSG("Raw headers:\n" . $response->getRawHeaders());
+    }
+
+    $counter = "0";
+
+    foreach ($res as $he => $details)
+    {
+        print "\nheadend: $he\n";
+        print "location: {$details["location"]}\n";
+        foreach ($details["lineups"] as $v)
+        {
+            $counter++;
+            $name = $v["name"];
+            $lineup = end(explode("/", $v["uri"]));
+            $sdLineupArray[$counter] = $lineup;
+            print "\t#$counter:\n";
+            print "\tname: $name\n";
+            print "\tLineup: $lineup\n";
+        }
+    }
+
+    print "\n\n";
+    $lineup = readline("Lineup to add (# or lineup)>");
+
+    if ($lineup == "")
+    {
+        return;
+    }
+
+    if (strlen($lineup) < 3)
+    {
+        $lineup = $sdLineupArray[$lineup];
+    }
+    else
+    {
+        $lineup = strtoupper($lineup);
+    }
+
+    if (substr_count($lineup, "-") != 2)
+    {
+        print "Did not see two hyphens in lineup; did you enter it correctly?\n";
+
+        return;
+    }
+
+    print "Sending request to server.\n";
+    $lineup = str_replace(" ", "", $lineup);
+
+    try
+    {
+        $response = $client->put("lineups/$lineup", array("token" => $token), array())->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+        print "********************************************\n";
+        print "\tError response from server:\n";
+        print "\tCode: {$s["code"]}\n";
+        print "\tMessage: {$s["message"]}\n";
+        print "\tServer: {$s["serverID"]}\n";
+        print "********************************************\n";
+
+        return;
+    }
+
+    $res = $response->json();
+
+    if ($debug)
+    {
+        debugMSG("addLineupsToSchedulesDirect:Response:$res");
+        debugMSG("Raw headers:\n" . $response->getRawHeaders());
+    }
+
+    print "Message from server: {$res["message"]}\n";
 }
 
 function directAddLineup($lineup)
