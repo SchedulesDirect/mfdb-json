@@ -1677,7 +1677,7 @@ function printListOfAvailableCountries($countries)
         {
             if (strlen($country) > $countryWidth)
             {
-                $countryWidth = $country;
+                $countryWidth = strlen($country);
             }
         }
 
