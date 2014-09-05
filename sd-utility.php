@@ -24,6 +24,35 @@ $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 $lineupArray = array();
 
+$availableCountries = array(
+    "North America" => array(
+        "United States" => "USA",
+        "Canada"        => "CAN",
+        "Mexico"        => "MEX"),
+    "Europe"        => array(
+        "Denmark"       => "DNK",
+        "Finland"       => "FIN",
+        "Great Britain" => "GBR",
+        "Sweden"        => "SWE"),
+    "Latin America" => array(
+        "Argentina"  => "ARG",
+        "Belize"     => "BLZ",
+        "Brazil"     => "BRA",
+        "Chile"      => "CHL",
+        "Columbia"   => "COL",
+        "Costa Rica" => "CRI",
+        "Ecuador"    => "ECU",
+        "Guatemala"  => "GTM",
+        "Guyana"     => "GUY",
+        "Honduras"   => "HND",
+        "Panama"     => "PAN",
+        "Peru"       => "PER",
+        "Uruguay"    => "URY",
+        "Venezuela"  => "VEN"),
+    "Caribbean"     => array(
+        "Anguila"         => "AIA",
+        "Antigua/Barbuda" => "ATG"));
+
 require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
@@ -65,6 +94,7 @@ $host = "localhost";
 
 $helpText = <<< eol
 The following options are available:
+--countries\t\tThe list of countries that have data.
 --debug\t\tEnable debugging. (Default: FALSE)
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
@@ -89,6 +119,10 @@ foreach ($options as $k => $v)
 {
     switch ($k)
     {
+        case "countries":
+            printListOfAvailableCountries($availableCountries);
+            exit;
+            break;
         case "debug":
             $debug = TRUE;
             break;
@@ -901,6 +935,13 @@ function addLineupsToSchedulesDirect()
         return;
     }
 
+    if ($country == "?")
+    {
+        printListOfAvailableCountries();
+
+        return;
+    }
+
     if (array_key_exists($country, $arrayCountriesWithOnePostalCode))
     {
         print "Only one valid postal code for this country: {$arrayCountriesWithOnePostalCode[$country]}\n";
@@ -1623,6 +1664,15 @@ function getLineupFromNumber($numberOrLineup)
     {
         return ($numberOrLineup); //We're actually just returning the name of the array.
     }
+}
+
+function printListOfAvailableCountries($countries)
+{
+    foreach ($countries as $region=>$data)
+    {
+        print "Region:$region\n";
+    }
+
 }
 
 ?>
