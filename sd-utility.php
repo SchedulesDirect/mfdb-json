@@ -946,19 +946,28 @@ function addLineupsToSchedulesDirect()
         "TTO" => "TT",
         "TCA" => "TKCA1ZZ");
 
-    print "Three-character ISO-3166-1 alpha3 country code (? to list available countries):";
-    $country = strtoupper(readline(">"));
+    $done = FALSE;
+    $country = "";
 
-    if ($country == "")
+    while (!$done)
     {
-        return;
-    }
 
-    if ($country == "?")
-    {
-        printListOfAvailableCountries();
+        print "Three-character ISO-3166-1 alpha3 country code (? to list available countries):";
+        $country = strtoupper(readline(">"));
 
-        return;
+        if ($country == "")
+        {
+            return;
+        }
+
+        if ($country == "?")
+        {
+            printListOfAvailableCountries();
+        }
+        else
+        {
+            $done = TRUE;
+        }
     }
 
     if (array_key_exists($country, $arrayCountriesWithOnePostalCode))
