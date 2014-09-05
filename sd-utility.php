@@ -50,8 +50,27 @@ $availableCountries = array(
         "Uruguay"    => "URY",
         "Venezuela"  => "VEN"),
     "Caribbean"     => array(
-        "Anguila"         => "AIA",
-        "Antigua/Barbuda" => "ATG"));
+        "Anguila"                      => "AIA",
+        "Antigua/Barbuda"              => "ATG",
+        "Aruba"                        => "ABW",
+        "Bahamas"                      => "BHS",
+        "Barbados"                     => "BRB",
+        "Bermuda"                      => "BMU",
+        "Bonaire, Saba, St. Eustatius" => "BES",
+        "British Virgin Islands"       => "VGB",
+        "Cayman Islands"               => "CYM",
+        "Curacao"                      => "CUW",
+        "Dominica"                     => "DMA",
+        "Dominican Republic"           => "DOM",
+        "Grenada"                      => "GRD",
+        "Jamaica"                      => "JAM",
+        "Puerto Rico"                  => "PRI",
+        "Saint Martin"                 => "MAF",
+        "Saint Vincent / Grenadines"   => "VCT",
+        "St. Kitts and Nevis"          => "KNA",
+        "St. Lucia"                    => "LCA",
+        "Trinidad and Tobago"          => "TTO",
+        "Turks and Caicos"             => "TCA"));
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -120,7 +139,7 @@ foreach ($options as $k => $v)
     switch ($k)
     {
         case "countries":
-            printListOfAvailableCountries($availableCountries);
+            printListOfAvailableCountries();
             exit;
             break;
         case "debug":
@@ -1666,11 +1685,13 @@ function getLineupFromNumber($numberOrLineup)
     }
 }
 
-function printListOfAvailableCountries($countries)
+function printListOfAvailableCountries()
 {
-    foreach ($countries as $region => $data)
+    global $availableCountries;
+
+    foreach ($availableCountries as $region => $data)
     {
-        print "Region:$region\n";
+        print "\nRegion:$region\n";
 
         $countryWidth = 0;
         foreach ($data as $country => $tla)
