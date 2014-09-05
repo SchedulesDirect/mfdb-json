@@ -1668,11 +1668,29 @@ function getLineupFromNumber($numberOrLineup)
 
 function printListOfAvailableCountries($countries)
 {
-    foreach ($countries as $region=>$data)
+    foreach ($countries as $region => $data)
     {
         print "Region:$region\n";
-    }
 
+        $countryWidth = 0;
+        foreach ($data as $country => $tla)
+        {
+            if (strlen($country) > $countryWidth)
+            {
+                $countryWidth = $country;
+            }
+        }
+
+        $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 12)));
+        $countryList->appendRow(array("Country", "Three-letter"));
+
+        foreach ($data as $country => $tla)
+        {
+            $countryList->appendRow(array($country, $tla));
+        }
+
+        print $countryList;
+    }
 }
 
 ?>
