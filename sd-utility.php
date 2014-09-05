@@ -1681,8 +1681,8 @@ function printListOfAvailableCountries($countries)
             }
         }
 
-        $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 12)));
-        $countryList->appendRow(array("Country", "Three-letter"));
+        $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 18)));
+        $countryList->appendRow(array("Country", "Three-letter code"));
 
         foreach ($data as $country => $tla)
         {
