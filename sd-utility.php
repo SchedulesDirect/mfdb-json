@@ -94,7 +94,7 @@ $host = "localhost";
 
 $helpText = <<< eol
 The following options are available:
---countries\t\tThe list of countries that have data.
+--countries\tThe list of countries that have data.
 --debug\t\tEnable debugging. (Default: FALSE)
 --dbname=\tMySQL database name. (Default: $dbName)
 --dbuser=\tUsername for database access. (Default: $dbUser)
@@ -111,7 +111,7 @@ The following options are available:
 --version\tPrint version information.
 eol;
 
-$longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+$longoptions = array("countries", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
                      "logo::", "nomyth", "skiplogo", "username::", "password::", "timezone::", "version");
 
 $options = getopt("h::", $longoptions);
