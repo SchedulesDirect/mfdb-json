@@ -946,7 +946,7 @@ function addLineupsToSchedulesDirect()
         "TTO" => "TT",
         "TCA" => "TKCA1ZZ");
 
-    print "Three-character ISO-3166-1 alpha3 country code:";
+    print "Three-character ISO-3166-1 alpha3 country code (? to list available countries):";
     $country = strtoupper(readline(">"));
 
     if ($country == "")
