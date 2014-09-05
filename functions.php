@@ -6,8 +6,8 @@
  * Time: 2:22 AM
  */
 
-$scriptVersion = "0.06-test.09";
-$scriptDate = "2014-08-22";
+$scriptVersion = "0.07-test.00";
+$scriptDate = "2014-09-05";
 
 function getToken($username, $passwordHash)
 {
@@ -134,7 +134,7 @@ function getStatus()
 
 function printStatus($sdStatus)
 {
-    global $updatedHeadendsToRefresh;
+    global $updatedLineupsToRefresh;
     global $lineupArray;
     global $isMythTV;
 
@@ -220,7 +220,7 @@ function printStatus($sdStatus)
 
                 if ($serverModified > $mythModified)
                 {
-                    $updatedHeadendsToRefresh[$lineup] = $serverModified;
+                    $updatedLineupsToRefresh[$lineup] = $serverModified;
                     $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, "Updated"));
                     continue;
                 }
@@ -242,9 +242,9 @@ function printStatus($sdStatus)
 
         print $lineupData;
 
-        if (count($updatedHeadendsToRefresh))
+        if (count($updatedLineupsToRefresh))
         {
-            updateLocalLineupCache($updatedHeadendsToRefresh);
+            updateLocalLineupCache($updatedLineupsToRefresh);
         }
     }
     else
