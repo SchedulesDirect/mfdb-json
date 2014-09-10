@@ -90,10 +90,11 @@ The following options are available:
 --station=\tDownload the schedule for a single stationID in your lineup.
 --schedule\tDownload schedules based on stationIDs in sd.json.stations.conf file.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
+--version\tPrint version information and exit.
 eol;
 
 $longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "force", "nomyth", "max::", "program", "quiet", "station::", "schedule", "timezone::");
+                     "force", "nomyth", "max::", "program", "quiet", "station::", "schedule", "timezone::", "version");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -147,6 +148,10 @@ foreach ($options as $k => $v)
             break;
         case "timezone":
             date_default_timezone_set($v);
+            break;
+        case "version":
+            print "$agentString\n\n";
+            exit;
             break;
     }
 }

@@ -127,7 +127,7 @@ The following options are available:
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
---version\tPrint version information.
+--version\tPrint version information and exit.
 eol;
 
 $longoptions = array("countries", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
