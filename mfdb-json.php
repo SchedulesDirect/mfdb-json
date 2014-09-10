@@ -674,7 +674,16 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 {
                     foreach ($jsonProgram["crew"] as $credit)
                     {
-                        $role = $credit["role"];
+                        if (!isset($credit["role"]))
+                        {
+                            printMSG("No role?");
+                            var_dump($jsonProgram["crew"]);
+                            exit;
+                        }
+                        else
+                        {
+                            $role = $credit["role"];
+                        }
                         if (!isset($credit["personId"]))
                         {
                             printMSG("$jsonFileToProcess:$pid does not have a personId.");
