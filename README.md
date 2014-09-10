@@ -485,9 +485,9 @@ Restart sd-utility.php and continue to the next step:
 ####Antenna/QAM lineup post-scan and non-Antenna lineups.
 
 Once the scan is complete, or you're using a device which doesn't require a
-scan, you'll need to download the channel mapping using the "R" function. 
+scan, you'll need to download the channel mapping with the "U" function. 
 This is also done whenever the utility program tells you that there's an
-update available to the headend by putting "***" in the "New" column.
+update available to the headend by putting "Updated" in the "Status" column.
 
 Type in: **U**
 
