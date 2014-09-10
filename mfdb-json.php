@@ -439,7 +439,8 @@ function getSchedules($stationIDsToFetch)
             else
             {
                 $quiet = FALSE;
-                printMSG("FATAL ERROR: no MD5 value for program. Open ticket with Schedules Direct.");
+                printMSG("FATAL ERROR: no MD5 value for program.");
+                printMSG("Send the following to grabber@schedulesdirect.org\n");
                 printMSG("s:$stationID\n\njson:$json\n\nitem\n\n" . print_r($item, TRUE) . "\n\n");
                 exit;
             }
