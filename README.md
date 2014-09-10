@@ -466,8 +466,8 @@ database.  Send the file to
 
 qam-info@schedulesdirect.org
 
-Once we have the scan, we will correlate the station names and create a -QAM
-lineup for you.
+Once we have the scan, we will correlate the station names and create a
+"-QAM" lineup for you.
 
 For Antenna and QAM users who will run a scan, once you've added the
 appropriate lineup to your Schedules Direct account, added a videosource (in
