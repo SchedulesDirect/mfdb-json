@@ -63,6 +63,7 @@ yum -y install git curl curl-devel libcurl libcurl-devel php-common
 ###Clone from github
 
 git clone https://github.com/SchedulesDirect/mfdb-json.git
+
 git checkout API-20140530
 
 ###Install Composer
