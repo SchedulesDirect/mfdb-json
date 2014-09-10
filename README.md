@@ -614,7 +614,10 @@ Try to schedule something to record.  If it works, then excellent!  If not,
 let me know what didn't work and I'll take a look.
 
 The scripts will tell you the directories they're using; the raw data files
-are going to be plaintext json.
+are going to be plaintext JSON.
+
+**NOTE**: The script does not delete the data files while the scripts are
+still being developed.  Make sure that /tmp doesn't get full!
 
 #Automatically retrieving data
 
