@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.20, 2014-09-05
+v0.21, 2014-09-10
 
 Robert Kulagowski
 
@@ -63,6 +63,7 @@ yum -y install git curl curl-devel libcurl libcurl-devel php-common
 ###Clone from github
 
 git clone https://github.com/SchedulesDirect/mfdb-json.git
+git checkout API-20140530
 
 ###Install Composer
 
