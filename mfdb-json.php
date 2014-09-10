@@ -536,9 +536,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
 {
     global $dbh;
     global $dlProgramTempDir;
-    //global $debug;
-
-    $debug = TRUE;
+    global $debug;
 
     $insertJSON = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
@@ -761,9 +759,6 @@ function insertSchedule()
 
     printMSG("Inserting schedules.");
 
-    $dbh->exec("DROP TABLE IF EXISTS t_SDschedule");
-    $dbh->exec("CREATE TABLE t_SDschedule LIKE SDschedule");
-
     $dbh->exec("DROP TABLE IF EXISTS t_program");
     $dbh->exec("CREATE TABLE t_program LIKE program");
 
@@ -776,15 +771,6 @@ function insertSchedule()
     $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='DBSchemaVer'");
     $stmt->execute();
     $dbSchema = $stmt->fetchColumn();
-
-    $insertScheduleSD = $dbh->prepare("INSERT IGNORE INTO t_SDschedule(stationID,programID,md5,air_datetime,duration,
-    previouslyshown,closecaptioned,partnumber,parttotal,first,last,dvs,new,educational,hdtv,3d,letterbox,stereo,
-    dolby,dubbed,dubLanguage,subtitled,subtitleLanguage,sap,sapLanguage,programLanguage,tvRatingSystem,tvRating,
-    dialogRating,languageRating,sexualContentRating,violenceRating,fvRating)
-    VALUES(:stationID,:programID,:md5,:air_datetime,:duration,
-    :previouslyshown,:closecaptioned,:partnumber,:parttotal,:first,:last,:dvs,:new,:educational,:hdtv,:3d,
-    :letterbox,:stereo,:dolby,:dubbed,:dubLanguage,:subtitled,:subtitleLanguage,:sap,:sapLanguage,:programLanguage,
-    :ratingSystem,:tvRating,:dialogRating,:languageRating,:sexualContentRating,:violenceRating,:fvRating)");
 
     if ($dbSchema > "1318")
     {
@@ -1193,7 +1179,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $liveOrTapeDelay = $schedule["liveTapeDelay"];
             }
 
-            $title = $programJSON["titles"]["title120"];
+            $title = $programJSON["titles"][0]["title120"];
 
             if ($title == NULL OR $title == "")
             {
@@ -1422,88 +1408,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            /* Bypass the SD-specific insert for now; might be easier to just parse the JSON from the programCache.
-                        try
-                        {
-                            $insertScheduleSD->execute(array(
-                                "stationID"           => $stationID,
-                                "programID"           => $programID,
-                                "md5"                 => $md5,
-                                "air_datetime"        => $air_datetime,
-                                "duration"            => $duration,
-                                "previouslyshown"     => $previouslyshown,
-                                "closecaptioned"      => $isClosedCaption,
-                                "partnumber"          => $partNumber,
-                                "parttotal"           => $numberOfParts,
-                                "first"               => $isFirst,
-                                "last"                => $isLast,
-                                "dvs"                 => $dvs,
-                                "new"                 => $isNew,
-                                "educational"         => $isEducational,
-                                "hdtv"                => $isHDTV,
-                                "3d"                  => $is3d,
-                                "letterbox"           => $isLetterboxed,
-                                "stereo"              => $isStereo,
-                                "dolby"               => $dolbyType,
-                                "dubbed"              => $dubbed,
-                                "dubLanguage"         => $dubbedLanguage,
-                                "subtitled"           => $isSubtitled,
-                                "subtitleLanguage"    => $subtitledLanguage,
-                                "sap"                 => $sap,
-                                "sapLanguage"         => $sapLanguage,
-                                "programLanguage"     => $programLanguage,
-                                "ratingSystem"        => $ratingSystem,
-                                "tvRating"            => $rating,
-                                "dialogRating"        => $dialogRating,
-                                "languageRating"      => $languageRating,
-                                "sexualContentRating" => $sexRating,
-                                "violenceRating"      => $violenceRating,
-                                "fvRating"            => $fvRating));
-                        } catch (PDOException $e)
-                        {
-                            print "Exception: " . $e->getMessage();
-                            $debug = TRUE;
-                            var_dump($programJSON);
-                        }
-            */
-            if (isset($programJSON["castAndCrew"]))
-            {
-                foreach ($programJSON["castAndCrew"] as $credit)
-                {
-                    $role = strtolower($credit["role"]);
-                    /*
-                     * MythTV has hardcoded maps of roles because it uses a set during the create table.
-                     */
-                    switch ($role)
-                    {
-                        case "executive producer":
-                            $role = "executive_producer";
-                            break;
-                        case "guest star":
-                            $role = "guest_star";
-                            break;
-                        case "musical guest":
-                            $role = "musical_guest";
-                            break;
-                    }
-
-                    $roleTable[$role] = 1;
-
-                    try
-                    {
-                        $insertCreditMyth->execute(array("person"    => $peopleCache[$credit["name"]],
-                                                         "chanid"    => $chanID,
-                                                         "starttime" => $programStartTimeMyth,
-                                                         "role"      => $role));
-                    } catch (PDOException $e)
-                    {
-                        print "Exception: " . $e->getMessage();
-                        $debug = TRUE;
-                        var_dump($programJSON);
-                    }
-                }
-            }
-
             if ($ratingSystem != "")
             {
                 try
@@ -1646,10 +1550,6 @@ if (isset($v["sap"]))
         debugMSG("Role table:");
         debugMSG(print_r($roleTable, TRUE));
     }
-
-    printMSG("Done inserting schedules.");
-    $dbh->exec("DROP TABLE SDschedule");
-    $dbh->exec("RENAME TABLE t_SDschedule TO SDschedule");
 
     $dbh->exec("DROP TABLE program");
     $dbh->exec("RENAME TABLE t_program TO program");
