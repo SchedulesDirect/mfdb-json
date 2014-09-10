@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.20, 2014-09-05
+v0.21, 2014-09-10
 
 Robert Kulagowski
 
@@ -63,6 +63,8 @@ yum -y install git curl curl-devel libcurl libcurl-devel php-common
 ###Clone from github
 
 git clone https://github.com/SchedulesDirect/mfdb-json.git
+
+git checkout API-20140530
 
 ###Install Composer
 
@@ -464,8 +466,8 @@ database.  Send the file to
 
 qam-info@schedulesdirect.org
 
-Once we have the scan, we will correlate the station names and create a -QAM
-lineup for you.
+Once we have the scan, we will correlate the station names and create a
+"-QAM" lineup for you.
 
 For Antenna and QAM users who will run a scan, once you've added the
 appropriate lineup to your Schedules Direct account, added a videosource (in
@@ -483,9 +485,9 @@ Restart sd-utility.php and continue to the next step:
 ####Antenna/QAM lineup post-scan and non-Antenna lineups.
 
 Once the scan is complete, or you're using a device which doesn't require a
-scan, you'll need to download the channel mapping using the "R" function. 
+scan, you'll need to download the channel mapping with the "U" function. 
 This is also done whenever the utility program tells you that there's an
-update available to the headend by putting "***" in the "New" column.
+update available to the headend by putting "Updated" in the "Status" column.
 
 Type in: **U**
 
@@ -612,7 +614,10 @@ Try to schedule something to record.  If it works, then excellent!  If not,
 let me know what didn't work and I'll take a look.
 
 The scripts will tell you the directories they're using; the raw data files
-are going to be plaintext json.
+are going to be plaintext JSON.
+
+**NOTE**: The script does not delete the data files while the scripts are
+still being developed.  Make sure that /tmp doesn't get full!
 
 #Automatically retrieving data
 
