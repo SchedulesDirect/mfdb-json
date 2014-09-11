@@ -676,7 +676,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
                     {
                         if (!isset($credit["role"]))
                         {
-                            printMSG("No role?");
+                            printMSG("No role? Program:$pid");
                             var_dump($jsonProgram["crew"]);
                             exit;
                         }
