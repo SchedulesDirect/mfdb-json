@@ -636,7 +636,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
                         {
                             printMSG("No role?");
                             printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-                            printMSG("Program: $pid");
+                            printMSG("Program: $pid. No role in cast.");
                             var_dump($jsonProgram["cast"]);
                             exit;
                         }
@@ -690,7 +690,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
                         {
                             printMSG("No role?");
                             printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-                            printMSG("Program: $pid");
+                            printMSG("Program: $pid. No role in crew.");
                             var_dump($jsonProgram["crew"]);
                             exit;
                         }
