@@ -632,7 +632,19 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 {
                     foreach ($jsonProgram["cast"] as $credit)
                     {
-                        $role = $credit["role"];
+                        if (!isset($credit["role"]))
+                        {
+                            printMSG("No role?");
+                            printMSG("Send the following to grabber@schedulesdirect.org\n\n");
+                            printMSG("Program: $pid");
+                            var_dump($jsonProgram["cast"]);
+                            exit;
+                        }
+                        else
+                        {
+                            $role = $credit["role"];
+                        }
+
                         if (!isset($credit["personId"]))
                         {
                             printMSG("$jsonFileToProcess:$pid does not have a personId.");
@@ -686,6 +698,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
                         {
                             $role = $credit["role"];
                         }
+
                         if (!isset($credit["personId"]))
                         {
                             printMSG("$jsonFileToProcess:$pid does not have a personId.");
