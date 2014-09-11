@@ -428,8 +428,8 @@ function getSchedules($stationIDsToFetch)
 
         if (!array_key_exists("programs", $item))
         {
-            printMSG("WARNING: JSON does not contain any program elements.\n");
-            printMSG("Send the following to grabber@schedulesdirect.org\n");
+            printMSG("WARNING: JSON does not contain any program elements.");
+            printMSG("Send the following to grabber@schedulesdirect.org\n\n");
             var_dump($item);
             printMSG("$json\n\n");
             exit;
@@ -676,7 +676,9 @@ function insertJSON(array $jsonProgramsToRetrieve)
                     {
                         if (!isset($credit["role"]))
                         {
-                            printMSG("No role? Program:$pid");
+                            printMSG("No role?");
+                            printMSG("Send the following to grabber@schedulesdirect.org\n\n");
+                            printMSG("Program: $pid");
                             var_dump($jsonProgram["crew"]);
                             exit;
                         }
