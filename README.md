@@ -1,8 +1,8 @@
 #mfdb-json
 
-mythfilldatabase grabber for the Schedules Direct JSON service.
+Grabber for the Schedules Direct JSON service.
 
-v0.21, 2014-09-10
+v0.22, 2014-09-12
 
 Robert Kulagowski
 
@@ -14,11 +14,12 @@ for downloading data from Schedules Direct using the new JSON format.
 This file describes API 20140530.
 
 #Features:
-##Mythtv-only
+##MythTV-only
 - only downloads programs that have changes. Your first download may be
   40000 programs, but daily downloads after that will be 2-3000 depending on
   how many channels you have.  If the same program is broadcast on multiple
   channels, it's still only downloaded once.
+
 ##All
 - QAM tuning information.
 - program-specific language information. (A program that's being broadcast
@@ -63,7 +64,7 @@ yum -y install git curl curl-devel libcurl libcurl-devel php-common
 ###Clone from github
 
 git clone https://github.com/SchedulesDirect/mfdb-json.git
-
+cd mfdb-json
 git checkout API-20140530
 
 ###Install Composer
