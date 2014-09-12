@@ -20,6 +20,7 @@ $usernameFromDB = "";
 $password = "";
 $passwordFromDB = "";
 $passwordHash = "";
+$dbWithoutMythtv = FALSE;
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 $lineupArray = array();
@@ -126,12 +127,13 @@ The following options are available:
 --skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
+--usedb\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --version\tPrint version information and exit.
 eol;
 
 $longoptions = array("countries", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "logo::", "nomyth", "skiplogo", "username::", "password::", "timezone::", "version");
+                     "logo::", "nomyth", "skiplogo", "username::", "password::", "timezone::", "usedb", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -185,6 +187,9 @@ foreach ($options as $k => $v)
         case "timezone":
             date_default_timezone_set($v);
             break;
+        case "usedb":
+            $dbWithoutMythtv = TRUE;
+            break;
         case "version":
             print "$agentString\n\n";
             exit;
@@ -195,9 +200,9 @@ foreach ($options as $k => $v)
 print "Using timezone $tz\n";
 print "$agentString\n";
 
-if ($isMythTV)
+if ($isMythTV OR $dbWithoutMythtv)
 {
-    print "Attempting to connect to MythTV database.\n";
+    print "Attempting to connect to database.\n";
     try
     {
         $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
@@ -1363,47 +1368,77 @@ function getSchedulesDirectLineups()
 function checkDatabase()
 {
     global $dbh;
+    global $dbWithoutMythtv;
 
-    $schemaVersion = setting("SchedulesDirectJSONschemaVersion");
+    $createBaseTables = FALSE;
 
-    if ($schemaVersion === FALSE OR $schemaVersion == "26")
+    if ($dbWithoutMythtv)
     {
-        $stmt = $dbh->prepare("DESCRIBE videosource");
+        $stmt = $dbh->prepare("DESCRIBE 1_settings");
         $stmt->execute();
         $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if (in_array("modified", $columnNames))
+        if (!in_array("hostname", $columnNames))
         {
-            /*
-             * We're going to store lineup modification dates in the settings table so that we're not
-             * modifying a core MythTV table. But first we'll pull the existing information out.
-             */
+            $stmt = $dbh->exec("CREATE TABLE `settings`
+            (
+            `value` varchar(128) NOT NULL DEFAULT '',
+            `data` varchar(16000) NOT NULL DEFAULT '',
+            `hostname` varchar(64) DEFAULT NULL,
+            KEY `value` (`value`,`hostname`)
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
 
-            $stmt = $dbh->prepare("SELECT lineupid, modified FROM videosource");
+            setting("SchedulesDirectJSONschemaVersion", "27");
+            $createBaseTables = TRUE;
+        }
+    }
+    else
+    {
+        $schemaVersion = setting("SchedulesDirectJSONschemaVersion");
+
+        if ($schemaVersion === FALSE OR $schemaVersion == "26")
+        {
+            $stmt = $dbh->prepare("DESCRIBE videosource");
             $stmt->execute();
-            $existingLineups = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+            $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-            $foo = array();
-            foreach ($existingLineups as $lineup => $modified)
+            if (in_array("modified", $columnNames))
             {
-                $foo[] = array("lineup" => $lineup, "lastModified" => $modified);
+                /*
+                 * We're going to store lineup modification dates in the settings table so that we're not
+                 * modifying a core MythTV table. But first we'll pull the existing information out.
+                 */
+
+                $stmt = $dbh->prepare("SELECT lineupid, modified FROM videosource");
+                $stmt->execute();
+                $existingLineups = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                $foo = array();
+                foreach ($existingLineups as $lineup => $modified)
+                {
+                    $foo[] = array("lineup" => $lineup, "lastModified" => $modified);
+                }
+
+                $bar = json_encode($foo);
+
+                setting("localLineupLastModified", $bar);
+
+                $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
             }
 
-            $bar = json_encode($foo);
+            $result = setting("schedulesdirectLogin");
 
-            setting("localLineupLastModified", $bar);
-
-            $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
+            if ($result)
+            {
+                $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
+                setting("SchedulesDirectLogin", $result);
+            }
+            $createBaseTables = TRUE;
         }
+    }
 
-        $result = setting("schedulesdirectLogin");
-
-        if ($result)
-        {
-            $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
-            setting("SchedulesDirectLogin", $result);
-        }
-
+    if ($createBaseTables)
+    {
         print "Creating remaining tables.\n";
 
         $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
@@ -1555,7 +1590,6 @@ function checkDatabase()
          * Do whatever. Stub.
          */
     }
-
 }
 
 function putSchedulesDirectLoginIntoDB($usernameAndPassword)
