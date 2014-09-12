@@ -127,7 +127,7 @@ The following options are available:
 --skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
---usedb\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
+--usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --version\tPrint version information and exit.
 eol;
