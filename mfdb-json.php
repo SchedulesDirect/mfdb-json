@@ -35,6 +35,7 @@ $tz = "UTC";
 $usernameFromDB = "";
 $passwordFromDB = "";
 $stationIDs = array();
+$dbWithoutMythtv = FALSE;
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -90,11 +91,13 @@ The following options are available:
 --station=\tDownload the schedule for a single stationID in your lineup.
 --schedule\tDownload schedules based on stationIDs in sd.json.stations.conf file.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
+--usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --version\tPrint version information and exit.
 eol;
 
 $longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "force", "nomyth", "max::", "program", "quiet", "station::", "schedule", "timezone::", "version");
+                     "force", "nomyth", "max::", "program", "quiet", "station::", "schedule", "timezone::",
+                     "usedb", "version");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -149,6 +152,9 @@ foreach ($options as $k => $v)
         case "timezone":
             date_default_timezone_set($v);
             break;
+        case "usedb":
+            $dbWithoutMythtv = TRUE;
+            break;
         case "version":
             print "$agentString\n\n";
             exit;
@@ -163,9 +169,9 @@ printMSG("Temp directory for Schedules is $dlSchedTempDir");
 $dlProgramTempDir = tempdir("programs");
 printMSG("Temp directory for Programs is $dlProgramTempDir");
 
-if ($isMythTV)
+if ($isMythTV OR $dbWithoutMythtv)
 {
-    printMSG("Connecting to MythTV database.");
+    printMSG("Connecting to database.");
     try
     {
         $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,

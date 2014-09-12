@@ -1374,7 +1374,7 @@ function checkDatabase()
 
     if ($dbWithoutMythtv)
     {
-        $stmt = $dbh->prepare("DESCRIBE 1_settings");
+        $stmt = $dbh->prepare("DESCRIBE settings");
         try
         {
             $stmt->execute();
@@ -1382,7 +1382,7 @@ function checkDatabase()
         {
             if ($ex->getCode() == "42S02")
             {
-                $stmt = $dbh->exec("CREATE TABLE `1_settings`
+                $stmt = $dbh->exec("CREATE TABLE `settings`
                 (
                 `value` varchar(128) NOT NULL DEFAULT '',
                 `data` varchar(16000) NOT NULL DEFAULT '',

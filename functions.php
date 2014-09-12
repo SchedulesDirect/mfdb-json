@@ -6,8 +6,8 @@
  * Time: 2:22 AM
  */
 
-$scriptVersion = "0.08-test.01";
-$scriptDate = "2014-09-11";
+$scriptVersion = "0.08-test.02";
+$scriptDate = "2014-09-12";
 
 function getToken($username, $passwordHash)
 {
@@ -343,7 +343,7 @@ function setting()
 
     if (func_num_args() == 1)
     {
-        $stmt = $dbh->prepare("SELECT data FROM 1_settings WHERE value = :key");
+        $stmt = $dbh->prepare("SELECT data FROM settings WHERE value = :key");
         $stmt->execute(array("key" => $key));
         $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
         if (count($result))
@@ -369,11 +369,11 @@ function setting()
 
     if (!$keyAlreadyExists)
     {
-        $stmt = $dbh->prepare("INSERT INTO 1_settings(value,data) VALUES(:key,:value)");
+        $stmt = $dbh->prepare("INSERT INTO settings(value,data) VALUES(:key,:value)");
     }
     else
     {
-        $stmt = $dbh->prepare("UPDATE 1_settings SET data=:value WHERE value=:key");
+        $stmt = $dbh->prepare("UPDATE settings SET data=:value WHERE value=:key");
         /*
          * This would be a whole lot less obtuse if settings table had two columns:
          * "keyColumn" and "valueColumn".
