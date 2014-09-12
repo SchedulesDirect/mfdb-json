@@ -1375,7 +1375,15 @@ function checkDatabase()
     if ($dbWithoutMythtv)
     {
         $stmt = $dbh->prepare("DESCRIBE 1_settings");
-        $stmt->execute();
+        try
+        {
+            $stmt->execute();
+        } catch (PDOException $ex)
+        {
+            print "Caught exception.\n";
+            print "code:\n" . $ex->getCode();
+            $tt=fgets(STDIN);
+        }
         $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         if (!in_array("hostname", $columnNames))
