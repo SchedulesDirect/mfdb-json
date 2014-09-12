@@ -1380,24 +1380,20 @@ function checkDatabase()
             $stmt->execute();
         } catch (PDOException $ex)
         {
-            print "Caught exception.\n";
-            print "code:\n" . $ex->getCode();
-            $tt=fgets(STDIN);
-        }
-        $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            if ($ex->getCode() == "42S02")
+            {
+                $stmt = $dbh->exec("CREATE TABLE `1_settings`
+                (
+                `value` varchar(128) NOT NULL DEFAULT '',
+                `data` varchar(16000) NOT NULL DEFAULT '',
+                `hostname` varchar(64) DEFAULT NULL,
+                KEY `value` (`value`,`hostname`)
+                ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
 
-        if (!in_array("hostname", $columnNames))
-        {
-            $stmt = $dbh->exec("CREATE TABLE `settings`
-            (
-            `value` varchar(128) NOT NULL DEFAULT '',
-            `data` varchar(16000) NOT NULL DEFAULT '',
-            `hostname` varchar(64) DEFAULT NULL,
-            KEY `value` (`value`,`hostname`)
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
-
-            setting("SchedulesDirectJSONschemaVersion", "27");
-            $createBaseTables = TRUE;
+                setting("SchedulesDirectJSONschemaVersion", "27");
+                setting("SchedulesDirectWithoutMythTV", "TRUE");
+                $createBaseTables = TRUE;
+            }
         }
     }
     else
