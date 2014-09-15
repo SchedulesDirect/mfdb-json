@@ -1390,7 +1390,7 @@ function checkDatabase()
                 KEY `value` (`value`,`hostname`)
                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
 
-                setting("SchedulesDirectJSONschemaVersion", "27");
+                setting("SchedulesDirectJSONschemaVersion", "28");
                 setting("SchedulesDirectWithoutMythTV", "TRUE");
                 $createBaseTables = TRUE;
             }
@@ -1589,13 +1589,13 @@ function checkDatabase()
   `width` varchar(128) NOT NULL,
   `type` char(1) NOT NULL,
   PRIMARY KEY (`row`),
-  UNIQUE KEY `id` (`item`,`height`, `width`),
+  UNIQUE KEY `id` (`item`,`height`,`width`),
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
         $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
 
-        setting("SchedulesDirectJSONschemaVersion", "27");
+        setting("SchedulesDirectJSONschemaVersion", "28");
     }
 
     if ($schemaVersion == "26")
