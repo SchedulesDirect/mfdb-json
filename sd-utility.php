@@ -1439,6 +1439,15 @@ function checkDatabase()
             }
             $createBaseTables = TRUE;
         }
+
+        if ($schemaVersion == "27")
+        {
+            $stmt = $dbh->exec("ALTER TABLE SDimageCache DROP KEY id");
+            $stmt = $dbh->exec("ALTER TABLE SDimageCache CHANGE dimension height VARCHAR(128) NOT NULL");
+            $stmt = $dbh->exec("ALTER TABLE SDimageCache ADD width VARCHAR(128) NOT NULL AFTER height");
+            $stmt = $dbh->exec("ALTER TABLE SDimageCache ADD UNIQUE KEY id(item,height,width)");
+            setting("SchedulesDirectJSONschemaVersion", "28");
+        }
     }
 
     if ($createBaseTables)
@@ -1576,10 +1585,11 @@ function checkDatabase()
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `item` varchar(128) NOT NULL,
   `md5` char(22) NOT NULL,
-  `dimension` varchar(128) NOT NULL,
+  `height` varchar(128) NOT NULL,
+  `width` varchar(128) NOT NULL,
   `type` char(1) NOT NULL,
   PRIMARY KEY (`row`),
-  UNIQUE KEY `id` (`item`,`dimension`),
+  UNIQUE KEY `id` (`item`,`height`, `width`),
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
@@ -1622,12 +1632,13 @@ function checkForChannelIcon($stationID, $data)
     $iconFileName = end($a);
 
     $md5 = $data["md5"];
-    $dimension = $data["dimension"];
+    $height = $data["height"];
+    $width = $data["width"];
 
     $updateChannelTable = $dbh->prepare("UPDATE channel SET icon=:icon WHERE xmltvid=:stationID");
 
-    $stmt = $dbh->prepare("SELECT md5 FROM SDimageCache WHERE item=:item and dimension=:dimension");
-    $stmt->execute(array("item" => $iconFileName, "dimension" => $dimension));
+    $stmt = $dbh->prepare("SELECT md5 FROM SDimageCache WHERE item=:item AND height=:height AND width=:width");
+    $stmt->execute(array("item" => $iconFileName, "height" => $height, "width" => $width));
 
     $result = $stmt->fetchColumn();
 
@@ -1639,12 +1650,19 @@ function checkForChannelIcon($stationID, $data)
 
         printMSG("Fetching logo $iconFileName for station $stationID");
 
-        file_put_contents("$channelLogoDirectory/$iconFileName", file_get_contents($data["URL"]));
+        $success = file_put_contents("$channelLogoDirectory/$iconFileName", file_get_contents($data["URL"]));
 
-        $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,dimension,md5,type)
-        VALUES(:item,:dimension,:md5,'L')
+        if ($success === FALSE)
+        {
+            printMSG("Check permissions: could not write to $channelLogoDirectory\n");
+            return;
+        }
+
+        $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,height,width,md5,type)
+        VALUES(:item,:height, :width,:md5,'L')
         ON DUPLICATE KEY UPDATE md5=:md5");
-        $updateSDimageCache->execute(array("item" => $iconFileName, "dimension" => $dimension, "md5" => $md5));
+        $updateSDimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
+                                           "md5"  => $md5));
         $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));
     }
 }
