@@ -1590,7 +1590,7 @@ function checkDatabase()
   `md5` char(22) NOT NULL,
   `height` varchar(128) NOT NULL,
   `width` varchar(128) NOT NULL,
-  `type` char(1) NOT NULL,
+  `type` char(1) NOT NULL COMMENT 'L-Channel Logo',
   PRIMARY KEY (`row`),
   UNIQUE KEY `id` (`item`,`height`,`width`),
   KEY `type` (`type`)
