@@ -1382,6 +1382,7 @@ function checkDatabase()
         {
             if ($ex->getCode() == "42S02")
             {
+                printMSG("Creating settings table.\n");
                 $stmt = $dbh->exec("CREATE TABLE `settings`
                 (
                 `value` varchar(128) NOT NULL DEFAULT '',
@@ -1402,6 +1403,7 @@ function checkDatabase()
 
         if ($schemaVersion === FALSE OR $schemaVersion == "26")
         {
+            printMSG("Upgrading database from initial configuration.\n");
             $stmt = $dbh->prepare("DESCRIBE videosource");
             $stmt->execute();
             $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -1452,7 +1454,7 @@ function checkDatabase()
 
     if ($createBaseTables)
     {
-        print "Creating remaining tables.\n";
+        print "Creating Schedules Direct tables.\n";
 
         $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
     SDprogramrating,SDschedule,SDMessages,SDimageCache");
