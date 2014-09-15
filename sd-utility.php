@@ -1444,6 +1444,7 @@ function checkDatabase()
 
         if ($schemaVersion == "27")
         {
+            printMSG("Upgrading to Schedules Direct schema 28.\n");
             $stmt = $dbh->exec("ALTER TABLE SDimageCache DROP KEY id");
             $stmt = $dbh->exec("ALTER TABLE SDimageCache CHANGE dimension height VARCHAR(128) NOT NULL");
             $stmt = $dbh->exec("ALTER TABLE SDimageCache ADD width VARCHAR(128) NOT NULL AFTER height");
