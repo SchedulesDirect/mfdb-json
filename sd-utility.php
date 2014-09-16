@@ -1460,8 +1460,8 @@ function checkDatabase()
             $stmt = $dbh->exec("CREATE TABLE `SDschedule` (
   `stationID` varchar(12) NOT NULL,
   `md5` char(22) NOT NULL,
-  KEY `md5` (`md5`),
-  KEY `sid` (`stationID`)
+  UNIQUE KEY `sid` (`stationID`),
+  KEY `md5` (`md5`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
         }
         setting("SchedulesDirectJSONschemaVersion", "29");
@@ -1538,10 +1538,10 @@ function checkDatabase()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
         $stmt = $dbh->exec("CREATE TABLE `SDschedule` (
-`stationID` varchar(12) NOT NULL,
+  `stationID` varchar(12) NOT NULL,
   `md5` char(22) NOT NULL,
-  KEY `md5` (`md5`),
-  KEY `sid` (`stationID`)
+  UNIQUE KEY `sid` (`stationID`),
+  KEY `md5` (`md5`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
         $stmt = $dbh->exec("ALTER TABLE credits CHANGE role role SET('actor','director','producer','executive_producer',
