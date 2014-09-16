@@ -472,12 +472,18 @@ function getSchedules($stationIDsToFetch)
         return ("");
     }
 
+    $updateLocalMD5 = $dbh->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
+    ON DUPLICATE KEY UPDATE md5=:md5");
+
     $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
     foreach ($f as $json)
     {
         $item = json_decode($json, TRUE);
         $stationID = $item["stationID"];
+        $md5 = $item["metadata"]["md5"];
+        $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5));
+
         $downloadedStationIDs[] = $stationID;
 
         printMSG("Parsing schedule for stationID:$stationID");
