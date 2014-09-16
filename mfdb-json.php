@@ -36,7 +36,6 @@ $usernameFromDB = "";
 $passwordFromDB = "";
 $stationIDs = array();
 $dbWithoutMythtv = FALSE;
-$knownToBeBroken = TRUE;
 $force = FALSE;
 
 date_default_timezone_set($tz);

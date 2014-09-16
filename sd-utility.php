@@ -24,7 +24,6 @@ $dbWithoutMythtv = FALSE;
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 $lineupArray = array();
-$knownToBeBroken = TRUE;
 $force = FALSE;
 
 $availableCountries = array(
