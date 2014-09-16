@@ -1450,7 +1450,22 @@ function checkDatabase()
             $stmt = $dbh->exec("ALTER TABLE SDimageCache ADD width VARCHAR(128) NOT NULL AFTER height");
             $stmt = $dbh->exec("ALTER TABLE SDimageCache ADD UNIQUE KEY id(item,height,width)");
             setting("SchedulesDirectJSONschemaVersion", "28");
+            $schemaVersion = 28;
         }
+
+        if ($schemaVersion == "28")
+        {
+            printMSG("Upgrading to Schedules Direct schema 29.\n");
+            $stmt = $dbh->exec("DROP TABLE SDschedule");
+            $stmt = $dbh->exec("CREATE TABLE `SDschedule` (
+  `stationID` varchar(12) NOT NULL,
+  `md5` char(22) NOT NULL,
+  KEY `md5` (`md5`),
+  KEY `sid` (`stationID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        }
+        setting("SchedulesDirectJSONschemaVersion", "29");
+        $schemaVersion = 29;
     }
 
     if ($createBaseTables)
@@ -1524,45 +1539,7 @@ function checkDatabase()
 
         $stmt = $dbh->exec("CREATE TABLE `SDschedule` (
 `stationID` varchar(12) NOT NULL,
-  `programID` varchar(64) NOT NULL,
   `md5` char(22) NOT NULL,
-  `air_datetime` char(20) NOT NULL,
-  `duration` mediumint(8) unsigned DEFAULT '0' COMMENT 'Duration (in seconds) of the program.',
-  `airdate` year(4) NOT NULL DEFAULT '0000',
-  `previouslyshown` tinyint(1) DEFAULT '0',
-  `closecaptioned` tinyint(1) NOT NULL DEFAULT '0',
-  `partnumber` tinyint(3) unsigned DEFAULT '0',
-  `parttotal` tinyint(3) unsigned DEFAULT '0',
-  `listingsource` int(11) NOT NULL DEFAULT '0',
-  `first` tinyint(1) NOT NULL DEFAULT '0',
-  `last` tinyint(1) NOT NULL DEFAULT '0',
-  `dvs` tinyint(1) DEFAULT '0' COMMENT 'Descriptive Video Service',
-  `new` tinyint(1) DEFAULT '0' COMMENT 'New',
-  `educational` tinyint(1) NOT NULL DEFAULT '0'
-  COMMENT 'Identifies broadcaster-designated Educational/Instructional programming.',
-  `hdtv` tinyint(1) NOT NULL DEFAULT '0',
-  `3d` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Indicates program is in 3-D.',
-  `letterbox` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Indicates program is a letterbox version.',
-  `stereo` tinyint(1) DEFAULT '0',
-  `dolby` varchar(5) DEFAULT NULL,
-  `dubbed` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Indicates the program is dubbed.',
-  `dubLanguage` varchar(40) DEFAULT NULL,
-  `subtitled` tinyint(1) NOT NULL DEFAULT '0'
-  COMMENT 'Indicates if the audio is in a foreign language, the English translation appears on-screen.',
-  `subtitleLanguage` varchar(40) DEFAULT NULL,
-  `sap` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Indicates the availability of Secondary Audio Programming.',
-  `sapLanguage` varchar(40) DEFAULT NULL,
-  `programLanguage` varchar(40) DEFAULT NULL,
-  `tvRatingSystem` varchar(128) DEFAULT NULL,
-  `tvRating` varchar(7) DEFAULT NULL,
-  `dialogRating` tinyint(1) DEFAULT '0' COMMENT 'FCC content descriptor D rating',
-  `languageRating` tinyint(1) DEFAULT '0' COMMENT 'FCC content descriptor L rating',
-  `sexualContentRating` tinyint(1) DEFAULT '0' COMMENT 'FCC content descriptor S rating',
-  `violenceRating` tinyint(1) DEFAULT '0' COMMENT 'FCC content descriptor V rating',
-  `fvRating` tinyint(1) DEFAULT '0' COMMENT 'Indicates fantasy violence.',
-  UNIQUE KEY `stationid_airdatetime` (`stationID`,`air_datetime`),
-  KEY `previouslyshown` (`previouslyshown`),
-  KEY `programid` (`programID`),
   KEY `md5` (`md5`),
   KEY `sid` (`stationID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
@@ -1658,6 +1635,7 @@ function checkForChannelIcon($stationID, $data)
         if ($success === FALSE)
         {
             printMSG("Check permissions: could not write to $channelLogoDirectory\n");
+
             return;
         }
 

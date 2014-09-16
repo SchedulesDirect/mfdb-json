@@ -385,6 +385,30 @@ function getSchedules($stationIDsToFetch)
     $downloadedStationIDs = array();
     $serverScheduleMD5 = array();
 
+    printMSG("Determining if there are updated schedules.");
+
+    try
+    {
+        $response = $client->post("schedules/md5", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
+            json_encode($stationIDsToFetch))->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        print "BadResponseException in getSchedules.\n";
+        var_dump($e);
+
+        if ($e->getCode() == 400)
+        {
+            return ("ERROR");
+        }
+    } catch (Exception $e)
+    {
+        print "Other exception in getSchedules.\n";
+        var_dump($e);
+        exit;
+    }
+
+    $resBody = $response->getBody();
+
     printMSG("Sending schedule request.");
 
     while (list(, $sid) = each($stationIDsToFetch))
