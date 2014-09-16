@@ -385,12 +385,17 @@ function getSchedules($stationIDsToFetch)
     $downloadedStationIDs = array();
     $serverScheduleMD5 = array();
 
+    while (list(, $sid) = each($stationIDsToFetch))
+    {
+        $foo[] = array("stationID" => $sid, "days" => 13);
+    }
+
     printMSG("Determining if there are updated schedules.");
 
     try
     {
         $response = $client->post("schedules/md5", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-            json_encode($stationIDsToFetch))->send();
+            json_encode($foo))->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         print "BadResponseException in getSchedules.\n";
@@ -410,11 +415,6 @@ function getSchedules($stationIDsToFetch)
     $resBody = $response->getBody();
 
     printMSG("Sending schedule request.");
-
-    while (list(, $sid) = each($stationIDsToFetch))
-    {
-        $foo[] = array("stationID" => $sid, "days" => 13);
-    }
 
     try
     {
