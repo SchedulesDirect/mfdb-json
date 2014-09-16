@@ -99,7 +99,7 @@ eol;
 
 $longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
                      "force", "nomyth", "max::", "program", "quiet", "station::", "schedule", "timezone::",
-                     "usedb", "version");
+                     "usedb", "version", "x");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -132,7 +132,6 @@ foreach ($options as $k => $v)
             break;
         case "force":
             $forceDownload = TRUE;
-            $force = TRUE;
             break;
         case "nomyth":
             $isMythTV = FALSE;
@@ -161,6 +160,9 @@ foreach ($options as $k => $v)
         case "version":
             print "$agentString\n\n";
             exit;
+            break;
+        case "x":
+            $force = TRUE;
             break;
     }
 }
