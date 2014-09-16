@@ -445,6 +445,8 @@ function getSchedules($stationIDsToFetch)
         }
     }
 
+    print json_encode($bar);
+
     if (count($bar) == 0)
     {
         printMSG("No updated schedules.");
