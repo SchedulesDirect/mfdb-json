@@ -436,12 +436,12 @@ function getSchedules($stationIDsToFetch)
         {
             if ($localMD5[$stationID] != $data["md5"])
             {
-                $bar[] = array("stationID" => $sid, "days" => 13);
+                $bar[] = array("stationID" => $stationID, "days" => 13);
             }
         }
         else
         {
-            $bar[] = array("stationID" => $sid, "days" => 13);
+            $bar[] = array("stationID" => $stationID, "days" => 13);
         }
     }
 
