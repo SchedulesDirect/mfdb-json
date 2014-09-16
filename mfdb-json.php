@@ -431,7 +431,7 @@ function getSchedules($stationIDsToFetch)
     {
         if ($localMD5[$stationID] != $data["md5"])
         {
-            $foo[] = array("stationID" => $sid, "days" => 13);
+            $bar[] = array("stationID" => $sid, "days" => 13);
         }
     }
 
@@ -440,7 +440,7 @@ function getSchedules($stationIDsToFetch)
     try
     {
         $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-            json_encode($foo))->send();
+            json_encode($bar))->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         print "BadResponseException in getSchedules.\n";
