@@ -413,16 +413,18 @@ function getSchedules($stationIDsToFetch)
     }
 
     $res = $response->json();
-    var_dump($res);
 
-    $json = json_decode($res);
+    $getLocalCache = $dbh->prepare("SELECT stationID,md5 FROM SDschedule");
+    $getLocalCache->execute();
+    $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    while (list($key, $item) = each($json))
+    while (list($stationID, $data) = each($res))
     {
-        var_dump($key);
-        var_dump($item);
+        if ($localMD5[$stationID] != $data["md5"])
+        {
+            $foo[] = array("stationID" => $sid, "days" => 13);
+        }
     }
-
 
     printMSG("Sending schedule request.");
 
