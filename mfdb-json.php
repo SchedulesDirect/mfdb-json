@@ -387,10 +387,18 @@ function getSchedules($stationIDsToFetch)
 
     printMSG("Sending schedule request.");
 
+    while (list(, $sid) = each($stationIDsToFetch))
+    {
+        $foo[] = array("stationID" => $sid, "days" => 13);
+    }
+
+    var_dump($foo);
+    exit;
+
     try
     {
         $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-            json_encode($stationIDsToFetch))->send();
+            json_encode($foo))->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         print "BadResponseException in getSchedules.\n";
