@@ -24,6 +24,8 @@ $dbWithoutMythtv = FALSE;
 $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 $lineupArray = array();
+$knownToBeBroken = TRUE;
+$force = FALSE;
 
 $availableCountries = array(
     "North America" => array(
@@ -132,8 +134,9 @@ The following options are available:
 --version\tPrint version information and exit.
 eol;
 
-$longoptions = array("countries", "debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "logo::", "nomyth", "skiplogo", "username::", "password::", "timezone::", "usedb", "version");
+$longoptions = array("countries", "debug", "force", "help", "host::", "dbname::", "dbuser::", "dbpassword::",
+                     "dbhost::", "logo::", "nomyth", "skiplogo", "username::", "password::", "timezone::", "usedb",
+                     "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -165,6 +168,9 @@ foreach ($options as $k => $v)
         case "dbhost":
             $dbHost = $v;
             break;
+        case "force":
+            $force = TRUE;
+            break;
         case "host":
             $host = $v;
             break;
@@ -195,6 +201,12 @@ foreach ($options as $k => $v)
             exit;
             break;
     }
+}
+
+if ($knownToBeBroken AND !$force)
+{
+    print "This version is known to be broken and --force not specified. Exiting.\n";
+    exit;
 }
 
 print "Using timezone $tz\n";
