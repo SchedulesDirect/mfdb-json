@@ -392,7 +392,7 @@ function getSchedules($stationIDsToFetch)
         $foo[] = array("stationID" => $sid, "days" => 13);
     }
 
-    var_dump($foo);
+    print json_encode($foo) . "\n";
     exit;
 
     try
