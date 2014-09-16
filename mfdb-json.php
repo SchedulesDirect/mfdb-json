@@ -451,7 +451,7 @@ function getSchedules($stationIDsToFetch)
         return ($jsonProgramsToRetrieve);
     }
 
-    printMSG(count($bar) . "schedules to download.");
+    printMSG(count($bar) . " schedules to download.");
 
     try
     {
