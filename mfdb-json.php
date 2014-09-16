@@ -387,6 +387,9 @@ function getSchedules($stationIDsToFetch)
     global $quiet;
     global $debug;
     global $isMythTV;
+    $jsonProgramsToRetrieve = array();
+    $foo = array();
+    $bar = array();
 
     $dbProgramCache = array();
     $response = "";
@@ -442,7 +445,13 @@ function getSchedules($stationIDsToFetch)
         }
     }
 
-    printMSG("Sending schedule request.");
+    if (count($bar) == 0)
+    {
+        printMSG("No updated schedules.");
+        return ($jsonProgramsToRetrieve);
+    }
+
+    printMSG(count($bar) . "schedules to download.");
 
     try
     {
