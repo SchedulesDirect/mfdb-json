@@ -36,6 +36,8 @@ $usernameFromDB = "";
 $passwordFromDB = "";
 $stationIDs = array();
 $dbWithoutMythtv = FALSE;
+$knownToBeBroken = TRUE;
+$force = FALSE;
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -130,6 +132,7 @@ foreach ($options as $k => $v)
             break;
         case "force":
             $forceDownload = TRUE;
+            $force = TRUE;
             break;
         case "nomyth":
             $isMythTV = FALSE;
@@ -160,6 +163,12 @@ foreach ($options as $k => $v)
             exit;
             break;
     }
+}
+
+if ($knownToBeBroken AND !$force)
+{
+    print "This version is known to be broken and --force not specified. Exiting.\n";
+    exit;
 }
 
 printMSG("$agentString");
