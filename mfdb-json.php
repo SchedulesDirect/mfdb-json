@@ -412,9 +412,15 @@ function getSchedules($stationIDsToFetch)
         exit;
     }
 
-    $resBody = $response->getBody();
-
     $res = $response->json();
+
+    $json = json_decode($res);
+
+    while (list($key, $item) = each($json))
+    {
+        var_dump($key);
+        var_dump($item);
+    }
 
 
     printMSG("Sending schedule request.");
