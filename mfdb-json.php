@@ -412,7 +412,7 @@ function getSchedules($stationIDsToFetch)
         exit;
     }
 
-//    $resBody = $response->getBody();
+    $resBody = $response->getBody();
 
     $res = $response->json();
 
