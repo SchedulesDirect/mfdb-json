@@ -448,6 +448,7 @@ function getSchedules($stationIDsToFetch)
     if (count($bar) == 0)
     {
         printMSG("No updated schedules.");
+
         return ($jsonProgramsToRetrieve);
     }
 
@@ -497,8 +498,6 @@ function getSchedules($stationIDsToFetch)
     {
         $item = json_decode($json, TRUE);
         $stationID = $item["stationID"];
-        $md5 = $item["metadata"]["md5"];
-        $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5));
 
         $downloadedStationIDs[] = $stationID;
 
@@ -512,6 +511,9 @@ function getSchedules($stationIDsToFetch)
             printMSG("$json\n\n");
             exit;
         }
+
+        $md5 = $item["metadata"]["md5"];
+        $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5));
 
         foreach ($item["programs"] as $programData)
         {
