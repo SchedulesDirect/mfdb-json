@@ -392,9 +392,6 @@ function getSchedules($stationIDsToFetch)
         $foo[] = array("stationID" => $sid, "days" => 13);
     }
 
-    print json_encode($foo) . "\n";
-    exit;
-
     try
     {
         $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
