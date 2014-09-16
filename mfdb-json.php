@@ -429,7 +429,14 @@ function getSchedules($stationIDsToFetch)
 
     while (list($stationID, $data) = each($res))
     {
-        if ($localMD5[$stationID] != $data["md5"])
+        if (isset($localMD5[$stationID]))
+        {
+            if ($localMD5[$stationID] != $data["md5"])
+            {
+                $bar[] = array("stationID" => $sid, "days" => 13);
+            }
+        }
+        else
         {
             $bar[] = array("stationID" => $sid, "days" => 13);
         }
