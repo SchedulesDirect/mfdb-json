@@ -343,7 +343,7 @@ $globalStartTime = date("Y-m-d H:i:s", $globalStartTime);
 $globalEndTime = date("Y-m-d H:i:s");
 
 printMSG("Global. Start Time:$globalStartTime");
-printMSG("Global. End Time:$globalEndTime");
+printMSG("Global. End Time:  $globalEndTime");
 $globalSinceStart = $globalStartDate->diff(new DateTime());
 if ($globalSinceStart->h)
 {
