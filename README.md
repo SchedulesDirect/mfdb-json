@@ -2,7 +2,7 @@
 
 mythfilldatabase grabber for the Schedules Direct JSON service.
 
-v0.16, 2014-05-15
+v0.16, 2014-09-19
 
 Robert Kulagowski
 
@@ -10,6 +10,8 @@ grabber@schedulesdirect.org
 
 This program runs as a replacement to mythfilldatabase (for now) and
 downloads data from Schedules Direct using the new JSON format.
+
+**NOTE**: As of 2014-09-19 you probably want to be running 20140530. Please go to https://github.com/SchedulesDirect/mfdb-json/blob/API-20140530/README.md
 
 #Features:
 
