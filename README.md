@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.23, 2014-09-19
+v0.24, 2014-09-19
 
 Robert Kulagowski
 
@@ -28,7 +28,7 @@ This file describes API 20140530.
 - Season and Episode information.
 - Logos, fanart, etc.
 - Full support for United States, Canada, Great Britain.
-- See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2530 for the
+- See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2586 for the
   complete list of countries with data.
 - Self-hosted data, so not dependent on Tribune's XML servers.
 
