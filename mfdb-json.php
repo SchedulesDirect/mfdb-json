@@ -437,9 +437,13 @@ function getSchedules($stationIDsToFetch)
         {
             foreach ($data as $item)
             {
-                if ($localMD5[$stationID] != $data["md5"])
+                if ($item["days"] == 13)
                 {
-                    $bar[] = array("stationID" => $stationID, "days" => 13);
+                    if ($localMD5[$stationID] != $item["md5"])
+                    {
+                        $bar[] = array("stationID" => $stationID, "days" => 13);
+                        continue;
+                    }
                 }
             }
         }
