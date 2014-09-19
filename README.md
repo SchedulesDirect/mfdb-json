@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.22, 2014-09-12
+v0.23, 2014-09-19
 
 Robert Kulagowski
 
@@ -173,7 +173,7 @@ U to update a videosource by downloading from Schedules Direct
 Q to Quit
 
 ```
-Type in: **1**
+Type in: **2**
 
 Three-character ISO-3166-1 alpha3 country code (? to list available countries):>**USA**
 
