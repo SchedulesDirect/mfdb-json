@@ -566,14 +566,18 @@ function updateChannelTable($lineup)
                 {
                     $channum = $mapArray["channel"];
                     $stmt = $dbh->prepare(
-                        "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid)
-                         VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid)");
+                        "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,mplexid,serviceid,atsc_major_chan)
+                         VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:mplexid,:serviceid,:atsc_major_chan)");
 
                     try
                     {
-                        $stmt->execute(array("chanid"  => (int)($sourceID * 1000) + (int)$channum,
-                                             "channum" => ltrim($channum, "0"),
-                                             "freqid"  => $channum, "sourceid" => $sourceID, "xmltvid" => $stationID));
+                        $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$channum,
+                                             "channum"         => ltrim($channum, "0"),
+                                             "freqid"          => $channum,
+                                             "sourceid"        => $sourceID, "xmltvid" => $stationID,
+                                             "mplexid"         => 32767,
+                                             "serviceid"       => 0,
+                                             "atsc_major_chan" => $channum));
                     } catch (PDOException $e)
                     {
                         if ($e->getCode() == 23000)
@@ -676,7 +680,7 @@ function updateChannelTable($lineup)
                 print "Inserting QAM data into tables.\n";
 
                 $insertDTVMultiplex = $dbh->prepare
-                    ("INSERT INTO dtv_multiplex
+                ("INSERT INTO dtv_multiplex
         (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
         VALUES
         (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
