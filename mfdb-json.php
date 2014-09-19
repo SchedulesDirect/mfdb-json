@@ -434,13 +434,13 @@ function getSchedules($stationIDsToFetch)
     while (list($stationID, $data) = each($res))
     {
         if (isset($localMD5[$stationID]))
-            /*
-             * TODO: we need to get the entry in the response array that has the "13" days value for comparison.
-             */
         {
-            if ($localMD5[$stationID] != $data["md5"])
+            foreach ($data as $item)
             {
-                $bar[] = array("stationID" => $stationID, "days" => 13);
+                if ($localMD5[$stationID] != $data["md5"])
+                {
+                    $bar[] = array("stationID" => $stationID, "days" => 13);
+                }
             }
         }
         else
