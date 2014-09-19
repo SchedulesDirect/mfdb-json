@@ -168,7 +168,7 @@ foreach ($options as $k => $v)
 
 if ($knownToBeBroken AND !$force)
 {
-    print "This version is known to be broken and --force not specified. Exiting.\n";
+    print "This version is known to be broken and force option not specified. Exiting.\n";
     exit;
 }
 
