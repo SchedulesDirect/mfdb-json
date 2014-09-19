@@ -25,6 +25,8 @@ $useServiceAPI = FALSE;
 $channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 $lineupArray = array();
 $force = FALSE;
+$printFancyTable = TRUE;
+$printCountries = FALSE;
 
 $availableCountries = array(
     "North America" => array(
@@ -134,8 +136,8 @@ The following options are available:
 eol;
 
 $longoptions = array("countries", "debug", "force", "help", "host::", "dbname::", "dbuser::", "dbpassword::",
-                     "dbhost::", "logo::", "nomyth", "skiplogo", "username::", "password::", "timezone::", "usedb",
-                     "version");
+                     "dbhost::", "logo::", "notfancy", "nomyth", "skiplogo", "username::", "password::", "timezone::",
+                     "usedb", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -143,8 +145,7 @@ foreach ($options as $k => $v)
     switch ($k)
     {
         case "countries":
-            printListOfAvailableCountries();
-            exit;
+            $printCountries = TRUE;
             break;
         case "debug":
             $debug = TRUE;
@@ -179,6 +180,9 @@ foreach ($options as $k => $v)
         case "nomyth":
             $isMythTV = FALSE;
             break;
+        case "notfancy":
+            $printFancyTable = FALSE;
+            break;
         case "skiplogo":
             $skipChannelLogo = TRUE;
             break;
@@ -205,6 +209,12 @@ foreach ($options as $k => $v)
 if ($knownToBeBroken AND !$force)
 {
     print "This version is known to be broken and --force not specified. Exiting.\n";
+    exit;
+}
+
+if ($printCountries)
+{
+    printListOfAvailableCountries($printFancyTable);
     exit;
 }
 
@@ -680,7 +690,7 @@ function updateChannelTable($lineup)
                 print "Inserting QAM data into tables.\n";
 
                 $insertDTVMultiplex = $dbh->prepare
-                ("INSERT INTO dtv_multiplex
+                    ("INSERT INTO dtv_multiplex
         (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
         VALUES
         (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
@@ -1745,7 +1755,7 @@ function getLineupFromNumber($numberOrLineup)
     }
 }
 
-function printListOfAvailableCountries()
+function printListOfAvailableCountries($fancyTable)
 {
     global $availableCountries;
 
@@ -1762,15 +1772,24 @@ function printListOfAvailableCountries()
             }
         }
 
-        $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 18)));
-        $countryList->appendRow(array("Country", "Three-letter code"));
-
-        foreach ($data as $country => $tla)
+        if ($fancyTable)
         {
-            $countryList->appendRow(array($country, $tla));
-        }
+            $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 18)));
+            $countryList->appendRow(array("Country", "Three-letter code"));
 
-        print $countryList;
+            foreach ($data as $country => $tla)
+            {
+                $countryList->appendRow(array($country, $tla));
+            }
+            print $countryList;
+        }
+        else
+        {
+            foreach ($data as $country => $tla)
+            {
+                print "$country\n";
+            }
+        }
     }
 }
 
