@@ -401,6 +401,8 @@ function getSchedules($stationIDsToFetch)
     global $quiet;
     global $debug;
     global $isMythTV;
+    global $forceDownload;
+
     $jsonProgramsToRetrieve = array();
     $foo = array();
     $bar = array();
@@ -416,51 +418,61 @@ function getSchedules($stationIDsToFetch)
         $foo[] = array("stationID" => $sid, "days" => 13);
     }
 
-    printMSG("Determining if there are updated schedules.");
-
-    try
+    if (!$forceDownload)
     {
-        $response = $client->post("schedules/md5", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-            json_encode($foo))->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        print "BadResponseException in getSchedules.\n";
-        var_dump($e);
+        printMSG("Determining if there are updated schedules.");
 
-        if ($e->getCode() == 400)
+        try
         {
-            return ("ERROR");
-        }
-    } catch (Exception $e)
-    {
-        print "Other exception in getSchedules.\n";
-        var_dump($e);
-        exit;
-    }
-
-    $res = $response->json();
-
-    $getLocalCache = $dbh->prepare("SELECT stationID,md5 FROM SDschedule");
-    $getLocalCache->execute();
-    $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
-
-    while (list($stationID, $data) = each($res))
-    {
-        if (isset($localMD5[$stationID]))
+            $response = $client->post("schedules/md5", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
+                json_encode($foo))->send();
+        } catch (Guzzle\Http\Exception\BadResponseException $e)
         {
-            foreach ($data as $item)
+            print "BadResponseException in getSchedules.\n";
+            var_dump($e);
+
+            if ($e->getCode() == 400)
             {
-                if ($item["days"] == 13)
+                return ("ERROR");
+            }
+        } catch (Exception $e)
+        {
+            print "Other exception in getSchedules.\n";
+            var_dump($e);
+            exit;
+        }
+
+        $res = $response->json();
+
+        $getLocalCache = $dbh->prepare("SELECT stationID,md5 FROM SDschedule");
+        $getLocalCache->execute();
+        $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        while (list($stationID, $data) = each($res))
+        {
+            if (isset($localMD5[$stationID]))
+            {
+                foreach ($data as $item)
                 {
-                    if ($localMD5[$stationID] != $item["md5"])
+                    if ($item["days"] == 13)
                     {
-                        $bar[] = array("stationID" => $stationID, "days" => 13);
-                        continue;
+                        if ($localMD5[$stationID] != $item["md5"])
+                        {
+                            $bar[] = array("stationID" => $stationID, "days" => 13);
+                            continue;
+                        }
                     }
                 }
             }
+            else
+            {
+                $bar[] = array("stationID" => $stationID, "days" => 13);
+            }
         }
-        else
+    }
+    else
+    {
+        foreach ($stationIDsToFetch as $stationID)
         {
             $bar[] = array("stationID" => $stationID, "days" => 13);
         }
