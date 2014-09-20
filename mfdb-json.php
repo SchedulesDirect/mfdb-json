@@ -606,36 +606,43 @@ function fetchPrograms($jsonProgramsToRetrieve)
      * either because we didn't have them, or they have different md5's.
      */
 
-    printMSG("Need to download $toRetrieveTotal new or updated programs.");
-
-    if ($toRetrieveTotal > 10000)
+    if ($toRetrieveTotal == 0)
     {
-        printMSG("Requesting more than 10000 programs. Please be patient.");
+        printMSG("No programs to fetch.");
     }
-
-    printMSG("Maximum number of programs we're downloading per call: $maxProgramsToGet");
-
-    if (count($jsonProgramsToRetrieve))
+    else
     {
-        $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
+        printMSG("Need to download $toRetrieveTotal new or updated programs.");
 
-        $counter = 0;
-
-        for ($i = 0; $i <= $totalChunks; $i++)
+        if ($toRetrieveTotal > 10000)
         {
-            printMSG("Retrieving chunk " . ($i + 1) . " of " . ($totalChunks + 1) . ".");
-            $startOffset = $i * $maxProgramsToGet;
-            $chunk = array_slice($jsonProgramsToRetrieve, $startOffset, $maxProgramsToGet);
+            printMSG("Requesting more than 10000 programs. Please be patient.");
+        }
 
-            $counter += count($chunk);
+        printMSG("Maximum number of programs we're downloading per call: $maxProgramsToGet");
 
-            $request = $client->post("programs", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-                json_encode($chunk));
-            $response = $request->send();
+        if (count($jsonProgramsToRetrieve))
+        {
+            $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
 
-            $resBody = $response->getBody();
+            $counter = 0;
 
-            file_put_contents("$dlProgramTempDir/programs." . substr("00$i", -2) . ".json", $resBody);
+            for ($i = 0; $i <= $totalChunks; $i++)
+            {
+                printMSG("Retrieving chunk " . ($i + 1) . " of " . ($totalChunks + 1) . ".");
+                $startOffset = $i * $maxProgramsToGet;
+                $chunk = array_slice($jsonProgramsToRetrieve, $startOffset, $maxProgramsToGet);
+
+                $counter += count($chunk);
+
+                $request = $client->post("programs", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
+                    json_encode($chunk));
+                $response = $request->send();
+
+                $resBody = $response->getBody();
+
+                file_put_contents("$dlProgramTempDir/programs." . substr("00$i", -2) . ".json", $resBody);
+            }
         }
     }
 
