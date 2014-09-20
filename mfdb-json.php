@@ -563,7 +563,7 @@ function getSchedules($stationIDsToFetch)
     }
 
     printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.");
-    printMSG("Retrieving existing MD5 values.");
+    printMSG("Retrieving existing MD5 values from local cache.");
 
     /*
      * We're going to figure out which programIDs we need to download.
