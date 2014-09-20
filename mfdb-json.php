@@ -61,7 +61,8 @@ $fh_error = fopen("$todayDate.debug.log", "a");
 if ($isBeta)
 {
     # Test server. Things may be broken there.
-    $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
+    // $baseurl = "http://ec2-54-86-226-234.compute-1.amazonaws.com/20140530/";
+    $baseurl = "20140530-1953452940.us-east-1.elb.amazonaws.com/20140530/";
     printMSG("Using beta server.");
     # API must match server version.
     $api = 20140530;
