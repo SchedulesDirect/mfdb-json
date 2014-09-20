@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Bob
- * Date: 2/16/14
- * Time: 2:22 AM
- */
-
 /*
 functions.php * This file contains commonly used functions between the various programs.
 Copyright (C) 2012-2014  Robert Kulagowski grabber@schedulesdirect.org
@@ -25,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.10-test.03";
+$scriptVersion = "0.10";
 $scriptDate = "2014-09-19";
 $knownToBeBroken = FALSE;
 
