@@ -472,10 +472,7 @@ function getSchedules($stationIDsToFetch)
     }
     else
     {
-        foreach ($stationIDsToFetch as $stationID)
-        {
-            $bar[] = array("stationID" => $stationID, "days" => 13);
-        }
+        $bar = $foo;
     }
 
     if (count($bar) == 0)
