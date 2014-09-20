@@ -955,12 +955,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
     $getProgramInformation = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID =:pid");
 
-    $jsonSchedule = array();
-
-    foreach (glob("$dlSchedTempDir/*.json") as $jsonFileToProcess)
-    {
-        $scheduleTemp = file($jsonFileToProcess);
-    }
+    $scheduleTemp = file("$dlSchedTempDir/schedule.json");
 
     /*
      * Move the schedule into an associative array so that we can process the items per stationID. We're going to
@@ -976,7 +971,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     }
 
     /*
-     * Now that we're done, reset the array to empty.
+     * Now that we're done, reset the array to empty to free up some memory.
      */
     $scheduleTemp = array();
 
@@ -985,6 +980,12 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
         $chanID = $item["chanid"];
         $sourceID = $item["sourceid"];
         $stationID = $item["xmltvid"];
+
+        if (!array_key_exists($stationID, $scheduleJSON))
+        {
+            continue; // If we don't have an updated schedule for the stationID, there's nothing to do.
+        }
+
         printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID");
 
         $dbh->beginTransaction();
