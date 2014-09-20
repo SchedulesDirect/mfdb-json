@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.24, 2014-09-19
+v0.25, 2014-09-20
 
 Robert Kulagowski
 
@@ -12,6 +12,9 @@ These programs can be used as a replacement to mythfilldatabase and
 for downloading data from Schedules Direct using the new JSON format.
 
 This file describes API 20140530.
+
+**NOTE**: You are strongly encouraged to run "git pull" to refresh your client before each use; the software is under
+active development and this will ensure that you stay up-to-date.
 
 #Features:
 ##MythTV-only
