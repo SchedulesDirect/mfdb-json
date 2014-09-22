@@ -32,6 +32,7 @@ require_once "functions.php";
 use Guzzle\Http\Client;
 
 $isBeta = TRUE;
+$api = "";
 $debug = FALSE;
 $quiet = FALSE;
 $forceDownload = FALSE;
@@ -58,20 +59,7 @@ $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 $fh_error = fopen("$todayDate.debug.log", "a");
 
-if ($isBeta)
-{
-    # Test server. Things may be broken there.
-    $baseurl = "https://data2.schedulesdirect.org/20140530/";
-    printMSG("Using beta server.");
-    # API must match server version.
-    $api = 20140530;
-}
-else
-{
-    $baseurl = "https://json.schedulesdirect.org/20131021/";
-    printMSG("Using production server.");
-    $api = 20131021;
-}
+$baseurl = getBaseURL($isBeta);
 
 $agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$scriptDate";
 
