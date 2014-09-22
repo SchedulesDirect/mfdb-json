@@ -265,7 +265,7 @@ print "Checking to see if we're running the latest client.\n";
 
 $serverVersion = checkForClientUpdate($client);
 
-if ($clientVersion == "ERROR")
+if ($serverVersion == "ERROR")
 {
     print "Received error response from server. Exiting.\n";
     exit;
