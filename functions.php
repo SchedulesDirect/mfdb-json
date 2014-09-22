@@ -435,8 +435,14 @@ function checkForClientUpdate($client)
 
     $res = $response->json();
 
-    var_dump($res);
-    $tt=fgets(STDIN);
+    if ($res["code"] == 0)
+    {
+        return ($res["version"]);
+    }
 
-
+    if ($res["code"] == 1005)
+    {
+        print "Got error message from server: unknown client.\n";
+        return("ERROR");
+    }
 }

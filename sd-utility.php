@@ -261,7 +261,30 @@ if ($skipChannelLogo === FALSE)
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
-$needToUpdateClient = checkForClientUpdate($client);
+print "Checking to see if we're running the latest client.\n";
+
+$serverVersion = checkForClientUpdate($client);
+
+if ($clientVersion == "ERROR")
+{
+    print "Received error response from server. Exiting.\n";
+    exit;
+}
+
+if ($serverVersion != $scriptVersion)
+{
+    print "Version mismatch.\nServer version: $serverVersion\nOur version:$scriptVersion\n";
+    if (!$force)
+    {
+        print "Exiting. Do you need to run 'git pull' to refresh?\n";
+        print "Restart script with --force to ignore mismatch.\n";
+        exit;
+    }
+    else
+    {
+        print "Continuing because of --force parameter.\n";
+    }
+}
 
 if ($isMythTV)
 {
