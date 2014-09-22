@@ -18,9 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.11-test.01";
+$scriptVersion = "0.12";
 $scriptDate = "2014-09-22";
-$knownToBeBroken = TRUE;
+$knownToBeBroken = FALSE;
 
 function getToken($username, $passwordHash)
 {

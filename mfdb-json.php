@@ -66,6 +66,33 @@ $agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$script
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
+printMSG("Checking to see if we're running the latest client.");
+
+$serverVersion = checkForClientUpdate($client);
+
+if ($serverVersion == "ERROR")
+{
+    printMSG("Received error response from server. Exiting.");
+    exit;
+}
+
+if ($serverVersion != $scriptVersion)
+{
+    printMSG("***Version mismatch.***");
+    printMSG("Server version: $serverVersion");
+    printMSG("Our version:$scriptVersion");
+    if (!$force)
+    {
+        printMSG("Exiting. Do you need to run 'git pull' to refresh?");
+        printMSG("Restart script with --force to ignore mismatch.");
+        exit;
+    }
+    else
+    {
+        printMSG("Continuing because of --force parameter.");
+    }
+}
+
 $jsonProgramsToRetrieve = array();
 $peopleCache = array();
 

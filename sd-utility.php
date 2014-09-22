@@ -273,7 +273,7 @@ if ($serverVersion == "ERROR")
 
 if ($serverVersion != $scriptVersion)
 {
-    print "Version mismatch.\nServer version: $serverVersion\nOur version:$scriptVersion\n";
+    print "***Version mismatch.***\nServer version: $serverVersion\nOur version:$scriptVersion\n";
     if (!$force)
     {
         print "Exiting. Do you need to run 'git pull' to refresh?\n";
