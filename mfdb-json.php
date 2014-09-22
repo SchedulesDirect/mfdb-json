@@ -80,7 +80,7 @@ if ($serverVersion != $scriptVersion)
 {
     printMSG("***Version mismatch.***");
     printMSG("Server version: $serverVersion");
-    printMSG("Our version:$scriptVersion");
+    printMSG("Our version: $scriptVersion");
     if (!$force)
     {
         printMSG("Exiting. Do you need to run 'git pull' to refresh?");
