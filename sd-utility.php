@@ -261,6 +261,8 @@ if ($skipChannelLogo === FALSE)
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
+$needToUpdateClient = checkForClientUpdate($client);
+
 if ($isMythTV)
 {
     $useServiceAPI = checkForServiceAPI();
