@@ -1764,7 +1764,7 @@ function extractData($sourceIDtoExtract)
 
     fwrite($fhExtract, $json . "\n");
 
-    print "JSON is \n$json\n";
+    //print "JSON is \n$json\n";
 
     /*
      * TODO: send json automatically.
@@ -1772,7 +1772,7 @@ function extractData($sourceIDtoExtract)
 
     fclose($fhExtract);
 
-    print "Please send $lineupName.extract.conf to grabber@schedulesdirect.org\n";
+    print "Please send the $lineupName.extract.conf to grabber@schedulesdirect.org\n";
 }
 
 function getLineupFromNumber($numberOrLineup)
