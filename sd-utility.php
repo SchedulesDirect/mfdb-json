@@ -243,13 +243,27 @@ if ($isMythTV OR $dbWithoutMythtv)
             print "If you're running the grabber as standalone, use --nomyth\n";
             exit;
         }
+        else
+        {
+            print "Got error connecting to database.\n";
+            print "Code: " . $e->getCode() . "\n";
+            print "Message: " . $e->getMessage() . "\n";
+            exit;
+        }
     }
+
     if (!$justExtract)
     {
         checkDatabase();
     }
     else
     {
+        if (!isset($dbh))
+        {
+            print "Don't have dbh. Exiting.\n";
+            exit;
+        }
+
         $sourceIDtoExtract = readline("Which sourceid do you want to extract:>");
         if ($sourceIDtoExtract != "")
         {
