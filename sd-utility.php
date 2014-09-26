@@ -40,6 +40,7 @@ $lineupArray = array();
 $force = FALSE;
 $printFancyTable = TRUE;
 $printCountries = FALSE;
+$justExtract = FALSE;
 
 $availableCountries = array(
     "North America" => array(
@@ -123,6 +124,7 @@ The following options are available:
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
 --dbhost=\tMySQL database hostname. (Default: $dbHost)
+--extract\t\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
@@ -135,9 +137,9 @@ The following options are available:
 --version\tPrint version information and exit.
 eol;
 
-$longoptions = array("countries", "debug", "force", "help", "host::", "dbname::", "dbuser::", "dbpassword::",
-                     "dbhost::", "logo::", "notfancy", "nomyth", "skiplogo", "username::", "password::", "timezone::",
-                     "usedb", "version");
+$longoptions = array("countries", "debug", "extract", "force", "help", "host::", "dbname::", "dbuser::",
+                     "dbpassword::", "dbhost::", "logo::", "notfancy", "nomyth", "skiplogo", "username::", "password::",
+                     "timezone::", "usedb", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -167,6 +169,9 @@ foreach ($options as $k => $v)
             break;
         case "dbhost":
             $dbHost = $v;
+            break;
+        case "extract":
+            $justExtract = TRUE;
             break;
         case "force":
             $force = TRUE;
@@ -239,8 +244,19 @@ if ($isMythTV OR $dbWithoutMythtv)
             exit;
         }
     }
-
-    checkDatabase();
+    if (!$justExtract)
+    {
+        checkDatabase();
+    }
+    else
+    {
+        $sourceIDtoExtract = readline("Which sourceid do you want to extract:>");
+        if ($sourceIDtoExtract != "")
+        {
+            extractData($sourceIDtoExtract);
+        }
+        exit;
+    }
 }
 
 if ($skipChannelLogo === FALSE)
