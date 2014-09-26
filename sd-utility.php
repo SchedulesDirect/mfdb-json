@@ -124,7 +124,7 @@ The following options are available:
 --dbuser=\tUsername for database access. (Default: $dbUser)
 --dbpassword=\tPassword for database access. (Default: $dbPassword)
 --dbhost=\tMySQL database hostname. (Default: $dbHost)
---extract\t\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
+--extract\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: $host)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
