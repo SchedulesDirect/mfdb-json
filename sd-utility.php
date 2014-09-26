@@ -110,23 +110,17 @@ $todayDate = $date->format("Y-m-d");
 $fh_log = fopen("$todayDate.log", "a");
 $fh_error = fopen("$todayDate.debug.log", "a");
 
-$dbUser = "mythtv";
-$dbPassword = "mythtv";
-$dbHost = "localhost";
-$dbName = "mythconverg";
-$host = "localhost";
-
 $helpText = <<< eol
 The following options are available:
 --countries\tThe list of countries that have data.
 --debug\t\tEnable debugging. (Default: FALSE)
---dbname=\tMySQL database name. (Default: $dbName)
---dbuser=\tUsername for database access. (Default: $dbUser)
---dbpassword=\tPassword for database access. (Default: $dbPassword)
---dbhost=\tMySQL database hostname. (Default: $dbHost)
+--dbname=\tMySQL database name. (Default: mythconverg)
+--dbuser=\tUsername for database access. (Default: mythtv)
+--dbpassword=\tPassword for database access. (Default: mythtv)
+--dbhost=\tMySQL database hostname. (Default: localhost)
 --extract\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --help\t\t(this text)
---host=\t\tIP address of the MythTV backend. (Default: $host)
+--host=\t\tIP address of the MythTV backend. (Default: localhost)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
 --skiplogo\tDon't download channel logos.
@@ -225,6 +219,22 @@ if ($printCountries)
 
 print "Using timezone $tz\n";
 print "$agentString\n";
+
+if ($isMythTV)
+{
+    if (!isset($dbHost) AND !isset($dbName) AND !isset($dbUser) and !isset($dbPassword))
+    {
+        list($dbHost, $dbName, $dbUser, $dbPassword) = getLoginFromFiles();
+        if ($dbHost == "NONE")
+        {
+            $dbUser = "mythtv";
+            $dbPassword = "mythtv";
+            $dbHost = "localhost";
+            $dbName = "mythconverg";
+            $host = "localhost";
+        }
+    }
+}
 
 if ($isMythTV OR $dbWithoutMythtv)
 {
@@ -1753,9 +1763,9 @@ function extractData($sourceIDtoExtract)
 
     if (count($result) == 0)
     {
-        /*
-         * Dump an error message and return.
-         */
+        print "Channel table is empty; nothing to do.\n";
+
+        return;
     }
 
     $fhExtract = fopen("$lineupName.extract.conf", "a");

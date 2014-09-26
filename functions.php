@@ -18,9 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.12";
+$scriptVersion = "0.13";
 $scriptDate = "2014-09-26";
-$knownToBeBroken = FALSE;
+$knownToBeBroken = TRUE;
 
 function getToken($username, $passwordHash)
 {
@@ -443,6 +443,42 @@ function checkForClientUpdate($client)
     if ($res["code"] == 1005)
     {
         print "Got error message from server: unknown client.\n";
-        return("ERROR");
+
+        return ("ERROR");
     }
+}
+
+function getLoginFromFiles()
+{
+    $etcFile = file_exists("/etc/mythtv/config.xml");
+    $localFile = file_exists("~/.mythtv/config.xml");
+
+    if ($localFile)
+    {
+        $foo = file("~/.mythtv/config.xml");
+    }
+
+    /*
+     * We want to use the file in the local directory first if it exists.
+     */
+
+    if (!isset($foo) AND $etcFile)
+    {
+        $foo = file("/etc/mythtv/config.xml");
+    }
+
+    if (!isset($foo))
+    {
+        return (array("NONE", "", "", ""));
+    }
+
+    /*
+     * Process the file to pull out the informatin that we need
+     */
+
+    foreach($foo as $line)
+    {
+
+    }
+
 }
