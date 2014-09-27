@@ -455,7 +455,7 @@ function getLoginFromFiles()
 
     if ($localFile)
     {
-        print "Using database information from ~/.mythtv/config.xml\n";
+        printMSG("Using database information from ~/.mythtv/config.xml");
         $xml = simplexml_load_file(getenv("HOME") . "/.mythtv/config.xml");
     }
 
@@ -465,7 +465,7 @@ function getLoginFromFiles()
 
     if (!isset($xml) AND $etcFile)
     {
-        print "Using database information from /etc/mythtv/config.xml\n";
+        printMSG("Using database information from /etc/mythtv/config.xml");
         $xml = simplexml_load_file("/etc/mythtv/config.xml");
     }
 
@@ -489,9 +489,10 @@ function getLoginFromFiles()
         }
         else
         {
-            print "Fatal: couldn't parse XML to JSON.\n";
-            print "Open ticket with grabber@schedulesdirect.org and send the following:\n";
+            printMSG("Fatal: couldn't parse XML to JSON.");
+            printMSG("Open ticket with grabber@schedulesdirect.org and send the following:");
             var_dump($foo);
+            printMSG(print_r($foo, TRUE));
             exit;
         }
     }
