@@ -543,7 +543,7 @@ function getSchedules($stationIDsToFetch)
         return ("");
     }
 
-    $updateLocalMD5 = $dbh->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
+        $updateLocalMD5 = $dbh->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
 
     $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -1010,7 +1010,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             continue; // If we don't have an updated schedule for the stationID, there's nothing to do.
         }
 
-        printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID xmltvid:$stationID");
+        printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID stationID:$stationID");
 
         $dbh->beginTransaction();
 
