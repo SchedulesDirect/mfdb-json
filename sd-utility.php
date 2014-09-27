@@ -1788,8 +1788,6 @@ function extractData($sourceIDtoExtract)
 
     fwrite($fhExtract, $json . "\n");
 
-    //print "JSON is \n$json\n";
-
     /*
      * TODO: send json automatically.
      */
