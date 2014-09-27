@@ -478,7 +478,19 @@ function getLoginFromFiles()
 
     $foo = json_decode(json_encode($xml), TRUE);
 
-    print "Break here.\n";
-
-
+    if (count($foo))
+    {
+        if (isset($foo["Database"]))
+        {
+            return array($foo["Database"]["Host"], $foo["Database"]["DatabaseName"], $foo["Database"]["UserName"],
+                         $foo["Database"]["Password"]);
+        }
+        else
+        {
+            print "Fatal: couldn't parse XML to JSON.\n";
+            print "Open ticket with grabber@schedulesdirect.org and send the following:\n";
+            var_dump($foo);
+            exit;
+        }
+    }
 }
