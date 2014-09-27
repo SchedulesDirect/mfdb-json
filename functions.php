@@ -455,6 +455,7 @@ function getLoginFromFiles()
 
     if ($localFile)
     {
+        print "Using database information from ~/.mythtv/config.xml\n";
         $xml = simplexml_load_file(getenv("HOME") . "/.mythtv/config.xml");
     }
 
@@ -464,6 +465,7 @@ function getLoginFromFiles()
 
     if (!isset($xml) AND $etcFile)
     {
+        print "Using database information from /etc/mythtv/config.xml\n";
         $xml = simplexml_load_file("/etc/mythtv/config.xml");
     }
 
