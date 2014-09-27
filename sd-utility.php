@@ -1780,7 +1780,7 @@ function extractData($sourceIDtoExtract)
         $extractArray[] = array("chanNum"   => $v["channum"], "callSign" => $v["callsign"],
                                 "xmltvid"   => $v["xmltvid"],
                                 "mplexid"   => $v["mplexid"], "serviceid" => $v["serviceid"],
-                                "frequency" => $freq[0]);
+                                "frequency" => $freq);
 
     }
 
