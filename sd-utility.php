@@ -1795,8 +1795,6 @@ function extractData($sourceIDtoExtract)
 
     $fhExtract = fopen("$lineupName.extract.conf", "w");
 
-    fwrite($fhExtract, "# jsonextract v0.02 $todayDate $lineupName\n");
-
     foreach ($result as $v)
     {
         $getFrequency->execute(array("mplexid" => $v["mplexid"]));
@@ -1806,8 +1804,11 @@ function extractData($sourceIDtoExtract)
                                 "xmltvid"   => $v["xmltvid"],
                                 "mplexid"   => $v["mplexid"], "serviceid" => $v["serviceid"],
                                 "frequency" => $freq);
-
     }
+
+    $extractArray["version"] = "0.03";
+    $extractArray["date"] = $todayDate;
+    $extractArray["lineup"] = $lineupName;
 
     $json = json_encode($extractArray);
 
