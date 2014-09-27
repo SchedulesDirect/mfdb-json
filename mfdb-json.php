@@ -51,6 +51,8 @@ $passwordFromDB = "";
 $stationIDs = array();
 $dbWithoutMythtv = FALSE;
 $force = FALSE;
+$jsonProgramsToRetrieve = array();
+$peopleCache = array();
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -93,25 +95,16 @@ if ($serverVersion != $scriptVersion)
     }
 }
 
-$jsonProgramsToRetrieve = array();
-$peopleCache = array();
-
-$dbUser = "mythtv";
-$dbPassword = "mythtv";
-$dbHost = "localhost";
-$dbName = "mythconverg";
-$host = "localhost";
-
 $helpText = <<< eol
 The following options are available:
 --beta
 --help\t\t(this text)
---dbname=\tMySQL database name. (Default: $dbName)
---dbuser=\tUsername for database access. (Default: $dbUser)
---dbpassword=\tPassword for database access. (Default: $dbPassword)
---dbhost=\tMySQL database hostname. (Default: $dbHost)
+--dbname=\tMySQL database name. (Default: mythconverg)
+--dbuser=\tUsername for database access. (Default: mythtv)
+--dbpassword=\tPassword for database access. (Default: mythtv)
+--dbhost=\tMySQL database hostname. (Default: localhost)
 --force\t\tForce download of schedules. (Default: FALSE)
---host=\t\tIP address of the MythTV backend. (Default: $host)
+--host=\t\tIP address of the MythTV backend. (Default: localhost)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
     Must specify --schedule and/or --program
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
@@ -206,6 +199,22 @@ $dlSchedTempDir = tempdir("schedules");
 printMSG("Temp directory for Schedules is $dlSchedTempDir");
 $dlProgramTempDir = tempdir("programs");
 printMSG("Temp directory for Programs is $dlProgramTempDir");
+
+if ($isMythTV)
+{
+    if (!isset($dbHost) AND !isset($dbName) AND !isset($dbUser) and !isset($dbPassword))
+    {
+        list($dbHost, $dbName, $dbUser, $dbPassword) = getLoginFromFiles();
+        if ($dbHost == "NONE")
+        {
+            $dbUser = "mythtv";
+            $dbPassword = "mythtv";
+            $dbHost = "localhost";
+            $dbName = "mythconverg";
+            $host = "localhost";
+        }
+    }
+}
 
 if ($isMythTV OR $dbWithoutMythtv)
 {
