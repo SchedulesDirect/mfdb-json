@@ -1768,7 +1768,7 @@ function extractData($sourceIDtoExtract)
         return;
     }
 
-    $fhExtract = fopen("$lineupName.extract.conf", "a");
+    $fhExtract = fopen("$lineupName.extract.conf", "w");
 
     fwrite($fhExtract, "# jsonextract v0.01 $todayDate $lineupName\n");
 
