@@ -455,7 +455,7 @@ function getLoginFromFiles()
 
     if ($localFile)
     {
-        $xml = simplexml_load_file("~/.mythtv/config.xml");
+        $xml = simplexml_load_file(getenv("HOME") . "/.mythtv/config.xml");
     }
 
     /*
