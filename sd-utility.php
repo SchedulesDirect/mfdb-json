@@ -236,6 +236,31 @@ if ($isMythTV)
     }
 }
 
+if (!isset($dbHost))
+{
+    $dbHost = "localhost";
+}
+
+if (!isset($dbName))
+{
+    $dbName = "mythconverg";
+}
+
+if (!isset($dbUser))
+{
+    $dbUser = "mythtv";
+}
+
+if (!isset($dbPassword))
+{
+    $dbPassword = "mythtv";
+}
+
+if (!isset($host))
+{
+    $host = "localhost";
+}
+
 if ($isMythTV OR $dbWithoutMythtv)
 {
     print "Attempting to connect to database.\n";
