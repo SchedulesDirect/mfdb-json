@@ -455,30 +455,30 @@ function getLoginFromFiles()
 
     if ($localFile)
     {
-        $foo = file("~/.mythtv/config.xml");
+        $xml = simplexml_load_file("~/.mythtv/config.xml");
     }
 
     /*
      * We want to use the file in the local directory first if it exists.
      */
 
-    if (!isset($foo) AND $etcFile)
+    if (!isset($xml) AND $etcFile)
     {
-        $foo = file("/etc/mythtv/config.xml");
+        $xml = simplexml_load_file("/etc/mythtv/config.xml");
     }
 
-    if (!isset($foo))
+    if (!isset($xml))
     {
         return (array("NONE", "", "", ""));
     }
 
     /*
-     * Process the file to pull out the informatin that we need
+     * xml to array.
      */
 
-    foreach($foo as $line)
-    {
+    $foo = json_decode(json_encode($xml), TRUE);
 
-    }
+    print "Break here.\n";
+
 
 }
