@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.25, 2014-09-20
+v0.26, 2014-09-26
 
 Robert Kulagowski
 
@@ -15,6 +15,8 @@ This file describes API 20140530.
 
 **NOTE**: You are strongly encouraged to run "git pull" to refresh your client before each use; the software is under
 active development and this will ensure that you stay up-to-date.
+
+**NOTE**: Version of the client after 0.12 will now query the server and report if they're not the current version.
 
 #Features:
 ##MythTV-only
@@ -114,7 +116,7 @@ MythTV database.
 You can run it with **--help** to see the various options.
 
 ```
-sd-utility.php utility program API:20140530 v0.07-test.03/2014-09-05
+sd-utility.php utility program API:20140530 v0.13/2014-09-26
 
 The following options are available:
 --countries     The list of countries that have data.
@@ -123,6 +125,7 @@ The following options are available:
 --dbuser=       Username for database access. (Default: mythtv)
 --dbpassword=   Password for database access. (Default: mythtv)
 --dbhost=       MySQL database hostname. (Default: localhost)
+--extract       Don't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --help          (this text)
 --host=         IP address of the MythTV backend. (Default: localhost)
 --logo=         Directory where channel logos are stored (Default: /home/mythtv/.mythtv/channels)
@@ -130,13 +133,19 @@ The following options are available:
 --skiplogo      Don't download channel logos.
 --username=     Schedules Direct username.
 --password=     Schedules Direct password.
+--usedb         Use a database to store data, even if you're not running MythTV. (Default: FALSE)
 --timezone=     Set the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:UTC)
---version       Print version information.
+--version       Print version information and exit.
 ```
 
 If you've never used the Schedules Direct JSON service before, you will be
 prompted to enter your username and password; otherwise, your username and
 password will be read from the "videosource" table in mythconverg.
+
+MythTV database access information will be read from
+**/etc/mythtv/config.xml** and overriden if **~/.mythtv/config.xml** exists. 
+If neither file is present then you will need to pass database access
+information on the command line if you intend on using a database.
 
 ###Add a lineup.
 
