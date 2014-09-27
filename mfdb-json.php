@@ -78,23 +78,6 @@ if ($serverVersion == "ERROR")
     exit;
 }
 
-if ($serverVersion != $scriptVersion)
-{
-    printMSG("***Version mismatch.***");
-    printMSG("Server version: $serverVersion");
-    printMSG("Our version: $scriptVersion");
-    if (!$force)
-    {
-        printMSG("Exiting. Do you need to run 'git pull' to refresh?");
-        printMSG("Restart script with --force to ignore mismatch.");
-        exit;
-    }
-    else
-    {
-        printMSG("Continuing because of --force parameter.");
-    }
-}
-
 $helpText = <<< eol
 The following options are available:
 --beta
@@ -184,6 +167,23 @@ foreach ($options as $k => $v)
         case "x":
             $force = TRUE;
             break;
+    }
+}
+
+if ($serverVersion != $scriptVersion)
+{
+    printMSG("***Version mismatch.***");
+    printMSG("Server version: $serverVersion");
+    printMSG("Our version: $scriptVersion");
+    if (!$force)
+    {
+        printMSG("Exiting. Do you need to run 'git pull' to refresh?");
+        printMSG("Restart script with --force to ignore mismatch.");
+        exit;
+    }
+    else
+    {
+        printMSG("Continuing because of --force parameter.");
     }
 }
 
