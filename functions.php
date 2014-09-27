@@ -451,7 +451,7 @@ function checkForClientUpdate($client)
 function getLoginFromFiles()
 {
     $etcFile = file_exists("/etc/mythtv/config.xml");
-    $localFile = file_exists("~/.mythtv/config.xml");
+    $localFile = file_exists(getenv("HOME") . "/.mythtv/config.xml");
 
     if ($localFile)
     {
