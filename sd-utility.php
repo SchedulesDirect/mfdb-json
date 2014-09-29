@@ -35,7 +35,6 @@ $passwordFromDB = "";
 $passwordHash = "";
 $dbWithoutMythtv = FALSE;
 $useServiceAPI = FALSE;
-$channelLogoDirectory = "/home/mythtv/.mythtv/channels";
 $lineupArray = array();
 $force = FALSE;
 $printFancyTable = TRUE;
@@ -95,6 +94,7 @@ require_once "functions.php";
 use Guzzle\Http\Client;
 
 $baseurl = getBaseURL($isBeta);
+$channelLogoDirectory = getChannelLogoDirectory();
 
 $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
 
@@ -208,6 +208,12 @@ foreach ($options as $k => $v)
 if ($knownToBeBroken AND !$force)
 {
     print "This version is known to be broken and --force not specified. Exiting.\n";
+    exit;
+}
+
+if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === FALSE)
+{
+    print "Can't determine directory for station logos. Please specify using --logo or use --skiplogo\n";
     exit;
 }
 
@@ -1748,7 +1754,7 @@ function checkForChannelIcon($stationID, $data)
 
         printMSG("Fetching logo $iconFileName for station $stationID");
 
-        $success = file_put_contents("$channelLogoDirectory/$iconFileName", file_get_contents($data["URL"]));
+        $success = @file_put_contents("$channelLogoDirectory/$iconFileName", file_get_contents($data["URL"]));
 
         if ($success === FALSE)
         {
@@ -1883,6 +1889,22 @@ function printListOfAvailableCountries($fancyTable)
             }
         }
     }
+}
+
+function getChannelLogoDirectory()
+{
+    if (is_dir(getenv("HOME") . "/.mythtv/channels"))
+    {
+        return (getenv("HOME") . "/.mythtv/channels");
+    }
+
+    if (is_dir("/home/mythtv/.mythtv/channels"))
+    {
+        return ("/home/mythtv/.mythtv/channels");
+    }
+
+    return ("UNKNOWN");
+
 }
 
 ?>
