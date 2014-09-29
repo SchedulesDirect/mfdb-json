@@ -299,6 +299,7 @@ if ($isMythTV OR $dbWithoutMythtv)
             exit;
         }
 
+        displayLocalVideoSources();
         $sourceIDtoExtract = readline("Which sourceid do you want to extract:>");
         if ($sourceIDtoExtract != "")
         {
