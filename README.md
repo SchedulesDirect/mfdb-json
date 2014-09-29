@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.26, 2014-09-26
+v0.27, 2014-09-29
 
 Robert Kulagowski
 
@@ -16,7 +16,7 @@ This file describes API 20140530.
 **NOTE**: You are strongly encouraged to run "git pull" to refresh your client before each use; the software is under
 active development and this will ensure that you stay up-to-date.
 
-**NOTE**: Version of the client after 0.12 will now query the server and report if they're not the current version.
+**NOTE**: Versions of the client after 0.12 will now query the server and report if they're not the current version.
 
 #Features:
 ##MythTV-only
@@ -472,17 +472,13 @@ information directly you can skip to the next step; you'll be asked which
 method you'd like to use in the "R" step.
 
 If you have QAM, but it didn't appear in the list of lineups available in
-your headend, please run the scan in mythtv-setup, then see
+your headend, please run the scan in mythtv-setup, then use the "Extract"
+functionality to send your scanned QAM data to Schedules Direct so that we
+can create a QAM lineup for you.
 
-http://forums.schedulesdirect.org/viewtopic.php?f=3&t=1211
-
-The utility program will extract the scanned QAM information from your
-database.  Send the file to
+Send the file to
 
 qam-info@schedulesdirect.org
-
-Once we have the scan, we will correlate the station names and create a
-"-QAM" lineup for you.
 
 For Antenna and QAM users who will run a scan, once you've added the
 appropriate lineup to your Schedules Direct account, added a videosource (in
