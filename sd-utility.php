@@ -1820,7 +1820,7 @@ function extractData($sourceIDtoExtract)
 
     fclose($fhExtract);
 
-    print "Please send the $lineupName.extract.conf to grabber@schedulesdirect.org\n";
+    print "Please send the $lineupName.extract.conf to qam-info@schedulesdirect.org\n";
 }
 
 function getLineupFromNumber($numberOrLineup)
