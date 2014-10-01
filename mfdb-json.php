@@ -444,8 +444,8 @@ function getSchedules($stationIDsToFetch)
 
     if (count($foo) == 0)
     {
-        print "No schedules to fetch.\n";
-
+        print "No schedules to fetch.\nBreak here.\n";
+        $tt = fgets(STDIN);
     }
 
     if (!$forceDownload)
