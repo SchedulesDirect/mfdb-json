@@ -750,8 +750,27 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 continue;
             }
 
-            $pid = $jsonProgram["programID"];
-            $md5 = $jsonProgram["md5"];
+            if (isset($jsonProgram["programID"]))
+            {
+                $pid = $jsonProgram["programID"];
+            }
+            else
+            {
+                print "Fatal Error: No programID?\n";
+                print "$item\n";
+                exit;
+            }
+
+            if (isset($jsonProgram["md5"]))
+            {
+                $md5 = $jsonProgram["md5"];
+            }
+            else
+            {
+                print "Fatal Error: No md5?\n";
+                print "$item\n";
+                exit;
+            }
 
             $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
                                        "json"      => $item));
