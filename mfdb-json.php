@@ -442,6 +442,12 @@ function getSchedules($stationIDsToFetch)
         $foo[] = array("stationID" => $sid, "days" => 13);
     }
 
+    if (count($foo) == 0)
+    {
+        print "No schedules to fetch.\n";
+
+    }
+
     if (!$forceDownload)
     {
         printMSG("Determining if there are updated schedules.");
@@ -466,13 +472,13 @@ function getSchedules($stationIDsToFetch)
             exit;
         }
 
-        $res = $response->json();
+        $schedulesDirectMD5s = $response->json();
 
         $getLocalCache = $dbh->prepare("SELECT stationID,md5 FROM SDschedule");
         $getLocalCache->execute();
         $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
 
-        while (list($stationID, $data) = each($res))
+        while (list($stationID, $data) = each($schedulesDirectMD5s))
         {
             if (isset($localMD5[$stationID]))
             {
@@ -528,7 +534,7 @@ function getSchedules($stationIDsToFetch)
         exit;
     }
 
-    $resBody = $response->getBody();
+    $schedules = $response->getBody();
 
     /*
      * Keep a copy for troubleshooting.
@@ -536,14 +542,14 @@ function getSchedules($stationIDsToFetch)
 
     printMSG("Writing to $dlSchedTempDir/schedule.json");
 
-    file_put_contents("$dlSchedTempDir/schedule.json", $resBody);
+    file_put_contents("$dlSchedTempDir/schedule.json", $schedules);
 
     if (!$isMythTV)
     {
         return ("");
     }
 
-        $updateLocalMD5 = $dbh->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
+    $updateLocalMD5 = $dbh->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
 
     $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -659,13 +665,15 @@ function fetchPrograms($jsonProgramsToRetrieve)
 
                 $counter += count($chunk);
 
-                $request = $client->post("programs", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
+                $schedulesDirectPrograms = $client->post("programs",
+                    array("token"           => $token,
+                          "Accept-Encoding" => "deflate,gzip"),
                     json_encode($chunk));
-                $response = $request->send();
+                $response = $schedulesDirectPrograms->send();
 
-                $resBody = $response->getBody();
+                $schedulesDirectPrograms = $response->getBody();
 
-                file_put_contents("$dlProgramTempDir/programs." . substr("00$i", -2) . ".json", $resBody);
+                file_put_contents("$dlProgramTempDir/programs." . substr("00$i", -2) . ".json", $schedulesDirectPrograms);
             }
         }
     }
