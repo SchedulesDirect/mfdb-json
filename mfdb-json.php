@@ -750,6 +750,20 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 continue;
             }
 
+            if (isset($jsonProgram["code"]))
+            {
+                /*
+                 * Probably not good. :(
+                 */
+
+                if ($jsonProgram["code"] == 6000)
+                {
+                    print "Fatal: server couldn't find programID?\n";
+                    print "$item\n";
+                    exit;
+                }
+            }
+
             if (isset($jsonProgram["programID"]))
             {
                 $pid = $jsonProgram["programID"];
