@@ -1595,7 +1595,7 @@ function checkDatabase()
         {
             $stmt = $dbh->exec("ALTER TABLE credits CHANGE role role set('actor','director','producer',
             'executive_producer','writer','guest_star','host','adapter','presenter','commentator','guest')
-            NOT NULL DEFAULT '')");
+            NOT NULL DEFAULT ''");
             setting("SchedulesDirectJSONschemaVersion", "30");
             $schemaVersion = 30;
         }
