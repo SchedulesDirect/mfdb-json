@@ -561,7 +561,7 @@ function getSchedules($stationIDsToFetch)
 
     printMSG("Writing to $dlSchedTempDir/schedule.json");
 
-    file_put_contents("$dlSchedTempDir/schedule.json", $schedules);
+    file_put_contents("$dlSchedTempDir/schedule.json", $schedules, FILE_APPEND);
 
     if (!$isMythTV)
     {
