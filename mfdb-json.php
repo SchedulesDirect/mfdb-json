@@ -53,6 +53,7 @@ $dbWithoutMythtv = FALSE;
 $force = FALSE;
 $jsonProgramsToRetrieve = array();
 $peopleCache = array();
+$addToRetryQueue = array();
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -426,6 +427,7 @@ function getSchedules($stationIDsToFetch)
     global $debug;
     global $isMythTV;
     global $forceDownload;
+    global $addToRetryQueue;
 
     $jsonProgramsToRetrieve = array();
     $foo = array();
