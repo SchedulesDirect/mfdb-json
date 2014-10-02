@@ -178,12 +178,12 @@ if ($serverVersion != $scriptVersion)
     if (!$force)
     {
         printMSG("Exiting. Do you need to run 'git pull' to refresh?");
-        printMSG("Restart script with --force to ignore mismatch.");
+        printMSG("Restart script with --x to ignore mismatch.");
         exit;
     }
     else
     {
-        printMSG("Continuing because of --force parameter.");
+        printMSG("Continuing because of --x parameter.");
     }
 }
 

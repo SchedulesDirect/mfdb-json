@@ -133,7 +133,7 @@ eol;
 
 $longoptions = array("countries", "debug", "extract", "force", "help", "host::", "dbname::", "dbuser::",
                      "dbpassword::", "dbhost::", "logo::", "notfancy", "nomyth", "skiplogo", "username::", "password::",
-                     "timezone::", "usedb", "version");
+                     "timezone::", "usedb", "version", "x");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -202,12 +202,15 @@ foreach ($options as $k => $v)
             print "$agentString\n\n";
             exit;
             break;
+        case "x":
+            $force = TRUE;
+            break;
     }
 }
 
 if ($knownToBeBroken AND !$force)
 {
-    print "This version is known to be broken and --force not specified. Exiting.\n";
+    print "This version is known to be broken and --x not specified. Exiting.\n";
     exit;
 }
 
