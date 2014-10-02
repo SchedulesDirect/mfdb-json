@@ -569,9 +569,9 @@ function getSchedules($stationIDsToFetch)
             continue;
         }
 
-        if (isset($item["errorCode"]))
+        if (isset($item["code"]))
         {
-            if ($item["errorCode"] == 7000)
+            if ($item["code"] == 7000)
             {
                 if (!isset($addToRetryQueue[$stationID]))
                 {
