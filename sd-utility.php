@@ -1590,6 +1590,15 @@ function checkDatabase()
         }
         setting("SchedulesDirectJSONschemaVersion", "29");
         $schemaVersion = 29;
+
+        if ($schemaVersion == 29)
+        {
+            $stmt = $dbh->exec("ALTER TABLE credits CHANGE role role set('actor','director','producer',
+            'executive_producer','writer','guest_star','host','adapter','presenter','commentator','guest')
+            NOT NULL DEFAULT '')");
+            setting("SchedulesDirectJSONschemaVersion", "30");
+            $schemaVersion = 30;
+        }
     }
 
     if ($createBaseTables)
@@ -1668,9 +1677,14 @@ function checkDatabase()
   KEY `md5` (`md5`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
+        /*
+         * MythTV has hardcoded enum for the credits, so we had been changing that here. Don't do that anymore; too
+         * many issues with users who may want to change back.
+         *
         $stmt = $dbh->exec("ALTER TABLE credits CHANGE role role SET('actor','director','producer','executive_producer',
     'writer','guest_star','host','adapter','presenter','commentator','guest','musical_guest','judge',
     'correspondent','contestant')");
+        */
 
         $stmt = $dbh->exec("DELETE FROM settings WHERE VALUE IN('mythfilldatabaseLastRunStart',
         'mythfilldatabaseLastRunEnd','mythfilldatabaseLastRunStatus','MythFillSuggestedRunTime',

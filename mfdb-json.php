@@ -995,6 +995,10 @@ function insertSchedule()
     global $debug;
     global $errorWarning;
 
+    $existingRoleTypesInMyth = array("actor", "director", "producer", "executive_producer", "writer", "guest_star",
+                                     "host", "adapter", "presenter", "commentator", "guest");
+    $existingRoleTypesInMyth = array_flip($existingRoleTypesInMyth);
+
     if (!count($peopleCache))
     {
         /*
@@ -1790,6 +1794,10 @@ if (isset($v["sap"]))
 
 
 */
+
+    /*
+     * TODO: update the credits table using the existing role types in MythTV.
+     */
 
 
     /*
