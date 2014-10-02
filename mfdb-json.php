@@ -348,7 +348,10 @@ if ($token != "ERROR" AND $response != "ERROR")
             printMSG("Retrying schedule fetch for the following:");
             var_dump($addToRetryQueue); // Raw dump for now while we troubleshoot.
             $forceDownload = TRUE;
-            $bar = array_flip($addToRetryQueue);
+            foreach ($addToRetryQueue as $k => $v)
+            {
+                $bar[] = $k;
+            }
             $foo = getSchedules($bar);
             $jsonProgramsToRetrieve = array_merge($jsonProgramsToRetrieve, $foo);
         }
