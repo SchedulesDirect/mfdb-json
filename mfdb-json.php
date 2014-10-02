@@ -557,7 +557,40 @@ function getSchedules($stationIDsToFetch)
     foreach ($f as $json)
     {
         $item = json_decode($json, TRUE);
-        $stationID = $item["stationID"];
+
+        if (isset($item["stationID"]))
+        {
+            $stationID = $item["stationID"];
+        }
+        else
+        {
+            printMSG("Fatal: No stationID? Send the following to grabber@schedulesdirect.org");
+            printMSG($json);
+            continue;
+        }
+
+        if (isset($item["errorCode"]))
+        {
+            if ($item["errorCode"] == 7000)
+            {
+                if (!isset($addToRetryQueue[$stationID]))
+                {
+                    $addToRetryQueue[$stationID] = 1;
+                }
+                else
+                {
+                    $addToRetryQueue[$stationID]++;
+                }
+
+                if ($addToRetryQueue[$stationID] == 10)
+                {
+                    unset($addToRetryQueue[$stationID]); // Permanent error.
+                    printMSG("Permanent error attempting to fetch schedule for $stationID");
+                }
+
+                continue;
+            }
+        }
 
         $downloadedStationIDs[] = $stationID;
 
@@ -617,6 +650,17 @@ function getSchedules($stationIDsToFetch)
         printMSG(print_r($serverScheduleMD5, TRUE));
         printMSG("jsonProrgamstoRetrieve is");
         printMSG(print_r($jsonProgramsToRetrieve, TRUE));
+    }
+
+    if (count($addToRetryQueue))
+    {
+        /*
+         * Recursive; hopefully we don't get a runaway.
+         */
+        printMSG("Retrying schedule fetch for the following:");
+        var_dump($addToRetryQueue); // Raw dump for now while we troubleshoot.
+        $foo = getSchedules($addToRetryQueue);
+        $jsonProgramsToRetrieve = array_merge($jsonProgramsToRetrieve, $foo);
     }
 
     return ($jsonProgramsToRetrieve);
