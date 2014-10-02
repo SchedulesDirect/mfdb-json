@@ -345,6 +345,7 @@ if ($token != "ERROR" AND $response != "ERROR")
             /*
              * Recursive; hopefully we don't get a runaway.
              */
+            $bar = array();
             printMSG("Retrying schedule fetch for the following:");
             var_dump($addToRetryQueue); // Raw dump for now while we troubleshoot.
             $forceDownload = TRUE;
