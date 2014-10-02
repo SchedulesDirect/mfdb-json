@@ -339,6 +339,20 @@ if ($token != "ERROR" AND $response != "ERROR")
     if (count($stationIDs))
     {
         $jsonProgramsToRetrieve = getSchedules($stationIDs);
+
+        while (count($addToRetryQueue))
+        {
+            /*
+             * Recursive; hopefully we don't get a runaway.
+             */
+            printMSG("Retrying schedule fetch for the following:");
+            var_dump($addToRetryQueue); // Raw dump for now while we troubleshoot.
+            $forceDownload = TRUE;
+            $bar = array_flip($addToRetryQueue);
+            $foo = getSchedules($bar);
+            $jsonProgramsToRetrieve = array_merge($jsonProgramsToRetrieve, $foo);
+        }
+
         fetchPrograms($jsonProgramsToRetrieve);
     }
 }
@@ -652,17 +666,6 @@ function getSchedules($stationIDsToFetch)
         printMSG(print_r($serverScheduleMD5, TRUE));
         printMSG("jsonProrgamstoRetrieve is");
         printMSG(print_r($jsonProgramsToRetrieve, TRUE));
-    }
-
-    if (count($addToRetryQueue))
-    {
-        /*
-         * Recursive; hopefully we don't get a runaway.
-         */
-        printMSG("Retrying schedule fetch for the following:");
-        var_dump($addToRetryQueue); // Raw dump for now while we troubleshoot.
-        $foo = getSchedules($addToRetryQueue);
-        $jsonProgramsToRetrieve = array_merge($jsonProgramsToRetrieve, $foo);
     }
 
     return ($jsonProgramsToRetrieve);
