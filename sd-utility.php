@@ -792,7 +792,7 @@ function updateChannelTable($lineup)
                 print "Inserting QAM data into tables.\n";
 
                 $insertDTVMultiplex = $dbh->prepare
-                    ("INSERT INTO dtv_multiplex
+                ("INSERT INTO dtv_multiplex
         (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
         VALUES
         (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
@@ -1804,7 +1804,7 @@ function extractData($sourceIDtoExtract)
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $lineupName = $stmt->fetchColumn();
 
-    $stmt = $dbh->prepare("SELECT channum, callsign, xmltvid, mplexid, serviceid FROM channel where sourceid=:sid");
+    $stmt = $dbh->prepare("SELECT channum, freqid, callsign, name, xmltvid, mplexid, serviceid FROM channel where sourceid=:sid");
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -1824,13 +1824,12 @@ function extractData($sourceIDtoExtract)
         $getFrequency->execute(array("mplexid" => $v["mplexid"]));
         $freq = $getFrequency->fetchColumn();
 
-        $extractArray[] = array("chanNum"   => $v["channum"], "callSign" => $v["callsign"],
-                                "xmltvid"   => $v["xmltvid"],
-                                "mplexid"   => $v["mplexid"], "serviceid" => $v["serviceid"],
-                                "frequency" => $freq);
+        $extractArray[] = array("qamChannel" => $v["channum"], "channel" => $v["freqid"], "callSign" => $v["callsign"],
+                                "name"       => $v["name"], "xmltvid" => $v["xmltvid"], "serviceid" => $v["serviceid"],
+                                "frequency"  => $freq);
     }
 
-    $extractArray["version"] = "0.03";
+    $extractArray["version"] = "0.04";
     $extractArray["date"] = $todayDate;
     $extractArray["lineup"] = $lineupName;
 
