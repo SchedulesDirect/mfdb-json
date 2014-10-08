@@ -685,7 +685,7 @@ function updateChannelTable($lineup)
                     {
                         $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$channum,
                                              "channum"         => ltrim($channum, "0"),
-                                             "freqid"          => $channum,
+                                             "freqid"          => (int)$channum,
                                              "sourceid"        => $sourceID, "xmltvid" => $stationID,
                                              "mplexid"         => 32767,
                                              "serviceid"       => 0,
