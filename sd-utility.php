@@ -792,7 +792,7 @@ function updateChannelTable($lineup)
                 print "Inserting QAM data into tables.\n";
 
                 $insertDTVMultiplex = $dbh->prepare
-                    ("INSERT INTO dtv_multiplex
+                ("INSERT INTO dtv_multiplex
         (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
         VALUES
         (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
@@ -1799,16 +1799,18 @@ function extractData($sourceIDtoExtract)
     global $todayDate;
 
     $extractArray = array();
+    $extractChannel = array();
+    $extractMultiplex = array();
 
     $stmt = $dbh->prepare("SELECT lineupid from videosource where sourceid=:sid");
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $lineupName = $stmt->fetchColumn();
 
-    $stmt = $dbh->prepare("SELECT channum, callsign, xmltvid, mplexid, serviceid FROM channel where sourceid=:sid");
+    $stmt = $dbh->prepare("SELECT channum, freqid, callsign, name, xmltvid, mplexid, serviceid FROM channel where sourceid=:sid");
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $getFrequency = $dbh->prepare("SELECT frequency FROM dtv_multiplex WHERE mplexid=:mplexid");
+    $getDTVMultiplex = $dbh->prepare("SELECT transportid, frequency FROM dtv_multiplex WHERE mplexid=:mplexid");
 
     if (count($result) == 0)
     {
@@ -1821,22 +1823,27 @@ function extractData($sourceIDtoExtract)
 
     foreach ($result as $v)
     {
-        $getFrequency->execute(array("mplexid" => $v["mplexid"]));
-        $freq = $getFrequency->fetchColumn();
+        $getDTVMultiplex->execute(array("mplexid" => $v["mplexid"]));
+        $dtv = $getDTVMultiplex->fetchAll(PDO::FETCH_ASSOC);
 
-        $extractArray[] = array("chanNum"   => $v["channum"], "callSign" => $v["callsign"],
-                                "xmltvid"   => $v["xmltvid"],
-                                "mplexid"   => $v["mplexid"], "serviceid" => $v["serviceid"],
-                                "frequency" => $freq);
+        $extractChannel[] = array("qamChannel" => $v["channum"], "channel" => $v["freqid"],
+                                  "callSign"   => $v["callsign"],
+                                  "name"       => $v["name"], "mplexid" => $v["mplexid"], "xmltvid" => $v["xmltvid"],
+                                  "serviceid"  => $v["serviceid"]);
+
+        $extractMultiplex[$v["mplexid"]] = array("transportid" => $dtv[0]["transportid"],
+                                                 "frequency"   => $dtv[0]["frequency"]);
     }
 
-    $extractArray["version"] = "0.03";
+    $extractArray["version"] = "0.04";
     $extractArray["date"] = $todayDate;
     $extractArray["lineup"] = $lineupName;
+    $extractArray["channel"] = $extractChannel;
+    $extractArray["multiplex"] = $extractMultiplex;
 
     $json = json_encode($extractArray);
 
-    fwrite($fhExtract, $json . "\n");
+    fwrite($fhExtract, "$json\n");
 
     /*
      * TODO: send json automatically.
