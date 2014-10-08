@@ -1810,7 +1810,7 @@ function extractData($sourceIDtoExtract)
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $getDTVMultiplex = $dbh->prepare("SELECT transportid, frequency FROM dtv_multiplex WHERE mplexid=:mplexid");
+    $getDTVMultiplex = $dbh->prepare("SELECT transportid, frequency, modulation FROM dtv_multiplex WHERE mplexid=:mplexid");
 
     if (count($result) == 0)
     {
@@ -1832,10 +1832,11 @@ function extractData($sourceIDtoExtract)
                                   "serviceid"  => $v["serviceid"]);
 
         $extractMultiplex[$v["mplexid"]] = array("transportid" => $dtv[0]["transportid"],
-                                                 "frequency"   => $dtv[0]["frequency"]);
+                                                 "frequency"   => $dtv[0]["frequency"],
+                                                 "modulation"  => $dtv[0]["modulation"]);
     }
 
-    $extractArray["version"] = "0.04";
+    $extractArray["version"] = "0.05";
     $extractArray["date"] = $todayDate;
     $extractArray["lineup"] = $lineupName;
     $extractArray["channel"] = $extractChannel;
