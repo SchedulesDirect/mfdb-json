@@ -1178,7 +1178,7 @@ function addLineupsToSchedulesDirect()
         $lineup = strtoupper($lineup);
     }
 
-    if ($lineup != "USA-C-BAND-DEFAULT" OR substr_count($lineup, "-") != 2)
+    if ($lineup != "USA-C-BAND-DEFAULT" AND substr_count($lineup, "-") != 2)
     {
         print "Did not see at least two hyphens in lineup; did you enter it correctly?\n";
 
