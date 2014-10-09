@@ -691,7 +691,8 @@ function updateChannelTable($lineup)
                         $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$channum,
                                              "channum"         => ltrim($channum, "0"),
                                              "freqid"          => (int)$channum,
-                                             "sourceid"        => $sourceID, "xmltvid" => $stationID,
+                                             "sourceid"        => $sourceID,
+                                             "xmltvid"         => $stationID,
                                              "mplexid"         => 32767,
                                              "serviceid"       => 0,
                                              "atsc_major_chan" => $channum));
@@ -717,9 +718,39 @@ function updateChannelTable($lineup)
 
                 if ($transport == "Satellite")
                 {
-                    /*
-                     * TODO.
-                     */
+                    $channum = $mapArray["channel"];
+                    $stmt = $dbh->prepare(
+                        "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,mplexid,serviceid,atsc_major_chan)
+                         VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:mplexid,:serviceid,:atsc_major_chan)");
+
+                    try
+                    {
+                        $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$channum,
+                                             "channum"         => ltrim($channum, "0"),
+                                             "freqid"          => (int)$channum,
+                                             "sourceid"        => $sourceID,
+                                             "xmltvid"         => $stationID,
+                                             "mplexid"         => 32767,
+                                             "serviceid"       => 0,
+                                             "atsc_major_chan" => $channum));
+                    } catch (PDOException $e)
+                    {
+                        if ($e->getCode() == 23000)
+                        {
+                            print "\n\n";
+                            print "*************************************************************\n";
+                            print "\n\n";
+                            print "Error inserting data. Duplicate channel number exists?\n";
+                            print "Send email to grabber@schedulesdirect.org with the following:\n\n";
+                            print "Duplicate channel error.\n";
+                            print "Transport: $transport\n";
+                            print "Lineup: $lineup\n";
+                            print "Channum: $channum\n";
+                            print "stationID: $stationID\n";
+                            print "\n\n";
+                            print "*************************************************************\n";
+                        }
+                    }
                 }
             }
         }
