@@ -632,6 +632,11 @@ function updateChannelTable($lineup)
             $transport = "QAM";
         }
 
+        if ($json["metadata"]["transport"] == "Satellite")
+        {
+            $transport = "Satellite";
+        }
+
         if ($transport != "QAM")
         {
             foreach ($json["map"] as $mapArray)
@@ -708,6 +713,13 @@ function updateChannelTable($lineup)
                             print "*************************************************************\n";
                         }
                     }
+                }
+
+                if ($transport == "Satellite")
+                {
+                    /*
+                     * TODO.
+                     */
                 }
             }
         }
