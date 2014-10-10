@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.27, 2014-09-29
+v0.28, 2014-10-10
 
 Robert Kulagowski
 
@@ -61,7 +61,7 @@ populate MythTV data.
 Install the prerequisites:
 
 ###Ubuntu
-sudo apt-get install git php5-cli php5-curl curl
+sudo apt-get install git php5-cli php5-mysql php5-curl curl
 
 ###Fedora
 yum -y install git curl curl-devel libcurl libcurl-devel php-common
