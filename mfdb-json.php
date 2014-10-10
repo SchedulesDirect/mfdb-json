@@ -639,7 +639,7 @@ function getSchedules($stationIDsToFetch)
                 printMSG("FATAL ERROR: no MD5 value for program.");
                 printMSG("Send the following to grabber@schedulesdirect.org\n");
                 printMSG("s:$stationID\n\njson:$json\n\nitem\n\n" . print_r($item, TRUE) . "\n\n");
-                exit;
+                continue;
             }
         }
     }
@@ -810,9 +810,9 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
                 if ($jsonProgram["code"] == 6000)
                 {
-                    print "Fatal: server couldn't find programID?\n";
+                    print "FATAL ERROR: server couldn't find programID?\n";
                     print "$item\n";
-                    exit;
+                    continue;
                 }
             }
 
@@ -822,9 +822,9 @@ function insertJSON(array $jsonProgramsToRetrieve)
             }
             else
             {
-                print "Fatal Error: No programID?\n";
+                print "FATAL ERROR: No programID?\n";
                 print "$item\n";
-                exit;
+                continue;
             }
 
             if (isset($jsonProgram["md5"]))
@@ -833,9 +833,9 @@ function insertJSON(array $jsonProgramsToRetrieve)
             }
             else
             {
-                print "Fatal Error: No md5?\n";
+                print "FATAL ERROR: No md5?\n";
                 print "$item\n";
-                exit;
+                continue;
             }
 
             $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
@@ -1447,7 +1447,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             if ($title == NULL OR $title == "")
             {
                 debugMSG("FATAL ERROR: Empty title? $programID");
-                exit;
+                continue;
             }
 
             if (isset($programJSON["episodeTitle150"]))
@@ -1511,7 +1511,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     break;
                 default:
                     debugMSG("FATAL ERROR: $programID has unknown type.");
-                    exit;
+                    continue;
                     break;
             }
 
