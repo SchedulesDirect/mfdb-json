@@ -495,6 +495,7 @@ function getSchedules($stationIDsToFetch)
                         break;
                     case 504:
                         $errorCount++;
+                        printMSG("Got timeout from gateway; retrying in 10 seconds.");
                         sleep(10); // Hammering away isn't going to make things better.
                         break;
                     default:
@@ -579,6 +580,7 @@ function getSchedules($stationIDsToFetch)
                     break;
                 case 504:
                     $errorCount++;
+                    printMSG("Got timeout from gateway; retrying in 10 seconds.");
                     sleep(10); // Hammering away isn't going to make things better.
                     break;
                 default:
