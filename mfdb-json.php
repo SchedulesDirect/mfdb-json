@@ -1142,7 +1142,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
     $getProgramInformation = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID =:pid");
 
-    $deleteExistingSchedule = $dbh->prepare("DELETE FROM program WHERE chanid = :chanid");
+    $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
 
     $scheduleTemp = file("$dlSchedTempDir/schedule.json");
 
