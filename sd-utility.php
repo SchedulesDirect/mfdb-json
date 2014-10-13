@@ -808,7 +808,7 @@ function updateChannelTable($lineup)
 
                 foreach ($json["map"][$mapToUse] as $foo)
                 {
-                    $map["{$foo["qamFrequency"]}-{$foo["qamProgram"]}"] = $foo["stationID"];
+                    $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
                 }
 
                 foreach ($existingChannelNumbers as $foo)
@@ -819,7 +819,7 @@ function updateChannelTable($lineup)
                     {
                         $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
                                                               "mplexid"   => $foo["mplexid"],
-                                                              "serviceid" => $foo["serviceid"]));
+                                                              "serviceid" => $foo["serviceID"]));
                     }
                 }
 
@@ -838,8 +838,7 @@ function updateChannelTable($lineup)
                 ("INSERT INTO dtv_multiplex
         (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
         VALUES
-        (:sourceid,:freq,0,'v','qam_256',1,'qam_256','a','UNDEFINED','0.35','atsc')");
-
+        (:sourceid,:freq,0,'v',:modulation,1,:modulation,'a','UNDEFINED','0.35','atsc')");
 
                 $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,visible,mplexid,serviceid)
                      VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid)");
@@ -851,29 +850,33 @@ function updateChannelTable($lineup)
 
                 foreach ($json["map"][$mapToUse] as $mapArray)
                 {
-                    /*
-                     * Because multiple programs may end up on a single frequency, we only want to insert once, but we want
-                     * to track the mplexid assigned when we do the insert, because that might be used more than once.
-                     */
-                    $stationID = $mapArray["stationID"];
-                    $qamType = $mapArray["qamType"];
-                    $qamProgram = $mapArray["qamProgram"];
-                    $qamFreq = $mapArray["qamFrequency"];
-                    $channel = $mapArray["channel"];
+                    $virtualChannel = $mapArray["virtualChannel"]; // "Channel 127"
 
-                    if (!isset($dtvMultiplex[$qamFreq]))
+                    if (isset($mapArray["channel"]))
                     {
-                        $insertDTVMultiplex->execute(array("sourceid" => $sourceID, "freq" => $qamFreq));
-                        $dtvMultiplex[$qamFreq] = $dbh->lastInsertId();
-                    }
-
-                    if (isset($mapArray["virtualChannel"]))
-                    {
-                        $virtualChannel = $mapArray["virtualChannel"];
+                        $channel = $mapArray["channel"]; // "54-18" or whatever.
                     }
                     else
                     {
-                        $virtualChannel = "";
+                        $channel = $virtualChannel;
+                    }
+
+                    $modulation = $mapArray["modulation"];
+                    $frequency = $mapArray["frequency"];
+                    $serviceID = $mapArray["serviceID"];
+                    $stationID = $mapArray["stationID"];
+
+                    /*
+                     * Because multiple programs may end up on a single frequency, we only want to insert once,
+                     * but we want to track the mplexid assigned when we do the insert,
+                     * because that might be used more than once.
+                     */
+                    if (!isset($dtvMultiplex[$frequency]))
+                    {
+                        $insertDTVMultiplex->execute(array("sourceid"   => $sourceID,
+                                                           "freq"       => $frequency,
+                                                           "modulation" => $modulation));
+                        $dtvMultiplex[$frequency] = $dbh->lastInsertId();
                     }
 
                     /*
@@ -888,10 +891,11 @@ function updateChannelTable($lineup)
                     {
                         $channelInsert->execute(array("chanid"    => (int)($sourceID * 1000) + (int)$strippedChannel,
                                                       "channum"   => $channel,
-                                                      "freqid"    => $channel, "sourceid" => $sourceID,
+                                                      "freqid"    => $virtualChannel,
+                                                      "sourceid"  => $sourceID,
                                                       "xmltvid"   => $stationID,
-                                                      "mplexid"   => $dtvMultiplex[$qamFreq],
-                                                      "serviceid" => $qamProgram));
+                                                      "mplexid"   => $dtvMultiplex[$frequency],
+                                                      "serviceid" => $serviceID));
                     } catch (PDOException $e)
                     {
                         if ($e->getCode() == 23000)
@@ -905,6 +909,7 @@ function updateChannelTable($lineup)
                             print "Transport: $transport\n";
                             print "Lineup: $lineup\n";
                             print "Channum: $channel\n";
+                            print "Virtual: $virtualChannel\n";
                             print "stationID: $stationID\n";
                             print "\n\n";
                             print "*************************************************************\n";
@@ -1136,7 +1141,7 @@ function addLineupsToSchedulesDirect()
 
         if ($country == "?")
         {
-            printListOfAvailableCountries();
+            printListOfAvailableCountries(TRUE);
         }
         else
         {
@@ -1869,17 +1874,20 @@ function extractData($sourceIDtoExtract)
         $getDTVMultiplex->execute(array("mplexid" => $v["mplexid"]));
         $dtv = $getDTVMultiplex->fetchAll(PDO::FETCH_ASSOC);
 
-        $extractChannel[] = array("qamChannel" => $v["channum"], "channel" => $v["freqid"],
-                                  "callSign"   => $v["callsign"],
-                                  "name"       => $v["name"], "mplexid" => $v["mplexid"], "xmltvid" => $v["xmltvid"],
-                                  "serviceid"  => $v["serviceid"]);
+        $extractChannel[] = array("channel"        => $v["channum"],
+                                  "virtualChannel" => $v["freqid"],
+                                  "callsign"       => $v["callsign"],
+                                  "name"           => $v["name"],
+                                  "mplexID"        => $v["mplexid"],
+                                  "stationID"      => $v["xmltvid"],
+                                  "serviceID"      => $v["serviceid"]);
 
-        $extractMultiplex[$v["mplexid"]] = array("transportid" => $dtv[0]["transportid"],
+        $extractMultiplex[$v["mplexid"]] = array("transportID" => $dtv[0]["transportid"],
                                                  "frequency"   => $dtv[0]["frequency"],
                                                  "modulation"  => $dtv[0]["modulation"]);
     }
 
-    $extractArray["version"] = "0.05";
+    $extractArray["version"] = "0.06";
     $extractArray["date"] = $todayDate;
     $extractArray["lineup"] = $lineupName;
     $extractArray["channel"] = $extractChannel;
