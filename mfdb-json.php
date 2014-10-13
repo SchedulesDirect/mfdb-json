@@ -1023,6 +1023,7 @@ function insertSchedule()
 
     $dbh->exec("DROP TABLE IF EXISTS t_program");
     $dbh->exec("CREATE TABLE t_program LIKE program");
+    $dbh->exec("INSERT t_program SELECT * FROM program");
 
     $dbh->exec("DROP TABLE IF EXISTS t_credits");
     $dbh->exec("CREATE TABLE t_credits LIKE credits");
