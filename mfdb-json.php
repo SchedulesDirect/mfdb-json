@@ -340,6 +340,12 @@ if ($token != "ERROR" AND $response != "ERROR")
     {
         $jsonProgramsToRetrieve = getSchedules($stationIDs);
 
+        if ($jsonProgramsToRetrieve == "ERROR")
+        {
+            printMSG("Could not get schedules. Exiting.");
+            exit;
+        }
+
         while (count($addToRetryQueue))
         {
             /*
@@ -471,25 +477,47 @@ function getSchedules($stationIDsToFetch)
     {
         printMSG("Determining if there are updated schedules.");
 
-        try
-        {
-            $response = $client->post("schedules/md5", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-                json_encode($foo))->send();
-        } catch (Guzzle\Http\Exception\BadResponseException $e)
-        {
-            print "BadResponseException in getSchedules.\n";
-            var_dump($e);
+        $errorCount = 0;
 
-            if ($e->getCode() == 400)
-            {
-                return ("ERROR");
-            }
-        } catch (Exception $e)
+        do
         {
-            print "Other exception in getSchedules.\n";
-            var_dump($e);
-            exit;
+            try
+            {
+                $response = $client->post("schedules/md5", array("token"           => $token,
+                                                                 "Accept-Encoding" => "deflate,gzip"),
+                    json_encode($foo))->send();
+            } catch (Guzzle\Http\Exception\BadResponseException $e)
+            {
+                switch ($e->getCode())
+                {
+                    case 400:
+                        return ("ERROR");
+                        break;
+                    case 504:
+                        $errorCount++;
+                        sleep(10); // Hammering away isn't going to make things better.
+                        break;
+                    default:
+                        print "BadResponseException in getSchedules.\n";
+                        var_dump($e);
+                        break;
+                }
+
+            } catch (Exception $e)
+            {
+                print "Other exception in getSchedules.\n";
+                var_dump($e);
+                exit;
+            }
+        } while ($errorCount < 10);
+
+        if ($errorCount == 10)
+        {
+            printMSG("Fatal error trying to get MD5 for schedules.");
+
+            return ("ERROR");
         }
+
 
         $schedulesDirectMD5s = $response->json();
 
@@ -519,6 +547,7 @@ function getSchedules($stationIDsToFetch)
             }
         }
     }
+
     else
     {
         $bar = $foo;
@@ -533,24 +562,44 @@ function getSchedules($stationIDsToFetch)
 
     printMSG(count($bar) . " schedules to download.");
 
-    try
-    {
-        $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-            json_encode($bar))->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        print "BadResponseException in getSchedules.\n";
-        var_dump($e);
+    $errorCount = 0;
 
-        if ($e->getCode() == 400)
-        {
-            return ("ERROR");
-        }
-    } catch (Exception $e)
+    do
     {
-        print "Other exception in getSchedules.\n";
-        var_dump($e);
-        exit;
+        try
+        {
+            $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
+                json_encode($bar))->send();
+        } catch (Guzzle\Http\Exception\BadResponseException $e)
+        {
+            switch ($e->getCode())
+            {
+                case 400:
+                    return ("ERROR");
+                    break;
+                case 504:
+                    $errorCount++;
+                    sleep(10); // Hammering away isn't going to make things better.
+                    break;
+                default:
+                    print "BadResponseException in getSchedules.\n";
+                    var_dump($e);
+                    break;
+            }
+        } catch (Exception $e)
+        {
+            print "Other exception in getSchedules.\n";
+            var_dump($e);
+            exit;
+        }
+
+    } while ($errorCount < 10);
+
+    if ($errorCount == 10)
+    {
+        printMSG("Fatal error trying to get schedules.");
+
+        return ("ERROR");
     }
 
     $schedules = $response->getBody();
