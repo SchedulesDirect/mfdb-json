@@ -481,13 +481,16 @@ function getSchedules($stationIDsToFetch)
 
         do
         {
+            $response = NULL;
             try
             {
-                $response = $client->post("schedules/md5", array("token"           => $token,
-                                                                 "Accept-Encoding" => "deflate,gzip"),
+                $response = $client->post("schedules/md5",
+                    array("token"           => $token,
+                          "Accept-Encoding" => "deflate,gzip"),
                     json_encode($foo))->send();
             } catch (Guzzle\Http\Exception\BadResponseException $e)
             {
+                $response = NULL;
                 switch ($e->getCode())
                 {
                     case 400:
@@ -499,16 +502,21 @@ function getSchedules($stationIDsToFetch)
                         sleep(10); // Hammering away isn't going to make things better.
                         break;
                     default:
-                        print "BadResponseException in getSchedules.\n";
+                        print "Unhandled BadResponseException in getSchedules MD5.\n";
+                        print "Send the following to grabber@schedulesdirect.org\n";
                         var_dump($e);
                         break;
                 }
-
             } catch (Exception $e)
             {
                 print "Other exception in getSchedules.\n";
                 var_dump($e);
                 exit;
+            }
+
+            if (!is_null($response))
+            {
+                break;
             }
         } while ($errorCount < 10);
 
@@ -518,7 +526,6 @@ function getSchedules($stationIDsToFetch)
 
             return ("ERROR");
         }
-
 
         $schedulesDirectMD5s = $response->json();
 
@@ -567,12 +574,14 @@ function getSchedules($stationIDsToFetch)
 
     do
     {
+        $response = NULL;
         try
         {
             $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
                 json_encode($bar))->send();
         } catch (Guzzle\Http\Exception\BadResponseException $e)
         {
+            $response = NULL;
             switch ($e->getCode())
             {
                 case 400:
@@ -584,7 +593,8 @@ function getSchedules($stationIDsToFetch)
                     sleep(10); // Hammering away isn't going to make things better.
                     break;
                 default:
-                    print "BadResponseException in getSchedules.\n";
+                    print "Unhandled BadResponseException in getSchedules.\n";
+                    print "Send the following to grabber@schedulesdirect.org\n";
                     var_dump($e);
                     break;
             }
@@ -595,6 +605,10 @@ function getSchedules($stationIDsToFetch)
             exit;
         }
 
+        if (!is_null($response))
+        {
+            break;
+        }
     } while ($errorCount < 10);
 
     if ($errorCount == 10)
