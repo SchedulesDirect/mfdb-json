@@ -547,16 +547,41 @@ function getSchedules($stationIDsToFetch)
 
         $schedulesDirectMD5s = $response->json();
 
+        if ($debug)
+        {
+            print "Schedules Direct MD5's\n";
+            var_dump($schedulesDirectMD5s);
+        }
+
         $getLocalCache = $dbh->prepare("SELECT stationID,md5 FROM SDschedule");
         $getLocalCache->execute();
         $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
 
+        if ($debug)
+        {
+            print "Local MD5\n";
+            var_dump($localMD5);
+        }
+
         while (list($stationID, $data) = each($schedulesDirectMD5s))
         {
+            if ($debug)
+            {
+                print "sid: $stationID\n";
+                print "data:\n";
+                var_dump($data);
+            }
+
             if (isset($localMD5[$stationID]))
             {
                 foreach ($data as $item)
                 {
+                    if ($debug)
+                    {
+                        print "item is\n";
+                        var_dump($item);
+                    }
+
                     if ($item["days"] == 13)
                     {
                         if ($localMD5[$stationID] != $item["md5"])
@@ -576,6 +601,12 @@ function getSchedules($stationIDsToFetch)
     else
     {
         $bar = $requestArray;
+    }
+
+    if ($debug)
+    {
+        print "bar is now\n";
+        var_dump($bar);
     }
 
     if (count($bar) == 0)
