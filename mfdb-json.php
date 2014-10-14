@@ -453,7 +453,7 @@ function getSchedules($stationIDsToFetch)
     global $addToRetryQueue;
 
     $jsonProgramsToRetrieve = array();
-    $foo = array();
+    $requestArray = array();
     $bar = array();
 
     $dbProgramCache = array();
@@ -462,15 +462,33 @@ function getSchedules($stationIDsToFetch)
     $downloadedStationIDs = array();
     $serverScheduleMD5 = array();
 
-    while (list(, $sid) = each($stationIDsToFetch))
+    if ($debug)
     {
-        $foo[] = array("stationID" => $sid, "days" => 13);
+        print "Station array:\n";
+        var_dump($stationIDsToFetch);
     }
 
-    if (count($foo) == 0)
+    if (count($stationIDsToFetch) == 0)
     {
-        print "No schedules to fetch.\nBreak here.\n";
-        $tt = fgets(STDIN);
+        print "1. No schedules to fetch.\n";
+        return("");
+    }
+
+    while (list(, $sid) = each($stationIDsToFetch))
+    {
+        $requestArray[] = array("stationID" => $sid, "days" => 13);
+    }
+
+    if (count($requestArray) == 0)
+    {
+        print "2. No schedules to fetch.\n"; // Should never hit this.
+        return("");
+    }
+
+    if ($debug)
+    {
+        print "Request array:\n";
+        var_dump($requestArray);
     }
 
     if (!$forceDownload)
@@ -487,7 +505,7 @@ function getSchedules($stationIDsToFetch)
                 $response = $client->post("schedules/md5",
                     array("token"           => $token,
                           "Accept-Encoding" => "deflate,gzip"),
-                    json_encode($foo))->send();
+                    json_encode($requestArray))->send();
             } catch (Guzzle\Http\Exception\BadResponseException $e)
             {
                 $response = NULL;
@@ -555,10 +573,9 @@ function getSchedules($stationIDsToFetch)
             }
         }
     }
-
     else
     {
-        $bar = $foo;
+        $bar = $requestArray;
     }
 
     if (count($bar) == 0)
