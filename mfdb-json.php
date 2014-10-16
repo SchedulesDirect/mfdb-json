@@ -279,10 +279,22 @@ if ($isMythTV)
         $stmt->execute();
         $sources = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
-AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
-        $stmt->execute();
-        $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        if (!count($sources))
+        {
+            printMSG("Error: no videosources configured for Schedules Direct JSON service. Check videosource table.");
+            exit;
+        }
+
+        foreach ($sources as $sourceid)
+        {
+            $stmt = $dbh->prepare("SELECT xmltvid FROM channel WHERE visible=TRUE AND xmltvid != '' AND xmltvid > 0 AND
+        sourceid=:sourceid");
+            $stmt->execute(array("sourceid" => $sourceid));
+            $stationIDs = array_merge($stationIDs, $stmt->fetchAll(PDO::FETCH_COLUMN));
+        }
+
+        $stationIDs = array_flip(array_flip($stationIDs)); // Double flip does a unique then makes the keys back to
+        // values
 
         if (!count($stationIDs))
         {
@@ -476,7 +488,8 @@ function getSchedules($stationIDsToFetch)
     if (count($stationIDsToFetch) == 0)
     {
         print "1. No schedules to fetch.\n";
-        return("");
+
+        return ("");
     }
 
     while (list(, $sid) = each($stationIDsToFetch))
@@ -487,7 +500,7 @@ function getSchedules($stationIDsToFetch)
     if (count($requestArray) == 0)
     {
         print "2. No schedules to fetch.\n"; // Should never hit this.
-        return("");
+        return ("");
     }
 
     if ($debug)
