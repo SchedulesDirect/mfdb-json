@@ -274,10 +274,27 @@ if ($isMythTV)
     if ($station == "")
     {
         printMSG("Retrieving list of channels to download.");
-        $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
-AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
+
+        $stmt = $dbh->prepare("SELECT sourceID FROM videosource WHERE xmltvgrabber='schedulesdirect2'");
         $stmt->execute();
-        $stationIDs = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $sources = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if (!count($sources))
+        {
+            printMSG("Error: no videosources configured for Schedules Direct JSON service. Check videosource table.");
+            exit;
+        }
+
+        foreach ($sources as $sourceid)
+        {
+            $stmt = $dbh->prepare("SELECT xmltvid FROM channel WHERE visible=TRUE AND xmltvid != '' AND xmltvid > 0 AND
+        sourceid=:sourceid");
+            $stmt->execute(array("sourceid" => $sourceid));
+            $stationIDs = array_merge($stationIDs, $stmt->fetchAll(PDO::FETCH_COLUMN));
+        }
+
+        $stationIDs = array_flip(array_flip($stationIDs)); // Double flip does a unique then makes the keys back to
+        // values
 
         if (!count($stationIDs))
         {
@@ -357,7 +374,9 @@ if ($token != "ERROR" AND $response != "ERROR")
             foreach ($addToRetryQueue as $k => $v)
             {
                 $bar[] = $k;
+                printMSG("StationID: $k");
             }
+            $addToRetryQueue = array(); // Otherwise we may never exit.
             $foo = getSchedules($bar);
             $jsonProgramsToRetrieve = array_merge($jsonProgramsToRetrieve, $foo);
         }
@@ -471,7 +490,8 @@ function getSchedules($stationIDsToFetch)
     if (count($stationIDsToFetch) == 0)
     {
         print "1. No schedules to fetch.\n";
-        return("");
+
+        return ("");
     }
 
     while (list(, $sid) = each($stationIDsToFetch))
@@ -482,7 +502,7 @@ function getSchedules($stationIDsToFetch)
     if (count($requestArray) == 0)
     {
         print "2. No schedules to fetch.\n"; // Should never hit this.
-        return("");
+        return ("");
     }
 
     if ($debug)
@@ -713,6 +733,8 @@ function getSchedules($stationIDsToFetch)
                 {
                     $addToRetryQueue[$stationID]++;
                 }
+
+                printMSG("Adding $stationID to retry queue. Count is {$addToRetryQueue[$stationID]}");
 
                 if ($addToRetryQueue[$stationID] == 10)
                 {
@@ -1203,8 +1225,24 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     while (list(, $item) = each($scheduleTemp))
     {
         $tempJSON = json_decode($item, TRUE);
-        $stationID = $tempJSON["stationID"];
-        $scheduleJSON[$stationID] = $tempJSON["programs"];
+        if (isset($tempJSON["stationID"]))
+        {
+            $stationID = $tempJSON["stationID"];
+        }
+        else
+        {
+            printMSG("Fatal error in insertSchedules:No stationID:$item");
+            exit;
+        }
+        if (isset($tempJSON["programs"]))
+        {
+            $scheduleJSON[$stationID] = $tempJSON["programs"];
+        }
+        else
+        {
+            printMSG("Fatal error in insertSchedules:No programs:$item");
+            exit;
+        }
     }
 
     /*
