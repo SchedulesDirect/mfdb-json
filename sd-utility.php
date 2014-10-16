@@ -264,7 +264,6 @@ if ($initDB)
             exit;
         }
     }
-    checkDatabase();
     unset($dbhSD);
 }
 
