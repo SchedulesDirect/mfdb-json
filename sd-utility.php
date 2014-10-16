@@ -478,8 +478,9 @@ while (!$done)
     print "1 Add a known lineupID to your account at Schedules Direct\n";
     print "2 Search for a lineup to add to your account at Schedules Direct\n";
     print "3 Delete a lineup from your account at Schedules Direct\n";
-    print "4 Acknowledge a message\n";
-    print "5 Print a channel table for a lineup\n";
+    print "4 Refresh the local lineup cache\n";
+    print "5 Acknowledge a message\n";
+    print "6 Print a channel table for a lineup\n";
 
     if ($isMythTV)
     {
@@ -508,9 +509,21 @@ while (!$done)
             deleteLineupFromSchedulesDirect();
             break;
         case "4":
-            deleteMessageFromSchedulesDirect();
+            $updatedLineupsToRefresh = array();
+            $stmt = $dbh->prepare("SELECT lineupid FROM videosource");
+            $stmt->execute();
+            $lineups = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            if (count($lineups))
+            {
+                $updatedLineupsToRefresh = array_flip($lineups);
+                updateLocalLineupCache($updatedLineupsToRefresh);
+            }
             break;
         case "5":
+            deleteMessageFromSchedulesDirect();
+            break;
+        case "6":
             printLineup();
             break;
         case "A":
@@ -1451,12 +1464,6 @@ function getLineup($lineupToGet)
 function updateLocalLineupCache($updatedLineupsToRefresh)
 {
     global $dbh;
-    global $isMythTV;
-
-    if (!$isMythTV)
-    {
-        return;
-    }
 
     print "Checking for updated lineups from Schedules Direct.\n";
 
