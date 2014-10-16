@@ -441,7 +441,7 @@ if ($needToStoreLogin)
 
     $credentials = json_encode($userInformation);
 
-    if ($isMythTV)
+    if ($isMythTV OR $dbWithoutMythtv)
     {
         putSchedulesDirectLoginIntoDB($credentials);
 
