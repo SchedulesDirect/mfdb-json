@@ -257,7 +257,10 @@ if ($isMythTV OR $dbWithoutMythtv)
         exit;
     }
 
-    $useServiceAPI = checkForServiceAPI();
+    if ($isMythTV)
+    {
+        $useServiceAPI = checkForServiceAPI();
+    }
 
     $userLoginInformation = setting("SchedulesDirectLogin");
 
