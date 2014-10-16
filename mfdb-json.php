@@ -277,7 +277,7 @@ if ($isMythTV)
 
         $stmt = $dbh->prepare("SELECT sourceID FROM videosource WHERE xmltvgrabber='schedulesdirect2'");
         $stmt->execute();
-        $sources = $stmt->fetchColumn();
+        $sources = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
 AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
