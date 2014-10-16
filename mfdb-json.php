@@ -1225,8 +1225,24 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     while (list(, $item) = each($scheduleTemp))
     {
         $tempJSON = json_decode($item, TRUE);
-        $stationID = $tempJSON["stationID"];
-        $scheduleJSON[$stationID] = $tempJSON["programs"];
+        if (isset($tempJSON["stationID"]))
+        {
+            $stationID = $tempJSON["stationID"];
+        }
+        else
+        {
+            printMSG("Fatal error in insertSchedules:No stationID:$item");
+            exit;
+        }
+        if (isset($tempJSON["programs"]))
+        {
+            $scheduleJSON[$stationID] = $tempJSON["programs"];
+        }
+        else
+        {
+            printMSG("Fatal error in insertSchedules:No programs:$item");
+            exit;
+        }
     }
 
     /*
