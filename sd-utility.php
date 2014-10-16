@@ -324,6 +324,14 @@ if ($isMythTV OR $dbWithoutMythtv)
             checkDatabase();
             exit;
         }
+
+        if ($e->getCode() == 1049)
+        {
+            print "Initial database not created.\n";
+            print "Please run\nmysql -uroot -p < sd.sql\n";
+            print "Then run this script with --initdb\n";
+            exit;
+        }
         else
         {
             print "Got error connecting to database.\n";
