@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 $scriptVersion = "0.18";
 $scriptDate = "2014-10-15";
-$knownToBeBroken = TRUE;
+$knownToBeBroken = FALSE;
 
 function getToken($username, $passwordHash)
 {
