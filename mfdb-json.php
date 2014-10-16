@@ -376,6 +376,7 @@ if ($token != "ERROR" AND $response != "ERROR")
                 $bar[] = $k;
                 printMSG("StationID: $k");
             }
+            $addToRetryQueue = array(); // Otherwise we may never exit.
             $foo = getSchedules($bar);
             $jsonProgramsToRetrieve = array_merge($jsonProgramsToRetrieve, $foo);
         }
