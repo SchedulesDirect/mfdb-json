@@ -274,6 +274,11 @@ if ($isMythTV)
     if ($station == "")
     {
         printMSG("Retrieving list of channels to download.");
+
+        $stmt = $dbh->prepare("SELECT sourceID FROM videosource WHERE xmltvgrabber='schedulesdirect2'");
+        $stmt->execute();
+        $sources = $stmt->fetchColumn();
+
         $stmt = $dbh->prepare("SELECT CAST(xmltvid AS UNSIGNED) FROM channel WHERE visible=TRUE
 AND xmltvid != '' AND xmltvid > 0 GROUP BY xmltvid");
         $stmt->execute();
