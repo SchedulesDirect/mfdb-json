@@ -264,7 +264,8 @@ if ($initDB)
             exit;
         }
     }
-
+    checkDatabase();
+    unset($dbhSD);
 }
 
 if ($isMythTV)
