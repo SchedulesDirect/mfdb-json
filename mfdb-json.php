@@ -294,10 +294,11 @@ if ($isMythTV OR $dbWithoutMythtv)
                 print "Message: " . $e->getMessage() . "\n";
                 exit;
             }
-            $useServiceAPI = checkForServiceAPI();
         }
 
-        $userLoginInformation = setting("SchedulesDirectLogin");
+        $useServiceAPI = checkForServiceAPI();
+
+        $userLoginInformation = settingSD("SchedulesDirectLogin");
 
         if ($userLoginInformation !== FALSE)
         {
@@ -525,7 +526,7 @@ exit;
 function getSchedules($stationIDsToFetch)
 {
     global $client;
-    global $dbh;
+    global $dbhSD;
     global $token;
     global $dlSchedTempDir;
     global $quiet;
@@ -636,7 +637,7 @@ function getSchedules($stationIDsToFetch)
             var_dump($schedulesDirectMD5s);
         }
 
-        $getLocalCache = $dbh->prepare("SELECT stationID,md5 FROM SDschedule");
+        $getLocalCache = $dbhSD->prepare("SELECT stationID,md5 FROM SDschedule");
         $getLocalCache->execute();
         $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -764,7 +765,7 @@ function getSchedules($stationIDsToFetch)
         return ("");
     }
 
-    $updateLocalMD5 = $dbh->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
+    $updateLocalMD5 = $dbhSD->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
 
     $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -849,7 +850,7 @@ function getSchedules($stationIDsToFetch)
      * We're going to figure out which programIDs we need to download.
      */
 
-    $stmt = $dbh->prepare("SELECT md5, programID FROM SDprogramCache");
+    $stmt = $dbhSD->prepare("SELECT md5, programID FROM SDprogramCache");
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
