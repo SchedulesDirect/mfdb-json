@@ -374,6 +374,7 @@ if ($token != "ERROR" AND $response != "ERROR")
             foreach ($addToRetryQueue as $k => $v)
             {
                 $bar[] = $k;
+                printMSG("StationID: $k");
             }
             $foo = getSchedules($bar);
             $jsonProgramsToRetrieve = array_merge($jsonProgramsToRetrieve, $foo);
