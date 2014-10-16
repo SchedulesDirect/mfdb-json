@@ -734,6 +734,8 @@ function getSchedules($stationIDsToFetch)
                     $addToRetryQueue[$stationID]++;
                 }
 
+                printMSG("Adding $stationID to retry queue. Count is {$addToRetryQueue[$stationID]}");
+
                 if ($addToRetryQueue[$stationID] == 10)
                 {
                     unset($addToRetryQueue[$stationID]); // Permanent error.
