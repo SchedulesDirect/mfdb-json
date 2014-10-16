@@ -40,6 +40,8 @@ $force = FALSE;
 $printFancyTable = TRUE;
 $printCountries = FALSE;
 $justExtract = FALSE;
+$dbHostSD = "localhost";
+$initDB = FALSE;
 
 $availableCountries = array(
     "North America" => array(
@@ -114,13 +116,15 @@ $helpText = <<< eol
 The following options are available:
 --countries\tThe list of countries that have data.
 --debug\t\tEnable debugging. (Default: FALSE)
---dbname=\tMySQL database name. (Default: mythconverg)
---dbuser=\tUsername for database access. (Default: mythtv)
---dbpassword=\tPassword for database access. (Default: mythtv)
---dbhost=\tMySQL database hostname. (Default: localhost)
+--dbname=\tMySQL database name for MythTV. (Default: mythconverg)
+--dbuser=\tUsername for database access for MythTV. (Default: mythtv)
+--dbpassword=\tPassword for database access for MythTV. (Default: mythtv)
+--dbhost=\tMySQL database hostname for MythTV. (Default: localhost)
+--dbhostsd=\tMySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
 --extract\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
+--initdb\t\tPerform initial database configuration for SchedulesDirect.
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
 --skiplogo\tDon't download channel logos.
@@ -132,12 +136,14 @@ The following options are available:
 eol;
 
 $longoptions = array("countries", "debug", "extract", "force", "help", "host::", "dbname::", "dbuser::",
-                     "dbpassword::", "dbhost::", "logo::", "notfancy", "nomyth", "skiplogo", "username::", "password::",
+                     "dbpassword::", "dbhost::", "dbhostsd::", "initdb", "logo::", "notfancy", "nomyth", "skiplogo",
+                     "username::", "password::",
                      "timezone::", "usedb", "version", "x");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
 {
+    $k = strtolower($k);
     switch ($k)
     {
         case "countries":
@@ -164,6 +170,9 @@ foreach ($options as $k => $v)
         case "dbhost":
             $dbHost = $v;
             break;
+        case "dbhostsd":
+            $dbHostSD = $v;
+            break;
         case "extract":
             $justExtract = TRUE;
             break;
@@ -172,6 +181,9 @@ foreach ($options as $k => $v)
             break;
         case "host":
             $host = $v;
+            break;
+        case "initdb":
+            $initDB = TRUE;
             break;
         case "logo":
             $channelLogoDirectory = $v;
@@ -229,6 +241,32 @@ if ($printCountries)
 print "Using timezone $tz\n";
 print "$agentString\n";
 
+if ($initDB)
+{
+    print "Connecting to Schedules Direct database.\n";
+    try
+    {
+        $dbhSD = new PDO("mysql:host=$dbHostSD;dbname=schedulesdirect;charset=utf8", "sd", "sd");
+        $dbhSD->exec("SET CHARACTER SET utf8");
+        $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e)
+    {
+        if ($e->getCode() == 2002)
+        {
+            print "Could not connect to database:\n" . $e->getMessage() . "\n";
+            exit;
+        }
+        else
+        {
+            print "Got error connecting to database.\n";
+            print "Code: " . $e->getCode() . "\n";
+            print "Message: " . $e->getMessage() . "\n";
+            exit;
+        }
+    }
+
+}
+
 if ($isMythTV)
 {
     if (!isset($dbHost) AND !isset($dbName) AND !isset($dbUser) and !isset($dbPassword))
@@ -272,19 +310,18 @@ if (!isset($host))
 
 if ($isMythTV OR $dbWithoutMythtv)
 {
-    print "Attempting to connect to database.\n";
+    print "Connecting to Schedules Direct database.\n";
     try
     {
-        $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
-            array(PDO::ATTR_PERSISTENT => true));
-        $dbh->exec("SET CHARACTER SET utf8");
-        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $dbhSD = new PDO("mysql:host=$dbHostSD;dbname=schedulesdirect;charset=utf8", "sd", "sd");
+        $dbhSD->exec("SET CHARACTER SET utf8");
+        $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e)
     {
         if ($e->getCode() == 2002)
         {
             print "Could not connect to database:\n" . $e->getMessage() . "\n";
-            print "If you're running the grabber as standalone, use --nomyth\n";
+            checkDatabase();
             exit;
         }
         else
@@ -293,6 +330,32 @@ if ($isMythTV OR $dbWithoutMythtv)
             print "Code: " . $e->getCode() . "\n";
             print "Message: " . $e->getMessage() . "\n";
             exit;
+        }
+    }
+
+    if ($isMythTV)
+    {
+        print "Connecting to MythTV database.\n";
+        try
+        {
+            $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword);
+            $dbh->exec("SET CHARACTER SET utf8");
+            $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e)
+        {
+            if ($e->getCode() == 2002)
+            {
+                print "Could not connect to database:\n" . $e->getMessage() . "\n";
+                print "If you're running the grabber as standalone, use --nomyth\n";
+                exit;
+            }
+            else
+            {
+                print "Got error connecting to database.\n";
+                print "Code: " . $e->getCode() . "\n";
+                print "Message: " . $e->getMessage() . "\n";
+                exit;
+            }
         }
     }
 
@@ -305,6 +368,12 @@ if ($isMythTV OR $dbWithoutMythtv)
         if (!isset($dbh))
         {
             print "Don't have dbh. Exiting.\n";
+            exit;
+        }
+
+        if (!isset($dbhSD))
+        {
+            print "Don't have dbhSD. Exiting.\n";
             exit;
         }
 
@@ -366,8 +435,11 @@ if ($serverVersion != $scriptVersion)
 if ($isMythTV)
 {
     $useServiceAPI = checkForServiceAPI();
+}
 
-    $userLoginInformation = setting("SchedulesDirectLogin");
+if ($isMythTV OR $dbWithoutMythtv)
+{
+    $userLoginInformation = settingSD("SchedulesDirectLogin");
 
     if ($userLoginInformation !== FALSE)
     {
@@ -443,7 +515,7 @@ if ($needToStoreLogin)
 
     if ($isMythTV OR $dbWithoutMythtv)
     {
-        putSchedulesDirectLoginIntoDB($credentials);
+        settingSD("SchedulesDirectLogin", $credentials);
 
         $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
     password=:password WHERE xmltvgrabber='schedulesdirect2'");
@@ -588,6 +660,7 @@ exit;
 function updateChannelTable($lineup)
 {
     global $dbh;
+    global $dbhSD;
     global $skipChannelLogo;
 
     $transport = "";
@@ -603,7 +676,7 @@ function updateChannelTable($lineup)
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
+    $stmt = $dbhSD->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -968,7 +1041,7 @@ function updateChannelTable($lineup)
             $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
         }
 
-        $lineupLastModifiedJSON = setting("localLineupLastModified");
+        $lineupLastModifiedJSON = settingSD("localLineupLastModified");
         $lineupLastModifiedArray = array();
 
         if (count($lineupLastModifiedJSON))
@@ -978,23 +1051,24 @@ function updateChannelTable($lineup)
 
         $lineupLastModifiedArray[$lineup] = $modified;
 
-        setting("localLineupLastModified", json_encode($lineupLastModifiedArray));
+        settingSD("localLineupLastModified", json_encode($lineupLastModifiedArray));
 
         /*
          * Set the startchan to a non-bogus value.
          */
-        $stmt = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid
+        $getChanNum = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid
     ORDER BY CAST(channum AS SIGNED) LIMIT 1");
 
-        foreach ($sID as $sourceID)
+        foreach ($sID as $updateSourceID)
         {
-            $stmt->execute(array("sourceid" => $sourceID));
-            $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            if (count($result))
+            $getChanNum->execute(array("sourceid" => $updateSourceID));
+            $result = $getChanNum->fetchColumn();
+
+            if ($result != "")
             {
-                $startChan = $result[0];
+                $startChan = $result;
                 $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
-                $setStartChannel->execute(array("sourceid" => $sourceID, "startChan" => $startChan));
+                $setStartChannel->execute(array("sourceid" => $updateSourceID, "startChan" => $startChan));
             }
         }
     }
@@ -1003,6 +1077,7 @@ function updateChannelTable($lineup)
 function linkSchedulesDirectLineup()
 {
     global $dbh;
+    global $dbhSD;
 
     $sid = readline("MythTV sourceid:>");
 
@@ -1018,13 +1093,24 @@ function linkSchedulesDirectLineup()
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
+    $stmt = $dbhSD->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
-    if (!count($response))
+    if (!count($response)) // We've already decoded the JSON.
     {
-        return;
+        print "Fatal Error in Link SchedulesDirect Lineup.\n";
+        print "No JSON stored in SDlineupCache?\n";
+        print "lineup:$lineup\n";
+        exit;
+    }
+
+    if ($response == "[]")
+    {
+        print "Fatal Error in Link SchedulesDirect Lineup.\n";
+        print "Empty JSON stored in SDlineupCache?\n";
+        print "lineup:$lineup\n";
+        exit;
     }
 
     $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:lineup WHERE sourceid=:sid");
@@ -1033,7 +1119,7 @@ function linkSchedulesDirectLineup()
 
 function printLineup()
 {
-    global $dbh;
+    global $dbhSD;
 
     /*
      * First we want to get the lineup that we're interested in.
@@ -1046,7 +1132,7 @@ function printLineup()
         return;
     }
 
-    $stmt = $dbh->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
+    $stmt = $dbhSD->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -1162,7 +1248,7 @@ function addLineupsToSchedulesDirect()
         }
     }
 
-    if (array_key_exists($country, $arrayCountriesWithOnePostalCode))
+    if (isset($arrayCountriesWithOnePostalCode[$country]))
     {
         print "Only one valid postal code for this country: {$arrayCountriesWithOnePostalCode[$country]}\n";
         $postalcode = $arrayCountriesWithOnePostalCode[$country];
@@ -1322,12 +1408,13 @@ function directAddLineup($lineup)
 function deleteLineupFromSchedulesDirect()
 {
     global $dbh;
+    global $dbhSD;
     global $debug;
     global $client;
     global $token;
     global $updatedLineupsToRefresh;
 
-    $deleteFromLocalCache = $dbh->prepare("DELETE FROM SDlineupCache WHERE lineup=:lineup");
+    $deleteFromLocalCache = $dbhSD->prepare("DELETE FROM SDlineupCache WHERE lineup=:lineup");
     $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
 
     $toDelete = getLineupFromNumber(strtoupper(readline("Lineup to Delete (# or lineup):>")));
@@ -1463,7 +1550,7 @@ function getLineup($lineupToGet)
 
 function updateLocalLineupCache($updatedLineupsToRefresh)
 {
-    global $dbh;
+    global $dbhSD;
 
     print "Checking for updated lineups from Schedules Direct.\n";
 
@@ -1482,7 +1569,7 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbh->prepare("INSERT INTO SDlineupCache(lineup,json,modified)
+        $stmt = $dbhSD->prepare("INSERT INTO SDlineupCache(lineup,json,modified)
         VALUES(:lineup,:json,:modified) ON DUPLICATE KEY UPDATE json=:json,modified=:modified");
 
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
@@ -1550,123 +1637,60 @@ function getSchedulesDirectLineups()
 function checkDatabase()
 {
     global $dbh;
-    global $dbWithoutMythtv;
+    global $dbhSD;
 
     $createBaseTables = FALSE;
 
-    if ($dbWithoutMythtv)
+    $stmt = $dbhSD->prepare("DESCRIBE settings");
+    try
     {
-        $stmt = $dbh->prepare("DESCRIBE settings");
-        try
-        {
-            $stmt->execute();
-        } catch (PDOException $ex)
-        {
-            if ($ex->getCode() == "42S02")
-            {
-                printMSG("Creating settings table.\n");
-                $stmt = $dbh->exec("CREATE TABLE `settings`
-                (
-                `value` varchar(128) NOT NULL DEFAULT '',
-                `data` varchar(16000) NOT NULL DEFAULT '',
-                `hostname` varchar(64) DEFAULT NULL,
-                KEY `value` (`value`,`hostname`)
-                ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
-
-                setting("SchedulesDirectJSONschemaVersion", "28");
-                setting("SchedulesDirectWithoutMythTV", "TRUE");
-                $createBaseTables = TRUE;
-            }
-        }
-    }
-    else
+        $stmt->execute();
+    } catch (PDOException $ex)
     {
-        $schemaVersion = setting("SchedulesDirectJSONschemaVersion");
-
-        if ($schemaVersion === FALSE OR $schemaVersion == "26")
+        if ($ex->getCode() == "42S02")
         {
-            printMSG("Upgrading database from initial configuration.\n");
-            $stmt = $dbh->prepare("DESCRIBE videosource");
-            $stmt->execute();
-            $columnNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            printMSG("Creating settings table.\n");
+            $stmt = $dbhSD->exec(
+                "CREATE TABLE `settings` (
+                    `keyColumn` varchar(255) NOT NULL,
+                    `valueColumn` varchar(255) NOT NULL,
+                    PRIMARY KEY (`keyColumn`),
+                    UNIQUE KEY `keyColumn` (`keyColumn`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-            if (in_array("modified", $columnNames))
-            {
-                /*
-                 * We're going to store lineup modification dates in the settings table so that we're not
-                 * modifying a core MythTV table. But first we'll pull the existing information out.
-                 */
-
-                $stmt = $dbh->prepare("SELECT lineupid, modified FROM videosource");
-                $stmt->execute();
-                $existingLineups = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-                $foo = array();
-                foreach ($existingLineups as $lineup => $modified)
-                {
-                    $foo[] = array("lineup" => $lineup, "lastModified" => $modified);
-                }
-
-                $bar = json_encode($foo);
-
-                setting("localLineupLastModified", $bar);
-
-                $dbh->exec("ALTER TABLE videosource DROP COLUMN modified");
-            }
-
-            $result = setting("schedulesdirectLogin");
-
-            if ($result)
-            {
-                $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
-                setting("SchedulesDirectLogin", $result);
-            }
+            //settingSD("SchedulesDirectWithoutMythTV", "TRUE");
             $createBaseTables = TRUE;
         }
+    }
 
-        if ($schemaVersion == "27")
-        {
-            printMSG("Upgrading to Schedules Direct schema 28.\n");
-            $stmt = $dbh->exec("ALTER TABLE SDimageCache DROP KEY id");
-            $stmt = $dbh->exec("ALTER TABLE SDimageCache CHANGE dimension height VARCHAR(128) NOT NULL");
-            $stmt = $dbh->exec("ALTER TABLE SDimageCache ADD width VARCHAR(128) NOT NULL AFTER height");
-            $stmt = $dbh->exec("ALTER TABLE SDimageCache ADD UNIQUE KEY id(item,height,width)");
-            setting("SchedulesDirectJSONschemaVersion", "28");
-            $schemaVersion = 28;
-        }
+    $schemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
 
-        if ($schemaVersion == "28")
-        {
-            printMSG("Upgrading to Schedules Direct schema 29.\n");
-            $stmt = $dbh->exec("DROP TABLE SDschedule");
-            $stmt = $dbh->exec("CREATE TABLE `SDschedule` (
-  `stationID` varchar(12) NOT NULL,
-  `md5` char(22) NOT NULL,
-  UNIQUE KEY `sid` (`stationID`),
-  KEY `md5` (`md5`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-        }
-        setting("SchedulesDirectJSONschemaVersion", "29");
-        $schemaVersion = 29;
+    if ($schemaVersion === FALSE)
+    {
+        printMSG("Copying existing data from MythTV");
 
-        if ($schemaVersion == 29)
-        {
-            $stmt = $dbh->exec("ALTER TABLE credits CHANGE role role set('actor','director','producer',
-            'executive_producer','writer','guest_star','host','adapter','presenter','commentator','guest')
-            NOT NULL DEFAULT ''");
-            setting("SchedulesDirectJSONschemaVersion", "30");
-            $schemaVersion = 30;
-        }
+        $lineups = setting("localLineupLastModified");
+        settingSD("localLineupLastModified", $lineups);
+
+        $login = setting("SchedulesDirectLogin");
+        settingSD("SchedulesDirectLogin", $login);
+
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
+
+        $createBaseTables = TRUE;
     }
 
     if ($createBaseTables)
     {
         print "Creating Schedules Direct tables.\n";
 
-        $stmt = $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
+        $stmt = $dbhSD->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
     SDprogramrating,SDschedule,SDMessages,SDimageCache");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDMessages` (
+        $stmt = $dbhSD->exec("CREATE TABLE `SDMessages` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `id` char(22) DEFAULT NULL COMMENT 'Required to ACK a message from the server.',
   `date` char(20) DEFAULT NULL,
@@ -1677,7 +1701,7 @@ function checkDatabase()
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDcredits` (
+        $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
 `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `programID` varchar(64) NOT NULL,
   `role` varchar(100) DEFAULT NULL,
@@ -1685,7 +1709,7 @@ function checkDatabase()
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDlineupCache` (
+        $stmt = $dbhSD->exec("CREATE TABLE `SDlineupCache` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `lineup` varchar(50) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
@@ -1695,13 +1719,13 @@ function checkDatabase()
   UNIQUE KEY `lineup` (`lineup`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDpeople` (
+        $stmt = $dbhSD->exec("CREATE TABLE `SDpeople` (
 `personID` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`personID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDprogramCache` (
+        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramCache` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `programID` varchar(64) NOT NULL,
   `md5` char(22) NOT NULL,
@@ -1712,7 +1736,7 @@ function checkDatabase()
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDprogramgenres` (
+        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramgenres` (
 `programID` varchar(64) NOT NULL,
   `relevance` char(1) NOT NULL DEFAULT '0',
   `genre` varchar(30) NOT NULL,
@@ -1721,43 +1745,21 @@ function checkDatabase()
   KEY `genre` (`genre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDprogramrating` (
+        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramrating` (
 `programID` varchar(64) NOT NULL,
   `system` varchar(30) NOT NULL,
   `rating` varchar(16) DEFAULT NULL,
   PRIMARY KEY (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("CREATE TABLE `SDschedule` (
+        $stmt = $dbhSD->exec("CREATE TABLE `SDschedule` (
   `stationID` varchar(12) NOT NULL,
   `md5` char(22) NOT NULL,
   UNIQUE KEY `sid` (`stationID`),
   KEY `md5` (`md5`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        /*
-         * MythTV has hardcoded enum for the credits, so we had been changing that here. Don't do that anymore; too
-         * many issues with users who may want to change back.
-         *
-        $stmt = $dbh->exec("ALTER TABLE credits CHANGE role role SET('actor','director','producer','executive_producer',
-    'writer','guest_star','host','adapter','presenter','commentator','guest','musical_guest','judge',
-    'correspondent','contestant')");
-        */
-
-        $stmt = $dbh->exec("DELETE FROM settings WHERE VALUE IN('mythfilldatabaseLastRunStart',
-        'mythfilldatabaseLastRunEnd','mythfilldatabaseLastRunStatus','MythFillSuggestedRunTime',
-        'MythFillSuggestedRunTime','MythFillSuggestedRunTime','MythFillDatabaseArgs')");
-
-        $stmt = $dbh->exec("INSERT INTO settings(value, data, hostname)
-    VALUES('mythfilldatabaseLastRunStart', '',NULL),
-    ('mythfilldatabaseLastRunEnd','',NULL),
-    ('mythfilldatabaseLastRunStatus','',NULL),
-    ('MythFillSuggestedRunTime','',NULL),
-    ('DataDirectMessage','',NULL),
-    ('MythFillDatabaseArgs','',NULL),
-    ('SchedulesDirectLastUpdate','',NULL)");
-
-        $stmt = $dbh->exec("CREATE TABLE `SDimageCache` (
+        $stmt = $dbhSD->exec("CREATE TABLE `SDimageCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `item` varchar(128) NOT NULL,
   `md5` char(22) NOT NULL,
@@ -1769,39 +1771,15 @@ function checkDatabase()
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
-
-        setting("SchedulesDirectJSONschemaVersion", "28");
-    }
-
-    if ($schemaVersion == "26")
-    {
-        /*
-         * Do whatever. Stub.
-         */
-    }
-}
-
-function putSchedulesDirectLoginIntoDB($usernameAndPassword)
-{
-    global $dbh;
-
-    $isInDB = setting("SchedulesDirectLogin");
-
-    if ($isInDB === FALSE)
-    {
-        setting("SchedulesDirectLogin", $usernameAndPassword);
-    }
-    else
-    {
-        $stmt = $dbh->prepare("UPDATE settings SET data=:json WHERE value='SchedulesDirectLogin'");
-        $stmt->execute(array("json" => $usernameAndPassword));
+        // $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
+        setting("SchedulesDirectJSONschemaVersion", "1");
     }
 }
 
 function checkForChannelIcon($stationID, $data)
 {
     global $dbh;
+    global $dbhSD;
     global $channelLogoDirectory;
 
     $a = explode("/", $data["URL"]);
@@ -1813,7 +1791,7 @@ function checkForChannelIcon($stationID, $data)
 
     $updateChannelTable = $dbh->prepare("UPDATE channel SET icon=:icon WHERE xmltvid=:stationID");
 
-    $stmt = $dbh->prepare("SELECT md5 FROM SDimageCache WHERE item=:item AND height=:height AND width=:width");
+    $stmt = $dbhSD->prepare("SELECT md5 FROM SDimageCache WHERE item=:item AND height=:height AND width=:width");
     $stmt->execute(array("item" => $iconFileName, "height" => $height, "width" => $width));
 
     $result = $stmt->fetchColumn();
@@ -1835,9 +1813,8 @@ function checkForChannelIcon($stationID, $data)
             return;
         }
 
-        $updateSDimageCache = $dbh->prepare("INSERT INTO SDimageCache(item,height,width,md5,type)
-        VALUES(:item,:height, :width,:md5,'L')
-        ON DUPLICATE KEY UPDATE md5=:md5");
+        $updateSDimageCache = $dbhSD->prepare("INSERT INTO SDimageCache(item,height,width,md5,type)
+        VALUES(:item,:height,:width,:md5,'L') ON DUPLICATE KEY UPDATE md5=:md5");
         $updateSDimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
                                            "md5"  => $md5));
         $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));

@@ -18,9 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.18";
-$scriptDate = "2014-10-15";
-$knownToBeBroken = FALSE;
+$scriptVersion = "0.19";
+$scriptDate = "2014-10-16";
+$knownToBeBroken = TRUE;
 
 function getToken($username, $passwordHash)
 {
@@ -397,6 +397,41 @@ function setting()
     $stmt->execute(array("key" => $key, "value" => $value));
 
     return;
+}
+
+function settingSD()
+{
+    /*
+     * If there is one argument, then we're reading from the database. If there are two,
+     * then we're writing to the database.
+     */
+
+    global $dbhSD;
+
+    $key = func_get_arg(0);
+
+    if (func_num_args() == 1)
+    {
+        $stmt = $dbhSD->prepare("SELECT valueColumn FROM settings WHERE keyColumn = :key");
+        $stmt->execute(array("key" => $key));
+        $result = $stmt->fetchColumn();
+        if ($result == "")
+        {
+            return FALSE;
+        }
+        else
+        {
+            return $result;
+        }
+    }
+
+    $value = func_get_arg(1);
+
+    $stmt = $dbhSD->prepare("INSERT INTO settings(keyColumn,valueColumn) VALUES(:key,:value)
+    ON DUPLICATE KEY UPDATE valueColumn=:value");
+
+    $stmt->execute(array("key" => $key, "value" => $value));
+
 }
 
 function getBaseurl($isBeta)

@@ -54,6 +54,7 @@ $force = FALSE;
 $jsonProgramsToRetrieve = array();
 $peopleCache = array();
 $addToRetryQueue = array();
+$dbHostSD = "localhost";
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -83,10 +84,11 @@ $helpText = <<< eol
 The following options are available:
 --beta
 --help\t\t(this text)
---dbname=\tMySQL database name. (Default: mythconverg)
---dbuser=\tUsername for database access. (Default: mythtv)
---dbpassword=\tPassword for database access. (Default: mythtv)
---dbhost=\tMySQL database hostname. (Default: localhost)
+--dbname=\tMySQL database name for MythTV. (Default: mythconverg)
+--dbuser=\tUsername for database access for MythTV. (Default: mythtv)
+--dbpassword=\tPassword for database access for MythTV. (Default: mythtv)
+--dbhost=\tMySQL database hostname for MythTV. (Default: localhost)
+--dbhostsd=\tMySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
 --force\t\tForce download of schedules. (Default: FALSE)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
@@ -121,6 +123,9 @@ foreach ($options as $k => $v)
             break;
         case "dbhost":
             $dbHost = $v;
+            break;
+        case "dbhostsd":
+            $dbHostSD = $v;
             break;
         case "dbname":
             $dbName = $v;
@@ -244,56 +249,86 @@ if (!isset($host))
 
 if ($isMythTV OR $dbWithoutMythtv)
 {
-    printMSG("Connecting to database.");
+    print "Connecting to Schedules Direct database.\n";
     try
     {
-        $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword,
-            array(PDO::ATTR_PERSISTENT => true));
-        $dbh->exec("SET CHARACTER SET utf8");
-        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $dbhSD = new PDO("mysql:host=$dbHostSD;dbname=schedulesdirect;charset=utf8", "sd", "sd");
+        $dbhSD->exec("SET CHARACTER SET utf8");
+        $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e)
     {
-        debugMSG("Exception with PDO: " . $e->getMessage());
-        exit;
+        if ($e->getCode() == 2002)
+        {
+            print "Could not connect to database:\n" . $e->getMessage() . "\n";
+            exit;
+        }
+        else
+        {
+            print "Got error connecting to database.\n";
+            print "Code: " . $e->getCode() . "\n";
+            print "Message: " . $e->getMessage() . "\n";
+            exit;
+        }
     }
 
     if ($isMythTV)
     {
-        $useServiceAPI = checkForServiceAPI();
-    }
+        print "Connecting to MythTV database.\n";
+        try
+        {
+            $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword);
+            $dbh->exec("SET CHARACTER SET utf8");
+            $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e)
+        {
+            if ($e->getCode() == 2002)
+            {
+                print "Could not connect to database:\n" . $e->getMessage() . "\n";
+                print "If you're running the grabber as standalone, use --nomyth\n";
+                exit;
+            }
+            else
+            {
+                print "Got error connecting to database.\n";
+                print "Code: " . $e->getCode() . "\n";
+                print "Message: " . $e->getMessage() . "\n";
+                exit;
+            }
+            $useServiceAPI = checkForServiceAPI();
+        }
 
-    $userLoginInformation = setting("SchedulesDirectLogin");
+        $userLoginInformation = setting("SchedulesDirectLogin");
 
-    if ($userLoginInformation !== FALSE)
-    {
-        $responseJSON = json_decode($userLoginInformation, TRUE);
-        $usernameFromDB = $responseJSON["username"];
-        $passwordFromDB = $responseJSON["password"];
+        if ($userLoginInformation !== FALSE)
+        {
+            $responseJSON = json_decode($userLoginInformation, TRUE);
+            $usernameFromDB = $responseJSON["username"];
+            $passwordFromDB = $responseJSON["password"];
+        }
+        else
+        {
+            printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
+            printMSG("Did you run the sd-utility.php program yet?");
+            exit;
+        }
     }
     else
     {
-        printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
-        printMSG("Did you run the sd-utility.php program yet?");
-        exit;
+        if (file_exists("sd.json.conf"))
+        {
+            $userLoginInformation = file("sd.json.conf");
+            $responseJSON = json_decode($userLoginInformation[0], TRUE);
+            $usernameFromDB = $responseJSON["username"];
+            $passwordFromDB = $responseJSON["password"];
+        }
+        else
+        {
+            printMSG("FATAL: Could not read Schedules Direct login information from sd.json.conf file.");
+            printMSG("Did you run the sd-utility.php program yet?");
+            exit;
+        }
     }
 }
-else
-{
-    if (file_exists("sd.json.conf"))
-    {
-        $userLoginInformation = file("sd.json.conf");
-        $responseJSON = json_decode($userLoginInformation[0], TRUE);
-        $usernameFromDB = $responseJSON["username"];
-        $passwordFromDB = $responseJSON["password"];
-    }
-    else
-    {
-        printMSG("FATAL: Could not read Schedules Direct login information from sd.json.conf file.");
-        printMSG("Did you run the sd-utility.php program yet?");
-        exit;
-    }
-}
-
 $globalStartTime = time();
 $globalStartDate = new DateTime();
 
