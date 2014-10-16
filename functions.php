@@ -250,6 +250,7 @@ function printStatus($sdStatus)
             else
             {
                 $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
+                $updatedLineupsToRefresh[$lineup] = $serverModified;
             }
         }
 
