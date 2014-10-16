@@ -124,7 +124,7 @@ The following options are available:
 --extract\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
---initdb\t\tPerform initial database configuration for SchedulesDirect.
+--initdb\tPerform initial database configuration for SchedulesDirect.
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
 --skiplogo\tDon't download channel logos.
