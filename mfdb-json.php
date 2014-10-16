@@ -935,33 +935,34 @@ function fetchPrograms($jsonProgramsToRetrieve)
 function insertJSON(array $jsonProgramsToRetrieve)
 {
     global $dbh;
+    global $dbhSD;
     global $dlProgramTempDir;
     global $debug;
 
-    $insertJSON = $dbh->prepare("INSERT INTO SDprogramCache(programID,md5,json)
+    $insertJSON = $dbhSD->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
 
-    $insertPersonSD = $dbh->prepare("INSERT INTO SDpeople(personID,name) VALUES(:personID, :name)");
-    $updatePersonSD = $dbh->prepare("UPDATE SDpeople SET name=:name WHERE personID=:personID");
+    $insertPersonSD = $dbhSD->prepare("INSERT INTO SDpeople(personID,name) VALUES(:personID, :name)");
+    $updatePersonSD = $dbhSD->prepare("UPDATE SDpeople SET name=:name WHERE personID=:personID");
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
-    $insertCreditSD = $dbh->prepare("INSERT INTO SDcredits(personID,programID,role)
+    $insertCreditSD = $dbhSD->prepare("INSERT INTO SDcredits(personID,programID,role)
     VALUES(:personID,:pid,:role)");
 
-    $insertProgramGenresSD = $dbh->prepare("INSERT INTO SDprogramgenres(programID,relevance,genre)
+    $insertProgramGenresSD = $dbhSD->prepare("INSERT INTO SDprogramgenres(programID,relevance,genre)
     VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
 
     $getPeople = $dbh->prepare("SELECT name,person FROM people");
     $getPeople->execute();
     $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $getPeople = $dbh->prepare("SELECT personID,name FROM SDpeople");
+    $getPeople = $dbhSD->prepare("SELECT personID,name FROM SDpeople");
     $getPeople->execute();
     $peopleCacheSD = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $getCredits = $dbh->prepare("SELECT CONCAT(personID,'-',programID,'-',role) FROM SDcredits");
+    $getCredits = $dbhSD->prepare("SELECT CONCAT(personID,'-',programID,'-',role) FROM SDcredits");
     $getCredits->execute();
     $creditCache = $getCredits->fetchAll(PDO::FETCH_COLUMN);
 
@@ -1088,7 +1089,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
                         $name = $credit["name"];
 
-                        if (!array_key_exists($personID, $peopleCacheSD))
+                        if (!isset($peopleCacheSD[$personID]))
                         {
                             $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
                             $peopleCacheSD[$personID] = $name;
@@ -1197,14 +1198,15 @@ function insertJSON(array $jsonProgramsToRetrieve)
 function insertSchedule()
 {
     global $dbh;
+    global $dbhSD;
     global $dlSchedTempDir;
     global $peopleCache;
     global $debug;
     global $errorWarning;
 
-    $existingRoleTypesInMyth = array("actor", "director", "producer", "executive_producer", "writer", "guest_star",
-                                     "host", "adapter", "presenter", "commentator", "guest");
-    $existingRoleTypesInMyth = array_flip($existingRoleTypesInMyth);
+    //$existingRoleTypesInMyth = array("actor", "director", "producer", "executive_producer", "writer", "guest_star",
+    //                                 "host", "adapter", "presenter", "commentator", "guest");
+    //$existingRoleTypesInMyth = array_flip($existingRoleTypesInMyth);
 
     if (!count($peopleCache))
     {
@@ -1274,7 +1276,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     $getExistingChannels->execute();
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
-    $getProgramInformation = $dbh->prepare("SELECT json FROM SDprogramCache WHERE programID =:pid");
+    $getProgramInformation = $dbhSD->prepare("SELECT json FROM SDprogramCache WHERE programID =:pid");
 
     $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
 
@@ -1320,7 +1322,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
         $sourceID = $item["sourceid"];
         $stationID = $item["xmltvid"];
 
-        if (!array_key_exists($stationID, $scheduleJSON))
+        if (!isset($scheduleJSON[$stationID]))
         {
             continue; // If we don't have an updated schedule for the stationID, there's nothing to do.
         }
@@ -2074,6 +2076,7 @@ function tempdir($type)
 function updateStatus()
 {
     global $dbh;
+    global $dbhSD;
     global $client;
     global $host;
     global $useServiceAPI;
@@ -2083,7 +2086,7 @@ function updateStatus()
 
     if ($isMythTV)
     {
-        $updateLocalMessageTable = $dbh->prepare("INSERT INTO SDMessages(id,date,message,type)
+        $updateLocalMessageTable = $dbhSD->prepare("INSERT INTO SDMessages(id,date,message,type)
     VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
     }
 
@@ -2135,15 +2138,10 @@ function updateStatus()
     {
         if ($isMythTV)
         {
-            $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value = 'MythFillSuggestedRunTime' AND hostname IS NULL");
-            $stmt->execute(array("data" => $nextConnectTime));
+            setting("MythFillSuggestedRunTime", $nextConnectTime);
+            setting("DataDirectMessage", "Your subscription expires on $expires.");
 
-            $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='DataDirectMessage' AND hostname IS NULL");
-            $stmt->execute(array("data" => "Your subscription expires on $expires."));
-
-            $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='SchedulesDirectLastUpdate'");
-            $result = $stmt->fetchColumn();
-            $getLastUpdate = $result[0];
+            $getLastUpdate = settingSD("SchedulesDirectLastUpdate");
 
             if ($res["lastDataUpdate"] == $getLastUpdate)
             {
@@ -2152,9 +2150,7 @@ function updateStatus()
             else
             {
                 printMSG("Updating settings using MySQL.");
-                $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='SchedulesDirectLastUpdate'
-        AND hostname IS NULL");
-                $stmt->execute(array("data" => $res["lastDataUpdate"]));
+                settingsSD("SchedulesDirectLastUpdate", $res["lastDataUpdate"]);
             }
         }
     }
