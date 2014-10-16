@@ -498,3 +498,18 @@ function getLoginFromFiles()
         }
     }
 }
+
+function checkForOS()
+{
+    if (PHP_OS == "WINNT")
+    {
+        function readline($string)
+        {
+            echo $string;
+            $handle = fopen("php://stdin", "r");
+            $line = fgets($handle);
+
+            return trim($line);
+        }
+    }
+}

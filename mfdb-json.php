@@ -217,6 +217,31 @@ if ($isMythTV)
     }
 }
 
+if (!isset($dbHost))
+{
+    $dbHost = "localhost";
+}
+
+if (!isset($dbName))
+{
+    $dbName = "mythconverg";
+}
+
+if (!isset($dbUser))
+{
+    $dbUser = "mythtv";
+}
+
+if (!isset($dbPassword))
+{
+    $dbPassword = "mythtv";
+}
+
+if (!isset($host))
+{
+    $host = "localhost";
+}
+
 if ($isMythTV OR $dbWithoutMythtv)
 {
     printMSG("Connecting to database.");
@@ -331,7 +356,7 @@ $token = getToken($usernameFromDB, sha1($passwordFromDB));
 if ($token == "ERROR")
 {
     printMSG("Got error when attempting to retrieve token from Schedules Direct.");
-    if ($isMythTV)
+    if ($isMythTV OR $dbWithoutMythtv)
     {
         printMSG("Check username / password in settings table.");
     }
