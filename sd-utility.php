@@ -41,7 +41,6 @@ $printFancyTable = TRUE;
 $printCountries = FALSE;
 $justExtract = FALSE;
 $dbHostSD = "localhost";
-$initDB = FALSE;
 
 $availableCountries = array(
     "North America" => array(
@@ -124,7 +123,6 @@ The following options are available:
 --extract\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
---initdb\tPerform initial database configuration for SchedulesDirect.
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
 --skiplogo\tDon't download channel logos.
@@ -136,7 +134,7 @@ The following options are available:
 eol;
 
 $longoptions = array("countries", "debug", "extract", "force", "help", "host::", "dbname::", "dbuser::",
-                     "dbpassword::", "dbhost::", "dbhostsd::", "initdb", "logo::", "notfancy", "nomyth", "skiplogo",
+                     "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
                      "username::", "password::",
                      "timezone::", "usedb", "version", "x");
 
@@ -181,9 +179,6 @@ foreach ($options as $k => $v)
             break;
         case "host":
             $host = $v;
-            break;
-        case "initdb":
-            $initDB = TRUE;
             break;
         case "logo":
             $channelLogoDirectory = $v;
@@ -240,32 +235,6 @@ if ($printCountries)
 
 print "Using timezone $tz\n";
 print "$agentString\n";
-
-if ($initDB)
-{
-    print "Connecting to Schedules Direct database.\n";
-    try
-    {
-        $dbhSD = new PDO("mysql:host=$dbHostSD;dbname=schedulesdirect;charset=utf8", "sd", "sd");
-        $dbhSD->exec("SET CHARACTER SET utf8");
-        $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e)
-    {
-        if ($e->getCode() == 2002)
-        {
-            print "Could not connect to database:\n" . $e->getMessage() . "\n";
-            exit;
-        }
-        else
-        {
-            print "Got error connecting to database.\n";
-            print "Code: " . $e->getCode() . "\n";
-            print "Message: " . $e->getMessage() . "\n";
-            exit;
-        }
-    }
-    unset($dbhSD);
-}
 
 if ($isMythTV)
 {
@@ -369,8 +338,6 @@ if ($isMythTV OR $dbWithoutMythtv)
 
     if (!$justExtract)
     {
-        print "Break here.\n";
-        $tt = fgets(STDIN);
         checkDatabase();
     }
     else
@@ -591,14 +558,11 @@ while (!$done)
             deleteLineupFromSchedulesDirect();
             break;
         case "4":
-            $updatedLineupsToRefresh = array();
-            $stmt = $dbh->prepare("SELECT lineupid FROM videosource");
-            $stmt->execute();
-            $lineups = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $lineupArray = getSchedulesDirectLineups();
 
-            if (count($lineups))
+            if (count($lineupArray))
             {
-                $updatedLineupsToRefresh = array_flip($lineups);
+                $updatedLineupsToRefresh = array_flip($lineupArray);
                 updateLocalLineupCache($updatedLineupsToRefresh);
             }
             break;
