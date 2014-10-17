@@ -262,6 +262,16 @@ if ($isMythTV OR $dbWithoutMythtv)
             print "Could not connect to database:\n" . $e->getMessage() . "\n";
             exit;
         }
+
+        if ($e->getCode() == 1049)
+        {
+            print "Initial database not created for Schedules Direct tables.\n";
+            print "Please run\nmysql -uroot -p < sd.sql\n";
+            print "Then run sd-utility.php to complete the initialization.\n";
+            print "Make sure you use function '4' to refresh the local lineup cache.\n";
+            print "Please check the updated README.md for more information.\n";
+            exit;
+        }
         else
         {
             print "Got error connecting to database.\n";

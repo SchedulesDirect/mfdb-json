@@ -296,9 +296,10 @@ if ($isMythTV OR $dbWithoutMythtv)
 
         if ($e->getCode() == 1049)
         {
-            print "Initial database not created.\n";
+            print "Initial database not created for Schedules Direct tables.\n";
             print "Please run\nmysql -uroot -p < sd.sql\n";
-            print "Then run this script with --initdb\n";
+            print "Then re-run this script.\n";
+            print "Please check the updated README.md for more information.\n";
             exit;
         }
         else
