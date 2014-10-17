@@ -415,7 +415,7 @@ function settingSD()
         $stmt = $dbhSD->prepare("SELECT valueColumn FROM settings WHERE keyColumn = :key");
         $stmt->execute(array("key" => $key));
         $result = $stmt->fetchColumn();
-        if ($result == "")
+        if ($result === FALSE)
         {
             return FALSE;
         }
