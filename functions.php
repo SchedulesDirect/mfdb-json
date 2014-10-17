@@ -183,7 +183,7 @@ function printStatus($sdStatus)
 
     if ($isMythTV)
     {
-        $videosourceModifiedJSON = setting("localLineupLastModified");
+        $videosourceModifiedJSON = settingSD("localLineupLastModified");
 
         if ($videosourceModifiedJSON)
         {
