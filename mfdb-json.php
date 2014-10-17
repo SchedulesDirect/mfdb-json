@@ -1232,9 +1232,7 @@ function insertSchedule()
     $dbh->exec("DROP TABLE IF EXISTS t_programrating");
     $dbh->exec("CREATE TABLE t_programrating LIKE programrating");
 
-    $stmt = $dbh->prepare("SELECT data FROM settings WHERE value='DBSchemaVer'");
-    $stmt->execute();
-    $dbSchema = $stmt->fetchColumn();
+    $dbSchema = setting("DBSchemaVer");
 
     if ($dbSchema > "1318")
     {
