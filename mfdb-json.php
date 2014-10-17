@@ -1305,6 +1305,14 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     while (list(, $item) = each($scheduleTemp))
     {
         $tempJSON = json_decode($item, TRUE);
+        if (isset($item["code"]))
+        {
+            if ($item["code"] == 7000)
+            {
+                continue; // The schedule was queued but wasn't ready yet.
+            }
+        }
+
         if (isset($tempJSON["stationID"]))
         {
             $stationID = $tempJSON["stationID"];
@@ -1314,6 +1322,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             printMSG("Fatal error in insertSchedules:No stationID:$item");
             exit;
         }
+
         if (isset($tempJSON["programs"]))
         {
             $scheduleJSON[$stationID] = $tempJSON["programs"];
@@ -1324,6 +1333,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             exit;
         }
     }
+
 
     /*
      * Now that we're done, reset the array to empty to free up some memory.
@@ -1971,7 +1981,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $sapLanguage = NULL;
             }
 
-if (isset($v["sap"]))
+    if (isset($v["sap"]))
             {
                 $sap = TRUE;
             }
@@ -2037,7 +2047,7 @@ if (isset($v["sap"]))
             }
 
 
-*/
+    */
 
     /*
      * TODO: update the credits table using the existing role types in MythTV.
