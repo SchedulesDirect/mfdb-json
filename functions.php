@@ -359,21 +359,15 @@ function setting()
     {
         $stmt = $dbh->prepare("SELECT data FROM settings WHERE value = :key");
         $stmt->execute(array("key" => $key));
-        $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        if (count($result))
+        $result = $stmt->fetchColumn();
+
+        if ($result === FALSE)
         {
-            if ($result[0] == "")
-            {
-                return FALSE;
-            }
-            else
-            {
-                return $result[0];
-            }
+            return FALSE;
         }
         else
         {
-            return FALSE;
+            return $result;
         }
     }
 
@@ -381,7 +375,7 @@ function setting()
 
     $keyAlreadyExists = setting($key);
 
-    if (!$keyAlreadyExists)
+    if ($keyAlreadyExists === FALSE)
     {
         $stmt = $dbh->prepare("INSERT INTO settings(value,data) VALUES(:key,:value)");
     }
