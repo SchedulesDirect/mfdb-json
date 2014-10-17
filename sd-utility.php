@@ -290,7 +290,6 @@ if ($isMythTV OR $dbWithoutMythtv)
         if ($e->getCode() == 2002)
         {
             print "Could not connect to database:\n" . $e->getMessage() . "\n";
-            //checkDatabase();
             exit;
         }
 
@@ -563,7 +562,7 @@ while (!$done)
 
             if (count($lineupArray))
             {
-                foreach($lineupArray as $v)
+                foreach ($lineupArray as $v)
                 {
                     $lineupToRefresh[$v["lineup"]] = 1;
                 }

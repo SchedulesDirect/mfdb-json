@@ -249,7 +249,7 @@ if (!isset($host))
 
 if ($isMythTV OR $dbWithoutMythtv)
 {
-    print "Connecting to Schedules Direct database.\n";
+    printMSG("Connecting to Schedules Direct database.");
     try
     {
         $dbhSD = new PDO("mysql:host=$dbHostSD;dbname=schedulesdirect;charset=utf8", "sd", "sd");
@@ -259,31 +259,31 @@ if ($isMythTV OR $dbWithoutMythtv)
     {
         if ($e->getCode() == 2002)
         {
-            print "Could not connect to database:\n" . $e->getMessage() . "\n";
+            printMSG("Could not connect to database:\n" . $e->getMessage());
             exit;
         }
 
         if ($e->getCode() == 1049)
         {
-            print "Initial database not created for Schedules Direct tables.\n";
-            print "Please run\nmysql -uroot -p < sd.sql\n";
-            print "Then run sd-utility.php to complete the initialization.\n";
-            print "Make sure you use function '4' to refresh the local lineup cache.\n";
-            print "Please check the updated README.md for more information.\n";
+            printMSG("Initial database not created for Schedules Direct tables.");
+            printMSG("Please run\nmysql -uroot -p < sd.sql");
+            printMSG("Then run sd-utility.php to complete the initialization.");
+            printMSG("Make sure you use function '4' to refresh the local lineup cache.");
+            printMSG("Please check the updated README.md for more information.");
             exit;
         }
         else
         {
-            print "Got error connecting to database.\n";
-            print "Code: " . $e->getCode() . "\n";
-            print "Message: " . $e->getMessage() . "\n";
+            printMSG("Got error connecting to database.");
+            printMSG("Code: " . $e->getCode() . "");
+            printMSG("Message: " . $e->getMessage() . "");
             exit;
         }
     }
 
     if ($isMythTV)
     {
-        print "Connecting to MythTV database.\n";
+        printMSG("Connecting to MythTV database.");
         try
         {
             $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword);
@@ -293,15 +293,15 @@ if ($isMythTV OR $dbWithoutMythtv)
         {
             if ($e->getCode() == 2002)
             {
-                print "Could not connect to database:\n" . $e->getMessage() . "\n";
-                print "If you're running the grabber as standalone, use --nomyth\n";
+                printMSG("Could not connect to database:\n" . $e->getMessage() . "");
+                printMSG("If you're running the grabber as standalone, use --nomyth");
                 exit;
             }
             else
             {
-                print "Got error connecting to database.\n";
-                print "Code: " . $e->getCode() . "\n";
-                print "Message: " . $e->getMessage() . "\n";
+                printMSG("Got error connecting to database.");
+                printMSG("Code: " . $e->getCode() . "");
+                printMSG("Message: " . $e->getMessage() . "");
                 exit;
             }
         }
