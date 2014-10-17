@@ -2073,7 +2073,6 @@ function tempdir($type)
 
 function updateStatus()
 {
-    global $dbh;
     global $dbhSD;
     global $client;
     global $host;
