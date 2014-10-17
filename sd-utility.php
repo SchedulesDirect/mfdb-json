@@ -321,7 +321,7 @@ if ($isMythTV OR $dbWithoutMythtv)
         if ($e->getCode() == 2002)
         {
             print "Could not connect to database:\n" . $e->getMessage() . "\n";
-            checkDatabase();
+            //checkDatabase();
             exit;
         }
 
@@ -369,6 +369,8 @@ if ($isMythTV OR $dbWithoutMythtv)
 
     if (!$justExtract)
     {
+        print "Break here.\n";
+        $tt = fgets(STDIN);
         checkDatabase();
     }
     else
