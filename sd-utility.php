@@ -1684,11 +1684,16 @@ function checkDatabase()
         settingSD("SchedulesDirectLogin", $login);
 
         $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLogin'");
         $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
         $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
         $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
 
         $createBaseTables = TRUE;
+        $schemaVersion = 1;
+
+        $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
+    SDprogramrating,SDschedule,SDMessages,SDimageCache");
     }
 
     if ($createBaseTables)
