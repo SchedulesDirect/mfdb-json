@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.28, 2014-10-10
+v0.29, 2014-10-17
 
 Robert Kulagowski
 
@@ -12,6 +12,12 @@ These programs can be used as a replacement to mythfilldatabase and
 for downloading data from Schedules Direct using the new JSON format.
 
 This file describes API 20140530.
+
+**2014-10-17 Update**: The scripts no longer use mythconverg. Please note the
+updated instruction below on using sd.sql to create the tables. You should
+also use function 4 in sd-utility.php to refresh your local lineup cache
+before doing anything else.  Also, your first run of mfdb-json.php will
+re-download program data.
 
 **NOTE**: You are strongly encouraged to run "git pull" to refresh your client before each use; the software is under
 active development and this will ensure that you stay up-to-date.
@@ -80,6 +86,10 @@ curl -sS https://getcomposer.org/installer | php
 
 php composer.phar install
 
+###Create the tables for SchedulesDirect
+
+mysql -uroot -p < sd.sql
+
 #Configuration
 ##MythTV
 
@@ -116,19 +126,20 @@ MythTV database.
 You can run it with **--help** to see the various options.
 
 ```
-sd-utility.php utility program API:20140530 v0.13/2014-09-26
+sd-utility.php utility program API:20140530 v0.19/2014-10-16
 
 The following options are available:
 --countries     The list of countries that have data.
 --debug         Enable debugging. (Default: FALSE)
---dbname=       MySQL database name. (Default: mythconverg)
---dbuser=       Username for database access. (Default: mythtv)
---dbpassword=   Password for database access. (Default: mythtv)
---dbhost=       MySQL database hostname. (Default: localhost)
+--dbname=       MySQL database name for MythTV. (Default: mythconverg)
+--dbuser=       Username for database access for MythTV. (Default: mythtv)
+--dbpassword=   Password for database access for MythTV. (Default: mythtv)
+--dbhost=       MySQL database hostname for MythTV. (Default: localhost)
+--dbhostsd=     MySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
 --extract       Don't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --help          (this text)
 --host=         IP address of the MythTV backend. (Default: localhost)
---logo=         Directory where channel logos are stored (Default: /home/mythtv/.mythtv/channels)
+--logo=         Directory where channel logos are stored (Default: /home/rkulagow/.mythtv/channels)
 --nomyth        Don't execute any MythTV specific functions. (Default: FALSE)
 --skiplogo      Don't download channel logos.
 --username=     Schedules Direct username.
@@ -173,8 +184,9 @@ Schedules Direct functions:
 1 Add a known lineupID to your account at Schedules Direct
 2 Search for a lineup to add to your account at Schedules Direct
 3 Delete a lineup from your account at Schedules Direct
-4 Acknowledge a message
-5 Print a channel table for a lineup
+4 Refresh the local lineup cache
+5 Acknowledge a message
+6 Print a channel table for a lineup
 
 MythTV functions:
 A to Add a new videosource to MythTV
@@ -183,7 +195,6 @@ E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct
 L to Link a videosource to a lineup at Schedules Direct
 U to update a videosource by downloading from Schedules Direct
 Q to Quit
-
 ```
 Type in: **2**
 
@@ -397,8 +408,9 @@ Schedules Direct functions:
 1 Add a known lineupID to your account at Schedules Direct
 2 Search for a lineup to add to your account at Schedules Direct
 3 Delete a lineup from your account at Schedules Direct
-4 Acknowledge a message
-5 Print a channel table for a lineup
+4 Refresh the local lineup cache
+5 Acknowledge a message
+6 Print a channel table for a lineup
 
 MythTV functions:
 A to Add a new videosource to MythTV
@@ -435,8 +447,9 @@ Schedules Direct functions:
 1 Add a known lineupID to your account at Schedules Direct
 2 Search for a lineup to add to your account at Schedules Direct
 3 Delete a lineup from your account at Schedules Direct
-4 Acknowledge a message
-5 Print a channel table for a lineup
+4 Refresh the local lineup cache
+5 Acknowledge a message
+6 Print a channel table for a lineup
 
 MythTV functions:
 A to Add a new videosource to MythTV
