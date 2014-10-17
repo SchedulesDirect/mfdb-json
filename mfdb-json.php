@@ -1334,7 +1334,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
         }
     }
 
-
     /*
      * Now that we're done, reset the array to empty to free up some memory.
      */
