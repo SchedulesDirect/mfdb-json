@@ -1787,7 +1787,7 @@ function checkDatabase()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
         // $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
-        setting("SchedulesDirectJSONschemaVersion", "1");
+        settingSD("SchedulesDirectJSONschemaVersion", "1");
     }
 }
 
