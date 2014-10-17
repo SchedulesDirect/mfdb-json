@@ -760,10 +760,10 @@ function getSchedules($stationIDsToFetch)
 
     file_put_contents("$dlSchedTempDir/schedule.json", $schedules, FILE_APPEND);
 
-    if (!$isMythTV)
-    {
-        return ("");
-    }
+    //if (!$isMythTV)
+    //{
+    //    return ("");
+    //}
 
     $updateLocalMD5 = $dbhSD->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
@@ -806,6 +806,12 @@ function getSchedules($stationIDsToFetch)
                     printMSG("Permanent error attempting to fetch schedule for $stationID");
                 }
 
+                sleep(10); // We're going to sleep so that the server has the chance to generate the schedule.
+                continue;
+            }
+            else
+            {
+                printMSG("getSchedules error: $json");
                 continue;
             }
         }
