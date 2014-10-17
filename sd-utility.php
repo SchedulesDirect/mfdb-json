@@ -562,8 +562,11 @@ while (!$done)
 
             if (count($lineupArray))
             {
-                $updatedLineupsToRefresh = array_flip($lineupArray);
-                updateLocalLineupCache($updatedLineupsToRefresh);
+                foreach($lineupArray as $v)
+                {
+                    $lineupToRefresh[$v["lineup"]] = 1;
+                }
+                updateLocalLineupCache($lineupToRefresh);
             }
             break;
         case "5":
