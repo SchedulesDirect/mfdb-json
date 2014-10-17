@@ -2147,7 +2147,7 @@ function updateStatus()
             else
             {
                 printMSG("Updating settings using MySQL.");
-                settingsSD("SchedulesDirectLastUpdate", $res["lastDataUpdate"]);
+                settingSD("SchedulesDirectLastUpdate", $res["lastDataUpdate"]);
             }
         }
     }
