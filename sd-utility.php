@@ -282,8 +282,7 @@ if ($isMythTV OR $dbWithoutMythtv)
     print "Connecting to Schedules Direct database.\n";
     try
     {
-        $dbhSD = new PDO("mysql:host=$dbHostSD;dbname=schedulesdirect;charset=utf8", "sd", "sd");
-        $dbhSD->exec("SET CHARACTER SET utf8");
+        $dbhSD = new PDO("sqlite:host=$dbHostSD;dbname=schedulesdirect.db");
         $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e)
     {
