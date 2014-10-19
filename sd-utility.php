@@ -1661,7 +1661,7 @@ function createDatabase()
     SDprogramrating,SDschedule,SDMessages,SDimageCache");
 
     $stmt = $dbhSD->exec("CREATE TABLE `SDMessages` (
-`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+`row` INTEGER PRIMARY KEY,
   `id` char(22) DEFAULT NULL COMMENT 'Required to ACK a message from the server.',
   `date` char(20) DEFAULT NULL,
   `message` varchar(512) DEFAULT NULL,
@@ -1680,7 +1680,7 @@ function createDatabase()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
     $stmt = $dbhSD->exec("CREATE TABLE `SDlineupCache` (
-`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+`row` INTEGER PRIMARY KEY,
   `lineup` varchar(50) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
   `modified` char(20) DEFAULT '1970-01-01T00:00:00Z',
@@ -1696,7 +1696,7 @@ function createDatabase()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
     $stmt = $dbhSD->exec("CREATE TABLE `SDprogramCache` (
-`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+`row` INTEGER PRIMARY KEY,
   `programID` varchar(64) NOT NULL,
   `md5` char(22) NOT NULL,
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1730,7 +1730,7 @@ function createDatabase()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
     $stmt = $dbhSD->exec("CREATE TABLE `SDimageCache` (
-  `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `row` INTEGER PRIMARY KEY,
   `item` varchar(128) NOT NULL,
   `md5` char(22) NOT NULL,
   `height` varchar(128) NOT NULL,
