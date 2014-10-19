@@ -1613,31 +1613,6 @@ function getSchedulesDirectLineups()
 function checkDatabase()
 {
     global $dbh;
-    global $dbhSD;
-
-    $createBaseTables = FALSE;
-
-    $stmt = $dbhSD->prepare("DESCRIBE settings");
-    try
-    {
-        $stmt->execute();
-    } catch (PDOException $ex)
-    {
-        if ($ex->getCode() == "42S02")
-        {
-            printMSG("Creating settings table.\n");
-            $stmt = $dbhSD->exec(
-                "CREATE TABLE `settings` (
-                    `keyColumn` varchar(255) NOT NULL,
-                    `valueColumn` varchar(255) NOT NULL,
-                    PRIMARY KEY (`keyColumn`),
-                    UNIQUE KEY `keyColumn` (`keyColumn`)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-
-            //settingSD("SchedulesDirectWithoutMythTV", "TRUE");
-            $createBaseTables = TRUE;
-        }
-    }
 
     $schemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
 
@@ -1645,7 +1620,9 @@ function checkDatabase()
     {
         printMSG("Copying existing data from MythTV");
 
-        $lineups = setting("localLineupLastModified");
+        $lineupsMyth = setting("localLineupLastModified");
+        $lineupsSD = settingSD("localLineupLastModified");
+
         settingSD("localLineupLastModified", $lineups);
 
         $login = setting("SchedulesDirectLogin");
@@ -1657,21 +1634,33 @@ function checkDatabase()
         $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
         $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
 
-        $createBaseTables = TRUE;
         $schemaVersion = 1;
 
         $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
     SDprogramrating,SDschedule,SDMessages,SDimageCache");
     }
 
-    if ($createBaseTables)
-    {
-        print "Creating Schedules Direct tables.\n";
+}
 
-        $stmt = $dbhSD->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
+function createDatabase()
+{
+    global $dbhSD;
+
+    printMSG("Creating settings table.\n");
+    $stmt = $dbhSD->exec(
+        "CREATE TABLE `settings` (
+                    `keyColumn` varchar(255) NOT NULL,
+                    `valueColumn` varchar(255) NOT NULL,
+                    PRIMARY KEY (`keyColumn`),
+                    UNIQUE KEY `keyColumn` (`keyColumn`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
+    print "Creating Schedules Direct tables.\n";
+
+    $stmt = $dbhSD->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
     SDprogramrating,SDschedule,SDMessages,SDimageCache");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDMessages` (
+    $stmt = $dbhSD->exec("CREATE TABLE `SDMessages` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `id` char(22) DEFAULT NULL COMMENT 'Required to ACK a message from the server.',
   `date` char(20) DEFAULT NULL,
@@ -1682,7 +1671,7 @@ function checkDatabase()
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
+    $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
 `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `programID` varchar(64) NOT NULL,
   `role` varchar(100) DEFAULT NULL,
@@ -1690,7 +1679,7 @@ function checkDatabase()
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDlineupCache` (
+    $stmt = $dbhSD->exec("CREATE TABLE `SDlineupCache` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `lineup` varchar(50) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
@@ -1700,13 +1689,13 @@ function checkDatabase()
   UNIQUE KEY `lineup` (`lineup`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDpeople` (
+    $stmt = $dbhSD->exec("CREATE TABLE `SDpeople` (
 `personID` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`personID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramCache` (
+    $stmt = $dbhSD->exec("CREATE TABLE `SDprogramCache` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `programID` varchar(64) NOT NULL,
   `md5` char(22) NOT NULL,
@@ -1717,7 +1706,7 @@ function checkDatabase()
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramgenres` (
+    $stmt = $dbhSD->exec("CREATE TABLE `SDprogramgenres` (
 `programID` varchar(64) NOT NULL,
   `relevance` char(1) NOT NULL DEFAULT '0',
   `genre` varchar(30) NOT NULL,
@@ -1726,21 +1715,21 @@ function checkDatabase()
   KEY `genre` (`genre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramrating` (
+    $stmt = $dbhSD->exec("CREATE TABLE `SDprogramrating` (
 `programID` varchar(64) NOT NULL,
   `system` varchar(30) NOT NULL,
   `rating` varchar(16) DEFAULT NULL,
   PRIMARY KEY (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDschedule` (
+    $stmt = $dbhSD->exec("CREATE TABLE `SDschedule` (
   `stationID` varchar(12) NOT NULL,
   `md5` char(22) NOT NULL,
   UNIQUE KEY `sid` (`stationID`),
   KEY `md5` (`md5`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDimageCache` (
+    $stmt = $dbhSD->exec("CREATE TABLE `SDimageCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `item` varchar(128) NOT NULL,
   `md5` char(22) NOT NULL,
@@ -1752,10 +1741,8 @@ function checkDatabase()
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        // $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
-        settingSD("SchedulesDirectJSONschemaVersion", "1");
-    }
 }
+
 
 function checkForChannelIcon($stationID, $data)
 {
