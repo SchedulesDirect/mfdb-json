@@ -1689,14 +1689,14 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
       programID varchar(64) NOT NULL UNIQUE,
       md5 char(22) NOT NULL,
-      modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
       json TEXT NOT NULL
       )");
 
     $dbhSD->exec("CREATE INDEX programID ON SDprogramCache (programID)");
 
     $dbhSD->exec("CREATE TABLE SDprogramgenres (
-    programID varchar(64) NOT NULL PRIMARY,
+    programID varchar(64) PRIMARY KEY NOT NULL,
       relevance char(1) NOT NULL DEFAULT '0',
       genre varchar(30) NOT NULL)");
 
