@@ -1702,7 +1702,7 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     $dbhSD->exec("CREATE UNIQUE INDEX pid_relevance ON SDprogramgenres (programID,relevance)");
 
     $dbhSD->exec("CREATE TABLE SDprogramrating (
-    programID varchar(64) NOT NULL PRIMARY,
+    programID varchar(64) PRIMARY KEY,
       system varchar(30) NOT NULL,
       rating varchar(16) DEFAULT NULL");
 
