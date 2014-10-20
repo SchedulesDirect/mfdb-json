@@ -1540,7 +1540,7 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO SDlineupCache(lineup,json,modified)
+        $stmt = $dbhSD->prepare("INSERT INTO SDlineupCache(lineup,json,modified)
         VALUES(:lineup,:json,:modified)");
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json"   => json_encode($res)));
