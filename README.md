@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.29, 2014-10-17
+v0.30, 2014-10-20
 
 Robert Kulagowski
 
@@ -12,6 +12,10 @@ These programs can be used as a replacement to mythfilldatabase and
 for downloading data from Schedules Direct using the new JSON format.
 
 This file describes API 20140530.
+
+**2014-10-20 Update**: The scripts will store all Schedules Direct data in a
+sqlite database and no longer depend on MySQL or MariaDB.  If you are not
+running a MythTV environment, then you no longer need to install MySQL.
 
 **2014-10-17 Update**: The scripts no longer use mythconverg. Please note the
 updated instruction below on using sd.sql to create the tables. You should
@@ -67,7 +71,7 @@ populate MythTV data.
 Install the prerequisites:
 
 ###Ubuntu
-sudo apt-get install git php5-cli php5-mysql php5-curl curl sqlite php5-sqlite
+sudo apt-get install git php5-cli php5-mysql php5-curl curl sqlite3 php5-sqlite
 
 ###Fedora
 yum -y install git curl curl-devel libcurl libcurl-devel php-common
@@ -78,17 +82,13 @@ git clone https://github.com/SchedulesDirect/mfdb-json.git
 
 cd mfdb-json
 
-git checkout API-20140530
+git checkout API-20140530-sqlite
 
 ###Install Composer
 
 curl -sS https://getcomposer.org/installer | php
 
 php composer.phar install
-
-###Create the tables for SchedulesDirect
-
-mysql -uroot -p < sd.sql
 
 #Configuration
 ##MythTV
