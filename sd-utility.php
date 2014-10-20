@@ -1663,14 +1663,12 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   date char(20) DEFAULT NULL,
   message varchar(512) DEFAULT NULL,
   type char(1) DEFAULT NULL, -- Message type. G-global, S-service status, U-user specific
-  modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-)");
+  modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL)");
 
     $dbhSD->exec("CREATE TABLE SDcredits (
-    personID mediumint(8) NOT NULL PRIMARY,
+    personID INTEGER NOT NULL PRIMARY,
       programID varchar(64) NOT NULL,
-      role varchar(100) DEFAULT NULL
-      )");
+      role varchar(100) DEFAULT NULL)");
 
     $dbhSD->exec("CREATE INDEX programID ON SDcredits (programID)");
 
