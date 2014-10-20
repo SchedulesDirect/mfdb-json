@@ -1651,12 +1651,12 @@ function createDatabase()
     print "Creating Schedules Direct tables.\n";
 
     $stmt = $dbhSD->exec("CREATE TABLE `SDMessages` (
-`row` INTEGER PRIMARY KEY,
-  `id` char(22) NOT NULL UNIQUE -- Required to ACK a message from the server.,
+`row` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  `id` char(22) NOT NULL UNIQUE, -- Required to ACK a message from the server.
   `date` char(20) DEFAULT NULL,
   `message` varchar(512) DEFAULT NULL,
-  `type` char(1) DEFAULT NULL -- Message type. G-global, S-service status, U-user specific,
-  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `type` char(1) DEFAULT NULL, -- Message type. G-global, S-service status, U-user specific
+  `modified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )");
 
 /*    $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
