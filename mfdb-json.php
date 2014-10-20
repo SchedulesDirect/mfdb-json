@@ -972,7 +972,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     $getPeople->execute();
     $peopleCacheSD = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $getCredits = $dbhSD->prepare("SELECT CONCAT(personID,'-',programID,'-',role) FROM credits");
+    $getCredits = $dbhSD->prepare("SELECT personID || '-' || programID || '-' || role FROM credits");
     $getCredits->execute();
     $creditCache = $getCredits->fetchAll(PDO::FETCH_COLUMN);
 
