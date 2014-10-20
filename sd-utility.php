@@ -1659,11 +1659,9 @@ function createDatabase()
     print "Creating settings table.\n";
     $stmt = $dbhSD->exec(
         "CREATE TABLE `settings` (
-                    `keyColumn` varchar(255) NOT NULL,
-                    `valueColumn` varchar(255) NOT NULL,
-                    PRIMARY KEY (`keyColumn`),
-                    UNIQUE KEY `keyColumn` (`keyColumn`)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+                    `keyColumn` TEXT NOT NULL UNIQUE,
+                    `valueColumn` TEXT NOT NULL
+                    )");
 
     print "Creating Schedules Direct tables.\n";
 
