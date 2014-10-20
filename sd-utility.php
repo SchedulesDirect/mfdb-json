@@ -279,11 +279,6 @@ if (!isset($host))
 
 if ($isMythTV OR $dbWithoutMythtv)
 {
-    if (!file_exists("schedulesdirect.db"))
-    {
-        createDatabase();
-    }
-
     print "Connecting to Schedules Direct database.\n";
     try
     {
@@ -317,6 +312,11 @@ if ($isMythTV OR $dbWithoutMythtv)
             print "Message: " . $e->getMessage() . "\n";
             exit;
         }
+    }
+
+    if (!file_exists("schedulesdirect.db"))
+    {
+        createDatabase();
     }
 
     if ($isMythTV)
@@ -1656,7 +1656,7 @@ function createDatabase()
 {
     global $dbhSD;
 
-    printMSG("Creating settings table.\n");
+    print "Creating settings table.\n";
     $stmt = $dbhSD->exec(
         "CREATE TABLE `settings` (
                     `keyColumn` varchar(255) NOT NULL,
