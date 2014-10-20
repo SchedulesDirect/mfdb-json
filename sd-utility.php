@@ -1611,34 +1611,38 @@ function getSchedulesDirectLineups()
 function checkDatabase()
 {
     global $dbh;
+    global $isMythTV;
 
     $schemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
 
     if ($schemaVersion === FALSE)
     {
-        print "Copying existing data from MythTV\n";
-
-        $lineupsMyth = setting("localLineupLastModified");
-
-        if ($lineupsMyth != FALSE)
+        if ($isMythTV)
         {
-            settingSD("localLineupLastModified", $lineupsMyth);
+            print "Copying existing data from MythTV\n";
+
+            $lineupsMyth = setting("localLineupLastModified");
+
+            if ($lineupsMyth != FALSE)
+            {
+                settingSD("localLineupLastModified", $lineupsMyth);
+            }
+
+            $login = setting("SchedulesDirectLogin");
+
+            if ($login != FALSE)
+            {
+                settingSD("SchedulesDirectLogin", $login);
+            }
+
+            $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
+            $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLogin'");
+            $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
+            $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
+            $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
+
+            $schemaVersion = 1;
         }
-
-        $login = setting("SchedulesDirectLogin");
-
-        if ($login != FALSE)
-        {
-            settingSD("SchedulesDirectLogin", $login);
-        }
-
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLogin'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
-
-        $schemaVersion = 1;
         settingSD("SchedulesDirectJSONschemaVersion", "1");
     }
 }
@@ -1782,12 +1786,12 @@ function checkForChannelIcon($stationID, $data)
         $insertImageCache = $dbhSD->prepare("INSERT OR IGNORE INTO imageCache(item,height,width,md5,type)
         VALUES(:item,:height,:width,:md5,'L')");
         $insertImageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
-                                           "md5"  => $md5));
+                                         "md5"  => $md5));
 
         $updateImageCache = $dbhSD->prepare("UPDATE imageCache SET md5=:md5 WHERE item=:item AND height=:height AND width=:width");
 
         $updateImageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
-                                           "md5"  => $md5));
+                                         "md5"  => $md5));
 
         $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));
     }
