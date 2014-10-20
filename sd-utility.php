@@ -1704,7 +1704,7 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     $dbhSD->exec("CREATE TABLE SDprogramrating (
     programID varchar(64) PRIMARY KEY NOT NULL,
       system varchar(30) NOT NULL,
-      rating varchar(16) DEFAULT NULL");
+      rating varchar(16) DEFAULT NULL)");
 
     $dbhSD->exec("CREATE TABLE SDschedule (
       stationID varchar(12) NOT NULL UNIQUE,
