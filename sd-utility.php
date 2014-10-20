@@ -1667,7 +1667,7 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 )");
 
     $dbhSD->exec("CREATE TABLE SDcredits (
-    personID mediumint(8) unsigned NOT NULL PRIMARY,
+    personID mediumint(8) NOT NULL PRIMARY,
       programID varchar(64) NOT NULL,
       role varchar(100) DEFAULT NULL
       )");
