@@ -423,6 +423,7 @@ function settingSD()
 
     $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO settings(keyColumn,valueColumn) VALUES(:key,:value)");
     $stmt->execute(array("key" => $key, "value" => $value));
+
     $stmt = $dbhSD->prepare("UPDATE settings SET valueColumn=:value WHERE keyColumn=:key");
     $stmt->execute(array("key" => $key, "value" => $value));
 }

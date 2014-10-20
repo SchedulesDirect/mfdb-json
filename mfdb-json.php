@@ -250,24 +250,20 @@ if (!isset($host))
 if ($isMythTV OR $dbWithoutMythtv)
 {
     printMSG("Connecting to Schedules Direct database.");
+    $dbhSD = new PDO("sqlite:schedulesdirect.db");
+    $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
     try
     {
-        $dbhSD = new PDO("mysql:host=$dbHostSD;dbname=schedulesdirect;charset=utf8", "sd", "sd");
-        $dbhSD->exec("SET CHARACTER SET utf8");
-        $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $stmt = $dbhSD->prepare("SELECT * FROM settings");
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e)
     {
-        if ($e->getCode() == 2002)
-        {
-            printMSG("Could not connect to database:\n" . $e->getMessage());
-            exit;
-        }
-
-        if ($e->getCode() == 1049)
+        if ($e->getCode() == "HY000")
         {
             printMSG("Initial database not created for Schedules Direct tables.");
-            printMSG("Please run\nmysql -uroot -p < sd.sql");
-            printMSG("Then run sd-utility.php to complete the initialization.");
+            printMSG("Please run sd-utility.php to complete the initialization.");
             printMSG("Make sure you use function '4' to refresh the local lineup cache.");
             printMSG("Please check the updated README.md for more information.");
             exit;
