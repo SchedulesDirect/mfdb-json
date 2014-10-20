@@ -1764,13 +1764,15 @@ function checkForChannelIcon($stationID, $data)
             return;
         }
 
-        $updateimageCache = $dbhSD->prepare("INSERT OR IGNORE INTO imageCache(item,height,width,md5,type)
+        $insertImageCache = $dbhSD->prepare("INSERT OR IGNORE INTO imageCache(item,height,width,md5,type)
         VALUES(:item,:height,:width,:md5,'L')");
-        $updateimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
+        $insertImageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
                                            "md5"  => $md5));
-        $updateimageCache = $dbhSD->prepare("UPDATE imageCache SET md5=:md5 WHERE item=:item,heigh=:height,width=:width");
 
-        $updateimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
+        $updateImageCache = $dbhSD->prepare("UPDATE imageCache SET md5=:md5 WHERE item=:item,height=:height,
+        width=:width");
+
+        $updateImageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
                                            "md5"  => $md5));
         $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));
     }
