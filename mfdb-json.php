@@ -770,13 +770,8 @@ function getSchedules($stationIDsToFetch)
 
     file_put_contents("$dlSchedTempDir/schedule.json", $schedules, FILE_APPEND);
 
-    //if (!$isMythTV)
-    //{
-    //    return ("");
-    //}
-
-    $updateLocalMD5 = $dbhSD->prepare("INSERT INTO schedule(stationID, md5) VALUES(:sid, :md5)
-    ON DUPLICATE KEY UPDATE md5=:md5");
+    $insertLocalMD5 = $dbhSD->prepare("INSERT OR IGNORE INTO schedule(stationID, md5) VALUES(:sid, :md5)");
+    $updateLocalMD5 = $dbhSD->prepare("UPDATE schedule SET md5=:md5 WHERE stationID=:sid");
 
     $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
@@ -840,6 +835,7 @@ function getSchedules($stationIDsToFetch)
         }
 
         $md5 = $item["metadata"]["md5"];
+        $insertLocalMD5->execute(array("sid" => $stationID, "md5" => $md5));
         $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5));
 
         foreach ($item["programs"] as $programData)
@@ -955,7 +951,10 @@ function insertJSON(array $jsonProgramsToRetrieve)
     global $dlProgramTempDir;
     global $debug;
 
-    $insertJSON = $dbhSD->prepare("INSERT INTO programCache(programID,md5,json)
+    $insertJSON = $dbhSD->prepare("INSERT OR IGNORE INTO programCache(programID,md5,json)
+            VALUES (:programID,:md5,:json)");
+
+    $updateJSON = $dbhSD->prepare("INSERT INTO programCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
 
