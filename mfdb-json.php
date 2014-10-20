@@ -1204,7 +1204,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
         rmdir("$dlProgramTempDir");
     }
 
-    $dbh->commit();
+    $dbhSD->commit();
 
     printMSG("Completed local database program updates.");
 }
