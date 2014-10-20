@@ -1713,12 +1713,12 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     $dbhSD->exec("CREATE INDEX md5 ON SDschedule (md5)");
 
     $dbhSD->exec("CREATE TABLE SDimageCache (
-    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE
+    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
       item varchar(128) NOT NULL,
       md5 char(22) NOT NULL,
       height varchar(128) NOT NULL,
       width varchar(128) NOT NULL,
-      type char(1) NOT NULL, -- COMMENT 'L-Channel Logo'
+      type char(1) NOT NULL -- COMMENT 'L-Channel Logo'
     )");
 
     $dbhSD->exec("CREATE UNIQUE INDEX id ON SDimageCache (item,height,width)");
