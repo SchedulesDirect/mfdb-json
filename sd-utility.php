@@ -1666,7 +1666,7 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL)");
 
     $dbhSD->exec("CREATE TABLE SDcredits (
-    personID INTEGER NOT NULL PRIMARY,
+    personID INTEGER PRIMARY KEY,
       programID varchar(64) NOT NULL,
       role varchar(100) DEFAULT NULL)");
 
@@ -1681,7 +1681,7 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       )");
 
     $dbhSD->exec("CREATE TABLE SDpeople (
-    personID INTEGER NOT NULL PRIMARY,
+    personID INTEGER PRIMARY KEY,
       name varchar(128)
       )");
 
