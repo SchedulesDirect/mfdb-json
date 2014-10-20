@@ -290,24 +290,10 @@ if ($isMythTV OR $dbWithoutMythtv)
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e)
     {
-
-        print "Got exception code: " . $e->getCode() . "\n";
-        print "Got message: " . $e->getMessage() . "\n";
-        exit;
-
-        if ($e->getCode() == 2002)
+        if ($e->getCode() == "HY000")
         {
-            print "Could not connect to database:\n" . $e->getMessage() . "\n";
-            exit;
-        }
-
-        if ($e->getCode() == 1049)
-        {
-            print "Initial database not created for Schedules Direct tables.\n";
-            print "Please run\nmysql -uroot -p < sd.sql\n";
-            print "Then re-run this script.\n";
-            print "Please check the updated README.md for more information.\n";
-            exit;
+            print "Creating initial database.\n";
+            createDatabase();
         }
         else
         {
@@ -316,11 +302,6 @@ if ($isMythTV OR $dbWithoutMythtv)
             print "Message: " . $e->getMessage() . "\n";
             exit;
         }
-    }
-
-    if (!file_exists("schedulesdirect.db"))
-    {
-        createDatabase();
     }
 
     if ($isMythTV)
