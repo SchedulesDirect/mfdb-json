@@ -1649,84 +1649,98 @@ function createDatabase()
 
     print "Creating settings table.\n";
     $dbhSD->exec(
-        "CREATE TABLE settings (
-                    keyColumn TEXT NOT NULL UNIQUE,
-                    valueColumn TEXT NOT NULL
-                    )");
+        "CREATE TABLE settings
+          (
+            keyColumn TEXT NOT NULL UNIQUE,
+            valueColumn TEXT NOT NULL
+          )");
 
     print "Creating Schedules Direct tables.\n";
 
-    $dbhSD->exec("CREATE TABLE messages (
-row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  id char(22) NOT NULL UNIQUE, -- Required to ACK a message from the server.
-  date char(20) DEFAULT NULL,
-  message varchar(512) DEFAULT NULL,
-  type char(1) DEFAULT NULL, -- Message type. G-global, S-service status, U-user specific
-  modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL)");
+    $dbhSD->exec("CREATE TABLE messages
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    id char(22) NOT NULL UNIQUE, -- Required to ACK a message from the server.
+                    date char(20) DEFAULT NULL,
+                    message varchar(512) DEFAULT NULL,
+                    type char(1) DEFAULT NULL, -- Message type. G-global, S-service status, U-user specific
+                    modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+  )");
 
-    $dbhSD->exec("CREATE TABLE credits (
-    personID INTEGER,
-      programID varchar(64) NOT NULL,
-      role varchar(100) DEFAULT NULL)");
+    $dbhSD->exec("CREATE TABLE credits
+                  (
+                    personID INTEGER,
+                    programID varchar(64) NOT NULL,
+                    role varchar(100) DEFAULT NULL
+                  )");
 
     $dbhSD->exec("CREATE INDEX programID ON credits (programID)");
     $dbhSD->exec("CREATE UNIQUE INDEX person_pid_role ON credits (personID,programID,role)");
 
-    $dbhSD->exec("CREATE TABLE lineupCache (
-    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-      lineup varchar(50) NOT NULL,
-      -- md5 char(22) NOT NULL,
-      modified char(20) DEFAULT '1970-01-01T00:00:00Z',
-      json TEXT
-      )");
+    $dbhSD->exec("CREATE TABLE lineupCache
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    lineup varchar(50) NOT NULL,
+                    -- md5 char(22) NOT NULL,
+                    modified char(20) DEFAULT '1970-01-01T00:00:00Z',
+                    json TEXT
+                  )");
 
     $dbhSD->exec("CREATE UNIQUE INDEX lineup ON lineupCache (lineup)");
 
-    $dbhSD->exec("CREATE TABLE SDpeople (
-    personID INTEGER PRIMARY KEY,
-      name varchar(128)
-      )");
+    $dbhSD->exec("CREATE TABLE people
+                  (
+                    personID INTEGER PRIMARY KEY,
+                    name varchar(128)
+                  )");
 
-    $dbhSD->exec("CREATE TABLE programCache (
-    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-      programID varchar(64) NOT NULL UNIQUE,
-      md5 char(22) NOT NULL,
-      modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-      json TEXT NOT NULL
-      )");
+    $dbhSD->exec("CREATE TABLE programCache
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    programID varchar(64) NOT NULL UNIQUE,
+                    md5 char(22) NOT NULL,
+                    modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                    json TEXT NOT NULL
+                  )");
 
-    $dbhSD->exec("CREATE TABLE programGenres (
-    programID varchar(64) PRIMARY KEY NOT NULL,
-      relevance char(1) NOT NULL DEFAULT '0',
-      genre varchar(30) NOT NULL)");
+    $dbhSD->exec("CREATE TABLE programGenres
+                  (
+                    programID varchar(64) PRIMARY KEY NOT NULL,
+                    relevance char(1) NOT NULL DEFAULT '0',
+                    genre varchar(30) NOT NULL
+                  )");
 
     $dbhSD->exec("CREATE INDEX genre ON programGenres (genre)");
     $dbhSD->exec("CREATE UNIQUE INDEX pid_relevance ON programGenres (programID,relevance)");
 
-    $dbhSD->exec("CREATE TABLE programRating (
-    programID varchar(64) PRIMARY KEY NOT NULL,
-      system varchar(30) NOT NULL,
-      rating varchar(16) DEFAULT NULL)");
+    $dbhSD->exec("CREATE TABLE programRating
+                  (
+                    programID varchar(64) PRIMARY KEY NOT NULL,
+                    system varchar(30) NOT NULL,
+                    rating varchar(16) DEFAULT NULL
+                  )");
 
-    $dbhSD->exec("CREATE TABLE schedule (
-      stationID varchar(12) NOT NULL UNIQUE,
-      md5 char(22) NOT NULL)");
+    $dbhSD->exec("CREATE TABLE schedule
+                  (
+                    stationID varchar(12) NOT NULL UNIQUE,
+                    md5 char(22) NOT NULL
+                  )");
 
     $dbhSD->exec("CREATE INDEX md5 ON schedule (md5)");
 
-    $dbhSD->exec("CREATE TABLE imageCache (
-    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-      item varchar(128) NOT NULL,
-      md5 char(22) NOT NULL,
-      height varchar(128) NOT NULL,
-      width varchar(128) NOT NULL,
-      type char(1) NOT NULL -- COMMENT 'L-Channel Logo'
-    )");
+    $dbhSD->exec("CREATE TABLE imageCache
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    item varchar(128) NOT NULL,
+                    md5 char(22) NOT NULL,
+                    height varchar(128) NOT NULL,
+                    width varchar(128) NOT NULL,
+                    type char(1) NOT NULL -- COMMENT 'L-Channel Logo'
+                  )");
 
     $dbhSD->exec("CREATE UNIQUE INDEX id ON imageCache (item,height,width)");
     $dbhSD->exec("CREATE INDEX type ON imageCache (type)");
 }
-
 
 function checkForChannelIcon($stationID, $data)
 {
