@@ -2106,11 +2106,11 @@ function updateStatus()
 
     $res = getStatus();
 
-    if ($isMythTV)
-    {
-        $updateLocalMessageTable = $dbhSD->prepare("INSERT INTO messages(id,date,message,type)
+    $insertLocalMessageTable = $dbhSD->prepare("INSERT OR IGNORE INTO messages(id,date,message,type)
+    VALUES(:id,:date,:message,:type)");
+    $updateLocalMessageTable = $dbhSD->prepare("INSERT INTO messages(id,date,message,type)
     VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
-    }
+
 
     if ($res["code"] == 0)
     {
