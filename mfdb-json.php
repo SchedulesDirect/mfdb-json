@@ -647,7 +647,7 @@ function getSchedules($stationIDsToFetch)
             var_dump($schedulesDirectMD5s);
         }
 
-        $getLocalCache = $dbhSD->prepare("SELECT stationID,md5 FROM SDschedule");
+        $getLocalCache = $dbhSD->prepare("SELECT stationID,md5 FROM schedule");
         $getLocalCache->execute();
         $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -775,7 +775,7 @@ function getSchedules($stationIDsToFetch)
     //    return ("");
     //}
 
-    $updateLocalMD5 = $dbhSD->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
+    $updateLocalMD5 = $dbhSD->prepare("INSERT INTO schedule(stationID, md5) VALUES(:sid, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
 
     $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -866,7 +866,7 @@ function getSchedules($stationIDsToFetch)
      * We're going to figure out which programIDs we need to download.
      */
 
-    $stmt = $dbhSD->prepare("SELECT md5, programID FROM SDprogramCache");
+    $stmt = $dbhSD->prepare("SELECT md5, programID FROM programCache");
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -955,7 +955,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     global $dlProgramTempDir;
     global $debug;
 
-    $insertJSON = $dbhSD->prepare("INSERT INTO SDprogramCache(programID,md5,json)
+    $insertJSON = $dbhSD->prepare("INSERT INTO programCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
 
@@ -964,10 +964,10 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
-    $insertCreditSD = $dbhSD->prepare("INSERT INTO SDcredits(personID,programID,role)
+    $insertCreditSD = $dbhSD->prepare("INSERT INTO credits(personID,programID,role)
     VALUES(:personID,:pid,:role)");
 
-    $insertProgramGenresSD = $dbhSD->prepare("INSERT INTO SDprogramgenres(programID,relevance,genre)
+    $insertProgramGenresSD = $dbhSD->prepare("INSERT INTO programGenres(programID,relevance,genre)
     VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
 
     $getPeople = $dbh->prepare("SELECT name,person FROM people");
@@ -978,7 +978,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     $getPeople->execute();
     $peopleCacheSD = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $getCredits = $dbhSD->prepare("SELECT CONCAT(personID,'-',programID,'-',role) FROM SDcredits");
+    $getCredits = $dbhSD->prepare("SELECT CONCAT(personID,'-',programID,'-',role) FROM credits");
     $getCredits->execute();
     $creditCache = $getCredits->fetchAll(PDO::FETCH_COLUMN);
 
@@ -1290,7 +1290,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     $getExistingChannels->execute();
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
-    $getProgramInformation = $dbhSD->prepare("SELECT json FROM SDprogramCache WHERE programID =:pid");
+    $getProgramInformation = $dbhSD->prepare("SELECT json FROM programCache WHERE programID =:pid");
 
     $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
 
@@ -2108,7 +2108,7 @@ function updateStatus()
 
     if ($isMythTV)
     {
-        $updateLocalMessageTable = $dbhSD->prepare("INSERT INTO SDMessages(id,date,message,type)
+        $updateLocalMessageTable = $dbhSD->prepare("INSERT INTO messages(id,date,message,type)
     VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
     }
 

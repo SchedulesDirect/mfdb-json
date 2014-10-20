@@ -647,7 +647,7 @@ function updateChannelTable($lineup)
         return;
     }
 
-    $stmt = $dbhSD->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
+    $stmt = $dbhSD->prepare("SELECT json FROM lineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -1064,14 +1064,14 @@ function linkSchedulesDirectLineup()
         return;
     }
 
-    $stmt = $dbhSD->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
+    $stmt = $dbhSD->prepare("SELECT json FROM lineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
     if (!count($response)) // We've already decoded the JSON.
     {
         print "Fatal Error in Link SchedulesDirect Lineup.\n";
-        print "No JSON stored in SDlineupCache?\n";
+        print "No JSON stored in lineupCache?\n";
         print "lineup:$lineup\n";
         exit;
     }
@@ -1079,7 +1079,7 @@ function linkSchedulesDirectLineup()
     if ($response == "[]")
     {
         print "Fatal Error in Link SchedulesDirect Lineup.\n";
-        print "Empty JSON stored in SDlineupCache?\n";
+        print "Empty JSON stored in lineupCache?\n";
         print "lineup:$lineup\n";
         exit;
     }
@@ -1103,7 +1103,7 @@ function printLineup()
         return;
     }
 
-    $stmt = $dbhSD->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
+    $stmt = $dbhSD->prepare("SELECT json FROM lineupCache WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -1385,7 +1385,7 @@ function deleteLineupFromSchedulesDirect()
     global $token;
     global $updatedLineupsToRefresh;
 
-    $deleteFromLocalCache = $dbhSD->prepare("DELETE FROM SDlineupCache WHERE lineup=:lineup");
+    $deleteFromLocalCache = $dbhSD->prepare("DELETE FROM lineupCache WHERE lineup=:lineup");
     $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
 
     $toDelete = getLineupFromNumber(strtoupper(readline("Lineup to Delete (# or lineup):>")));
@@ -1540,12 +1540,12 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO SDlineupCache(lineup,json,modified)
+        $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO lineupCache(lineup,json,modified)
         VALUES(:lineup,:json,:modified)");
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json"   => json_encode($res)));
 
-        $stmt = $dbhSD->prepare("UPDATE SDlineupCache SET json=:json,modified=:modified WHERE lineup=:lineup");
+        $stmt = $dbhSD->prepare("UPDATE lineupCache SET json=:json,modified=:modified WHERE lineup=:lineup");
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json"   => json_encode($res)));
 
@@ -1656,7 +1656,7 @@ function createDatabase()
 
     print "Creating Schedules Direct tables.\n";
 
-    $dbhSD->exec("CREATE TABLE SDMessages (
+    $dbhSD->exec("CREATE TABLE messages (
 row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   id char(22) NOT NULL UNIQUE, -- Required to ACK a message from the server.
   date char(20) DEFAULT NULL,
@@ -1664,14 +1664,14 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   type char(1) DEFAULT NULL, -- Message type. G-global, S-service status, U-user specific
   modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL)");
 
-    $dbhSD->exec("CREATE TABLE SDcredits (
+    $dbhSD->exec("CREATE TABLE credits (
     personID INTEGER PRIMARY KEY,
       programID varchar(64) NOT NULL,
       role varchar(100) DEFAULT NULL)");
 
-    $dbhSD->exec("CREATE INDEX programID ON SDcredits (programID)");
+    $dbhSD->exec("CREATE INDEX programID ON credits (programID)");
 
-    $dbhSD->exec("CREATE TABLE SDlineupCache (
+    $dbhSD->exec("CREATE TABLE lineupCache (
     row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
       lineup varchar(50) NOT NULL,
       -- md5 char(22) NOT NULL,
@@ -1679,14 +1679,14 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       json TEXT
       )");
 
-    $dbhSD->exec("CREATE UNIQUE INDEX lineup ON SDlineupCache (lineup)");
+    $dbhSD->exec("CREATE UNIQUE INDEX lineup ON lineupCache (lineup)");
 
     $dbhSD->exec("CREATE TABLE SDpeople (
     personID INTEGER PRIMARY KEY,
       name varchar(128)
       )");
 
-    $dbhSD->exec("CREATE TABLE SDprogramCache (
+    $dbhSD->exec("CREATE TABLE programCache (
     row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
       programID varchar(64) NOT NULL UNIQUE,
       md5 char(22) NOT NULL,
@@ -1694,26 +1694,26 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       json TEXT NOT NULL
       )");
 
-    $dbhSD->exec("CREATE TABLE SDprogramgenres (
+    $dbhSD->exec("CREATE TABLE programGenres (
     programID varchar(64) PRIMARY KEY NOT NULL,
       relevance char(1) NOT NULL DEFAULT '0',
       genre varchar(30) NOT NULL)");
 
-    $dbhSD->exec("CREATE INDEX genre ON SDprogramgenres (genre)");
-    $dbhSD->exec("CREATE UNIQUE INDEX pid_relevance ON SDprogramgenres (programID,relevance)");
+    $dbhSD->exec("CREATE INDEX genre ON programGenres (genre)");
+    $dbhSD->exec("CREATE UNIQUE INDEX pid_relevance ON programGenres (programID,relevance)");
 
-    $dbhSD->exec("CREATE TABLE SDprogramrating (
+    $dbhSD->exec("CREATE TABLE programRating (
     programID varchar(64) PRIMARY KEY NOT NULL,
       system varchar(30) NOT NULL,
       rating varchar(16) DEFAULT NULL)");
 
-    $dbhSD->exec("CREATE TABLE SDschedule (
+    $dbhSD->exec("CREATE TABLE schedule (
       stationID varchar(12) NOT NULL UNIQUE,
       md5 char(22) NOT NULL)");
 
-    $dbhSD->exec("CREATE INDEX md5 ON SDschedule (md5)");
+    $dbhSD->exec("CREATE INDEX md5 ON schedule (md5)");
 
-    $dbhSD->exec("CREATE TABLE SDimageCache (
+    $dbhSD->exec("CREATE TABLE imageCache (
     row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
       item varchar(128) NOT NULL,
       md5 char(22) NOT NULL,
@@ -1722,8 +1722,8 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       type char(1) NOT NULL -- COMMENT 'L-Channel Logo'
     )");
 
-    $dbhSD->exec("CREATE UNIQUE INDEX id ON SDimageCache (item,height,width)");
-    $dbhSD->exec("CREATE INDEX type ON SDimageCache (type)");
+    $dbhSD->exec("CREATE UNIQUE INDEX id ON imageCache (item,height,width)");
+    $dbhSD->exec("CREATE INDEX type ON imageCache (type)");
 }
 
 
@@ -1742,7 +1742,7 @@ function checkForChannelIcon($stationID, $data)
 
     $updateChannelTable = $dbh->prepare("UPDATE channel SET icon=:icon WHERE xmltvid=:stationID");
 
-    $stmt = $dbhSD->prepare("SELECT md5 FROM SDimageCache WHERE item=:item AND height=:height AND width=:width");
+    $stmt = $dbhSD->prepare("SELECT md5 FROM imageCache WHERE item=:item AND height=:height AND width=:width");
     $stmt->execute(array("item" => $iconFileName, "height" => $height, "width" => $width));
 
     $result = $stmt->fetchColumn();
@@ -1764,9 +1764,13 @@ function checkForChannelIcon($stationID, $data)
             return;
         }
 
-        $updateSDimageCache = $dbhSD->prepare("INSERT INTO SDimageCache(item,height,width,md5,type)
-        VALUES(:item,:height,:width,:md5,'L') ON DUPLICATE KEY UPDATE md5=:md5");
-        $updateSDimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
+        $updateimageCache = $dbhSD->prepare("INSERT INTO imageCache(item,height,width,md5,type)
+        VALUES(:item,:height,:width,:md5,'L')");
+        $updateimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
+                                           "md5"  => $md5));
+        $updateimageCache = $dbhSD->prepare("UPDATE imageCache SET md5=:md5 WHERE item=:item,heigh=:height,width=:width");
+
+        $updateimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
                                            "md5"  => $md5));
         $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));
     }
