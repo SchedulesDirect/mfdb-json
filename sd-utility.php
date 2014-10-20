@@ -1545,10 +1545,9 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json"   => json_encode($res)));
 
-        $stmt = $dbhSD - prepare("UPDATE SDlineupCache SET json=:json,modified=:modified WHERE lineup=:lineup");
+        $stmt = $dbhSD->prepare("UPDATE SDlineupCache SET json=:json,modified=:modified WHERE lineup=:lineup");
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json"   => json_encode($res)));
-
 
         unset ($updatedLineupsToRefresh[$k]);
     }
