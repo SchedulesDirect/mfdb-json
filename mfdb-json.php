@@ -953,8 +953,8 @@ function insertJSON(array $jsonProgramsToRetrieve)
             VALUES (:programID,:md5,:json)");
     $updateJSON = $dbhSD->prepare("UPDATE programCache SET md5=:md5, json=:json WHERE programID=:programID");
 
-    $insertPersonSD = $dbhSD->prepare("INSERT OR IGNORE INTO SDpeople(personID,name) VALUES(:personID, :name)");
-    $updatePersonSD = $dbhSD->prepare("UPDATE SDpeople SET name=:name WHERE personID=:personID");
+    $insertPersonSD = $dbhSD->prepare("INSERT OR IGNORE INTO people(personID,name) VALUES(:personID, :name)");
+    $updatePersonSD = $dbhSD->prepare("UPDATE people SET name=:name WHERE personID=:personID");
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
