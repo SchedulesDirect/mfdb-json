@@ -1540,7 +1540,7 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbhSD->prepare("INSERT INTO SDlineupCache(lineup,json,modified)
+        $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO SDlineupCache(lineup,json,modified)
         VALUES(:lineup,:json,:modified)");
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json"   => json_encode($res)));
@@ -1674,7 +1674,7 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     $dbhSD->exec("CREATE TABLE SDlineupCache (
     row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
       lineup varchar(50) NOT NULL,
-      md5 char(22) NOT NULL,
+      -- md5 char(22) NOT NULL,
       modified char(20) DEFAULT '1970-01-01T00:00:00Z',
       json TEXT
       )");
