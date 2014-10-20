@@ -953,12 +953,9 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
     $insertJSON = $dbhSD->prepare("INSERT OR IGNORE INTO programCache(programID,md5,json)
             VALUES (:programID,:md5,:json)");
+    $updateJSON = $dbhSD->prepare("UPDATE programCache SET md5=:md5, json=:json WHERE programID=:programID");
 
-    $updateJSON = $dbhSD->prepare("INSERT INTO programCache(programID,md5,json)
-            VALUES (:programID,:md5,:json)
-            ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
-
-    $insertPersonSD = $dbhSD->prepare("INSERT INTO SDpeople(personID,name) VALUES(:personID, :name)");
+    $insertPersonSD = $dbhSD->prepare("INSERT OR IGNORE INTO SDpeople(personID,name) VALUES(:personID, :name)");
     $updatePersonSD = $dbhSD->prepare("UPDATE SDpeople SET name=:name WHERE personID=:personID");
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
@@ -966,8 +963,10 @@ function insertJSON(array $jsonProgramsToRetrieve)
     $insertCreditSD = $dbhSD->prepare("INSERT INTO credits(personID,programID,role)
     VALUES(:personID,:pid,:role)");
 
-    $insertProgramGenresSD = $dbhSD->prepare("INSERT INTO programGenres(programID,relevance,genre)
+    $insertProgramGenresSD = $dbhSD->prepare("INSERT OR IGNORE INTO programGenres(programID,relevance,genre)
     VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
+    $updateProgramGenresSD = $dbhSD->prepare("UPDATE programGenres SET genre=:genre WHERE programID=:pid AND
+    relevance=:relevance");
 
     $getPeople = $dbh->prepare("SELECT name,person FROM people");
     $getPeople->execute();
@@ -1053,8 +1052,8 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 continue;
             }
 
-            $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-                                       "json"      => $item));
+            $insertJSON->execute(array("programID" => $pid, "md5" => $md5, "json" => $item));
+            $updateJSON->execute(array("programID" => $pid, "md5" => $md5, "json" => $item));
 
             $skipPersonID = FALSE;
 
@@ -1072,6 +1071,8 @@ function insertJSON(array $jsonProgramsToRetrieve)
                     }
                     $insertProgramGenresSD->execute(array("pid"       => $pid,
                                                           "relevance" => ++$relevance, "genre" => $g));
+                    $updateProgramGenresSD->execute(array("pid"       => $pid,
+                                                          "relevance" => $relevance, "genre" => $g));
                 }
             }
 
