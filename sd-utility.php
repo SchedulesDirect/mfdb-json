@@ -279,6 +279,11 @@ if (!isset($host))
 
 if ($isMythTV OR $dbWithoutMythtv)
 {
+    if (!file_exists("schedulesdirect.db"))
+    {
+        createDatabase();
+    }
+
     print "Connecting to Schedules Direct database.\n";
     try
     {
@@ -286,6 +291,11 @@ if ($isMythTV OR $dbWithoutMythtv)
         $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e)
     {
+
+        print "Got exception code: " . $e->getCode() . "\n";
+        print "Got message: " . $e->getMessage() . "\n";
+        exit;
+
         if ($e->getCode() == 2002)
         {
             print "Could not connect to database:\n" . $e->getMessage() . "\n";
