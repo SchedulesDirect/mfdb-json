@@ -1665,11 +1665,12 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL)");
 
     $dbhSD->exec("CREATE TABLE credits (
-    personID INTEGER PRIMARY KEY,
+    personID INTEGER,
       programID varchar(64) NOT NULL,
       role varchar(100) DEFAULT NULL)");
 
     $dbhSD->exec("CREATE INDEX programID ON credits (programID)");
+    $dbhSD->exec("CREATE UNIQUE INDEX person_pid_role ON credits (personID,programID,role)");
 
     $dbhSD->exec("CREATE TABLE lineupCache (
     row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
