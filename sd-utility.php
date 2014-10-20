@@ -1673,11 +1673,13 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 
     $dbhSD->exec("CREATE TABLE SDlineupCache (
     row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-      lineup varchar(50) NOT NULL DEFAULT '',
+      lineup varchar(50) NOT NULL,
       md5 char(22) NOT NULL,
       modified char(20) DEFAULT '1970-01-01T00:00:00Z',
       json TEXT
       )");
+
+    $dbhSD->exec("CREATE UNIQUE INDEX lineup ON SDlineupCache (lineup)");
 
     $dbhSD->exec("CREATE TABLE SDpeople (
     personID INTEGER PRIMARY KEY,
