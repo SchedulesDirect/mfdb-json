@@ -1613,32 +1613,12 @@ function checkDatabase()
 
     if ($schemaVersion === FALSE)
     {
-        printMSG("Copying existing data from MythTV");
-
-        $lineupsMyth = setting("localLineupLastModified");
-        $lineupsSD = settingSD("localLineupLastModified");
-
-        settingSD("localLineupLastModified", $lineups);
-
-        $login = setting("SchedulesDirectLogin");
-        settingSD("SchedulesDirectLogin", $login);
-
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLogin'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
-
-        $schemaVersion = 1;
-
-        $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
-    SDprogramrating,SDschedule,SDMessages,SDimageCache");
     }
-
 }
 
 function createDatabase()
 {
+    global $dbh;
     global $dbhSD;
 
     print "Creating settings table.\n";
@@ -1659,75 +1639,100 @@ function createDatabase()
   `modified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )");
 
-/*    $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
-`personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `programID` varchar(64) NOT NULL,
-  `role` varchar(100) DEFAULT NULL,
-  KEY `personID` (`personID`),
-  KEY `programID` (`programID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+    /*    $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
+    `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
+      `programID` varchar(64) NOT NULL,
+      `role` varchar(100) DEFAULT NULL,
+      KEY `personID` (`personID`),
+      KEY `programID` (`programID`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-    $stmt = $dbhSD->exec("CREATE TABLE `SDlineupCache` (
-`row` INTEGER PRIMARY KEY,
-  `lineup` varchar(50) NOT NULL DEFAULT '',
-  `md5` char(22) NOT NULL,
-  `modified` char(20) DEFAULT '1970-01-01T00:00:00Z',
-  `json` mediumtext,
-  PRIMARY KEY (`row`),
-  UNIQUE KEY `lineup` (`lineup`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        $stmt = $dbhSD->exec("CREATE TABLE `SDlineupCache` (
+    `row` INTEGER PRIMARY KEY,
+      `lineup` varchar(50) NOT NULL DEFAULT '',
+      `md5` char(22) NOT NULL,
+      `modified` char(20) DEFAULT '1970-01-01T00:00:00Z',
+      `json` mediumtext,
+      PRIMARY KEY (`row`),
+      UNIQUE KEY `lineup` (`lineup`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-    $stmt = $dbhSD->exec("CREATE TABLE `SDpeople` (
-`personID` mediumint(8) unsigned NOT NULL,
-  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
-  PRIMARY KEY (`personID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        $stmt = $dbhSD->exec("CREATE TABLE `SDpeople` (
+    `personID` mediumint(8) unsigned NOT NULL,
+      `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
+      PRIMARY KEY (`personID`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-    $stmt = $dbhSD->exec("CREATE TABLE `SDprogramCache` (
-`row` INTEGER PRIMARY KEY,
-  `programID` varchar(64) NOT NULL,
-  `md5` char(22) NOT NULL,
-  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `json` varchar(16384) NOT NULL,
-  PRIMARY KEY (`row`),
-  UNIQUE KEY `pid` (`programID`),
-  KEY `programID` (`programID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramCache` (
+    `row` INTEGER PRIMARY KEY,
+      `programID` varchar(64) NOT NULL,
+      `md5` char(22) NOT NULL,
+      `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      `json` varchar(16384) NOT NULL,
+      PRIMARY KEY (`row`),
+      UNIQUE KEY `pid` (`programID`),
+      KEY `programID` (`programID`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-    $stmt = $dbhSD->exec("CREATE TABLE `SDprogramgenres` (
-`programID` varchar(64) NOT NULL,
-  `relevance` char(1) NOT NULL DEFAULT '0',
-  `genre` varchar(30) NOT NULL,
-  PRIMARY KEY (`programID`),
-  UNIQUE KEY `pid_relevance` (`programID`,`relevance`),
-  KEY `genre` (`genre`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramgenres` (
+    `programID` varchar(64) NOT NULL,
+      `relevance` char(1) NOT NULL DEFAULT '0',
+      `genre` varchar(30) NOT NULL,
+      PRIMARY KEY (`programID`),
+      UNIQUE KEY `pid_relevance` (`programID`,`relevance`),
+      KEY `genre` (`genre`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-    $stmt = $dbhSD->exec("CREATE TABLE `SDprogramrating` (
-`programID` varchar(64) NOT NULL,
-  `system` varchar(30) NOT NULL,
-  `rating` varchar(16) DEFAULT NULL,
-  PRIMARY KEY (`programID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramrating` (
+    `programID` varchar(64) NOT NULL,
+      `system` varchar(30) NOT NULL,
+      `rating` varchar(16) DEFAULT NULL,
+      PRIMARY KEY (`programID`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-    $stmt = $dbhSD->exec("CREATE TABLE `SDschedule` (
-  `stationID` varchar(12) NOT NULL,
-  `md5` char(22) NOT NULL,
-  UNIQUE KEY `sid` (`stationID`),
-  KEY `md5` (`md5`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        $stmt = $dbhSD->exec("CREATE TABLE `SDschedule` (
+      `stationID` varchar(12) NOT NULL,
+      `md5` char(22) NOT NULL,
+      UNIQUE KEY `sid` (`stationID`),
+      KEY `md5` (`md5`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-    $stmt = $dbhSD->exec("CREATE TABLE `SDimageCache` (
-  `row` INTEGER PRIMARY KEY,
-  `item` varchar(128) NOT NULL,
-  `md5` char(22) NOT NULL,
-  `height` varchar(128) NOT NULL,
-  `width` varchar(128) NOT NULL,
-  `type` char(1) NOT NULL COMMENT 'L-Channel Logo',
-  PRIMARY KEY (`row`),
-  UNIQUE KEY `id` (`item`,`height`,`width`),
-  KEY `type` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");*/
+        $stmt = $dbhSD->exec("CREATE TABLE `SDimageCache` (
+      `row` INTEGER PRIMARY KEY,
+      `item` varchar(128) NOT NULL,
+      `md5` char(22) NOT NULL,
+      `height` varchar(128) NOT NULL,
+      `width` varchar(128) NOT NULL,
+      `type` char(1) NOT NULL COMMENT 'L-Channel Logo',
+      PRIMARY KEY (`row`),
+      UNIQUE KEY `id` (`item`,`height`,`width`),
+      KEY `type` (`type`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");*/
+
+    print "Copying existing data from MythTV\n";
+
+    $lineupsMyth = setting("localLineupLastModified");
+
+    if ($lineupsMyth != FALSE)
+    {
+        settingSD("localLineupLastModified", $lineupsMyth);
+    }
+
+    $login = setting("SchedulesDirectLogin");
+
+    if ($login != FALSE)
+    {
+        settingSD("SchedulesDirectLogin", $login);
+    }
+
+    $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
+    $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLogin'");
+    $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
+    $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
+    $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
+
+    $schemaVersion = 1;
+    settingSD("SchedulesDirectJSONschemaVersion", "1");
 
 }
 
