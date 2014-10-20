@@ -1613,6 +1613,30 @@ function checkDatabase()
 
     if ($schemaVersion === FALSE)
     {
+        print "Copying existing data from MythTV\n";
+
+        $lineupsMyth = setting("localLineupLastModified");
+
+        if ($lineupsMyth != FALSE)
+        {
+            settingSD("localLineupLastModified", $lineupsMyth);
+        }
+
+        $login = setting("SchedulesDirectLogin");
+
+        if ($login != FALSE)
+        {
+            settingSD("SchedulesDirectLogin", $login);
+        }
+
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLogin'");
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
+        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
+
+        $schemaVersion = 1;
+        settingSD("SchedulesDirectJSONschemaVersion", "1");
     }
 }
 
@@ -1709,30 +1733,6 @@ function createDatabase()
       KEY `type` (`type`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8");*/
 
-    print "Copying existing data from MythTV\n";
-
-    $lineupsMyth = setting("localLineupLastModified");
-
-    if ($lineupsMyth != FALSE)
-    {
-        settingSD("localLineupLastModified", $lineupsMyth);
-    }
-
-    $login = setting("SchedulesDirectLogin");
-
-    if ($login != FALSE)
-    {
-        settingSD("SchedulesDirectLogin", $login);
-    }
-
-    $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
-    $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLogin'");
-    $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
-    $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
-    $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
-
-    $schemaVersion = 1;
-    settingSD("SchedulesDirectJSONschemaVersion", "1");
 
 }
 
