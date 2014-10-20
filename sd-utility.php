@@ -1769,11 +1769,11 @@ function checkForChannelIcon($stationID, $data)
         $insertImageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
                                            "md5"  => $md5));
 
-        $updateImageCache = $dbhSD->prepare("UPDATE imageCache SET md5=:md5 WHERE item=:item,height=:height,
-        width=:width");
+        $updateImageCache = $dbhSD->prepare("UPDATE imageCache SET md5=:md5 WHERE item=:item AND height=:height AND width=:width");
 
         $updateImageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
                                            "md5"  => $md5));
+
         $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));
     }
 }
