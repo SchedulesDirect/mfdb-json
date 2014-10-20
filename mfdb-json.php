@@ -964,7 +964,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     VALUES(:personID,:pid,:role)");
 
     $insertProgramGenresSD = $dbhSD->prepare("INSERT OR IGNORE INTO programGenres(programID,relevance,genre)
-    VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
+    VALUES(:pid,:relevance,:genre)");
     $updateProgramGenresSD = $dbhSD->prepare("UPDATE programGenres SET genre=:genre WHERE programID=:pid AND
     relevance=:relevance");
 
@@ -1219,10 +1219,6 @@ function insertSchedule()
     global $peopleCache;
     global $debug;
     global $errorWarning;
-
-    //$existingRoleTypesInMyth = array("actor", "director", "producer", "executive_producer", "writer", "guest_star",
-    //                                 "host", "adapter", "presenter", "commentator", "guest");
-    //$existingRoleTypesInMyth = array_flip($existingRoleTypesInMyth);
 
     if (!count($peopleCache))
     {
@@ -2108,9 +2104,7 @@ function updateStatus()
 
     $insertLocalMessageTable = $dbhSD->prepare("INSERT OR IGNORE INTO messages(id,date,message,type)
     VALUES(:id,:date,:message,:type)");
-    $updateLocalMessageTable = $dbhSD->prepare("INSERT INTO messages(id,date,message,type)
-    VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
-
+    $updateLocalMessageTable = $dbhSD->prepare("UPDATE messages SET message=:message,date=:date,type=:type WHERE id=:id");
 
     if ($res["code"] == 0)
     {
@@ -2124,12 +2118,12 @@ function updateStatus()
             $msgDate = $a["date"];
             $message = $a["message"];
             printMSG("MessageID:$msgID : $msgDate : $message");
-            if ($isMythTV)
-            {
-                $updateLocalMessageTable->execute(array("id"      => $msgID, "date" => $msgDate,
-                                                        "message" => $message,
-                                                        "type"    => "U"));
-            }
+            $insertLocalMessageTable->execute(array("id"      => $msgID, "date" => $msgDate,
+                                                    "message" => $message,
+                                                    "type"    => "U"));
+            $updateLocalMessageTable->execute(array("id"      => $msgID, "date" => $msgDate,
+                                                    "message" => $message,
+                                                    "type"    => "U"));
         }
     }
     else
