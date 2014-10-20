@@ -1693,8 +1693,6 @@ row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       json TEXT NOT NULL
       )");
 
-    $dbhSD->exec("CREATE INDEX programID ON SDprogramCache (programID)");
-
     $dbhSD->exec("CREATE TABLE SDprogramgenres (
     programID varchar(64) PRIMARY KEY NOT NULL,
       relevance char(1) NOT NULL DEFAULT '0',
