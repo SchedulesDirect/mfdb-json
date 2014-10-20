@@ -1650,21 +1650,16 @@ function createDatabase()
 
     print "Creating Schedules Direct tables.\n";
 
-    $stmt = $dbhSD->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
-    SDprogramrating,SDschedule,SDMessages,SDimageCache");
-
     $stmt = $dbhSD->exec("CREATE TABLE `SDMessages` (
 `row` INTEGER PRIMARY KEY,
-  `id` char(22) DEFAULT NULL COMMENT 'Required to ACK a message from the server.',
+  `id` char(22) NOT NULL UNIQUE -- Required to ACK a message from the server.,
   `date` char(20) DEFAULT NULL,
   `message` varchar(512) DEFAULT NULL,
-  `type` char(1) DEFAULT NULL COMMENT 'Message type. G-global, S-service status, U-user specific',
-  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`row`),
-  UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+  `type` char(1) DEFAULT NULL -- Message type. G-global, S-service status, U-user specific,
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)");
 
-    $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
+/*    $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
 `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `programID` varchar(64) NOT NULL,
   `role` varchar(100) DEFAULT NULL,
@@ -1732,7 +1727,7 @@ function createDatabase()
   PRIMARY KEY (`row`),
   UNIQUE KEY `id` (`item`,`height`,`width`),
   KEY `type` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+) ENGINE=InnoDB DEFAULT CHARSET=utf8");*/
 
 }
 
