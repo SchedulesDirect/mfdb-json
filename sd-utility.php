@@ -1540,11 +1540,15 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbhSD->prepare("INSERT INTO SDlineupCache(lineup,json,modified)
-        VALUES(:lineup,:json,:modified) ON DUPLICATE KEY UPDATE json=:json,modified=:modified");
-
+        $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO SDlineupCache(lineup,json,modified)
+        VALUES(:lineup,:json,:modified)");
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
                              "json"   => json_encode($res)));
+
+        $stmt = $dbhSD - prepare("UPDATE SDlineupCache SET json=:json,modified=:modified WHERE lineup=:lineup");
+        $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
+                             "json"   => json_encode($res)));
+
 
         unset ($updatedLineupsToRefresh[$k]);
     }
@@ -1642,98 +1646,87 @@ function checkDatabase()
 
 function createDatabase()
 {
-    global $dbh;
     global $dbhSD;
 
     print "Creating settings table.\n";
-    $stmt = $dbhSD->exec(
-        "CREATE TABLE `settings` (
-                    `keyColumn` TEXT NOT NULL UNIQUE,
-                    `valueColumn` TEXT NOT NULL
+    $dbhSD->exec(
+        "CREATE TABLE settings (
+                    keyColumn TEXT NOT NULL UNIQUE,
+                    valueColumn TEXT NOT NULL
                     )");
 
     print "Creating Schedules Direct tables.\n";
 
-    $stmt = $dbhSD->exec("CREATE TABLE `SDMessages` (
-`row` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  `id` char(22) NOT NULL UNIQUE, -- Required to ACK a message from the server.
-  `date` char(20) DEFAULT NULL,
-  `message` varchar(512) DEFAULT NULL,
-  `type` char(1) DEFAULT NULL, -- Message type. G-global, S-service status, U-user specific
-  `modified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    $dbhSD->exec("CREATE TABLE SDMessages (
+row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  id char(22) NOT NULL UNIQUE, -- Required to ACK a message from the server.
+  date char(20) DEFAULT NULL,
+  message varchar(512) DEFAULT NULL,
+  type char(1) DEFAULT NULL, -- Message type. G-global, S-service status, U-user specific
+  modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )");
 
-    /*    $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
-    `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
-      `programID` varchar(64) NOT NULL,
-      `role` varchar(100) DEFAULT NULL,
-      KEY `personID` (`personID`),
-      KEY `programID` (`programID`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+    $dbhSD->exec("CREATE TABLE SDcredits (
+    personID mediumint(8) unsigned NOT NULL PRIMARY,
+      programID varchar(64) NOT NULL,
+      role varchar(100) DEFAULT NULL
+      )");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDlineupCache` (
-    `row` INTEGER PRIMARY KEY,
-      `lineup` varchar(50) NOT NULL DEFAULT '',
-      `md5` char(22) NOT NULL,
-      `modified` char(20) DEFAULT '1970-01-01T00:00:00Z',
-      `json` mediumtext,
-      PRIMARY KEY (`row`),
-      UNIQUE KEY `lineup` (`lineup`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+    $dbhSD->exec("CREATE INDEX programID ON SDcredits (programID)");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDpeople` (
-    `personID` mediumint(8) unsigned NOT NULL,
-      `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
-      PRIMARY KEY (`personID`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+    $dbhSD->exec("CREATE TABLE SDlineupCache (
+    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+      lineup varchar(50) NOT NULL DEFAULT '',
+      md5 char(22) NOT NULL,
+      modified char(20) DEFAULT '1970-01-01T00:00:00Z',
+      json TEXT
+      )");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramCache` (
-    `row` INTEGER PRIMARY KEY,
-      `programID` varchar(64) NOT NULL,
-      `md5` char(22) NOT NULL,
-      `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      `json` varchar(16384) NOT NULL,
-      PRIMARY KEY (`row`),
-      UNIQUE KEY `pid` (`programID`),
-      KEY `programID` (`programID`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+    $dbhSD->exec("CREATE TABLE SDpeople (
+    personID INTEGER NOT NULL PRIMARY,
+      name varchar(128)
+      )");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramgenres` (
-    `programID` varchar(64) NOT NULL,
-      `relevance` char(1) NOT NULL DEFAULT '0',
-      `genre` varchar(30) NOT NULL,
-      PRIMARY KEY (`programID`),
-      UNIQUE KEY `pid_relevance` (`programID`,`relevance`),
-      KEY `genre` (`genre`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+    $dbhSD->exec("CREATE TABLE SDprogramCache (
+    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+      programID varchar(64) NOT NULL UNIQUE,
+      md5 char(22) NOT NULL,
+      modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      json TEXT NOT NULL
+      )");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramrating` (
-    `programID` varchar(64) NOT NULL,
-      `system` varchar(30) NOT NULL,
-      `rating` varchar(16) DEFAULT NULL,
-      PRIMARY KEY (`programID`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+    $dbhSD->exec("CREATE INDEX programID ON SDprogramCache (programID)");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDschedule` (
-      `stationID` varchar(12) NOT NULL,
-      `md5` char(22) NOT NULL,
-      UNIQUE KEY `sid` (`stationID`),
-      KEY `md5` (`md5`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+    $dbhSD->exec("CREATE TABLE SDprogramgenres (
+    programID varchar(64) NOT NULL PRIMARY,
+      relevance char(1) NOT NULL DEFAULT '0',
+      genre varchar(30) NOT NULL)");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDimageCache` (
-      `row` INTEGER PRIMARY KEY,
-      `item` varchar(128) NOT NULL,
-      `md5` char(22) NOT NULL,
-      `height` varchar(128) NOT NULL,
-      `width` varchar(128) NOT NULL,
-      `type` char(1) NOT NULL COMMENT 'L-Channel Logo',
-      PRIMARY KEY (`row`),
-      UNIQUE KEY `id` (`item`,`height`,`width`),
-      KEY `type` (`type`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");*/
+    $dbhSD->exec("CREATE INDEX genre ON SDprogramgenres (genre)");
+    $dbhSD->exec("CREATE UNIQUE INDEX pid_relevance ON SDprogramgenres (programID,relevance)");
 
+    $dbhSD->exec("CREATE TABLE SDprogramrating (
+    programID varchar(64) NOT NULL PRIMARY,
+      system varchar(30) NOT NULL,
+      rating varchar(16) DEFAULT NULL");
 
+    $dbhSD->exec("CREATE TABLE SDschedule (
+      stationID varchar(12) NOT NULL UNIQUE,
+      md5 char(22) NOT NULL)");
+
+    $dbhSD->exec("CREATE INDEX md5 ON SDschedule (md5)");
+
+    $dbhSD->exec("CREATE TABLE SDimageCache (
+    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE
+      item varchar(128) NOT NULL,
+      md5 char(22) NOT NULL,
+      height varchar(128) NOT NULL,
+      width varchar(128) NOT NULL,
+      type char(1) NOT NULL, -- COMMENT 'L-Channel Logo'
+    )");
+
+    $dbhSD->exec("CREATE UNIQUE INDEX id ON SDimageCache (item,height,width)");
+    $dbhSD->exec("CREATE INDEX type ON SDimageCache (type)");
 }
 
 
