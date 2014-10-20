@@ -1,6 +1,0 @@
-CREATE DATABASE IF NOT EXISTS schedulesdirect;
-GRANT ALL ON schedulesdirect.* TO sd@localhost IDENTIFIED BY "sd";
-FLUSH PRIVILEGES;
-GRANT CREATE TEMPORARY TABLES ON schedulesdirect.* TO sd@localhost IDENTIFIED BY "sd";
-FLUSH PRIVILEGES;
-ALTER DATABASE schedulesdirect DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
