@@ -280,23 +280,15 @@ if (!isset($host))
 if ($isMythTV OR $dbWithoutMythtv)
 {
     print "Connecting to Schedules Direct database.\n";
-    //try
-    //{
     $dbhSD = new PDO("sqlite:schedulesdirect.db");
     $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    //}
 
-    $stmt = $dbhSD->prepare("SELECT * FROM settings");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if (!count($result))
+    try
     {
-        createDatabase();
-    }
-
-
-    /*catch (PDOException $e)
+        $stmt = $dbhSD->prepare("SELECT * FROM settings");
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e)
     {
 
         print "Got exception code: " . $e->getCode() . "\n";
@@ -324,7 +316,7 @@ if ($isMythTV OR $dbWithoutMythtv)
             print "Message: " . $e->getMessage() . "\n";
             exit;
         }
-    }*/
+    }
 
     if (!file_exists("schedulesdirect.db"))
     {
