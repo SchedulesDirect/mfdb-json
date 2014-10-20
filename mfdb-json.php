@@ -252,6 +252,8 @@ if ($isMythTV OR $dbWithoutMythtv)
     printMSG("Connecting to Schedules Direct database.");
     $dbhSD = new PDO("sqlite:schedulesdirect.db");
     $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $dbhSD->exec("PRAGMA synchronous = OFF");
+    $dbhSD->exec("PRAGMA journal_mode = MEMORY");
 
     try
     {
@@ -968,7 +970,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     $getPeople->execute();
     $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $getPeople = $dbhSD->prepare("SELECT personID,name FROM SDpeople");
+    $getPeople = $dbhSD->prepare("SELECT personID,name FROM people");
     $getPeople->execute();
     $peopleCacheSD = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -982,7 +984,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     $total = count($jsonProgramsToRetrieve);
     printMSG("Performing inserts of JSON data.");
 
-    $dbh->beginTransaction();
+    $dbhSD->beginTransaction();
 
     foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
     {
@@ -994,8 +996,8 @@ function insertJSON(array $jsonProgramsToRetrieve)
             if ($counter % 100 == 0)
             {
                 printMSG("$counter / $total             \r");
-                $dbh->commit();
-                $dbh->beginTransaction();
+                $dbhSD->commit();
+                $dbhSD->beginTransaction();
             }
 
             if ($item == "")
