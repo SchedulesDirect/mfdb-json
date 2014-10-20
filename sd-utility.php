@@ -1764,7 +1764,7 @@ function checkForChannelIcon($stationID, $data)
             return;
         }
 
-        $updateimageCache = $dbhSD->prepare("INSERT INTO imageCache(item,height,width,md5,type)
+        $updateimageCache = $dbhSD->prepare("INSERT OR IGNORE INTO imageCache(item,height,width,md5,type)
         VALUES(:item,:height,:width,:md5,'L')");
         $updateimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
                                            "md5"  => $md5));
