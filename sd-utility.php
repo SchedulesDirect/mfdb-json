@@ -488,9 +488,12 @@ if ($needToStoreLogin)
     {
         settingSD("SchedulesDirectLogin", $credentials);
 
-        $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
+        if ($isMythTV)
+        {
+            $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
     password=:password WHERE xmltvgrabber='schedulesdirect2'");
-        $stmt->execute(array("username" => $username, "password" => $password));
+            $stmt->execute(array("username" => $username, "password" => $password));
+        }
     }
     else
     {
