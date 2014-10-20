@@ -421,11 +421,10 @@ function settingSD()
 
     $value = func_get_arg(1);
 
-    $stmt = $dbhSD->prepare("INSERT INTO settings(keyColumn,valueColumn) VALUES(:key,:value)
-    ON DUPLICATE KEY UPDATE valueColumn=:value");
-
+    $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO settings(keyColumn,valueColumn) VALUES(:key,:value)");
     $stmt->execute(array("key" => $key, "value" => $value));
-
+    $stmt = $dbhSD-prepare("UPDATE settings SET valueColumn=:value WHERE keyColumn=:key");
+    $stmt->execute(array("key" => $key, "value" => $value));
 }
 
 function getBaseurl($isBeta)
