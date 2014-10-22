@@ -250,24 +250,22 @@ if (!isset($host))
 if ($isMythTV OR $dbWithoutMythtv)
 {
     printMSG("Connecting to Schedules Direct database.");
+    $dbhSD = new PDO("sqlite:schedulesdirect.db");
+    $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $dbhSD->exec("PRAGMA synchronous = OFF");
+    $dbhSD->exec("PRAGMA journal_mode = MEMORY");
+
     try
     {
-        $dbhSD = new PDO("mysql:host=$dbHostSD;dbname=schedulesdirect;charset=utf8", "sd", "sd");
-        $dbhSD->exec("SET CHARACTER SET utf8");
-        $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $stmt = $dbhSD->prepare("SELECT * FROM settings");
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e)
     {
-        if ($e->getCode() == 2002)
-        {
-            printMSG("Could not connect to database:\n" . $e->getMessage());
-            exit;
-        }
-
-        if ($e->getCode() == 1049)
+        if ($e->getCode() == "HY000")
         {
             printMSG("Initial database not created for Schedules Direct tables.");
-            printMSG("Please run\nmysql -uroot -p < sd.sql");
-            printMSG("Then run sd-utility.php to complete the initialization.");
+            printMSG("Please run sd-utility.php to complete the initialization.");
             printMSG("Make sure you use function '4' to refresh the local lineup cache.");
             printMSG("Please check the updated README.md for more information.");
             exit;
@@ -647,7 +645,7 @@ function getSchedules($stationIDsToFetch)
             var_dump($schedulesDirectMD5s);
         }
 
-        $getLocalCache = $dbhSD->prepare("SELECT stationID,md5 FROM SDschedule");
+        $getLocalCache = $dbhSD->prepare("SELECT stationID,md5 FROM schedule");
         $getLocalCache->execute();
         $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -770,13 +768,8 @@ function getSchedules($stationIDsToFetch)
 
     file_put_contents("$dlSchedTempDir/schedule.json", $schedules, FILE_APPEND);
 
-    //if (!$isMythTV)
-    //{
-    //    return ("");
-    //}
-
-    $updateLocalMD5 = $dbhSD->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
-    ON DUPLICATE KEY UPDATE md5=:md5");
+    $insertLocalMD5 = $dbhSD->prepare("INSERT OR IGNORE INTO schedule(stationID, md5) VALUES(:sid, :md5)");
+    $updateLocalMD5 = $dbhSD->prepare("UPDATE schedule SET md5=:md5 WHERE stationID=:sid");
 
     $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
@@ -840,6 +833,7 @@ function getSchedules($stationIDsToFetch)
         }
 
         $md5 = $item["metadata"]["md5"];
+        $insertLocalMD5->execute(array("sid" => $stationID, "md5" => $md5));
         $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5));
 
         foreach ($item["programs"] as $programData)
@@ -866,7 +860,7 @@ function getSchedules($stationIDsToFetch)
      * We're going to figure out which programIDs we need to download.
      */
 
-    $stmt = $dbhSD->prepare("SELECT md5, programID FROM SDprogramCache");
+    $stmt = $dbhSD->prepare("SELECT md5, programID FROM programCache");
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -955,30 +949,32 @@ function insertJSON(array $jsonProgramsToRetrieve)
     global $dlProgramTempDir;
     global $debug;
 
-    $insertJSON = $dbhSD->prepare("INSERT INTO SDprogramCache(programID,md5,json)
-            VALUES (:programID,:md5,:json)
-            ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
+    $insertJSON = $dbhSD->prepare("INSERT OR IGNORE INTO programCache(programID,md5,json)
+            VALUES (:programID,:md5,:json)");
+    $updateJSON = $dbhSD->prepare("UPDATE programCache SET md5=:md5, json=:json WHERE programID=:programID");
 
-    $insertPersonSD = $dbhSD->prepare("INSERT INTO SDpeople(personID,name) VALUES(:personID, :name)");
-    $updatePersonSD = $dbhSD->prepare("UPDATE SDpeople SET name=:name WHERE personID=:personID");
+    $insertPersonSD = $dbhSD->prepare("INSERT OR IGNORE INTO people(personID,name) VALUES(:personID, :name)");
+    $updatePersonSD = $dbhSD->prepare("UPDATE people SET name=:name WHERE personID=:personID");
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
-    $insertCreditSD = $dbhSD->prepare("INSERT INTO SDcredits(personID,programID,role)
+    $insertCreditSD = $dbhSD->prepare("INSERT INTO credits(personID,programID,role)
     VALUES(:personID,:pid,:role)");
 
-    $insertProgramGenresSD = $dbhSD->prepare("INSERT INTO SDprogramgenres(programID,relevance,genre)
-    VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
+    $insertProgramGenresSD = $dbhSD->prepare("INSERT OR IGNORE INTO programGenres(programID,relevance,genre)
+    VALUES(:pid,:relevance,:genre)");
+    $updateProgramGenresSD = $dbhSD->prepare("UPDATE programGenres SET genre=:genre WHERE programID=:pid AND
+    relevance=:relevance");
 
     $getPeople = $dbh->prepare("SELECT name,person FROM people");
     $getPeople->execute();
     $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $getPeople = $dbhSD->prepare("SELECT personID,name FROM SDpeople");
+    $getPeople = $dbhSD->prepare("SELECT personID,name FROM people");
     $getPeople->execute();
     $peopleCacheSD = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $getCredits = $dbhSD->prepare("SELECT CONCAT(personID,'-',programID,'-',role) FROM SDcredits");
+    $getCredits = $dbhSD->prepare("SELECT personID || '-' || programID || '-' || role FROM credits");
     $getCredits->execute();
     $creditCache = $getCredits->fetchAll(PDO::FETCH_COLUMN);
 
@@ -988,7 +984,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     $total = count($jsonProgramsToRetrieve);
     printMSG("Performing inserts of JSON data.");
 
-    $dbh->beginTransaction();
+    $dbhSD->beginTransaction();
 
     foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
     {
@@ -1000,8 +996,8 @@ function insertJSON(array $jsonProgramsToRetrieve)
             if ($counter % 100 == 0)
             {
                 printMSG("$counter / $total             \r");
-                $dbh->commit();
-                $dbh->beginTransaction();
+                $dbhSD->commit();
+                $dbhSD->beginTransaction();
             }
 
             if ($item == "")
@@ -1054,8 +1050,8 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 continue;
             }
 
-            $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-                                       "json"      => $item));
+            $insertJSON->execute(array("programID" => $pid, "md5" => $md5, "json" => $item));
+            $updateJSON->execute(array("programID" => $pid, "md5" => $md5, "json" => $item));
 
             $skipPersonID = FALSE;
 
@@ -1073,6 +1069,8 @@ function insertJSON(array $jsonProgramsToRetrieve)
                     }
                     $insertProgramGenresSD->execute(array("pid"       => $pid,
                                                           "relevance" => ++$relevance, "genre" => $g));
+                    $updateProgramGenresSD->execute(array("pid"       => $pid,
+                                                          "relevance" => $relevance, "genre" => $g));
                 }
             }
 
@@ -1206,7 +1204,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
         // rmdir("$dlProgramTempDir");
     }
 
-    $dbh->commit();
+    $dbhSD->commit();
 
     printMSG("Completed local database program updates.");
 }
@@ -1219,10 +1217,6 @@ function insertSchedule()
     global $peopleCache;
     global $debug;
     global $errorWarning;
-
-    //$existingRoleTypesInMyth = array("actor", "director", "producer", "executive_producer", "writer", "guest_star",
-    //                                 "host", "adapter", "presenter", "commentator", "guest");
-    //$existingRoleTypesInMyth = array_flip($existingRoleTypesInMyth);
 
     if (!count($peopleCache))
     {
@@ -1290,7 +1284,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     $getExistingChannels->execute();
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
-    $getProgramInformation = $dbhSD->prepare("SELECT json FROM SDprogramCache WHERE programID =:pid");
+    $getProgramInformation = $dbhSD->prepare("SELECT json FROM programCache WHERE programID =:pid");
 
     $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
 
@@ -2106,11 +2100,9 @@ function updateStatus()
 
     $res = getStatus();
 
-    if ($isMythTV)
-    {
-        $updateLocalMessageTable = $dbhSD->prepare("INSERT INTO SDMessages(id,date,message,type)
-    VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
-    }
+    $insertLocalMessageTable = $dbhSD->prepare("INSERT OR IGNORE INTO messages(id,date,message,type)
+    VALUES(:id,:date,:message,:type)");
+    $updateLocalMessageTable = $dbhSD->prepare("UPDATE messages SET message=:message,date=:date,type=:type WHERE id=:id");
 
     if ($res["code"] == 0)
     {
@@ -2124,12 +2116,12 @@ function updateStatus()
             $msgDate = $a["date"];
             $message = $a["message"];
             printMSG("MessageID:$msgID : $msgDate : $message");
-            if ($isMythTV)
-            {
-                $updateLocalMessageTable->execute(array("id"      => $msgID, "date" => $msgDate,
-                                                        "message" => $message,
-                                                        "type"    => "U"));
-            }
+            $insertLocalMessageTable->execute(array("id"      => $msgID, "date" => $msgDate,
+                                                    "message" => $message,
+                                                    "type"    => "U"));
+            $updateLocalMessageTable->execute(array("id"      => $msgID, "date" => $msgDate,
+                                                    "message" => $message,
+                                                    "type"    => "U"));
         }
     }
     else

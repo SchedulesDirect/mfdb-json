@@ -19,8 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 $scriptVersion = "0.19-sqlite";
-$scriptDate = "2014-10-18";
-$knownToBeBroken = TRUE;
+$scriptDate = "2014-10-20";
+$knownToBeBroken = FALSE;
 
 function getToken($username, $passwordHash)
 {
@@ -423,6 +423,7 @@ function settingSD()
 
     $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO settings(keyColumn,valueColumn) VALUES(:key,:value)");
     $stmt->execute(array("key" => $key, "value" => $value));
+
     $stmt = $dbhSD->prepare("UPDATE settings SET valueColumn=:value WHERE keyColumn=:key");
     $stmt->execute(array("key" => $key, "value" => $value));
 }
