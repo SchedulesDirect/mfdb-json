@@ -1197,13 +1197,13 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
         if ($debug === FALSE)
         {
-            // unlink($jsonFileToProcess);
+            unlink($jsonFileToProcess);
         }
     }
 
     if ($debug === FALSE)
     {
-        // rmdir("$dlProgramTempDir");
+        rmdir("$dlProgramTempDir");
     }
 
     $dbhSD->commit();
