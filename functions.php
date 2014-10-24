@@ -435,7 +435,8 @@ function getBaseurl($isBeta)
     if ($isBeta)
     {
         # Test server. Things may be broken there.
-        $baseurl = "https://data2.schedulesdirect.org/20140530/";
+        //$baseurl = "https://data2.schedulesdirect.org/20140530/";
+        $baseurl = "https://json.schedulesdirect.org/20140530/";
         print "Using beta server.\n";
         # API must match server version.
         $api = 20140530;
