@@ -988,7 +988,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     $total = count($jsonProgramsToRetrieve);
     printMSG("Performing inserts of JSON data.");
 
-    $dbh->beginTransaction();
+    $dbhSD->beginTransaction();
 
     foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
     {
@@ -1000,8 +1000,8 @@ function insertJSON(array $jsonProgramsToRetrieve)
             if ($counter % 100 == 0)
             {
                 printMSG("$counter / $total             \r");
-                $dbh->commit();
-                $dbh->beginTransaction();
+                $dbhSD->commit();
+                $dbhSD->beginTransaction();
             }
 
             if ($item == "")
@@ -1206,7 +1206,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
         rmdir("$dlProgramTempDir");
     }
 
-    $dbh->commit();
+    $dbhSD->commit();
 
     printMSG("Completed local database program updates.");
 }
