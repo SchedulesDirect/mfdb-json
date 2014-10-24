@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.19";
-$scriptDate = "2014-10-17";
+$scriptVersion = "0.20";
+$scriptDate = "2014-10-24";
 $knownToBeBroken = FALSE;
 
 function getToken($username, $passwordHash)
@@ -435,7 +435,7 @@ function getBaseurl($isBeta)
     if ($isBeta)
     {
         # Test server. Things may be broken there.
-        $baseurl = "https://data2.schedulesdirect.org/20140530/";
+        $baseurl = "https://json.schedulesdirect.org/20140530/";
         print "Using beta server.\n";
         # API must match server version.
         $api = 20140530;
