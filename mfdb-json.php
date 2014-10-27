@@ -519,7 +519,10 @@ if ($isMythTV)
 
     printMSG("Sending reschedule request to mythbackend.");
 
-    exec("mythutil --resched");
+    if (`which mythutil`)
+    {
+        exec("mythutil --resched");
+    }
 }
 
 printMSG("Done.");
@@ -2208,10 +2211,13 @@ function updateStatus()
 
     if ($isMythTV)
     {
-        exec("mythutil --clearcache"); // Force a clearcache to make sure that everyone is in sync.
-    }
+        if (`which mythutil`)
+        {
+            exec("mythutil --clearcache"); // Force a clearcache to make sure that everyone is in sync.
+        }
 
-    return ("");
+        return ("");
+    }
 }
 
 ?>
