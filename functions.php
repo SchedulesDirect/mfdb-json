@@ -518,6 +518,12 @@ function getLoginFromFiles()
             return array($foo["Database"]["Host"], $foo["Database"]["DatabaseName"], $foo["Database"]["UserName"],
                          $foo["Database"]["Password"]);
         }
+
+        if (isset($foo["UPnP"]["MythFrontend"]["DefaultBackend"]["DBHostName"]))
+        {
+            $a = $foo["UPnP"]["MythFrontend"]["DefaultBackend"];
+            return array($a["DBHostName"], $a["DBName"], $a["DBUserName"], $a["DBPassword"]);
+        }
         else
         {
             printMSG("Fatal: couldn't parse XML to JSON.");
