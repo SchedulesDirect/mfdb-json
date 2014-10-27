@@ -936,7 +936,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
                 $hadError = FALSE;
                 $failedChunk[$index] = TRUE;
 
-                printMSG("Retrieving chunk " . ($index + 1) . " of " . (count($retrieveList) + 1) . ".");
+                printMSG("Retrieving chunk " . ($index + 1) . " of " . count($retrieveList) . ".");
                 do
                 {
                     $schedulesDirectPrograms = $client->post("programs",
@@ -964,6 +964,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
                         file_put_contents("$dlProgramTempDir/programs." . substr("00$index", -2) . ".json",
                             $schedulesDirectPrograms);
                         unset($failedChunk[$index]);
+                        break;
                     }
                 } while ($retryCounter < 5);
             }
