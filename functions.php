@@ -61,6 +61,14 @@ function getToken($username, $passwordHash)
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
         return ("ERROR");
+    } catch (Guzzle\HTTP\Exception\RequestException $e)
+    {
+        $errorReq = $e->getRequest();
+        $errorResp = $e->getResponse();
+        $errorMessage = $e->getMessage();
+        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+
+        return ("ERROR");
     } catch (Exception $e)
     {
         print "getToken:HCF. Uncaught exception.\n";
@@ -69,17 +77,13 @@ function getToken($username, $passwordHash)
         print "e is \n";
         var_dump($e);
 
-        print "response is \n";
-        var_dump($response);
-
-
         return ("ERROR");
     }
 
     $res = array();
     $res = $response->json();
 
-    if (json_last_error() != 0)
+    if (json_last_error())
     {
         print "JSON decode error:\n";
         var_dump($response);
