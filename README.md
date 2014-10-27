@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.30, 2014-10-20
+v0.31, 2014-10-27
 
 Robert Kulagowski
 
@@ -82,7 +82,7 @@ git clone https://github.com/SchedulesDirect/mfdb-json.git
 
 cd mfdb-json
 
-git checkout API-20140530-sqlite
+git checkout API-20140530-sqlite3
 
 ###Install Composer
 
