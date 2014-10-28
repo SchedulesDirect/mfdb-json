@@ -54,7 +54,6 @@ $force = FALSE;
 $jsonProgramsToRetrieve = array();
 $peopleCache = array();
 $addToRetryQueue = array();
-$dbHostSD = "localhost";
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -88,7 +87,6 @@ The following options are available:
 --dbuser=\tUsername for database access for MythTV. (Default: mythtv)
 --dbpassword=\tPassword for database access for MythTV. (Default: mythtv)
 --dbhost=\tMySQL database hostname for MythTV. (Default: localhost)
---dbhostsd=\tMySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
 --force\t\tForce download of schedules. (Default: FALSE)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
@@ -123,9 +121,6 @@ foreach ($options as $k => $v)
             break;
         case "dbhost":
             $dbHost = $v;
-            break;
-        case "dbhostsd":
-            $dbHostSD = $v;
             break;
         case "dbname":
             $dbName = $v;

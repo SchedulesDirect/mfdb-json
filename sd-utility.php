@@ -40,7 +40,6 @@ $force = FALSE;
 $printFancyTable = TRUE;
 $printCountries = FALSE;
 $justExtract = FALSE;
-$dbHostSD = "localhost";
 
 $availableCountries = array(
     "North America" => array(
@@ -119,7 +118,6 @@ The following options are available:
 --dbuser=\tUsername for database access for MythTV. (Default: mythtv)
 --dbpassword=\tPassword for database access for MythTV. (Default: mythtv)
 --dbhost=\tMySQL database hostname for MythTV. (Default: localhost)
---dbhostsd=\tMySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
 --extract\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
@@ -134,7 +132,7 @@ The following options are available:
 eol;
 
 $longoptions = array("countries", "debug", "extract", "force", "help", "host::", "dbname::", "dbuser::",
-                     "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
+                     "dbpassword::", "dbhost::", "logo::", "notfancy", "nomyth", "skiplogo",
                      "username::", "password::",
                      "timezone::", "usedb", "version", "x");
 
@@ -167,9 +165,6 @@ foreach ($options as $k => $v)
             break;
         case "dbhost":
             $dbHost = $v;
-            break;
-        case "dbhostsd":
-            $dbHostSD = $v;
             break;
         case "extract":
             $justExtract = TRUE;
