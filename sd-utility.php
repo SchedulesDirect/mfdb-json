@@ -26,6 +26,7 @@ $debug = FALSE;
 $done = FALSE;
 $isMythTV = TRUE;
 $skipChannelLogo = FALSE;
+$forceLogoUpdate = FALSE;
 $schedulesDirectLineups = array();
 $sdStatus = "";
 $username = "";
@@ -121,6 +122,7 @@ The following options are available:
 --dbhost=\tMySQL database hostname for MythTV. (Default: localhost)
 --dbhostsd=\tMySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
 --extract\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
+--forcelogo\tForce update of channel logos.
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
@@ -133,7 +135,7 @@ The following options are available:
 --version\tPrint version information and exit.
 eol;
 
-$longoptions = array("countries", "debug", "extract", "force", "help", "host::", "dbname::", "dbuser::",
+$longoptions = array("countries", "debug", "extract", "force", "forcelogo", "help", "host::", "dbname::", "dbuser::",
                      "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
                      "username::", "password::",
                      "timezone::", "usedb", "version", "x");
@@ -176,6 +178,9 @@ foreach ($options as $k => $v)
             break;
         case "force":
             $force = TRUE;
+            break;
+        case "forcelogo":
+            $forceLogoUpdate = TRUE;
             break;
         case "host":
             $host = $v;
@@ -1763,6 +1768,7 @@ function checkForChannelIcon($stationID, $data)
     global $dbh;
     global $dbhSD;
     global $channelLogoDirectory;
+    global $forceLogoUpdate;
 
     $a = explode("/", $data["URL"]);
     $iconFileName = end($a);
@@ -1778,7 +1784,7 @@ function checkForChannelIcon($stationID, $data)
 
     $result = $stmt->fetchColumn();
 
-    if ($result === FALSE OR $result != $md5)
+    if ($result === FALSE OR $result != $md5 OR $forceLogoUpdate)
     {
         /*
          * We don't already have this icon, or it's different, so it will have to be fetched.
