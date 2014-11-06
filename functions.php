@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 $scriptVersion = "0.20-sqlite";
-$scriptDate = "2014-10-27";
+$scriptDate = "2014-11-06";
 $knownToBeBroken = FALSE;
 
 function getToken($username, $passwordHash)
