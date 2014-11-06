@@ -684,7 +684,7 @@ function getSchedules($stationIDsToFetch)
                     }
                     else
                     {
-                        debugMSG("Got error: " . $item["message"]);
+                        printMSG("Got error: " . $item["message"]);
                         $tt = fgets(STDIN);
                     }
                 }
