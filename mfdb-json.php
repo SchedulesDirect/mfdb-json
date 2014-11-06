@@ -537,7 +537,6 @@ function getSchedules($stationIDsToFetch)
     global $dlSchedTempDir;
     global $quiet;
     global $debug;
-    global $isMythTV;
     global $forceDownload;
     global $addToRetryQueue;
 
@@ -672,13 +671,21 @@ function getSchedules($stationIDsToFetch)
                         var_dump($item);
                     }
 
-                    if ($item["days"] == 13)
+                    if (!isset($item["isError"]))
                     {
-                        if ($localMD5[$stationID] != $item["md5"])
+                        if ($item["days"] == 13)
                         {
-                            $bar[] = array("stationID" => $stationID, "days" => 13);
-                            continue;
+                            if ($localMD5[$stationID] != $item["md5"])
+                            {
+                                $bar[] = array("stationID" => $stationID, "days" => 13);
+                                continue;
+                            }
                         }
+                    }
+                    else
+                    {
+                        debugMSG("Got error: " . $item["message"]);
+                        $tt = fgets(STDIN);
                     }
                 }
             }
