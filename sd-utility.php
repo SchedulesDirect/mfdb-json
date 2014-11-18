@@ -1521,6 +1521,12 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
 {
     global $dbhSD;
 
+    if (is_null($dbhSD))
+    {
+        print "Do not have dbhSD; exiting.\n";
+        exit;
+    }
+
     print "Checking for updated lineups from Schedules Direct.\n";
 
     foreach ($updatedLineupsToRefresh as $k => $v)
