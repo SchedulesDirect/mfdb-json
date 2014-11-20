@@ -1826,7 +1826,8 @@ function extractData($sourceIDtoExtract)
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $lineupName = $stmt->fetchColumn();
 
-    $stmt = $dbh->prepare("SELECT channum, freqid, callsign, name, xmltvid, mplexid, serviceid FROM channel where sourceid=:sid");
+    $stmt = $dbh->prepare("SELECT channum, freqid, callsign, name, xmltvid, mplexid, serviceid, atsc_major_chan,
+atsc_minor_chan FROM channel where sourceid=:sid");
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -1852,14 +1853,16 @@ function extractData($sourceIDtoExtract)
                                   "name"           => $v["name"],
                                   "mplexID"        => $v["mplexid"],
                                   "stationID"      => $v["xmltvid"],
-                                  "serviceID"      => $v["serviceid"]);
+                                  "serviceID"      => $v["serviceid"],
+                                  "atscMajor"      => $v["atsc_major_chan"],
+                                  "atscMinor"      => $v["atsc_minor_chan"]);
 
         $extractMultiplex[$v["mplexid"]] = array("transportID" => $dtv[0]["transportid"],
                                                  "frequency"   => $dtv[0]["frequency"],
                                                  "modulation"  => $dtv[0]["modulation"]);
     }
 
-    $extractArray["version"] = "0.06";
+    $extractArray["version"] = "0.07";
     $extractArray["date"] = $todayDate;
     $extractArray["lineup"] = $lineupName;
     $extractArray["channel"] = $extractChannel;
