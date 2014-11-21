@@ -908,8 +908,10 @@ function updateChannelTable($lineup)
         VALUES
         (:sourceid,:freq,0,'v',:modulation,1,:modulation,'a','UNDEFINED','0.35','atsc')");
 
-                $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,visible,mplexid,serviceid)
-                     VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid)");
+                $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,
+visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
+                     VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid,:atscMajor,
+                     :atscMinor)");
 
                 $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'
                 AND sourceid=:sourceid");
@@ -933,6 +935,8 @@ function updateChannelTable($lineup)
                     $frequency = $mapArray["frequency"];
                     $serviceID = $mapArray["serviceID"];
                     $stationID = $mapArray["stationID"];
+                    $atscMajor = (int)$mapArray["atscMajor"];
+                    $atscMinor = (int)$mapArray["atscMinor"];
 
                     /*
                      * Because multiple programs may end up on a single frequency, we only want to insert once,
@@ -953,17 +957,28 @@ function updateChannelTable($lineup)
                      * turned into "39"
                      */
 
-                    $strippedChannel = str_replace(array("-", "_"), "", $channel);
+                    $strippedChannel = (int)str_replace(array("-", "_"), "", $channel);
+
+                    if ($atscMajor > 0)
+                    {
+                        $chanid = ($sourceID * 1000) + ($atscMajor * 10) + $atscMinor;
+                    }
+                    else
+                    {
+                        $chanid = ($sourceID * 1000) + ($strippedChannel * 10) + $serviceID;
+                    }
 
                     try
                     {
-                        $channelInsert->execute(array("chanid"    => (int)($sourceID * 1000) + (int)$strippedChannel,
+                        $channelInsert->execute(array("chanid"    => $chanid,
                                                       "channum"   => $channel,
                                                       "freqid"    => $virtualChannel,
                                                       "sourceid"  => $sourceID,
                                                       "xmltvid"   => $stationID,
                                                       "mplexid"   => $dtvMultiplex[$frequency],
-                                                      "serviceid" => $serviceID));
+                                                      "serviceid" => $serviceID,
+                                                      "atscMajor" => $atscMajor,
+                                                      "atscMinor" => $atscMinor));
                     } catch (PDOException $e)
                     {
                         if ($e->getCode() == 23000)
