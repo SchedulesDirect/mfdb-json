@@ -861,6 +861,13 @@ function updateChannelTable($lineup)
 
             if ($useScan)
             {
+                /*
+                 * Use the providerCallsign mapping to look for the scanned callsign.
+                 */
+
+
+
+
                 $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
                 $stmt->execute();
                 $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
