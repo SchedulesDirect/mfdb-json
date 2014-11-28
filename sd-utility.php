@@ -865,15 +865,15 @@ function updateChannelTable($lineup)
                  * Use the providerCallsign mapping to look for the scanned callsign.
                  */
 
-                $stmt = $dbh->prepare("UPDATE channel SET xmltvid = :stationID WHERE
+                $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid = :stationID WHERE
                 callsign=:providerCallsign AND atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
 
                 foreach ($json["map"][$mapToUse] as $foo)
                 {
-                    $stmt->execute(array("stationID"        => $foo["stationID"],
-                                         "providerCallsign" => $foo["providerCallsign"],
-                                         "atscMajor"        => $foo["atscMajor"],
-                                         "atscMinor"        => $foo["atscMinor"]));
+                    $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
+                                                       "providerCallsign" => $foo["providerCallsign"],
+                                                       "atscMajor"        => $foo["atscMajor"],
+                                                       "atscMinor"        => $foo["atscMinor"]));
                 }
 
 
