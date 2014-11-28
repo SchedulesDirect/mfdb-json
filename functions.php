@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.23";
-$scriptDate = "2014-11-20";
+$scriptVersion = "0.24";
+$scriptDate = "2014-11-28";
 $knownToBeBroken = FALSE;
 
 function getToken($username, $passwordHash)
