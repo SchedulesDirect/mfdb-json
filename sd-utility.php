@@ -865,9 +865,19 @@ function updateChannelTable($lineup)
                  * Use the providerCallsign mapping to look for the scanned callsign.
                  */
 
+                $stmt = $dbh->prepare("UPDATE channel SET xmltvid = :stationID WHERE
+                callsign=:providerCallsign AND atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
+
+                foreach ($json["map"][$mapToUse] as $foo)
+                {
+                    $stmt->execute(array("stationID"        => $foo["stationID"],
+                                         "providerCallsign" => $foo["providerCallsign"],
+                                         "atscMajor"        => $foo["atscMajor"],
+                                         "atscMinor"        => $foo["atscMinor"]));
+                }
 
 
-
+                /*
                 $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
                 $stmt->execute();
                 $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -878,7 +888,6 @@ function updateChannelTable($lineup)
 
                 $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
                 mplexid=:mplexid AND serviceid=:serviceid");
-
                 $map = array();
 
                 foreach ($json["map"][$mapToUse] as $foo)
@@ -897,7 +906,7 @@ function updateChannelTable($lineup)
                                                               "serviceid" => $foo["serviceID"]));
                     }
                 }
-
+*/
                 print "Done updating QAM scan with stationIDs.\n";
             }
             else
