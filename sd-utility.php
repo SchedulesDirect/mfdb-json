@@ -831,9 +831,15 @@ function updateChannelTable($lineup)
 
             print "You can:\n";
             print "1. Exit this program and run a QAM scan using mythtv-setup then use the QAM lineup to populate stationIDs.\n";
-            print "2. Use the QAM lineup information directly. (Default)\n";
+            print "2. Use the QAM lineup information directly.\n";
             $useScan = readline("Which do you want to do? (1 or 2)>");
-            if ($useScan == "" OR $useScan == "2")
+
+            if ($useScan == "")
+            {
+                return;
+            }
+
+            if ($useScan == "2")
             {
                 $useScan = FALSE;
             }
@@ -861,11 +867,7 @@ function updateChannelTable($lineup)
 
             if ($useScan)
             {
-                /*
-                 * Use the providerCallsign mapping to look for the scanned callsign.
-                 */
-
-                $matchType = "callsign";
+                $matchType = $json["map"][$mapToUse][0]["matchType"];
 
                 if ($matchType == "multiplex")
                 {
@@ -900,27 +902,28 @@ function updateChannelTable($lineup)
                     }
                 }
 
-                if ($matchType == "callsign")
+                if ($matchType == "providerCallsign")
                 {
-                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid = :stationID WHERE
-                    callsign=:providerCallSign");
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE callsign=:providerCallSign");
                     foreach ($json["map"][$mapToUse] as $foo)
                     {
                         $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
+                                                           "virtualChannel"   => $foo["virtualChannel"],
                                                            "providerCallSign" => $foo["providerCallSign"]));
                     }
                 }
 
                 if ($matchType == "channel")
                 {
-                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid = :stationID WHERE
-                    channel=:channel");
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE channum=:channel");
                     foreach ($json["map"][$mapToUse] as $foo)
                     {
-                        $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
-                                                           "channel" => $foo["channel"]));
+                        $updateChannelTable->execute(array("stationID"      => $foo["stationID"],
+                                                           "virtualChannel" => $foo["virtualChannel"],
+                                                           "channum"        => $foo["channel"]));
                     }
-                }
                 }
                 print "Done updating QAM scan with stationIDs.\n";
             }
