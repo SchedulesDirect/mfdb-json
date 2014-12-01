@@ -865,48 +865,63 @@ function updateChannelTable($lineup)
                  * Use the providerCallsign mapping to look for the scanned callsign.
                  */
 
-                $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid = :stationID WHERE
-                callsign=:providerCallsign AND atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
+                $matchType = "callsign";
 
-                foreach ($json["map"][$mapToUse] as $foo)
+                if ($matchType == "multiplex")
                 {
-                    $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
-                                                       "providerCallsign" => $foo["providerCallsign"],
-                                                       "atscMajor"        => $foo["atscMajor"],
-                                                       "atscMinor"        => $foo["atscMinor"]));
-                }
+                    $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
+                    $stmt->execute();
+                    $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
+                    $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
+                    $stmt->execute(array("sid" => $sourceID));
+                    $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                /*
-                $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
-                $stmt->execute();
-                $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-                $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
-                $stmt->execute(array("sid" => $sourceID));
-                $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
+                    $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
                 mplexid=:mplexid AND serviceid=:serviceid");
-                $map = array();
 
-                foreach ($json["map"][$mapToUse] as $foo)
-                {
-                    $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
-                }
+                    $map = array();
 
-                foreach ($existingChannelNumbers as $foo)
-                {
-                    $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
-
-                    if (array_key_exists($toFind, $map))
+                    foreach ($json["map"][$mapToUse] as $foo)
                     {
-                        $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
-                                                              "mplexid"   => $foo["mplexid"],
-                                                              "serviceid" => $foo["serviceID"]));
+                        $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
+                    }
+
+                    foreach ($existingChannelNumbers as $foo)
+                    {
+                        $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
+
+                        if (isset($map[$toFind]))
+                        {
+                            $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
+                                                                  "mplexid"   => $foo["mplexid"],
+                                                                  "serviceid" => $foo["serviceID"]));
+                        }
                     }
                 }
-*/
+
+                if ($matchType == "callsign")
+                {
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid = :stationID WHERE
+                    callsign=:providerCallSign");
+                    foreach ($json["map"][$mapToUse] as $foo)
+                    {
+                        $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
+                                                           "providerCallSign" => $foo["providerCallSign"]));
+                    }
+                }
+
+                if ($matchType == "channel")
+                {
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid = :stationID WHERE
+                    channel=:channel");
+                    foreach ($json["map"][$mapToUse] as $foo)
+                    {
+                        $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
+                                                           "channel" => $foo["channel"]));
+                    }
+                }
+                }
                 print "Done updating QAM scan with stationIDs.\n";
             }
             else
