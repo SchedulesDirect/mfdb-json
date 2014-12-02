@@ -869,6 +869,8 @@ function updateChannelTable($lineup)
             {
                 $matchType = $json["map"][$mapToUse][0]["matchType"];
 
+                print "Matching QAM scan based on: $matchType\n";
+
                 if ($matchType == "multiplex")
                 {
                     $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
