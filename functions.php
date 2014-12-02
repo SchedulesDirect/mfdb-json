@@ -154,6 +154,7 @@ function printStatus($sdStatus)
     global $updatedLineupsToRefresh;
     global $lineupArray;
     global $isMythTV;
+    global $debug;
 
     print "\nStatus messages from Schedules Direct:\n";
 
@@ -196,6 +197,14 @@ function printStatus($sdStatus)
     }
 
     $lineupArray = getSchedulesDirectLineups();
+
+    if ($debug)
+    {
+        print "isMythTV status is:\n";
+        var_dump($isMythTV);
+        print "\n\nLineup array is:\n";
+        var_dump($lineupArray);
+    }
 
     if (count($lineupArray))
     {
