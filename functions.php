@@ -155,6 +155,7 @@ function printStatus($sdStatus)
     global $lineupArray;
     global $isMythTV;
     global $debug;
+    global $printFancyTable;
 
     print "\nStatus messages from Schedules Direct:\n";
 
@@ -212,13 +213,28 @@ function printStatus($sdStatus)
 
         if ($isMythTV)
         {
-            $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
-            $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update", "Status"));
+            if ($printFancyTable)
+            {
+                $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
+                $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update",
+                                             "Status"));
+            }
+            else
+            {
+                print "Number\tLineup\tServer modified\tMythTV videosource update\tStatus\n";
+            }
         }
         else
         {
-            $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20)));
-            $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
+            if ($printFancyTable)
+            {
+                $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20)));
+                $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
+            }
+            else
+            {
+                print "Number\tLineup\tServer modified\n";
+            }
         }
 
         if ($debug)
@@ -280,8 +296,16 @@ function printStatus($sdStatus)
                         print "5\n";
                     }
                     $updatedLineupsToRefresh[$lineup] = $serverModified;
-                    $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, "Updated"));
-                    continue;
+                    if ($printFancyTable)
+                    {
+                        $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
+                                                     "Updated"));
+                        continue;
+                    }
+                    else
+                    {
+                        print "$lineupNumber\t$lineup\t$serverModified\n";
+                    }
                 }
                 /*
                             if ($heStatus[$he] == "D")
@@ -290,8 +314,14 @@ function printStatus($sdStatus)
                                 continue;
                             }
                 */
-
-                $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
+                if ($printFancyTable)
+                {
+                    $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
+                }
+                else
+                {
+                    print "$lineupNumber\t$lineup\t$serverModified\t$mythModified\n";
+                }
                 if ($debug)
                 {
                     print "6\n";
@@ -299,7 +329,14 @@ function printStatus($sdStatus)
             }
             else
             {
-                $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
+                if ($printFancyTable)
+                {
+                    $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
+                }
+                else
+                {
+                    print "$lineupNumber\t$lineup\t$serverModified\n";
+                }
                 $updatedLineupsToRefresh[$lineup] = $serverModified;
                 if ($debug)
                 {
@@ -308,7 +345,10 @@ function printStatus($sdStatus)
             }
         }
 
-        print $lineupData;
+        if ($printFancyTable)
+        {
+            print $lineupData;
+        }
 
         if (count($updatedLineupsToRefresh))
         {
