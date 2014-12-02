@@ -221,31 +221,64 @@ function printStatus($sdStatus)
             $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
         }
 
+        if ($debug)
+        {
+            print "Temp printout.\n";
+            print $lineupData;
+        }
+
         foreach ($lineupArray as $lineupNumber => $v)
         {
             $lineup = $v["lineup"];
             $serverModified = $v["modified"];
 
+            if ($debug)
+            {
+                print "lineup is $lineup\n";
+                print "serverModified is $serverModified\n";
+            }
+
             if ($isMythTV)
             {
                 if (count($videosourceModifiedArray))
                 {
+                    if ($debug)
+                    {
+                        print "1\n";
+                    }
+
                     if (array_key_exists($lineup, $videosourceModifiedArray))
                     {
                         $mythModified = $videosourceModifiedArray[$lineup];
+                        if ($debug)
+                        {
+                            print "2\n";
+                        }
                     }
                     else
                     {
                         $mythModified = "";
+                        if ($debug)
+                        {
+                            print "3\n";
+                        }
                     }
                 }
                 else
                 {
                     $mythModified = "";
+                    if ($debug)
+                    {
+                        print "4\n";
+                    }
                 }
 
                 if ($serverModified > $mythModified)
                 {
+                    if ($debug)
+                    {
+                        print "5\n";
+                    }
                     $updatedLineupsToRefresh[$lineup] = $serverModified;
                     $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, "Updated"));
                     continue;
@@ -259,11 +292,19 @@ function printStatus($sdStatus)
                 */
 
                 $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
+                if ($debug)
+                {
+                    print "6\n";
+                }
             }
             else
             {
                 $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
                 $updatedLineupsToRefresh[$lineup] = $serverModified;
+                if ($debug)
+                {
+                    print "7\n";
+                }
             }
         }
 
@@ -271,11 +312,19 @@ function printStatus($sdStatus)
 
         if (count($updatedLineupsToRefresh))
         {
+            if ($debug)
+            {
+                print "8\n";
+            }
             updateLocalLineupCache($updatedLineupsToRefresh);
         }
     }
     else
     {
+        if ($debug)
+        {
+            print "9\n";
+        }
         print "\nWARNING: *** No lineups configured at Schedules Direct. ***\n";
     }
 }
