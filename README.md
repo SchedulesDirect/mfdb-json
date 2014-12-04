@@ -1,16 +1,18 @@
 #mfdb-json
 
-mythfilldatabase grabber for the Schedules Direct JSON service.
+Grabber for the Schedules Direct JSON service.
 
 This file serves as in index to the various versions of the grabber and the server API that they support.
 
-#Deprecated
-
-API-20131021
+While originally created for MythTV, it can also function as a stand-alone grabber.
 
 #Current
 
 API-20140530
+
+#Deprecated
+
+API-20131021
 
 #Beta
 
