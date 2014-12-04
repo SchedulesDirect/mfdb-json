@@ -500,16 +500,15 @@ function getBaseurl($isBeta)
     if ($isBeta)
     {
         # Test server. Things may be broken there.
-        $baseurl = "https://json.schedulesdirect.org/20140530/";
+        $baseurl = "https://json.schedulesdirect.org/20141201/";
         print "Using beta server.\n";
-        # API must match server version.
-        $api = 20140530;
+        $api = 20141201;
     }
     else
     {
-        $baseurl = "https://json.schedulesdirect.org/20131021/";
+        $baseurl = "https://json.schedulesdirect.org/20140530/";
         print "Using production server.\n";
-        $api = 20131021;
+        $api = 20140530;
     }
 
     return ($baseurl);
