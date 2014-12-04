@@ -31,7 +31,7 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
-$isBeta = TRUE;
+$isBeta = FALSE;
 $api = "";
 $debug = FALSE;
 $quiet = FALSE;
