@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 $scriptVersion = "0.24";
-$scriptDate = "2014-11-28";
+$scriptDate = "2014-12-04";
 $knownToBeBroken = FALSE;
 
 function getToken($username, $passwordHash)
@@ -258,43 +258,22 @@ function printStatus($sdStatus)
             {
                 if (count($videosourceModifiedArray))
                 {
-                    if ($debug)
-                    {
-                        print "1\n";
-                    }
-
                     if (array_key_exists($lineup, $videosourceModifiedArray))
                     {
                         $mythModified = $videosourceModifiedArray[$lineup];
-                        if ($debug)
-                        {
-                            print "2\n";
-                        }
                     }
                     else
                     {
                         $mythModified = "";
-                        if ($debug)
-                        {
-                            print "3\n";
-                        }
                     }
                 }
                 else
                 {
                     $mythModified = "";
-                    if ($debug)
-                    {
-                        print "4\n";
-                    }
                 }
 
                 if ($serverModified > $mythModified)
                 {
-                    if ($debug)
-                    {
-                        print "5\n";
-                    }
                     $updatedLineupsToRefresh[$lineup] = $serverModified;
                     if ($printFancyTable)
                     {
@@ -322,10 +301,6 @@ function printStatus($sdStatus)
                 {
                     print "$lineupNumber\t$lineup\t$serverModified\t$mythModified\n";
                 }
-                if ($debug)
-                {
-                    print "6\n";
-                }
             }
             else
             {
@@ -338,10 +313,6 @@ function printStatus($sdStatus)
                     print "$lineupNumber\t$lineup\t$serverModified\n";
                 }
                 $updatedLineupsToRefresh[$lineup] = $serverModified;
-                if ($debug)
-                {
-                    print "7\n";
-                }
             }
         }
 
@@ -352,19 +323,11 @@ function printStatus($sdStatus)
 
         if (count($updatedLineupsToRefresh))
         {
-            if ($debug)
-            {
-                print "8\n";
-            }
             updateLocalLineupCache($updatedLineupsToRefresh);
         }
     }
     else
     {
-        if ($debug)
-        {
-            print "9\n";
-        }
         print "\nWARNING: *** No lineups configured at Schedules Direct. ***\n";
     }
 }
