@@ -9,10 +9,12 @@ While originally created for MythTV, it can also function as a stand-alone grabb
 #Current
 
 API-20140530
+https://github.com/SchedulesDirect/mfdb-json/tree/API-20140530
 
 #Deprecated
 
 API-20131021
+https://github.com/SchedulesDirect/mfdb-json/tree/API-20131021
 
 #Beta
 
