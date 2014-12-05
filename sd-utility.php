@@ -133,6 +133,7 @@ The following options are available:
 --usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --version\tPrint version information and exit.
+--x\t\tForce the program to run even if there's a version mis-match.
 eol;
 
 $longoptions = array("countries", "debug", "extract", "force", "forcelogo", "help", "host::", "dbname::", "dbuser::",
@@ -907,12 +908,12 @@ function updateChannelTable($lineup)
                 if ($matchType == "providerCallsign")
                 {
                     $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
-                    WHERE callsign=:providerCallSign");
+                    WHERE callsign=:providerCallsign");
                     foreach ($json["map"][$mapToUse] as $foo)
                     {
                         $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
                                                            "virtualChannel"   => $foo["virtualChannel"],
-                                                           "providerCallSign" => $foo["providerCallSign"]));
+                                                           "providerCallsign" => $foo["providerCallsign"]));
                     }
                 }
 
