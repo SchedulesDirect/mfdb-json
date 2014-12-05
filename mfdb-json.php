@@ -101,6 +101,7 @@ The following options are available:
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --version\tPrint version information and exit.
+--x\t\tForce the program to run even if there's a version mismatch.
 eol;
 
 $longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",

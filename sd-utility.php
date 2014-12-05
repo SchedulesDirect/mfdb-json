@@ -133,7 +133,7 @@ The following options are available:
 --usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --version\tPrint version information and exit.
---x\t\tForce the program to run even if there's a version mis-match.
+--x\t\tForce the program to run even if there's a version mismatch.
 eol;
 
 $longoptions = array("countries", "debug", "extract", "force", "forcelogo", "help", "host::", "dbname::", "dbuser::",
@@ -692,6 +692,16 @@ function updateChannelTable($lineup)
         if ($json["metadata"]["transport"] == "Cable")
         {
             $transport = "Cable";
+
+            //$stmt = $dbh->prepare("SELECT ");
+
+            /*
+             * TODO: Change this from a delete to an update? May need to create an array of channel numbers in the
+             * database and compare what already exists with what's in the JSON. That way users that have
+             * recpriority, visible, etc don't have them reset.
+             */
+
+
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
             $stmt->execute(array("sourceid" => $sourceID));
         }
