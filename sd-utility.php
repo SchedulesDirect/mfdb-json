@@ -825,8 +825,8 @@ function updateChannelTable($lineup)
              */
 
             print "You can:\n";
-            print "1. Exit this program and run a QAM scan using mythtv-setup then use the QAM lineup to populate stationIDs.\n";
-            print "2. Use the QAM lineup information directly. (Default)\n";
+            print "1. Use the QAM lineup from Schedules Direct to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
+            print "2. Use the QAM lineup information directly.\n";
             $useScan = readline("Which do you want to do? (1 or 2)>");
             if ($useScan == "" OR $useScan == "2")
             {
