@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v0.29, 2014-10-17
+v20140530.01, 2014-12-04
 
 Robert Kulagowski
 
@@ -50,7 +50,7 @@ mythconverg database, the scripts will look for a file called "sd.json.conf"
 **NOTE**: the password is stored as plaintext.
 
 mfdb-json.php may be called with **--nomyth** as well, in which case you
-must specify --schedule and/or --program
+must specify **--schedule** and/or **--program**
 
 The list of stationIDs you wish to retrieve must be in
 "sd.json.stations.conf".  One stationID per line.

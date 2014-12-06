@@ -21,11 +21,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$isBeta = TRUE;
+$isBeta = FALSE;
 $debug = FALSE;
 $done = FALSE;
 $isMythTV = TRUE;
 $skipChannelLogo = FALSE;
+$forceLogoUpdate = FALSE;
 $schedulesDirectLineups = array();
 $sdStatus = "";
 $username = "";
@@ -121,6 +122,7 @@ The following options are available:
 --dbhost=\tMySQL database hostname for MythTV. (Default: localhost)
 --dbhostsd=\tMySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
 --extract\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
+--forcelogo\tForce update of channel logos.
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
@@ -131,9 +133,10 @@ The following options are available:
 --usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --version\tPrint version information and exit.
+--x\t\tForce the program to run even if there's a version mismatch.
 eol;
 
-$longoptions = array("countries", "debug", "extract", "force", "help", "host::", "dbname::", "dbuser::",
+$longoptions = array("countries", "debug", "extract", "force", "forcelogo", "help", "host::", "dbname::", "dbuser::",
                      "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
                      "username::", "password::",
                      "timezone::", "usedb", "version", "x");
@@ -176,6 +179,9 @@ foreach ($options as $k => $v)
             break;
         case "force":
             $force = TRUE;
+            break;
+        case "forcelogo":
+            $forceLogoUpdate = TRUE;
             break;
         case "host":
             $host = $v;
@@ -686,6 +692,16 @@ function updateChannelTable($lineup)
         if ($json["metadata"]["transport"] == "Cable")
         {
             $transport = "Cable";
+
+            //$stmt = $dbh->prepare("SELECT ");
+
+            /*
+             * TODO: Change this from a delete to an update? May need to create an array of channel numbers in the
+             * database and compare what already exists with what's in the JSON. That way users that have
+             * recpriority, visible, etc don't have them reset.
+             */
+
+
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
             $stmt->execute(array("sourceid" => $sourceID));
         }
@@ -825,10 +841,16 @@ function updateChannelTable($lineup)
              */
 
             print "You can:\n";
-            print "1. Use the QAM lineup from Schedules Direct to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
+            print "1. Exit this program and run a QAM scan using mythtv-setup then use the QAM lineup to populate stationIDs.\n";
             print "2. Use the QAM lineup information directly.\n";
             $useScan = readline("Which do you want to do? (1 or 2)>");
-            if ($useScan == "" OR $useScan == "2")
+
+            if ($useScan == "")
+            {
+                return;
+            }
+
+            if ($useScan == "2")
             {
                 $useScan = FALSE;
             }
@@ -856,36 +878,66 @@ function updateChannelTable($lineup)
 
             if ($useScan)
             {
-                $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
-                $stmt->execute();
-                $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+                $matchType = $json["map"][$mapToUse][0]["matchType"];
 
-                $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
-                $stmt->execute(array("sid" => $sourceID));
-                $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                print "Matching QAM scan based on: $matchType\n";
 
-                $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
+                if ($matchType == "multiplex")
+                {
+                    $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
+                    $stmt->execute();
+                    $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                    $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
+                    $stmt->execute(array("sid" => $sourceID));
+                    $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
                 mplexid=:mplexid AND serviceid=:serviceid");
 
-                $map = array();
+                    $map = array();
 
-                foreach ($json["map"][$mapToUse] as $foo)
-                {
-                    $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
-                }
-
-                foreach ($existingChannelNumbers as $foo)
-                {
-                    $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
-
-                    if (array_key_exists($toFind, $map))
+                    foreach ($json["map"][$mapToUse] as $foo)
                     {
-                        $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
-                                                              "mplexid"   => $foo["mplexid"],
-                                                              "serviceid" => $foo["serviceID"]));
+                        $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
+                    }
+
+                    foreach ($existingChannelNumbers as $foo)
+                    {
+                        $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
+
+                        if (isset($map[$toFind]))
+                        {
+                            $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
+                                                                  "mplexid"   => $foo["mplexid"],
+                                                                  "serviceid" => $foo["serviceID"]));
+                        }
                     }
                 }
 
+                if ($matchType == "providerCallsign")
+                {
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE callsign=:providerCallsign");
+                    foreach ($json["map"][$mapToUse] as $foo)
+                    {
+                        $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
+                                                           "virtualChannel"   => $foo["virtualChannel"],
+                                                           "providerCallsign" => $foo["providerCallsign"]));
+                    }
+                }
+
+                if ($matchType == "channel")
+                {
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE channum=:channel");
+                    foreach ($json["map"][$mapToUse] as $foo)
+                    {
+                        $updateChannelTable->execute(array("stationID"      => $foo["stationID"],
+                                                           "virtualChannel" => $foo["virtualChannel"],
+                                                           "channum"        => $foo["channel"]));
+                    }
+                }
                 print "Done updating QAM scan with stationIDs.\n";
             }
             else
@@ -903,8 +955,10 @@ function updateChannelTable($lineup)
         VALUES
         (:sourceid,:freq,0,'v',:modulation,1,:modulation,'a','UNDEFINED','0.35','atsc')");
 
-                $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,visible,mplexid,serviceid)
-                     VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid)");
+                $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,
+visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
+                     VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid,:atscMajor,
+                     :atscMinor)");
 
                 $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'
                 AND sourceid=:sourceid");
@@ -928,6 +982,8 @@ function updateChannelTable($lineup)
                     $frequency = $mapArray["frequency"];
                     $serviceID = $mapArray["serviceID"];
                     $stationID = $mapArray["stationID"];
+                    $atscMajor = (int)$mapArray["atscMajor"];
+                    $atscMinor = (int)$mapArray["atscMinor"];
 
                     /*
                      * Because multiple programs may end up on a single frequency, we only want to insert once,
@@ -948,17 +1004,28 @@ function updateChannelTable($lineup)
                      * turned into "39"
                      */
 
-                    $strippedChannel = str_replace(array("-", "_"), "", $channel);
+                    $strippedChannel = (int)str_replace(array("-", "_"), "", $channel);
+
+                    if ($atscMajor > 0)
+                    {
+                        $chanid = ($sourceID * 1000) + ($atscMajor * 10) + $atscMinor;
+                    }
+                    else
+                    {
+                        $chanid = ($sourceID * 1000) + ($strippedChannel * 10) + $serviceID;
+                    }
 
                     try
                     {
-                        $channelInsert->execute(array("chanid"    => (int)($sourceID * 1000) + (int)$strippedChannel,
+                        $channelInsert->execute(array("chanid"    => $chanid,
                                                       "channum"   => $channel,
                                                       "freqid"    => $virtualChannel,
                                                       "sourceid"  => $sourceID,
                                                       "xmltvid"   => $stationID,
                                                       "mplexid"   => $dtvMultiplex[$frequency],
-                                                      "serviceid" => $serviceID));
+                                                      "serviceid" => $serviceID,
+                                                      "atscMajor" => $atscMajor,
+                                                      "atscMinor" => $atscMinor));
                     } catch (PDOException $e)
                     {
                         if ($e->getCode() == 23000)
@@ -1763,6 +1830,7 @@ function checkForChannelIcon($stationID, $data)
     global $dbh;
     global $dbhSD;
     global $channelLogoDirectory;
+    global $forceLogoUpdate;
 
     $a = explode("/", $data["URL"]);
     $iconFileName = end($a);
@@ -1778,7 +1846,7 @@ function checkForChannelIcon($stationID, $data)
 
     $result = $stmt->fetchColumn();
 
-    if ($result === FALSE OR $result != $md5)
+    if ($result === FALSE OR $result != $md5 OR $forceLogoUpdate)
     {
         /*
          * We don't already have this icon, or it's different, so it will have to be fetched.
@@ -1820,7 +1888,8 @@ function extractData($sourceIDtoExtract)
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $lineupName = $stmt->fetchColumn();
 
-    $stmt = $dbh->prepare("SELECT channum, freqid, callsign, name, xmltvid, mplexid, serviceid FROM channel where sourceid=:sid");
+    $stmt = $dbh->prepare("SELECT channum, freqid, callsign, name, xmltvid, mplexid, serviceid, atsc_major_chan,
+atsc_minor_chan FROM channel where sourceid=:sid");
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -1846,14 +1915,16 @@ function extractData($sourceIDtoExtract)
                                   "name"           => $v["name"],
                                   "mplexID"        => $v["mplexid"],
                                   "stationID"      => $v["xmltvid"],
-                                  "serviceID"      => $v["serviceid"]);
+                                  "serviceID"      => $v["serviceid"],
+                                  "atscMajor"      => $v["atsc_major_chan"],
+                                  "atscMinor"      => $v["atsc_minor_chan"]);
 
         $extractMultiplex[$v["mplexid"]] = array("transportID" => $dtv[0]["transportid"],
                                                  "frequency"   => $dtv[0]["frequency"],
                                                  "modulation"  => $dtv[0]["modulation"]);
     }
 
-    $extractArray["version"] = "0.06";
+    $extractArray["version"] = "0.07";
     $extractArray["date"] = $todayDate;
     $extractArray["lineup"] = $lineupName;
     $extractArray["channel"] = $extractChannel;

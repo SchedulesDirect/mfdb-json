@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.19";
-$scriptDate = "2014-10-17";
+$scriptVersion = "0.24";
+$scriptDate = "2014-12-04";
 $knownToBeBroken = FALSE;
 
 function getToken($username, $passwordHash)
@@ -61,6 +61,14 @@ function getToken($username, $passwordHash)
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
         return ("ERROR");
+    } catch (Guzzle\HTTP\Exception\RequestException $e)
+    {
+        $errorReq = $e->getRequest();
+        $errorResp = $e->getResponse();
+        $errorMessage = $e->getMessage();
+        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+
+        return ("ERROR");
     } catch (Exception $e)
     {
         print "getToken:HCF. Uncaught exception.\n";
@@ -69,17 +77,13 @@ function getToken($username, $passwordHash)
         print "e is \n";
         var_dump($e);
 
-        print "response is \n";
-        var_dump($response);
-
-
         return ("ERROR");
     }
 
     $res = array();
     $res = $response->json();
 
-    if (json_last_error() != 0)
+    if (json_last_error())
     {
         print "JSON decode error:\n";
         var_dump($response);
@@ -150,6 +154,8 @@ function printStatus($sdStatus)
     global $updatedLineupsToRefresh;
     global $lineupArray;
     global $isMythTV;
+    global $debug;
+    global $printFancyTable;
 
     print "\nStatus messages from Schedules Direct:\n";
 
@@ -193,25 +199,60 @@ function printStatus($sdStatus)
 
     $lineupArray = getSchedulesDirectLineups();
 
+    if ($debug)
+    {
+        print "isMythTV status is:\n";
+        var_dump($isMythTV);
+        print "\n\nLineup array is:\n";
+        var_dump($lineupArray);
+    }
+
     if (count($lineupArray))
     {
         print "The following lineups are in your account at Schedules Direct:\n\n";
 
         if ($isMythTV)
         {
-            $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
-            $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update", "Status"));
+            if ($printFancyTable)
+            {
+                $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
+                $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update",
+                                             "Status"));
+            }
+            else
+            {
+                print "Number\tLineup\tServer modified\tMythTV videosource update\tStatus\n";
+            }
         }
         else
         {
-            $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20)));
-            $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
+            if ($printFancyTable)
+            {
+                $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20)));
+                $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
+            }
+            else
+            {
+                print "Number\tLineup\tServer modified\n";
+            }
+        }
+
+        if ($debug)
+        {
+            print "Temp printout.\n";
+            print $lineupData;
         }
 
         foreach ($lineupArray as $lineupNumber => $v)
         {
             $lineup = $v["lineup"];
             $serverModified = $v["modified"];
+
+            if ($debug)
+            {
+                print "lineup is $lineup\n";
+                print "serverModified is $serverModified\n";
+            }
 
             if ($isMythTV)
             {
@@ -234,8 +275,16 @@ function printStatus($sdStatus)
                 if ($serverModified > $mythModified)
                 {
                     $updatedLineupsToRefresh[$lineup] = $serverModified;
-                    $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, "Updated"));
-                    continue;
+                    if ($printFancyTable)
+                    {
+                        $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
+                                                     "Updated"));
+                        continue;
+                    }
+                    else
+                    {
+                        print "$lineupNumber\t$lineup\t$serverModified\n";
+                    }
                 }
                 /*
                             if ($heStatus[$he] == "D")
@@ -244,17 +293,33 @@ function printStatus($sdStatus)
                                 continue;
                             }
                 */
-
-                $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
+                if ($printFancyTable)
+                {
+                    $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
+                }
+                else
+                {
+                    print "$lineupNumber\t$lineup\t$serverModified\t$mythModified\n";
+                }
             }
             else
             {
-                $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
+                if ($printFancyTable)
+                {
+                    $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
+                }
+                else
+                {
+                    print "$lineupNumber\t$lineup\t$serverModified\n";
+                }
                 $updatedLineupsToRefresh[$lineup] = $serverModified;
             }
         }
 
-        print $lineupData;
+        if ($printFancyTable)
+        {
+            print $lineupData;
+        }
 
         if (count($updatedLineupsToRefresh))
         {
@@ -435,16 +500,15 @@ function getBaseurl($isBeta)
     if ($isBeta)
     {
         # Test server. Things may be broken there.
-        $baseurl = "https://data2.schedulesdirect.org/20140530/";
+        $baseurl = "https://json.schedulesdirect.org/20141201/";
         print "Using beta server.\n";
-        # API must match server version.
-        $api = 20140530;
+        $api = 20141201;
     }
     else
     {
-        $baseurl = "https://json.schedulesdirect.org/20131021/";
+        $baseurl = "https://json.schedulesdirect.org/20140530/";
         print "Using production server.\n";
-        $api = 20131021;
+        $api = 20140530;
     }
 
     return ($baseurl);
