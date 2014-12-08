@@ -667,6 +667,9 @@ function updateChannelTable($lineup)
 
     print "Updating channel table for lineup:$lineup\n";
 
+    $dbh->exec("CREATE TABLE IF NOT EXISTS t_channel LIKE channel");
+    $dbh->exec("INSERT INTO t_channel (SELECT * FROM channel)");
+
     foreach ($sID as $sourceID)
     {
         if ($json["metadata"]["transport"] == "Antenna")
@@ -676,31 +679,12 @@ function updateChannelTable($lineup)
              * going to use the scan, but use the atsc major and minor to correlate what we've scanned with what's in the
              * lineup file.
              */
-
-            /*
-             * TODO Check if we need to fix chanid for Antenna lineups.
-             */
-
             $transport = "Antenna";
-            $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
-    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
-
-            $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
-    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=0 AND atsc_minor_chan=0 AND freqID=:freqID");
         }
 
         if ($json["metadata"]["transport"] == "Cable")
         {
             $transport = "Cable";
-
-            //$stmt = $dbh->prepare("SELECT ");
-
-            /*
-             * TODO: Change this from a delete to an update? May need to create an array of channel numbers in the
-             * database and compare what already exists with what's in the JSON. That way users that have
-             * recpriority, visible, etc don't have them reset.
-             */
-
 
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
             $stmt->execute(array("sourceid" => $sourceID));
@@ -714,17 +698,28 @@ function updateChannelTable($lineup)
         if ($json["metadata"]["transport"] == "Satellite")
         {
             $transport = "Satellite";
+
+
+
+            $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
+            $stmt->execute(array("sourceid" => $sourceID));
         }
 
         if ($transport != "QAM")
         {
+            $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
+    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
+
+            $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
+    xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=0 AND atsc_minor_chan=0 AND freqID=:freqID");
+
             foreach ($json["map"] as $mapArray)
             {
                 $stationID = $mapArray["stationID"];
 
                 if ($transport == "Antenna")
                 {
-                    if (array_key_exists("uhfVhf", $mapArray))
+                    if (isset($mapArray["uhfVhf"]))
                     {
                         $freqid = $mapArray["uhfVhf"];
                     }
@@ -758,7 +753,7 @@ function updateChannelTable($lineup)
                      */
                 }
 
-                if ($transport == "Cable")
+                if ($transport == "Cable" OR $transport == "Satellite")
                 {
                     $channum = $mapArray["channel"];
                     $stmt = $dbh->prepare(
@@ -793,42 +788,25 @@ function updateChannelTable($lineup)
                             print "*************************************************************\n";
                         }
                     }
-                }
 
-                if ($transport == "Satellite")
-                {
-                    $channum = $mapArray["channel"];
-                    $stmt = $dbh->prepare(
-                        "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,mplexid,serviceid,atsc_major_chan)
-                         VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:mplexid,:serviceid,:atsc_major_chan)");
+                    $getOriginalRecPriority = $dbh->prepare("SELECT t_channel.chanid,t_channel.recpriority FROM
+                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
+                    $getOriginalRecPriority->execute(array("sid" => $sourceID));
+                    $originalRecPriorityArray = $getOriginalRecPriority->fetchAll(PDO::FETCH_KEY_PAIR);
 
-                    try
+                    $getOriginalVisibility = $dbh->prepare("SELECT t_channel.chanid,t_channel.visibility FROM
+                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
+                    $getOriginalVisibility->execute(array("sid" => $sourceID));
+                    $originalVisibilityArray = $getOriginalVisibility->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                    $updateChannel = $dbh->prepare("UPDATE channel SET recpriority=:rp,
+                    visible=:visible WHERE chanid=:chanid");
+                    
+                    foreach ($originalRecPriorityArray as $chanid => $foo)
                     {
-                        $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$channum,
-                                             "channum"         => ltrim($channum, "0"),
-                                             "freqid"          => (int)$channum,
-                                             "sourceid"        => $sourceID,
-                                             "xmltvid"         => $stationID,
-                                             "mplexid"         => 32767,
-                                             "serviceid"       => 0,
-                                             "atsc_major_chan" => $channum));
-                    } catch (PDOException $e)
-                    {
-                        if ($e->getCode() == 23000)
-                        {
-                            print "\n\n";
-                            print "*************************************************************\n";
-                            print "\n\n";
-                            print "Error inserting data. Duplicate channel number exists?\n";
-                            print "Send email to grabber@schedulesdirect.org with the following:\n\n";
-                            print "Duplicate channel error.\n";
-                            print "Transport: $transport\n";
-                            print "Lineup: $lineup\n";
-                            print "Channum: $channum\n";
-                            print "stationID: $stationID\n";
-                            print "\n\n";
-                            print "*************************************************************\n";
-                        }
+                        $updateChannel->execute(array("rp"      => $originalRecPriorityArray[$chanid],
+                                                      "visible" => $originalVisibilityArray[$chanid],
+                                                      "chanid"  => $chanid));
                     }
                 }
             }
@@ -1116,6 +1094,8 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
             }
         }
     }
+
+    $dbh->exec("DROP TABLE t_channel");
 }
 
 function linkSchedulesDirectLineup()
