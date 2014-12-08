@@ -794,7 +794,7 @@ function updateChannelTable($lineup)
                     $getOriginalRecPriority->execute(array("sid" => $sourceID));
                     $originalRecPriorityArray = $getOriginalRecPriority->fetchAll(PDO::FETCH_KEY_PAIR);
 
-                    $getOriginalVisibility = $dbh->prepare("SELECT t_channel.chanid,t_channel.visibility FROM
+                    $getOriginalVisibility = $dbh->prepare("SELECT t_channel.chanid,t_channel.visible FROM
                     t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
                     $getOriginalVisibility->execute(array("sid" => $sourceID));
                     $originalVisibilityArray = $getOriginalVisibility->fetchAll(PDO::FETCH_KEY_PAIR);
