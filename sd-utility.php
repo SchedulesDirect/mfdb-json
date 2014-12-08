@@ -667,7 +667,8 @@ function updateChannelTable($lineup)
 
     print "Updating channel table for lineup:$lineup\n";
 
-    $dbh->exec("CREATE TABLE IF NOT EXISTS t_channel LIKE channel");
+    $dbh->exec("DROP TABLE IF EXISTS t_channel");
+    $dbh->exec("CREATE TABLE t_channel LIKE channel");
     $dbh->exec("INSERT INTO t_channel (SELECT * FROM channel)");
 
     foreach ($sID as $sourceID)
