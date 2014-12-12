@@ -1918,7 +1918,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         }
                         else
                         {
-                            printMSG("insertSchedule (cast): didn't find {$castMemberArray["name"]} in peopleCacheMyth");
+                            printMSG("insertSchedule:$stationID (cast): didn't find {$castMemberArray["name"]} in peopleCacheMyth");
                             continue;
                         }
 
@@ -1957,7 +1957,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         }
                         else
                         {
-                            printMSG("insertSchedule (crew): didn't find {$crewMemberArray["name"]} in peopleCacheMyth");
+                            printMSG("insertSchedule:$stationID (crew): didn't find {$crewMemberArray["name"]} in peopleCacheMyth");
                             continue;
                         }
 
