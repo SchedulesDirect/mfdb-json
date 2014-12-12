@@ -323,6 +323,13 @@ if ($isMythTV OR $dbWithoutMythtv)
             printMSG("Did you run the sd-utility.php program yet?");
             exit;
         }
+
+        /*
+         * MythTV uses an auto-increment field for the person number, SD doesn't. We'll need to cross-reference later.
+         */
+        $getPeople = $dbh->prepare("SELECT name,person FROM people");
+        $getPeople->execute();
+        $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
     }
     else
     {
@@ -994,6 +1001,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     global $dbhSD;
     global $dlProgramTempDir;
     global $debug;
+    global $peopleCacheMyth;
 
     $insertJSON = $dbhSD->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
@@ -1009,10 +1017,6 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
     $insertProgramGenresSD = $dbhSD->prepare("INSERT INTO SDprogramgenres(programID,relevance,genre)
     VALUES(:pid,:relevance,:genre) ON DUPLICATE KEY UPDATE genre=:genre");
-
-    $getPeople = $dbh->prepare("SELECT name,person FROM people");
-    $getPeople->execute();
-    $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
     $getPeople = $dbhSD->prepare("SELECT personID,name FROM SDpeople");
     $getPeople->execute();
@@ -1256,7 +1260,7 @@ function insertSchedule()
     global $dbh;
     global $dbhSD;
     global $dlSchedTempDir;
-    global $peopleCache;
+    global $peopleCacheMyth;
     global $debug;
     global $errorWarning;
 
@@ -1284,16 +1288,6 @@ function insertSchedule()
                                          "Presenter"                           => "presenter",
                                          "Guest"                               => "guest"
     );
-
-    if (!count($peopleCache))
-    {
-        /*
-         * People cache array is empty, so read it in.
-         */
-        $getPeople = $dbh->prepare("SELECT name,person FROM people");
-        $getPeople->execute();
-        $peopleCache = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
-    }
 
     $roleTable = array();
 
@@ -1908,16 +1902,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 {
                     if (isset($castMemberArray["personId"]))
                     {
-                        $person = $castMemberArray["personId"];
-
-                        if (isset($castMemberArray["name"]))
-                        {
-                            $name = $castMemberArray["name"];
-                        }
-                        else
-                        {
-                            continue;
-                        }
+                        $person = $peopleCacheMyth[$castMemberArray["name"]];
 
                         if (isset($castMemberArray["role"]))
                         {
@@ -1934,6 +1919,10 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         {
                             continue;
                         }
+                        $insertCreditMyth->execute(array("person"    => $person,
+                                                         "chanid"    => $chanID,
+                                                         "starttime" => $programStartTimeMyth,
+                                                         "role"      => $mythTVRole));
                     }
                 }
             }
@@ -2142,19 +2131,15 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     */
 
     /*
-     * TODO: update the credits table using the existing role types in MythTV.
-     */
-
-
-    /*
      * If users start to complain about errors on the insert, it's probably due to a new role type.
-     */
+
 
     if ($debug AND count($roleTable))
     {
         debugMSG("Role table:");
         debugMSG(print_r($roleTable, TRUE));
     }
+    */
 
     $dbh->exec("DROP TABLE program");
     $dbh->exec("RENAME TABLE t_program TO program");

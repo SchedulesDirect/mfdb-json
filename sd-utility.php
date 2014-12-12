@@ -1750,9 +1750,10 @@ function checkDatabase()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
         $stmt = $dbhSD->exec("CREATE TABLE `SDpeople` (
-`personID` mediumint(8) unsigned NOT NULL,
+  `personID` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
-  PRIMARY KEY (`personID`)
+  PRIMARY KEY (`personID`),
+  KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
         $stmt = $dbhSD->exec("CREATE TABLE `SDprogramCache` (
@@ -1782,14 +1783,14 @@ function checkDatabase()
   PRIMARY KEY (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDschedule` (
+        $dbhSD->exec("CREATE TABLE `SDschedule` (
   `stationID` varchar(12) NOT NULL,
   `md5` char(22) NOT NULL,
   UNIQUE KEY `sid` (`stationID`),
   KEY `md5` (`md5`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDimageCache` (
+        $dbhSD->exec("CREATE TABLE `SDimageCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `item` varchar(128) NOT NULL,
   `md5` char(22) NOT NULL,
@@ -1801,9 +1802,15 @@ function checkDatabase()
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        // $stmt = $dbh->exec("UPDATE videosource SET lineupid=''");
         settingSD("SchedulesDirectJSONschemaVersion", "1");
     }
+
+    if ($schemaVersion == 1)
+    {
+        $dbh->exec("ALTER TABLE SDpeople ADD INDEX(name)");
+        settingSD("SchedulesDirectJSONschemaVersion", "2");
+    }
+
 }
 
 function checkForChannelIcon($stationID, $data)
