@@ -1343,7 +1343,7 @@ function insertSchedule()
     :first,:last,:audioprop,:subtitletypes,:videoprop)");
     }
 
-    $insertCreditMyth = $dbh->prepare("INSERT INTO t_credits(person, chanid, starttime, role)
+    $insertCreditMyth = $dbh->prepare("INSERT IGNORE INTO t_credits(person, chanid, starttime, role)
     VALUES(:person,:chanid,:starttime,:role)");
 
     $insertProgramRatingMyth = $dbh->prepare("INSERT INTO t_programrating(chanid, starttime, system, rating)
@@ -1936,6 +1936,37 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
+            if (isset($programJSON["crew"]))
+            {
+                foreach ($programJSON["crew"] as $crewMemberArray)
+                {
+                    if (isset($crewMemberArray["personId"]))
+                    {
+                        $person = $peopleCacheMyth[$crewMemberArray["name"]];
+
+                        if (isset($crewMemberArray["role"]))
+                        {
+                            if (isset($SchedulesDirectRoleToMythTv[$crewMemberArray["role"]]))
+                            {
+                                $mythTVRole = $SchedulesDirectRoleToMythTv[$crewMemberArray["role"]];
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                        $insertCreditMyth->execute(array("person"    => $person,
+                                                         "chanid"    => $chanID,
+                                                         "starttime" => $programStartTimeMyth,
+                                                         "role"      => $mythTVRole));
+                    }
+                }
+            }
+            
             if ($dbSchema > "1318")
             {
                 try
