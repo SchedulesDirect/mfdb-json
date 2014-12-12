@@ -1809,7 +1809,7 @@ function checkDatabase()
 
     if ($schemaVersion == 1)
     {
-        $dbh->exec("ALTER TABLE SDpeople ADD INDEX(name)");
+        $dbhSD->exec("ALTER TABLE SDpeople ADD INDEX(name)");
         settingSD("SchedulesDirectJSONschemaVersion", "2");
     }
 
