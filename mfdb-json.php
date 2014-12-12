@@ -1911,7 +1911,16 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 {
                     if (isset($castMemberArray["personId"]))
                     {
-                        $person = $peopleCacheMyth[$castMemberArray["name"]];
+
+                        if (isset($peopleCacheMyth[$castMemberArray["name"]]))
+                        {
+                            $person = $peopleCacheMyth[$castMemberArray["name"]];
+                        }
+                        else
+                        {
+                            printMSG("insertSchedule (cast): didn't find {$castMemberArray["name"]} in peopleCacheMyth");
+                            continue;
+                        }
 
                         if (isset($castMemberArray["role"]))
                         {
@@ -1942,7 +1951,15 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 {
                     if (isset($crewMemberArray["personId"]))
                     {
-                        $person = $peopleCacheMyth[$crewMemberArray["name"]];
+                        if (isset($peopleCacheMyth[$crewMemberArray["name"]]))
+                        {
+                            $person = $peopleCacheMyth[$crewMemberArray["name"]];
+                        }
+                        else
+                        {
+                            printMSG("insertSchedule (crew): didn't find {$crewMemberArray["name"]} in peopleCacheMyth");
+                            continue;
+                        }
 
                         if (isset($crewMemberArray["role"]))
                         {
@@ -1966,7 +1983,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     }
                 }
             }
-            
+
             if ($dbSchema > "1318")
             {
                 try
