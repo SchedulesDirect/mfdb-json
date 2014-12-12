@@ -388,30 +388,33 @@ if ($skipChannelLogo === FALSE)
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
-print "Checking to see if we're running the latest client.\n";
-
-$serverVersion = checkForClientUpdate($client);
-
-if ($serverVersion == "ERROR")
+if (!$skipVersionCheck)
 {
-    print "Received error response from server. Exiting.\n";
-    exit;
-}
+    print "Checking to see if we're running the latest client.\n";
 
-if ($serverVersion != $scriptVersion)
-{
-    print "***Version mismatch.***\n";
-    print "Server version: $serverVersion\n";
-    print "Our version: $scriptVersion\n";
-    if (!$force)
+    $serverVersion = checkForClientUpdate($client);
+
+    if ($serverVersion == "ERROR")
     {
-        print "Exiting. Do you need to run 'git pull' to refresh?\n";
-        print "Restart script with --x to ignore mismatch.\n";
+        print "Received error response from server. Exiting.\n";
         exit;
     }
-    else
+
+    if ($serverVersion != $scriptVersion)
     {
-        print "Continuing because of --x force parameter.\n";
+        print "***Version mismatch.***\n";
+        print "Server version: $serverVersion\n";
+        print "Our version: $scriptVersion\n";
+        if (!$force)
+        {
+            print "Exiting. Do you need to run 'git pull' to refresh?\n";
+            print "Restart script with --x to ignore mismatch.\n";
+            exit;
+        }
+        else
+        {
+            print "Continuing because of --x force parameter.\n";
+        }
     }
 }
 
@@ -701,7 +704,6 @@ function updateChannelTable($lineup)
             $transport = "Satellite";
 
 
-
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
             $stmt->execute(array("sourceid" => $sourceID));
         }
@@ -802,7 +804,7 @@ function updateChannelTable($lineup)
 
                     $updateChannel = $dbh->prepare("UPDATE channel SET recpriority=:rp,
                     visible=:visible WHERE chanid=:chanid");
-                    
+
                     foreach ($originalRecPriorityArray as $chanid => $foo)
                     {
                         $updateChannel->execute(array("rp"      => $originalRecPriorityArray[$chanid],
