@@ -1867,6 +1867,12 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $subtitleTypes = "SIGNED";
             }
 
+            if (isset($schedule["multipart"]))
+            {
+                $partNumber = $schedule["multipart"]["partNumber"];
+                $numberOfParts = $schedule["multipart"]["totalParts"];
+            }
+
             if ($dbSchema > "1318")
             {
                 try
@@ -1992,24 +1998,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     {
         $subtitledLanguage = NULL;
     }
-
-    if (isset($v["partNumber"]))
-            {
-                $partNumber = $v["partNumber"];
-            }
-            else
-            {
-                $partNumber = 0;
-            }
-
-            if (isset($v["numberOfParts"]))
-            {
-                $numberOfParts = $v["numberOfParts"];
-            }
-            else
-            {
-                $numberOfParts = 0;
-            }
 
     if (isset($v["sapLanguage"]))
             {
