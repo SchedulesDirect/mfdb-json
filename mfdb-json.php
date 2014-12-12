@@ -1198,7 +1198,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
                         $personID = $credit["personId"];
                         $name = $credit["name"];
 
-                        if (!array_key_exists($personID, $peopleCacheSD))
+                        if (!isset($peopleCacheSD[$personID]))
                         {
                             $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
                             $peopleCacheSD[$personID] = $name;
@@ -1260,9 +1260,30 @@ function insertSchedule()
     global $debug;
     global $errorWarning;
 
-    //$existingRoleTypesInMyth = array("actor", "director", "producer", "executive_producer", "writer", "guest_star",
-    //                                 "host", "adapter", "presenter", "commentator", "guest");
-    //$existingRoleTypesInMyth = array_flip($existingRoleTypesInMyth);
+    $SchedulesDirectRoleToMythTv = array("Actor"                               => "actor",
+                                         "Director"                            => "director",
+                                         "Executive Producer"                  => "executive_producer",
+                                         "Co-Producer"                         => "producer",
+                                         "Associate Producer"                  => "producer",
+                                         "Producer"                            => "producer",
+                                         "Line Producer"                       => "producer",
+                                         "Co-Executive Producer"               => "executive_producer",
+                                         "Co-Associate Producer"               => "producer",
+                                         "Assistant Producer"                  => "producer",
+                                         "Supervising Producer"                => "producer",
+                                         "Executive Music Producer"            => "producer",
+                                         "Visual Effects Producer"             => "producer",
+                                         "Special Effects Makeup Producer"     => "producer",
+                                         "Makeup Effects Producer"             => "producer",
+                                         "Consulting Producer"                 => "producer",
+                                         "Score Producer"                      => "producer",
+                                         "Executive Producer, English Version" => "producer",
+                                         "Writer"                              => "writer",
+                                         "Guest Star"                          => "guest_star",
+                                         "Host"                                => "host",
+                                         "Presenter"                           => "presenter",
+                                         "Guest"                               => "guest"
+    );
 
     if (!count($peopleCache))
     {
@@ -1471,11 +1492,19 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             $programID = $schedule["programID"];
             $getProgramInformation->execute(array("pid" => $programID));
             $pj = $getProgramInformation->fetchColumn();
+
+            if ($pj == "")
+            {
+                debugMSG("Error retrieving $programID from local database. Raw data was:");
+                $errorWarning = TRUE;
+                continue;
+            }
+
             $programJSON = json_decode($pj, TRUE);
 
             if (json_last_error())
             {
-                debugMSG("Error retrieving / decoding $programID from local database. Raw data was:");
+                debugMSG("Error decoding $programID from local database. Raw data was:");
                 debugMSG(print_r($pj, TRUE));
                 $errorWarning = TRUE;
                 continue;
@@ -1871,6 +1900,42 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             {
                 $partNumber = $schedule["multipart"]["partNumber"];
                 $numberOfParts = $schedule["multipart"]["totalParts"];
+            }
+
+            if (isset($programJSON["cast"]))
+            {
+                foreach ($programJSON["cast"] as $castMemberArray)
+                {
+                    if (isset($castMemberArray["personId"]))
+                    {
+                        $person = $castMemberArray["personId"];
+
+                        if (isset($castMemberArray["name"]))
+                        {
+                            $name = $castMemberArray["name"];
+                        }
+                        else
+                        {
+                            continue;
+                        }
+
+                        if (isset($castMemberArray["role"]))
+                        {
+                            if (isset($SchedulesDirectRoleToMythTv[$castMemberArray["role"]]))
+                            {
+                                $mythTVRole = $SchedulesDirectRoleToMythTv[$castMemberArray["role"]];
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                }
             }
 
             if ($dbSchema > "1318")
