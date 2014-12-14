@@ -556,6 +556,7 @@ exit;
 function getSchedules($stationIDsToFetch)
 {
     global $client;
+    global $dbh;
     global $dbhSD;
     global $token;
     global $dlSchedTempDir;
@@ -849,6 +850,14 @@ function getSchedules($stationIDsToFetch)
         $downloadedStationIDs[] = $stationID;
 
         printMSG("Parsing schedule for stationID:$stationID");
+
+        if (isset($item["metadata"]["isDeleted"]))
+        {
+            printMSG("WARNING: stationID has been marked as deleted.");
+            $updateVisibleToFalse = $dbh->prepare("UPDATE channel SET visible = FALSE WHERE xmltvid=:sid");
+            $updateVisibleToFalse->execute(array("sid" => $stationID));
+            continue;
+        }
 
         if (!array_key_exists("programs", $item))
         {
