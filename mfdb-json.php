@@ -853,7 +853,7 @@ function getSchedules($stationIDsToFetch)
 
         if (isset($item["metadata"]["isDeleted"]))
         {
-            printMSG("WARNING: stationID has been marked as deleted.");
+            printMSG("WARNING: $stationID has been marked as deleted.");
             $updateVisibleToFalse = $dbh->prepare("UPDATE channel SET visible = FALSE WHERE xmltvid=:sid");
             $updateVisibleToFalse->execute(array("sid" => $stationID));
             continue;
