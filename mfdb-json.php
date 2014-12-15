@@ -562,7 +562,6 @@ function getSchedules($stationIDsToFetch)
     global $dlSchedTempDir;
     global $quiet;
     global $debug;
-    global $isMythTV;
     global $forceDownload;
     global $addToRetryQueue;
 
@@ -606,7 +605,7 @@ function getSchedules($stationIDsToFetch)
         var_dump($requestArray);
     }
 
-    if (!$forceDownload)
+    if ($forceDownload === FALSE)
     {
         printMSG("Determining if there are updated schedules.");
 
@@ -790,11 +789,6 @@ function getSchedules($stationIDsToFetch)
     printMSG("Writing to $dlSchedTempDir/schedule.json");
 
     file_put_contents("$dlSchedTempDir/schedule.json", $schedules, FILE_APPEND);
-
-    //if (!$isMythTV)
-    //{
-    //    return ("");
-    //}
 
     $updateLocalMD5 = $dbhSD->prepare("INSERT INTO SDschedule(stationID, md5) VALUES(:sid, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
