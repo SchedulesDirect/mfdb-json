@@ -853,7 +853,7 @@ function getSchedules($stationIDsToFetch)
             continue;
         }
 
-        if (!array_key_exists("programs", $item))
+        if (!isset($item["programs"]))
         {
             printMSG("WARNING: JSON does not contain any program elements.");
             printMSG("Send the following to grabber@schedulesdirect.org\n\n");
@@ -1240,6 +1240,12 @@ function insertJSON(array $jsonProgramsToRetrieve)
                         }
                     }
                 }
+            }
+            else
+            {
+                printMSG("skipPersonID is TRUE; Skipping insert of $pid:\n$item");
+                $tt = fgets(STDIN);
+
             }
 
             if (isset($jsonProgram["genres"]))
@@ -1914,7 +1920,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 {
                     if (isset($castMemberArray["personId"]))
                     {
-
                         if (isset($peopleCacheMyth[$castMemberArray["name"]]))
                         {
                             $person = $peopleCacheMyth[$castMemberArray["name"]];
