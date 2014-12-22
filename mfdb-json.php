@@ -757,12 +757,16 @@ function getSchedules($stationIDsToFetch)
                 default:
                     print "Unhandled BadResponseException in getSchedules.\n";
                     print "Send the following to grabber@schedulesdirect.org\n";
+                    print "Code: " . $e->getCode() . "\n";
+                    print "Message: " . $e->getMessage() . "\n";
                     var_dump($e);
                     break;
             }
         } catch (Exception $e)
         {
             print "Other exception in getSchedules.\n";
+            print "Code: " . $e->getCode() . "\n";
+            print "Message: " . $e->getMessage() . "\n";
             var_dump($e);
             exit;
         }
