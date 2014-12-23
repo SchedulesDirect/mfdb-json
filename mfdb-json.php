@@ -1167,10 +1167,13 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
                     $name = $credit["name"];
 
-                    if (!isset($credit["personId"]) AND $skipPersonID === FALSE)
+                    if (!isset($credit["personId"]))
                     {
-                        printMSG("$jsonFileToProcess:$pid does not have a personId.");
-                        $debug = TRUE; // Set it to true
+                        if ($skipPersonID === FALSE)
+                        {
+                            printMSG("$jsonFileToProcess:$pid does not have a personId.");
+                            $debug = TRUE; // Set it to true
+                        }
                     }
                     else
                     {
@@ -1186,6 +1189,13 @@ function insertJSON(array $jsonProgramsToRetrieve)
                         {
                             $updatePersonSD->execute(array("personID" => (int)$personID, "name" => $name));
                         }
+
+                        if (!isset($creditCache["$personID-$pid-$role"]))
+                        {
+                            $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
+                                                           "role"     => $role));
+                            $creditCache["$personID-$pid-$role"] = 1;
+                        }
                     }
 
                     if (!isset($peopleCacheMyth[$name]))
@@ -1193,13 +1203,6 @@ function insertJSON(array $jsonProgramsToRetrieve)
                         $insertPersonMyth->execute(array("name" => $name));
                         $id = $dbh->lastInsertId();
                         $peopleCacheMyth[$name] = $id;
-                    }
-
-                    if (!isset($creditCache["$personID-$pid-$role"]))
-                    {
-                        $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
-                                                       "role"     => $role));
-                        $creditCache["$personID-$pid-$role"] = 1;
                     }
                 }
             }
@@ -1223,10 +1226,13 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
                     $name = $credit["name"];
 
-                    if (!isset($credit["personId"]) AND $skipPersonID === FALSE)
+                    if (!isset($credit["personId"]))
                     {
-                        printMSG("$jsonFileToProcess:$pid does not have a personId.");
-                        $debug = TRUE; // Set it to true
+                        if ($skipPersonID === FALSE)
+                        {
+                            printMSG("$jsonFileToProcess:$pid does not have a personId.");
+                            $debug = TRUE; // Set it to true
+                        }
                     }
                     else
                     {
@@ -1242,6 +1248,13 @@ function insertJSON(array $jsonProgramsToRetrieve)
                         {
                             $updatePersonSD->execute(array("personID" => (int)$personID, "name" => $name));
                         }
+
+                        if (!isset($creditCache["$personID-$pid-$role"]))
+                        {
+                            $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
+                                                           "role"     => $role));
+                            $creditCache["$personID-$pid-$role"] = 1;
+                        }
                     }
 
                     if (!isset($peopleCacheMyth[$name]))
@@ -1249,13 +1262,6 @@ function insertJSON(array $jsonProgramsToRetrieve)
                         $insertPersonMyth->execute(array("name" => $name));
                         $id = $dbh->lastInsertId();
                         $peopleCacheMyth[$name] = $id;
-                    }
-
-                    if (!isset($creditCache["$personID-$pid-$role"]))
-                    {
-                        $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
-                                                       "role"     => $role));
-                        $creditCache["$personID-$pid-$role"] = 1;
                     }
                 }
             }
