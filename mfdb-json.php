@@ -53,7 +53,6 @@ $stationIDs = array();
 $dbWithoutMythtv = FALSE;
 $skipVersionCheck = FALSE;
 $jsonProgramsToRetrieve = array();
-$peopleCache = array();
 $addToRetryQueue = array();
 $dbHostSD = "localhost";
 
@@ -1321,6 +1320,22 @@ function insertSchedule()
     );
 
     $roleTable = array();
+
+    if (count($peopleCacheMyth) == 0)
+    {
+        /*
+         * Shouldn't happen, but check for it anyway.
+         */
+        printMSG("peopleCache array is empty. Reading from database.");
+        $getPeople = $dbh->prepare("SELECT name,person FROM people");
+        $getPeople->execute();
+        $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
+        if (count($peopleCacheMyth) == 0)
+        {
+            printMSG("peopleCache array is still empty. Exiting.");
+            exit;
+        }
+    }
 
     printMSG("Inserting schedules.");
 
