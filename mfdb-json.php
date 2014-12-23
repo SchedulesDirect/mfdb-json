@@ -88,7 +88,7 @@ The following options are available:
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --program\tDownload programs based on programIDs in sd.json.programs.conf file.
 --quiet\t\tDon't print to screen; put all output into the logfile.
---skipversion\t\orce the program to run even if there's a version mismatch between the client and the server.
+--skipversion\tForce the program to run even if there's a version mismatch between the client and the server.
 --station=\tDownload the schedule for a single stationID in your lineup.
 --schedule\tDownload schedules based on stationIDs in sd.json.stations.conf file.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
@@ -176,7 +176,7 @@ foreach ($options as $k => $v)
 
 if ($knownToBeBroken === TRUE AND $forceRun === FALSE)
 {
-    print "This version is known to be broken and force option not specified. Exiting.\n";
+    print "This version is known to be broken and --forcerun option not specified. Exiting.\n";
     exit;
 }
 
@@ -197,15 +197,15 @@ if ($skipVersionCheck === FALSE)
         printMSG("***Version mismatch.***");
         printMSG("Server version: $serverVersion");
         printMSG("Our version: $scriptVersion");
-        if ($forceRun === FALSE)
+        if ($skipVersionCheck === FALSE)
         {
             printMSG("Exiting. Do you need to run 'git pull' to refresh?");
-            printMSG("Restart script with --x to ignore mismatch.");
+            printMSG("Restart script with --skipversion to ignore mismatch.");
             exit;
         }
         else
         {
-            printMSG("Continuing because of --x force parameter.");
+            printMSG("Continuing because of --forcerun parameter.");
         }
     }
 
