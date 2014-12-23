@@ -80,15 +80,15 @@ The following options are available:
 --dbpassword=\tPassword for database access for MythTV. (Default: mythtv)
 --dbhost=\tMySQL database hostname for MythTV. (Default: localhost)
 --dbhostsd=\tMySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
---forcedownload\t\tForce download of schedules. (Default: FALSE)
---forcerun\t\tContinue to run even if we're known to be broken. (Default: FALSE)
+--forcedownload\tForce download of schedules. (Default: FALSE)
+--forcerun\tContinue to run even if we're known to be broken. (Default: FALSE)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
     Must specify --schedule and/or --program
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --program\tDownload programs based on programIDs in sd.json.programs.conf file.
 --quiet\t\tDon't print to screen; put all output into the logfile.
---skipversioncheck\t\tForce the program to run even if there's a version mismatch between the client and the server.
+--skipversion\t\tForce the program to run even if there's a version mismatch between the client and the server.
 --station=\tDownload the schedule for a single stationID in your lineup.
 --schedule\tDownload schedules based on stationIDs in sd.json.stations.conf file.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
@@ -99,7 +99,7 @@ eol;
 
 $longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
                      "forcedownload", "forcerun", "nomyth", "max::", "program", "quiet", "station::", "schedule",
-                     "skipversioncheck", "timezone::",
+                     "skipversion", "timezone::",
                      "usedb", "version");
 $options = getopt("h::", $longoptions);
 
@@ -155,7 +155,7 @@ foreach ($options as $k => $v)
         case "schedule":
             $useScheduleFile = TRUE;
             break;
-        case "skipversioncheck":
+        case "skipversion":
             $skipVersionCheck = TRUE;
             break;
         case "station":
