@@ -197,7 +197,7 @@ if ($skipVersionCheck === FALSE)
         printMSG("***Version mismatch.***");
         printMSG("Server version: $serverVersion");
         printMSG("Our version: $scriptVersion");
-        if (!$force)
+        if ($forceRun === FALSE)
         {
             printMSG("Exiting. Do you need to run 'git pull' to refresh?");
             printMSG("Restart script with --x to ignore mismatch.");
