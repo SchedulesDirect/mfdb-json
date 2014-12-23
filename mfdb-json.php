@@ -36,6 +36,7 @@ $api = "";
 $debug = FALSE;
 $quiet = FALSE;
 $forceDownload = FALSE;
+$forceRun = FALSE;
 $sdStatus = "";
 $printTimeStamp = TRUE;
 $maxProgramsToGet = 2000;
@@ -50,7 +51,7 @@ $usernameFromDB = "";
 $passwordFromDB = "";
 $stationIDs = array();
 $dbWithoutMythtv = FALSE;
-$force = FALSE;
+$skipVersionCheck = FALSE;
 $jsonProgramsToRetrieve = array();
 $peopleCache = array();
 $addToRetryQueue = array();
@@ -70,42 +71,6 @@ $agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$script
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
-if (!$skipVersionCheck)
-{
-    printMSG("Checking to see if we're running the latest client.");
-
-    $serverVersion = checkForClientUpdate($client);
-
-    if ($serverVersion == "ERROR")
-    {
-        printMSG("Received error response from server. Exiting.");
-        exit;
-    }
-
-    if ($serverVersion != $scriptVersion)
-    {
-        printMSG("***Version mismatch.***");
-        printMSG("Server version: $serverVersion");
-        printMSG("Our version: $scriptVersion");
-        if (!$force)
-        {
-            printMSG("Exiting. Do you need to run 'git pull' to refresh?");
-            printMSG("Restart script with --x to ignore mismatch.");
-            exit;
-        }
-        else
-        {
-            printMSG("Continuing because of --x force parameter.");
-        }
-    }
-
-    if ($serverVersion == "ERROR")
-    {
-        printMSG("Received error response from server. Exiting.");
-        exit;
-    }
-}
-
 $helpText = <<< eol
 The following options are available:
 --beta
@@ -115,24 +80,27 @@ The following options are available:
 --dbpassword=\tPassword for database access for MythTV. (Default: mythtv)
 --dbhost=\tMySQL database hostname for MythTV. (Default: localhost)
 --dbhostsd=\tMySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
---force\t\tForce download of schedules. (Default: FALSE)
+--forcedownload\t\tForce download of schedules. (Default: FALSE)
+--forcerun\t\tContinue to run even if we're known to be broken. (Default: FALSE)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
     Must specify --schedule and/or --program
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --program\tDownload programs based on programIDs in sd.json.programs.conf file.
 --quiet\t\tDon't print to screen; put all output into the logfile.
+--skipversioncheck\t\tForce the program to run even if there's a version mismatch between the client and the server.
 --station=\tDownload the schedule for a single stationID in your lineup.
 --schedule\tDownload schedules based on stationIDs in sd.json.stations.conf file.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --version\tPrint version information and exit.
---x\t\tForce the program to run even if there's a version mismatch.
+
 eol;
 
 $longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "force", "nomyth", "max::", "program", "quiet", "station::", "schedule", "timezone::",
-                     "usedb", "version", "x");
+                     "forcedownload", "forcerun", "nomyth", "max::", "program", "quiet", "station::", "schedule",
+                     "skipversioncheck", "timezone::",
+                     "usedb", "version");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -166,8 +134,11 @@ foreach ($options as $k => $v)
         case "host":
             $host = $v;
             break;
-        case "force":
+        case "forcedownload":
             $forceDownload = TRUE;
+            break;
+        case "forcerun":
+            $forceRun = TRUE;
             break;
         case "nomyth":
             $isMythTV = FALSE;
@@ -184,6 +155,9 @@ foreach ($options as $k => $v)
         case "schedule":
             $useScheduleFile = TRUE;
             break;
+        case "skipversioncheck":
+            $skipVersionCheck = TRUE;
+            break;
         case "station":
             $station = $v;
             break;
@@ -197,16 +171,49 @@ foreach ($options as $k => $v)
             print "$agentString\n\n";
             exit;
             break;
-        case "x":
-            $force = TRUE;
-            break;
     }
 }
 
-if ($knownToBeBroken AND !$force)
+if ($knownToBeBroken === TRUE AND $forceRun === FALSE)
 {
     print "This version is known to be broken and force option not specified. Exiting.\n";
     exit;
+}
+
+if ($skipVersionCheck === FALSE)
+{
+    printMSG("Checking to see if we're running the latest client.");
+
+    $serverVersion = checkForClientUpdate($client);
+
+    if ($serverVersion == "ERROR")
+    {
+        printMSG("Received error response from server. Exiting.");
+        exit;
+    }
+
+    if ($serverVersion != $scriptVersion)
+    {
+        printMSG("***Version mismatch.***");
+        printMSG("Server version: $serverVersion");
+        printMSG("Our version: $scriptVersion");
+        if (!$force)
+        {
+            printMSG("Exiting. Do you need to run 'git pull' to refresh?");
+            printMSG("Restart script with --x to ignore mismatch.");
+            exit;
+        }
+        else
+        {
+            printMSG("Continuing because of --x force parameter.");
+        }
+    }
+
+    if ($serverVersion == "ERROR")
+    {
+        printMSG("Received error response from server. Exiting.");
+        exit;
+    }
 }
 
 printMSG("$agentString");
@@ -384,8 +391,10 @@ if ($isMythTV)
             $stationIDs = array_merge($stationIDs, $stmt->fetchAll(PDO::FETCH_COLUMN));
         }
 
-        $stationIDs = array_flip(array_flip($stationIDs)); // Double flip does a unique then makes the keys back to
-        // values
+        /*
+         * Double flip does a unique then makes the keys back to values
+         */
+        $stationIDs = array_flip(array_flip($stationIDs));
 
         if (!count($stationIDs))
         {
