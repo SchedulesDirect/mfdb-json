@@ -88,7 +88,7 @@ The following options are available:
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --program\tDownload programs based on programIDs in sd.json.programs.conf file.
 --quiet\t\tDon't print to screen; put all output into the logfile.
---skipversion\t\tForce the program to run even if there's a version mismatch between the client and the server.
+--skipversion\t\orce the program to run even if there's a version mismatch between the client and the server.
 --station=\tDownload the schedule for a single stationID in your lineup.
 --schedule\tDownload schedules based on stationIDs in sd.json.stations.conf file.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
