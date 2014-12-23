@@ -37,7 +37,7 @@ $passwordHash = "";
 $dbWithoutMythtv = FALSE;
 $useServiceAPI = FALSE;
 $lineupArray = array();
-$force = FALSE;
+$forceRun = FALSE;
 $printFancyTable = TRUE;
 $printCountries = FALSE;
 $justExtract = FALSE;
@@ -123,6 +123,7 @@ The following options are available:
 --dbhostsd=\tMySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
 --extract\tDon't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
 --forcelogo\tForce update of channel logos.
+--forcerun\tContinue to run even if we're known to be broken. (Default: FALSE)
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
@@ -130,16 +131,16 @@ The following options are available:
 --skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
---usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
+--skipversion\tForce the program to run even if there's a version mismatch between the client and the server.
+--usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
 --version\tPrint version information and exit.
---x\t\tForce the program to run even if there's a version mismatch.
 eol;
 
-$longoptions = array("countries", "debug", "extract", "force", "forcelogo", "help", "host::", "dbname::", "dbuser::",
+$longoptions = array("countries", "debug", "extract", "forcelogo", "forcerun", "help", "host::", "dbname::", "dbuser::",
                      "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
                      "username::", "password::",
-                     "timezone::", "usedb", "version", "x");
+                     "skipversion", "timezone::", "usedb", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -177,8 +178,8 @@ foreach ($options as $k => $v)
         case "extract":
             $justExtract = TRUE;
             break;
-        case "force":
-            $force = TRUE;
+        case "forcerun":
+            $forceRun = TRUE;
             break;
         case "forcelogo":
             $forceLogoUpdate = TRUE;
@@ -205,6 +206,9 @@ foreach ($options as $k => $v)
             $password = $v;
             $passwordHash = sha1($v);
             break;
+        case "skipversion":
+            $skipVersionCheck = TRUE;
+            break;
         case "timezone":
             date_default_timezone_set($v);
             break;
@@ -215,15 +219,13 @@ foreach ($options as $k => $v)
             print "$agentString\n\n";
             exit;
             break;
-        case "x":
-            $force = TRUE;
-            break;
+
     }
 }
 
-if ($knownToBeBroken AND !$force)
+if ($knownToBeBroken AND $forceRun === FALSE)
 {
-    print "This version is known to be broken and --x not specified. Exiting.\n";
+    print "This version is known to be broken and --forcerun not specified. Exiting.\n";
     exit;
 }
 
@@ -405,15 +407,15 @@ if (!$skipVersionCheck)
         print "***Version mismatch.***\n";
         print "Server version: $serverVersion\n";
         print "Our version: $scriptVersion\n";
-        if (!$force)
+        if (!$forceRun)
         {
             print "Exiting. Do you need to run 'git pull' to refresh?\n";
-            print "Restart script with --x to ignore mismatch.\n";
+            print "Restart script with --skipversion to ignore mismatch.\n";
             exit;
         }
         else
         {
-            print "Continuing because of --x force parameter.\n";
+            print "Continuing because of --skipversion.\n";
         }
     }
 }
