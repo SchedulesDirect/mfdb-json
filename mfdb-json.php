@@ -1256,8 +1256,6 @@ function insertJSON(array $jsonProgramsToRetrieve)
             else
             {
                 printMSG("skipPersonID is TRUE; Skipping insert of $pid:\n$item");
-                $tt = fgets(STDIN);
-
             }
 
             if (isset($jsonProgram["genres"]))
