@@ -880,7 +880,7 @@ function getSchedules($stationIDsToFetch)
 
         foreach ($item["programs"] as $programData)
         {
-            if (array_key_exists("md5", $programData))
+            if (isset($programData["md5"]))
             {
                 $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
             }
