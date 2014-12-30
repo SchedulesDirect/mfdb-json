@@ -1388,7 +1388,7 @@ function insertSchedule()
     VALUES(:chanid,:starttime,:system,:rating)");
 
     $insertProgramGenreMyth = $dbh->prepare("INSERT INTO t_programgenres(chanid, starttime, relevance, genre)
-    VALUES(:chanid,:starttime,0,:genre)");
+    VALUES(:chanid,:starttime,:relevance,:genre)");
 
     $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid, CAST(xmltvid AS UNSIGNED) AS xmltvid FROM channel
 WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
@@ -2026,12 +2026,14 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if (isset($programJSON["genres"]))
             {
-                print "Processing $programID\n";
+                $relevance = 0;
                 foreach ($programJSON["genres"] as $genre)
                 {
                     $insertProgramGenreMyth->execute(array("chanid"    => $chanID,
                                                            "starttime" => $programStartTimeMyth,
+                                                           "relevance" => $relevance,
                                                            "genre"     => $genre));
+                    $relevance++;
                 }
 
             }
