@@ -1387,7 +1387,7 @@ function insertSchedule()
     $insertProgramRatingMyth = $dbh->prepare("INSERT INTO t_programrating(chanid, starttime, system, rating)
     VALUES(:chanid,:starttime,:system,:rating)");
 
-    $insertProgramGenreMyth = $dbh->prepare("INSERT INTO t_programgenre(chanid, starttime, relevance, genre)
+    $insertProgramGenreMyth = $dbh->prepare("INSERT INTO t_programgenres(chanid, starttime, relevance, genre)
     VALUES(:chanid,:starttime,0,:genre)");
 
     $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid, CAST(xmltvid AS UNSIGNED) AS xmltvid FROM channel
