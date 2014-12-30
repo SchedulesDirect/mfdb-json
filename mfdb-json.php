@@ -1265,14 +1265,6 @@ function insertJSON(array $jsonProgramsToRetrieve)
                     }
                 }
             }
-
-            if (isset($jsonProgram["genres"]))
-            {
-                foreach ($jsonProgram["genres"] as $relevance => $genre)
-                {
-
-                }
-            }
         }
 
         if ($debug === FALSE)
@@ -1355,6 +1347,9 @@ function insertSchedule()
     $dbh->exec("DROP TABLE IF EXISTS t_programrating");
     $dbh->exec("CREATE TABLE t_programrating LIKE programrating");
 
+    $dbh->exec("DROP TABLE IF EXISTS t_programgenres");
+    $dbh->exec("CREATE TABLE t_programgenres LIKE programgenres");
+
     $dbSchema = setting("DBSchemaVer");
 
     if ($dbSchema > "1318")
@@ -1391,6 +1386,9 @@ function insertSchedule()
 
     $insertProgramRatingMyth = $dbh->prepare("INSERT INTO t_programrating(chanid, starttime, system, rating)
     VALUES(:chanid,:starttime,:system,:rating)");
+
+    $insertProgramGenreMyth = $dbh->prepare("INSERT INTO t_programgenre(chanid, starttime, relevance, genre)
+    VALUES(:chanid,:starttime,0,:genre)");
 
     $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid, CAST(xmltvid AS UNSIGNED) AS xmltvid FROM channel
 WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
@@ -2024,6 +2022,17 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                                                          "role"      => $mythTVRole));
                     }
                 }
+            }
+
+            if (isset($programJSON["genres"]))
+            {
+                foreach ($programJSON["genres"] as $genre)
+                {
+                    $insertProgramGenreMyth->execute(array("chanid"    => $chanID,
+                                                           "starttime" => $programStartTimeMyth,
+                                                           "genre"     => $genre));
+                }
+
             }
 
             if ($dbSchema > "1318")
