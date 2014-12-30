@@ -2257,6 +2257,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
     $dbh->exec("DROP TABLE programrating");
     $dbh->exec("RENAME TABLE t_programrating TO programrating");
+
+    $dbh->exec("DROP TABLE programgenre");
+    $dbh->exec("RENAME TABLE t_programgenre TO programgenre");
 }
 
 function tempdir($type)
