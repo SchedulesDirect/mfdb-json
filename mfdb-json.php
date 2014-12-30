@@ -2026,6 +2026,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if (isset($programJSON["genres"]))
             {
+                print "Processing $programID\n";
                 foreach ($programJSON["genres"] as $genre)
                 {
                     $insertProgramGenreMyth->execute(array("chanid"    => $chanID,
