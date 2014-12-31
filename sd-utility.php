@@ -628,8 +628,9 @@ while (!$done)
             linkSchedulesDirectLineup();
             break;
         case "U":
-            $lineup = getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
-            if ($lineup != "")
+            list($lineup, $isDeleted) =
+                getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
+            if ($lineup != "" AND $isDeleted === FALSE)
             {
                 updateChannelTable($lineup);
             }
@@ -1113,9 +1114,9 @@ function linkSchedulesDirectLineup()
         return;
     }
 
-    $lineup = getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
+    list ($lineup, $isDeleted) = getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
 
-    if ($lineup == "")
+    if ($lineup == "" OR $isDeleted === TRUE)
     {
         return;
     }
@@ -1152,9 +1153,9 @@ function printLineup()
      * First we want to get the lineup that we're interested in.
      */
 
-    $lineup = getLineupFromNumber(strtoupper(readline("Lineup to print (# or lineup):>")));
+    list($lineup, $isDeleted) = getLineupFromNumber(strtoupper(readline("Lineup to print (# or lineup):>")));
 
-    if ($lineup == "")
+    if ($lineup == "" OR $isDeleted)
     {
         return;
     }
@@ -1444,7 +1445,7 @@ function deleteLineupFromSchedulesDirect()
     $deleteFromLocalCache = $dbhSD->prepare("DELETE FROM SDlineupCache WHERE lineup=:lineup");
     $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
 
-    $toDelete = getLineupFromNumber(strtoupper(readline("Lineup to Delete (# or lineup):>")));
+    list($toDelete,) = getLineupFromNumber(strtoupper(readline("Lineup to Delete (# or lineup):>")));
 
     if ($toDelete == "")
     {
@@ -1927,11 +1928,18 @@ function getLineupFromNumber($numberOrLineup)
 
         if (!array_key_exists($foo, $sdStatus["lineups"]))
         {
-            return "";
+            return array("", "");
         }
         else
         {
-            return $sdStatus["lineups"][$numberOrLineup]["ID"];
+            if (isset($sdStatus["lineups"][$numberOrLineup]["isDeleted"]))
+            {
+                return array($sdStatus["lineups"][$numberOrLineup]["ID"], TRUE);
+            }
+            else
+            {
+                return array($sdStatus["lineups"][$numberOrLineup]["ID"], FALSE);
+            }
         }
     }
     else
