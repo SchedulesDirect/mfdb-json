@@ -205,7 +205,7 @@ function printStatus($sdStatus)
         print "isMythTV status is:\n";
         var_dump($isMythTV);
         print "\n\nLineup array is:\n";
-        var_dump($lineupArray);
+        var_dump($sdStatus);
     }
 
     if (count($sdStatus["lineups"]) == 0)
@@ -251,7 +251,7 @@ function printStatus($sdStatus)
 
     foreach ($sdStatus["lineups"] as $lineupNumber => $v)
     {
-        $lineup = $v["lineup"];
+        $lineup = $v["ID"];
         $serverModified = $v["modified"];
         if (isset($v["isDeleted"]))
         {
