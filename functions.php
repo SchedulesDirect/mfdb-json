@@ -208,139 +208,148 @@ function printStatus($sdStatus)
         var_dump($lineupArray);
     }
 
-    if (count($lineupArray))
+    if (count($lineupArray) == 0)
     {
-        print "The following lineups are in your account at Schedules Direct:\n\n";
+        print "\nWARNING: *** No lineups configured at Schedules Direct. ***\n";
+
+        return;
+    }
+
+
+    print "The following lineups are in your account at Schedules Direct:\n\n";
+
+    if ($isMythTV)
+    {
+        if ($printFancyTable)
+        {
+            $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
+            $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update",
+                                         "Status"));
+        }
+        else
+        {
+            print "Number\tLineup\tServer modified\tMythTV videosource update\tStatus\n";
+        }
+    }
+    else
+    {
+        if ($printFancyTable)
+        {
+            $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20)));
+            $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
+        }
+        else
+        {
+            print "Number\tLineup\tServer modified\n";
+        }
+    }
+
+    if ($debug)
+    {
+        print "Temp printout.\n";
+        print $lineupData;
+    }
+
+    foreach ($lineupArray as $lineupNumber => $v)
+    {
+        $lineup = $v["lineup"];
+        $serverModified = $v["modified"];
+        if (isset($v["isDeleted"]))
+        {
+            $lineupIsDeleted = TRUE;
+        }
+        else
+        {
+            $lineupIsDeleted = FALSE;
+        }
+
+        if ($debug)
+        {
+            print "Raw lineup:\n";
+            var_dump($v);
+        }
 
         if ($isMythTV)
         {
-            if ($printFancyTable)
+            if (count($videosourceModifiedArray))
             {
-                $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
-                $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update",
-                                             "Status"));
+                if (array_key_exists($lineup, $videosourceModifiedArray))
+                {
+                    $mythModified = $videosourceModifiedArray[$lineup];
+                }
+                else
+                {
+                    $mythModified = "";
+                }
             }
             else
             {
-                print "Number\tLineup\tServer modified\tMythTV videosource update\tStatus\n";
+                $mythModified = "";
+            }
+
+            if ($serverModified > $mythModified)
+            {
+                if ($lineupIsDeleted === FALSE)
+                {
+                    $updatedLineupsToRefresh[$lineup] = $serverModified;
+                }
+
+                if ($printFancyTable)
+                {
+                    if ($lineupIsDeleted === FALSE)
+                    {
+                        $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
+                                                     "Updated"));
+                    }
+                    else
+                    {
+                        $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
+                                                     "DELETED"));
+                    }
+                    continue;
+                }
+                else
+                {
+                    print "$lineupNumber\t$lineup\t$serverModified\n";
+                }
+            }
+
+            if ($printFancyTable)
+            {
+                $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
+            }
+            else
+            {
+                print "$lineupNumber\t$lineup\t$serverModified\t$mythModified\n";
             }
         }
         else
         {
             if ($printFancyTable)
             {
-                $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20)));
-                $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
+                $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
             }
             else
             {
-                print "Number\tLineup\tServer modified\n";
+                print "$lineupNumber\t$lineup\t$serverModified\n";
             }
-        }
-
-        if ($debug)
-        {
-            print "Temp printout.\n";
-            print $lineupData;
-        }
-
-        foreach ($lineupArray as $lineupNumber => $v)
-        {
-            $lineup = $v["lineup"];
-            $serverModified = $v["modified"];
-            if (isset($v["isDeleted"]))
+            if ($lineupIsDeleted === FALSE)
             {
-                $lineupIsDeleted = TRUE;
-            }
-            else
-            {
-                $lineupIsDeleted = FALSE;
-            }
-
-            if ($debug)
-            {
-                print "Raw lineup:\n";
-                var_dump($v);
-            }
-
-            if ($isMythTV)
-            {
-                if (count($videosourceModifiedArray))
-                {
-                    if (array_key_exists($lineup, $videosourceModifiedArray))
-                    {
-                        $mythModified = $videosourceModifiedArray[$lineup];
-                    }
-                    else
-                    {
-                        $mythModified = "";
-                    }
-                }
-                else
-                {
-                    $mythModified = "";
-                }
-
-                if ($serverModified > $mythModified)
-                {
-                    $updatedLineupsToRefresh[$lineup] = $serverModified;
-                    if ($printFancyTable)
-                    {
-                        if ($lineupIsDeleted === FALSE)
-                        {
-                            $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
-                                                         "Updated"));
-                        }
-                        else
-                        {
-                            $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
-                                                         "DELETED"));
-                        }
-                        continue;
-                    }
-                    else
-                    {
-                        print "$lineupNumber\t$lineup\t$serverModified\n";
-                    }
-                }
-
-                if ($printFancyTable)
-                {
-                    $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
-                }
-                else
-                {
-                    print "$lineupNumber\t$lineup\t$serverModified\t$mythModified\n";
-                }
-            }
-            else
-            {
-                if ($printFancyTable)
-                {
-                    $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
-                }
-                else
-                {
-                    print "$lineupNumber\t$lineup\t$serverModified\n";
-                }
                 $updatedLineupsToRefresh[$lineup] = $serverModified;
             }
         }
-
-        if ($printFancyTable)
-        {
-            print $lineupData;
-        }
-
-        if (count($updatedLineupsToRefresh))
-        {
-            updateLocalLineupCache($updatedLineupsToRefresh);
-        }
     }
-    else
+
+    if ($printFancyTable)
     {
-        print "\nWARNING: *** No lineups configured at Schedules Direct. ***\n";
+        print $lineupData;
     }
+
+    if (count($updatedLineupsToRefresh))
+    {
+        updateLocalLineupCache($updatedLineupsToRefresh);
+    }
+
 }
 
 function exceptionErrorDump($errorReq, $errorResp, $errorMessage)
