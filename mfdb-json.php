@@ -1038,8 +1038,6 @@ function insertJSON(array $jsonProgramsToRetrieve)
     $insertPersonSD = $dbhSD->prepare("INSERT INTO SDpeople(personID,name) VALUES(:personID, :name)");
     $updatePersonSD = $dbhSD->prepare("UPDATE SDpeople SET name=:name WHERE personID=:personID");
 
-    $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
-
     $insertCreditSD = $dbhSD->prepare("INSERT INTO SDcredits(personID,programID,role)
     VALUES(:personID,:pid,:role)");
 
@@ -1128,143 +1126,6 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
             $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
                                        "json"      => $item));
-
-            $skipPersonID = FALSE;
-
-            if (isset($jsonProgram["genres"]))
-            {
-                $relevance = 0; // We're going to assume that at some point we might do something with relevance.
-                foreach ($jsonProgram["genres"] as $g)
-                {
-                    switch ($g)
-                    {
-                        case "Adults only":
-                        case "Erotic":
-                            $skipPersonID = TRUE; // Adult content typically does not have personID.
-                            break;
-                    }
-                    $insertProgramGenresSD->execute(array("pid"       => $pid,
-                                                          "relevance" => ++$relevance, "genre" => $g));
-                }
-            }
-
-            if (isset($jsonProgram["cast"]))
-            {
-                foreach ($jsonProgram["cast"] as $credit)
-                {
-                    if (!isset($credit["role"]))
-                    {
-                        printMSG("No role?");
-                        printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-                        printMSG("Program: $pid. No role in cast.");
-                        var_dump($jsonProgram["cast"]);
-                        exit;
-                    }
-                    else
-                    {
-                        $role = $credit["role"];
-                    }
-
-                    $name = $credit["name"];
-
-                    if (!isset($credit["personId"]))
-                    {
-                        if ($skipPersonID === FALSE)
-                        {
-                            printMSG("$jsonFileToProcess:$pid does not have a personId.");
-                            $debug = TRUE; // Set it to true
-                        }
-                    }
-                    else
-                    {
-                        $personID = $credit["personId"];
-
-                        if (!isset($peopleCacheSD[$personID]))
-                        {
-                            $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
-                            $peopleCacheSD[$personID] = $name;
-                        }
-
-                        if ($peopleCacheSD[$personID] != $name)
-                        {
-                            $updatePersonSD->execute(array("personID" => (int)$personID, "name" => $name));
-                        }
-
-                        if (!isset($creditCache["$personID-$pid-$role"]))
-                        {
-                            $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
-                                                           "role"     => $role));
-                            $creditCache["$personID-$pid-$role"] = 1;
-                        }
-                    }
-
-                    if (!isset($peopleCacheMyth[$name]))
-                    {
-                        $insertPersonMyth->execute(array("name" => $name));
-                        $id = $dbh->lastInsertId();
-                        $peopleCacheMyth[$name] = $id;
-                    }
-                }
-            }
-
-            if (isset($jsonProgram["crew"]))
-            {
-                foreach ($jsonProgram["crew"] as $credit)
-                {
-                    if (!isset($credit["role"]))
-                    {
-                        printMSG("No role?");
-                        printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-                        printMSG("Program: $pid. No role in crew.");
-                        var_dump($jsonProgram["crew"]);
-                        exit;
-                    }
-                    else
-                    {
-                        $role = $credit["role"];
-                    }
-
-                    $name = $credit["name"];
-
-                    if (!isset($credit["personId"]))
-                    {
-                        if ($skipPersonID === FALSE)
-                        {
-                            printMSG("$jsonFileToProcess:$pid does not have a personId.");
-                            $debug = TRUE; // Set it to true
-                        }
-                    }
-                    else
-                    {
-                        $personID = $credit["personId"];
-
-                        if (!isset($peopleCacheSD[$personID]))
-                        {
-                            $insertPersonSD->execute(array("personID" => (int)$personID, "name" => $name));
-                            $peopleCacheSD[$personID] = $name;
-                        }
-
-                        if ($peopleCacheSD[$personID] != $name)
-                        {
-                            $updatePersonSD->execute(array("personID" => (int)$personID, "name" => $name));
-                        }
-
-                        if (!isset($creditCache["$personID-$pid-$role"]))
-                        {
-                            $insertCreditSD->execute(array("personID" => (int)$personID, "pid" => $pid,
-                                                           "role"     => $role));
-                            $creditCache["$personID-$pid-$role"] = 1;
-                        }
-                    }
-
-                    if (!isset($peopleCacheMyth[$name]))
-                    {
-                        $insertPersonMyth->execute(array("name" => $name));
-                        $id = $dbh->lastInsertId();
-                        $peopleCacheMyth[$name] = $id;
-                    }
-                }
-            }
         }
 
         if ($debug === FALSE)
@@ -1292,6 +1153,8 @@ function insertSchedule()
     global $debug;
     global $errorWarning;
 
+    $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
+    
     $SchedulesDirectRoleToMythTv = array("Actor"                               => "actor",
                                          "Director"                            => "director",
                                          "Executive Producer"                  => "executive_producer",
@@ -1539,7 +1402,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if ($pj == "")
             {
-                debugMSG("Error retrieving $programID from local database. Raw data was:");
+                debugMSG("Error retrieving $programID from local database.");
                 $errorWarning = TRUE;
                 continue;
             }
@@ -1554,6 +1417,96 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 continue;
             }
 
+            $skipPersonID = FALSE;
+
+            if (isset($programJSON["genres"]))
+            {
+                foreach ($programJSON["genres"] as $g)
+                {
+                    switch ($g)
+                    {
+                        case "Adults only":
+                        case "Erotic":
+                            $skipPersonID = TRUE; // Adult content typically does not have personID.
+                            break;
+                    }
+                }
+            }
+
+            if (isset($programJSON["cast"]))
+            {
+                foreach ($programJSON["cast"] as $credit)
+                {
+                    if (!isset($credit["role"]))
+                    {
+                        printMSG("No role?");
+                        printMSG("Send the following to grabber@schedulesdirect.org\n\n");
+                        printMSG("Program: $programID. No role in cast.");
+                        var_dump($programJSON["cast"]);
+                        exit;
+                    }
+                    else
+                    {
+                        $role = $credit["role"];
+                    }
+
+                    $name = $credit["name"];
+
+                    if (!isset($credit["personId"]))
+                    {
+                        if ($skipPersonID === FALSE)
+                        {
+                            printMSG("$programID does not have a personId.");
+                            $debug = TRUE; // Set it to true
+                        }
+                    }
+
+                    if (!isset($peopleCacheMyth[$name]))
+                    {
+                        $insertPersonMyth->execute(array("name" => $name));
+                        $id = $dbh->lastInsertId();
+                        $peopleCacheMyth[$name] = $id;
+                    }
+                }
+            }
+
+            if (isset($programJSON["crew"]))
+            {
+                foreach ($programJSON["crew"] as $credit)
+                {
+                    if (!isset($credit["role"]))
+                    {
+                        printMSG("No role?");
+                        printMSG("Send the following to grabber@schedulesdirect.org\n\n");
+                        printMSG("Program: $programID. No role in crew.");
+                        var_dump($programJSON["crew"]);
+                        exit;
+                    }
+                    else
+                    {
+                        $role = $credit["role"];
+                    }
+
+                    $name = $credit["name"];
+
+                    if (!isset($credit["personId"]))
+                    {
+                        if ($skipPersonID === FALSE)
+                        {
+                            printMSG("$programID does not have a personId.");
+                            $debug = TRUE; // Set it to true
+                        }
+                    }
+
+                    if (!isset($peopleCacheMyth[$name]))
+                    {
+                        $insertPersonMyth->execute(array("name" => $name));
+                        $id = $dbh->lastInsertId();
+                        $peopleCacheMyth[$name] = $id;
+                    }
+                }
+            }
+            
             $md5 = $schedule["md5"];
             $air_datetime = $schedule["airDateTime"];
             $duration = $schedule["duration"];
