@@ -569,13 +569,11 @@ while (!$done)
             deleteLineupFromSchedulesDirect();
             break;
         case "4":
-            $lineupArray = getSchedulesDirectLineups();
-
-            if (count($lineupArray))
+            if (count($sdStatus["lineups"]))
             {
-                foreach ($lineupArray as $v)
+                foreach ($sdStatus["lineups"] as $v)
                 {
-                    $lineupToRefresh[$v["lineup"]] = 1;
+                    $lineupToRefresh[$v["ID"]] = 1;
                 }
                 updateLocalLineupCache($lineupToRefresh);
             }
@@ -1646,7 +1644,7 @@ function displayLocalVideoSources()
         print "\nWARNING: *** No videosources configured in MythTV. ***\n";
     }
 }
-
+/*
 function getSchedulesDirectLineups()
 {
     global $sdStatus;
@@ -1662,6 +1660,7 @@ function getSchedulesDirectLineups()
 
     return ($schedulesDirectLineups);
 }
+*/
 
 function checkDatabase()
 {

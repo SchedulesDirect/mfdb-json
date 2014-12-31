@@ -153,7 +153,7 @@ function getStatus()
 function printStatus($sdStatus)
 {
     global $updatedLineupsToRefresh;
-    global $lineupArray;
+    // global $lineupArray;
     global $isMythTV;
     global $debug;
     global $printFancyTable;
@@ -198,7 +198,7 @@ function printStatus($sdStatus)
         }
     }
 
-    $lineupArray = getSchedulesDirectLineups();
+    // $lineupArray = getSchedulesDirectLineups();
 
     if ($debug)
     {
@@ -208,7 +208,7 @@ function printStatus($sdStatus)
         var_dump($lineupArray);
     }
 
-    if (count($lineupArray) == 0)
+    if (count($sdStatus["lineups"]) == 0)
     {
         print "\nWARNING: *** No lineups configured at Schedules Direct. ***\n";
 
@@ -249,7 +249,7 @@ function printStatus($sdStatus)
         print $lineupData;
     }
 
-    foreach ($lineupArray as $lineupNumber => $v)
+    foreach ($sdStatus["lineups"] as $lineupNumber => $v)
     {
         $lineup = $v["lineup"];
         $serverModified = $v["modified"];
@@ -348,7 +348,6 @@ function printStatus($sdStatus)
     {
         updateLocalLineupCache($updatedLineupsToRefresh);
     }
-
 }
 
 function exceptionErrorDump($errorReq, $errorResp, $errorMessage)
