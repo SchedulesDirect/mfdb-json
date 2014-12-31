@@ -215,7 +215,6 @@ function printStatus($sdStatus)
         return;
     }
 
-
     print "The following lineups are in your account at Schedules Direct:\n\n";
 
     if ($isMythTV)
