@@ -248,11 +248,19 @@ function printStatus($sdStatus)
         {
             $lineup = $v["lineup"];
             $serverModified = $v["modified"];
+            if (isset($v["isDeleted"]))
+            {
+                $lineupIsDeleted = TRUE;
+            }
+            else
+            {
+                $lineupIsDeleted = FALSE;
+            }
 
             if ($debug)
             {
-                print "lineup is $lineup\n";
-                print "serverModified is $serverModified\n";
+                print "Raw lineup:\n";
+                var_dump($v);
             }
 
             if ($isMythTV)
@@ -278,8 +286,16 @@ function printStatus($sdStatus)
                     $updatedLineupsToRefresh[$lineup] = $serverModified;
                     if ($printFancyTable)
                     {
-                        $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
-                                                     "Updated"));
+                        if ($lineupIsDeleted === FALSE)
+                        {
+                            $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
+                                                         "Updated"));
+                        }
+                        else
+                        {
+                            $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
+                                                         "DELETED"));
+                        }
                         continue;
                     }
                     else
@@ -287,13 +303,7 @@ function printStatus($sdStatus)
                         print "$lineupNumber\t$lineup\t$serverModified\n";
                     }
                 }
-                /*
-                            if ($heStatus[$he] == "D")
-                            {
-                                $lineupData->appendRow(array($id, $serverModified, $mythModified, "DELETED"));
-                                continue;
-                            }
-                */
+
                 if ($printFancyTable)
                 {
                     $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
