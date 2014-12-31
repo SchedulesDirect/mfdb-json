@@ -153,7 +153,6 @@ function getStatus()
 function printStatus($sdStatus)
 {
     global $updatedLineupsToRefresh;
-    // global $lineupArray;
     global $isMythTV;
     global $debug;
     global $printFancyTable;

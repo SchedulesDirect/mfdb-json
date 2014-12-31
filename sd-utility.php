@@ -36,7 +36,7 @@ $passwordFromDB = "";
 $passwordHash = "";
 $dbWithoutMythtv = FALSE;
 $useServiceAPI = FALSE;
-$lineupArray = array();
+//$lineupArray = array();
 $forceRun = FALSE;
 $printFancyTable = TRUE;
 $printCountries = FALSE;
@@ -1919,19 +1919,19 @@ atsc_minor_chan FROM channel where sourceid=:sid");
 
 function getLineupFromNumber($numberOrLineup)
 {
-    global $lineupArray;
+    global $sdStatus;
 
     if (strlen($numberOrLineup) < 3)
     {
         $foo = (int)$numberOrLineup;
 
-        if (!array_key_exists($foo, $lineupArray))
+        if (!array_key_exists($foo, $sdStatus["lineups"]))
         {
             return "";
         }
         else
         {
-            return $lineupArray[$numberOrLineup]["lineup"];
+            return $sdStatus["lineups"][$numberOrLineup]["ID"];
         }
     }
     else
