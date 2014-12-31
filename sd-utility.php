@@ -1644,23 +1644,6 @@ function displayLocalVideoSources()
         print "\nWARNING: *** No videosources configured in MythTV. ***\n";
     }
 }
-/*
-function getSchedulesDirectLineups()
-{
-    global $sdStatus;
-    $schedulesDirectLineups = array();
-
-    $counter = "0";
-
-    foreach ($sdStatus["lineups"] as $hv)
-    {
-        $counter++;
-        $schedulesDirectLineups[$counter] = array("lineup" => $hv["ID"], "modified" => $hv["modified"]);
-    }
-
-    return ($schedulesDirectLineups);
-}
-*/
 
 function checkDatabase()
 {

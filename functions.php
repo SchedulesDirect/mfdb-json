@@ -198,8 +198,6 @@ function printStatus($sdStatus)
         }
     }
 
-    // $lineupArray = getSchedulesDirectLineups();
-
     if ($debug)
     {
         print "isMythTV status is:\n";
