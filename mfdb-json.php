@@ -1426,39 +1426,42 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if (isset($programJSON["cast"]))
+            foreach (array("cast", "crew") as $processing)
             {
-                foreach ($programJSON["cast"] as $credit)
+                if (isset($programJSON[$processing]))
                 {
-                    if (!isset($credit["role"]))
+                    foreach ($programJSON[$processing] as $credit)
                     {
-                        printMSG("No role?");
-                        printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-                        printMSG("Program: $programID. No role in cast.");
-                        var_dump($programJSON["cast"]);
-                        exit;
-                    }
-
-                    $name = $credit["name"];
-
-                    if (!isset($credit["personId"]))
-                    {
-                        if ($skipPersonID === FALSE)
+                        if (!isset($credit["role"]))
                         {
-                            printMSG("$programID does not have a personId.");
-                            $debug = TRUE; // Set it to true
+                            printMSG("No role?");
+                            printMSG("Send the following to grabber@schedulesdirect.org\n\n");
+                            printMSG("Program: $programID. No role in cast.");
+                            var_dump($programJSON[$processing]);
+                            exit;
                         }
-                    }
 
-                    if (!isset($peopleCacheMyth[$name]))
-                    {
-                        $insertPersonMyth->execute(array("name" => $name));
-                        $id = $dbh->lastInsertId();
-                        $peopleCacheMyth[$name] = $id;
+                        $name = $credit["name"];
+
+                        if (!isset($credit["personId"]))
+                        {
+                            if ($skipPersonID === FALSE)
+                            {
+                                printMSG("$programID does not have a personId.");
+                                $debug = TRUE; // Set it to true
+                            }
+                        }
+
+                        if (!isset($peopleCacheMyth[$name]))
+                        {
+                            $insertPersonMyth->execute(array("name" => $name));
+                            $id = $dbh->lastInsertId();
+                            $peopleCacheMyth[$name] = $id;
+                        }
                     }
                 }
             }
-
+            /*
             if (isset($programJSON["crew"]))
             {
                 foreach ($programJSON["crew"] as $credit)
@@ -1482,7 +1485,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     }
                 }
             }
-
+*/
             $md5 = $schedule["md5"];
             $air_datetime = $schedule["airDateTime"];
             $duration = $schedule["duration"];
