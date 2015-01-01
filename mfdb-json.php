@@ -1154,7 +1154,7 @@ function insertSchedule()
     global $errorWarning;
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
-    
+
     $SchedulesDirectRoleToMythTv = array("Actor"                               => "actor",
                                          "Director"                            => "director",
                                          "Executive Producer"                  => "executive_producer",
@@ -1421,15 +1421,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if (isset($programJSON["genres"]))
             {
-                foreach ($programJSON["genres"] as $g)
+                if (in_array(array("Adults only", "Erotic"), $programJSON["genres"]))
                 {
-                    switch ($g)
-                    {
-                        case "Adults only":
-                        case "Erotic":
-                            $skipPersonID = TRUE; // Adult content typically does not have personID.
-                            break;
-                    }
+                    $skipPersonID = TRUE; // Adult content typically does not have personID.
                 }
             }
 
@@ -1444,10 +1438,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         printMSG("Program: $programID. No role in cast.");
                         var_dump($programJSON["cast"]);
                         exit;
-                    }
-                    else
-                    {
-                        $role = $credit["role"];
                     }
 
                     $name = $credit["name"];
@@ -1474,19 +1464,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             {
                 foreach ($programJSON["crew"] as $credit)
                 {
-                    if (!isset($credit["role"]))
-                    {
-                        printMSG("No role?");
-                        printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-                        printMSG("Program: $programID. No role in crew.");
-                        var_dump($programJSON["crew"]);
-                        exit;
-                    }
-                    else
-                    {
-                        $role = $credit["role"];
-                    }
-
                     $name = $credit["name"];
 
                     if (!isset($credit["personId"]))
@@ -1506,7 +1483,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     }
                 }
             }
-            
+
             $md5 = $schedule["md5"];
             $air_datetime = $schedule["airDateTime"];
             $duration = $schedule["duration"];
