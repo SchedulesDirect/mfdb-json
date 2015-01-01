@@ -1029,7 +1029,6 @@ function insertJSON(array $jsonProgramsToRetrieve)
     global $dbhSD;
     global $dlProgramTempDir;
     global $debug;
-    global $peopleCacheMyth;
 
     $insertJSON = $dbhSD->prepare("INSERT INTO SDprogramCache(programID,md5,json)
             VALUES (:programID,:md5,:json)
