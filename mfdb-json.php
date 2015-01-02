@@ -1430,9 +1430,12 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if (isset($programJSON["genres"]))
             {
-                if (in_array($adultContent, $programJSON["genres"]))
+                foreach ($programJSON["genres"] as $g)
                 {
-                    $skipPersonID = TRUE; // Adult content typically does not have personID.
+                    if (in_array($adultContent, $g))
+                    {
+                        $skipPersonID = TRUE; // Adult content typically does not have personID.
+                    }
                 }
             }
 
