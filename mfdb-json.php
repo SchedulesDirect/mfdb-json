@@ -1155,6 +1155,7 @@ function insertSchedule()
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
     $SchedulesDirectRoleToMythTv = array("Actor"                               => "actor",
+                                         "Voice"                               => "actor",
                                          "Director"                            => "director",
                                          "Executive Producer"                  => "executive_producer",
                                          "Co-Producer"                         => "producer",
@@ -1172,9 +1173,11 @@ function insertSchedule()
                                          "Consulting Producer"                 => "producer",
                                          "Score Producer"                      => "producer",
                                          "Executive Producer, English Version" => "producer",
+                                         "Co-Writer"                           => "writer",
                                          "Screenwriter"                        => "writer",
                                          "Writer"                              => "writer",
                                          "Guest Star"                          => "guest_star",
+                                         "Anchor"                              => "host",
                                          "Host"                                => "host",
                                          "Presenter"                           => "presenter",
                                          "Guest"                               => "guest"
