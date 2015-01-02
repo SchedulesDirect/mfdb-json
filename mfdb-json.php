@@ -1994,8 +1994,8 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     $debug = TRUE;
                 }
             }
-            $dbh->commit();
         }
+        $dbh->commit();
     }
 
     /* These don't seem to be in the On data:
