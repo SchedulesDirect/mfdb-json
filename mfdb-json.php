@@ -1471,20 +1471,17 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                             $personID = $peopleCacheMyth[$name];
                         }
 
-                        if (isset($credit["role"]))
+                        if (isset($SchedulesDirectRoleToMythTv[$credit["role"]]))
                         {
-                            if (isset($SchedulesDirectRoleToMythTv[$credit["role"]]))
-                            {
-                                $mythTVRole = $SchedulesDirectRoleToMythTv[$credit["role"]];
-                                $insertCreditMyth->execute(array("person"    => $personID,
-                                                                 "chanid"    => $chanID,
-                                                                 "starttime" => $programStartTimeMyth,
-                                                                 "role"      => $mythTVRole));
-                            }
-                            else
-                            {
-                                debugMSG("New role: {$credit["role"]}");
-                            }
+                            $mythTVRole = $SchedulesDirectRoleToMythTv[$credit["role"]];
+                            $insertCreditMyth->execute(array("person"    => $personID,
+                                                             "chanid"    => $chanID,
+                                                             "starttime" => $programStartTimeMyth,
+                                                             "role"      => $mythTVRole));
+                        }
+                        else
+                        {
+                            debugMSG("New role: {$credit["role"]}");
                         }
                     }
                 }
