@@ -1416,6 +1416,14 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 continue;
             }
 
+            $md5 = $schedule["md5"];
+            $air_datetime = $schedule["airDateTime"];
+            $duration = $schedule["duration"];
+
+            $programStartTimeMyth = str_replace("T", " ", $air_datetime);
+            $programStartTimeMyth = rtrim($programStartTimeMyth, "Z");
+            $programEndTimeMyth = gmdate("Y-m-d H:i:s", strtotime("$air_datetime + $duration seconds"));
+
             $skipPersonID = FALSE;
 
             if (isset($programJSON["genres"]))
@@ -1455,8 +1463,28 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         if (!isset($peopleCacheMyth[$name]))
                         {
                             $insertPersonMyth->execute(array("name" => $name));
-                            $id = $dbh->lastInsertId();
-                            $peopleCacheMyth[$name] = $id;
+                            $personID = $dbh->lastInsertId();
+                            $peopleCacheMyth[$name] = $personID;
+                        }
+                        else
+                        {
+                            $personID = $peopleCacheMyth[$name];
+                        }
+
+                        if (isset($credit["role"]))
+                        {
+                            if (isset($SchedulesDirectRoleToMythTv[$credit["role"]]))
+                            {
+                                $mythTVRole = $SchedulesDirectRoleToMythTv[$credit["role"]];
+                                $insertCreditMyth->execute(array("person"    => $personID,
+                                                                 "chanid"    => $chanID,
+                                                                 "starttime" => $programStartTimeMyth,
+                                                                 "role"      => $mythTVRole));
+                            }
+                            else
+                            {
+                                debugMSG("New role: {$credit["role"]}");
+                            }
                         }
                     }
                 }
@@ -1486,61 +1514,41 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 */
-            $md5 = $schedule["md5"];
-            $air_datetime = $schedule["airDateTime"];
-            $duration = $schedule["duration"];
 
-            $programStartTimeMyth = str_replace("T", " ", $air_datetime);
-            $programStartTimeMyth = rtrim($programStartTimeMyth, "Z");
-            $programEndTimeMyth = gmdate("Y-m-d H:i:s", strtotime("$air_datetime + $duration seconds"));
 
             if (isset($schedule["audioProperties"]))
             {
                 foreach ($schedule["audioProperties"] as $ap)
                 {
-                    if ($ap == "cc")
+                    switch ($ap)
                     {
-                        $isClosedCaption = TRUE;
-                    }
-
-                    if ($ap == "dvs")
-                    {
-                        $dvs = TRUE;
-                    }
-
-                    if ($ap == "Dolby")
-                    {
-                        $dolbyType = "dolby";
-                    }
-
-                    if ($ap == "DD")
-                    {
-                        $dolbyType = "Dolby Digital";
-                    }
-
-                    if ($ap == "DD 5.1")
-                    {
-                        $dolbyType = "Dolby Digital 5.1";
-                    }
-
-                    if ($ap == "dubbed")
-                    {
-                        $dubbed = TRUE;
-                    }
-
-                    if ($ap == "stereo")
-                    {
-                        $isStereo = TRUE;
-                    }
-
-                    if ($ap == "subtitled")
-                    {
-                        $isSubtitled = TRUE;
-                    }
-
-                    if ($ap == "surround")
-                    {
-                        $isSurround = TRUE;
+                        case "cc":
+                            $isClosedCaption = TRUE;
+                            break;
+                        case "dvs":
+                            $dvs = TRUE;
+                            break;
+                        case "Dolby":
+                            $dolbyType = "dolby";
+                            break;
+                        case "DD":
+                            $dolbyType = "Dolby Digital";
+                            break;
+                        case "DD 5.1":
+                            $dolbyType = "Dolby Digital 5.1";
+                            break;
+                        case "dubbed":
+                            $dubbed = TRUE;
+                            break;
+                        case "stereo":
+                            $isStereo = TRUE;
+                            break;
+                        case "subtitled":
+                            $isSubtitled = TRUE;
+                            break;
+                        case "surround":
+                            $isSurround = TRUE;
+                            break;
                     }
                 }
             }
@@ -1549,29 +1557,24 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             {
                 foreach ($schedule["videoProperties"] as $vp)
                 {
-                    if ($vp == "3d")
+                    switch ($vp)
                     {
-                        $is3d = TRUE;
-                    }
+                        case "3d":
+                            $is3d = TRUE;
+                            break;
+                        case "enhanced":
+                            $isEnhancedResolution = TRUE;
+                            break;
+                        case "hdtv":
+                            $isHDTV = TRUE;
+                            break;
+                        case "letterbox":
+                            $isLetterboxed = TRUE;
+                            break;
+                        case "sdtv":
+                            $isSDTV = TRUE; // Not used in MythTV
+                            break;
 
-                    if ($vp == "enhanced")
-                    {
-                        $isEnhancedResolution = TRUE;
-                    }
-
-                    if ($vp == "hdtv")
-                    {
-                        $isHDTV = TRUE;
-                    }
-
-                    if ($vp == "letterbox")
-                    {
-                        $isLetterboxed = TRUE;
-                    }
-
-                    if ($vp == "sdtv")
-                    {
-                        $isSDTV = TRUE; //Not used in MythTV
                     }
                 }
             }
@@ -1878,84 +1881,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $numberOfParts = $schedule["multipart"]["totalParts"];
             }
 
-            if (isset($programJSON["cast"]))
-            {
-                foreach ($programJSON["cast"] as $castMemberArray)
-                {
-                    if (isset($castMemberArray["personId"]))
-                    {
-                        if (isset($peopleCacheMyth[$castMemberArray["name"]]))
-                        {
-                            $person = $peopleCacheMyth[$castMemberArray["name"]];
-                        }
-                        else
-                        {
-                            printMSG("insertSchedule:$stationID (cast): didn't find {$castMemberArray["name"]} in peopleCacheMyth");
-                            continue;
-                        }
-
-                        if (isset($castMemberArray["role"]))
-                        {
-                            if (isset($SchedulesDirectRoleToMythTv[$castMemberArray["role"]]))
-                            {
-                                $mythTVRole = $SchedulesDirectRoleToMythTv[$castMemberArray["role"]];
-                            }
-                            else
-                            {
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                        $insertCreditMyth->execute(array("person"    => $person,
-                                                         "chanid"    => $chanID,
-                                                         "starttime" => $programStartTimeMyth,
-                                                         "role"      => $mythTVRole));
-                    }
-                }
-            }
-
-            if (isset($programJSON["crew"]))
-            {
-                foreach ($programJSON["crew"] as $crewMemberArray)
-                {
-                    if (isset($crewMemberArray["personId"]))
-                    {
-                        if (isset($peopleCacheMyth[$crewMemberArray["name"]]))
-                        {
-                            $person = $peopleCacheMyth[$crewMemberArray["name"]];
-                        }
-                        else
-                        {
-                            printMSG("insertSchedule:$stationID (crew): didn't find {$crewMemberArray["name"]} in peopleCacheMyth");
-                            continue;
-                        }
-
-                        if (isset($crewMemberArray["role"]))
-                        {
-                            if (isset($SchedulesDirectRoleToMythTv[$crewMemberArray["role"]]))
-                            {
-                                $mythTVRole = $SchedulesDirectRoleToMythTv[$crewMemberArray["role"]];
-                            }
-                            else
-                            {
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                        $insertCreditMyth->execute(array("person"    => $person,
-                                                         "chanid"    => $chanID,
-                                                         "starttime" => $programStartTimeMyth,
-                                                         "role"      => $mythTVRole));
-                    }
-                }
-            }
-
             if (isset($programJSON["genres"]))
             {
                 $relevance = 0;
@@ -1967,7 +1892,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                                                            "genre"     => $genre));
                     $relevance++;
                 }
-
             }
 
             if ($dbSchema > "1318")
@@ -2065,15 +1989,16 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 {
                     $insertProgramRatingMyth->execute(array("chanid"    => $chanID,
                                                             "starttime" => $programStartTimeMyth,
-                                                            "system"    => $ratingSystem, "rating" => $rating));
+                                                            "system"    => $ratingSystem,
+                                                            "rating"    => $rating));
                 } catch (PDOException $e)
                 {
                     print "Exception: " . $e->getMessage();
                     $debug = TRUE;
                 }
             }
+            $dbh->commit();
         }
-        $dbh->commit();
     }
 
     /* These don't seem to be in the On data:
