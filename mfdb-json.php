@@ -1172,6 +1172,7 @@ function insertSchedule()
                                          "Consulting Producer"                 => "producer",
                                          "Score Producer"                      => "producer",
                                          "Executive Producer, English Version" => "producer",
+                                         "Screenwriter"                        => "writer",
                                          "Writer"                              => "writer",
                                          "Guest Star"                          => "guest_star",
                                          "Host"                                => "host",
@@ -1456,7 +1457,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                             if ($skipPersonID === FALSE)
                             {
                                 printMSG("$programID does not have a personId.");
-                                $debug = TRUE; // Set it to true
                             }
                         }
 
@@ -1479,39 +1479,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                                                              "starttime" => $programStartTimeMyth,
                                                              "role"      => $mythTVRole));
                         }
-                        else
-                        {
-                            debugMSG("New role: {$credit["role"]}");
-                        }
                     }
                 }
             }
-            /*
-            if (isset($programJSON["crew"]))
-            {
-                foreach ($programJSON["crew"] as $credit)
-                {
-                    $name = $credit["name"];
-
-                    if (!isset($credit["personId"]))
-                    {
-                        if ($skipPersonID === FALSE)
-                        {
-                            printMSG("$programID does not have a personId.");
-                            $debug = TRUE; // Set it to true
-                        }
-                    }
-
-                    if (!isset($peopleCacheMyth[$name]))
-                    {
-                        $insertPersonMyth->execute(array("name" => $name));
-                        $id = $dbh->lastInsertId();
-                        $peopleCacheMyth[$name] = $id;
-                    }
-                }
-            }
-*/
-
 
             if (isset($schedule["audioProperties"]))
             {
