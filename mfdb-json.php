@@ -1306,6 +1306,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
      * Now that we're done, reset the array to empty to free up some memory.
      */
     $scheduleTemp = array();
+    $adultContent = array("Adults only", "Erotic");
 
     while (list(, $item) = each($existingChannels))
     {
@@ -1429,7 +1430,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if (isset($programJSON["genres"]))
             {
-                if (in_array(array("Adults only", "Erotic"), $programJSON["genres"]))
+                if (in_array($adultContent, $programJSON["genres"]))
                 {
                     $skipPersonID = TRUE; // Adult content typically does not have personID.
                 }
