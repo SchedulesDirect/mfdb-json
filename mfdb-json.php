@@ -1000,8 +1000,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
                         $hadError = TRUE;
                         debugMSG("Had error retrieving chunk $index: retrying.");
                         sleep(30);
-                    }
-                    catch (Guzzle\Http\Exception\CurlException $e)
+                    } catch (Guzzle\Http\Exception\CurlException $e)
                     {
                         $errorReq = $e->getRequest();
                         $errorResp = $e->getResponse();
