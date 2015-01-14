@@ -114,6 +114,7 @@ $fh_error = fopen("$todayDate.debug.log", "a");
 
 $helpText = <<< eol
 The following options are available:
+--beta\t\tUse beta server. (Default: FALSE)
 --countries\tThe list of countries that have data.
 --debug\t\tEnable debugging. (Default: FALSE)
 --dbname=\tMySQL database name for MythTV. (Default: mythconverg)
@@ -137,10 +138,9 @@ The following options are available:
 --version\tPrint version information and exit.
 eol;
 
-$longoptions = array("countries", "debug", "extract", "forcelogo", "forcerun", "help", "host::", "dbname::", "dbuser::",
-                     "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
-                     "username::", "password::",
-                     "skipversion", "timezone::", "usedb", "version");
+$longoptions = array("beta", "countries", "debug", "extract", "forcelogo", "forcerun", "help", "host::", "dbname::",
+                     "dbuser::", "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
+                     "username::", "password::", "skipversion", "timezone::", "usedb", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -148,6 +148,10 @@ foreach ($options as $k => $v)
     $k = strtolower($k);
     switch ($k)
     {
+        case "beta":
+            $isBeta = TRUE;
+            $baseurl = getBaseURL($isBeta);
+            break;
         case "countries":
             $printCountries = TRUE;
             break;
