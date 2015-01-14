@@ -151,6 +151,7 @@ foreach ($options as $k => $v)
         case "beta":
             $isBeta = TRUE;
             $baseurl = getBaseURL($isBeta);
+            $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
             break;
         case "countries":
             $printCountries = TRUE;
