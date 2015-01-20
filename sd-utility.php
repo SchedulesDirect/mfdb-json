@@ -221,6 +221,12 @@ foreach ($options as $k => $v)
     }
 }
 
+if ($printCountries)
+{
+    printListOfAvailableCountries($printFancyTable);
+    exit;
+}
+
 if ($knownToBeBroken AND !$force)
 {
     print "This version is known to be broken and --x not specified. Exiting.\n";
@@ -230,12 +236,6 @@ if ($knownToBeBroken AND !$force)
 if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === FALSE)
 {
     print "Can't determine directory for station logos. Please specify using --logo or use --skiplogo\n";
-    exit;
-}
-
-if ($printCountries)
-{
-    printListOfAvailableCountries($printFancyTable);
     exit;
 }
 
