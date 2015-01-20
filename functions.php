@@ -334,14 +334,12 @@ function printStatus($sdStatus)
 
 function exceptionErrorDump($errorReq, $errorResp, $errorMessage)
 {
-    print "errorReq\n";
-    print "$errorReq\n\n";
+    print "Caught error; send the following to grabber@schedulesdirect.org:\n";
+    print "errorReq:\n$errorReq\n\n";
 
-    print "errorResp\n";
-    print "$errorResp\n\n";
+    print "errorResp:\n$errorResp\n\n";
 
-    print "errorMessage\n";
-    print "$errorMessage\n\n";
+    print "errorMessage:\n$errorMessage\n\n";
 }
 
 function checkForServiceAPI()
