@@ -1077,7 +1077,20 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                     )");
             }
 
-
+            foreach ($json["satelliteDetail"] as $satellite)
+            {
+                foreach ($satellite as $entry)
+                {
+                    $transportID = $entry["transportID"];
+                    $networkID = $entry["networkID"];
+                    $frequency = $entry["frequencyMHz"] * 1000;
+                    $symbolrate = $entry["symbolrate"] * 1000;
+                    $polarity = $entry["polarization"];
+                    $modulation = strtolower($entry["modulationSystem"]);
+                    $constellation = strtolower($entry["modulationSystem"]);
+                    $mod_sys = $entry["deliverySystem"];
+                }
+            }
         }
 
         /*
