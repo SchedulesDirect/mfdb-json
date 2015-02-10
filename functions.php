@@ -621,3 +621,19 @@ function checkForOS()
         }
     }
 }
+
+function getMplexID($frequency, $polarization, $modulation, $networkid, $transportid)
+{
+    global $dbh;
+    $stmt = $dbh->prepare("SELECT mplexid FROM dtv_multiplex WHERE
+      frequency=:frequency AND
+      polarity=:polarization AND
+      modulation=:modulation AND
+      networkid=:networkID AND
+      transportid=:transportID
+      ");
+    $stmt->execute(array("frequency" => $frequency, "polarization" => $polarization, "modulation" => $modulation,
+                         "networkID" => $networkid, "transportID" => $transportid));
+
+    $stmt->fetchColumn();
+}
