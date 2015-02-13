@@ -51,7 +51,6 @@ $availableCountries = array(
               "postalCode" => "/[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}/gm"),
         array("fullName" => "Mexico", "shortName" => "MEX", "postalCodeExample" => "11500", "postalCode" =>
             "/\d{5}/")),
-
     "Europe"        => array(
         array("fullName" => "Denmark", "shortName" => "DNK", "postalCodeExample" => "9260", "postalCode" => "/\d{4}/"),
         array("fullName" => "Finland", "shortName" => "FIN", "postalCodeExample" => "91980", "postalCode" =>
