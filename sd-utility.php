@@ -45,10 +45,12 @@ $dbHostSD = "localhost";
 
 $availableCountries = array(
     "North America" => array(
-        array("fullName" => "United States", "shortName" => "USA", "postalCode" => "/\d{5}/"),
-        array("fullName"   => "Canada", "shortName" => "CAN",
+        array("fullName" => "United States", "shortName" => "USA", "postalCodeExample" => "12345", "postalCode" =>
+            "/\d{5}/"),
+        array("fullName"   => "Canada", "shortName" => "CAN", "postalCodeExample" => "K1A0B1",
               "postalCode" => "/[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}/gm"),
-        array("fullName" => "Mexico", "shortName" => "MEX", "postalCode" => "/\d{5}/")));
+        array("fullName" => "Mexico", "shortName" => "MEX", "postalCodeExample" => "11500", "postalCode" =>
+            "/\d{5}/")));
 /*
     "Europe"        => array(
         "Denmark"       => "DNK",
@@ -2033,13 +2035,13 @@ function printListOfAvailableCountries($fancyTable)
         if ($fancyTable)
         {
             $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 18)));
-            $countryList->appendRow(array("Country", "Three-letter code"));
+            $countryList->appendRow(array("Country", "Three-letter code", "Postal Code"));
 
             //foreach ($data as $country => $tla)
             foreach ($data as $item)
             {
                 // $countryList->appendRow(array($country, $tla));
-                $countryList->appendRow(array($item["fullName"], $item["shortName"]));
+                $countryList->appendRow(array($item["fullName"], $item["shortName"], $item["postalCodeExample"]));
             }
             print $countryList;
         }
