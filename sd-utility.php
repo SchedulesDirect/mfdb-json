@@ -2034,8 +2034,8 @@ function printListOfAvailableCountries($fancyTable)
 
         if ($fancyTable)
         {
-            $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 18, 8)));
-            $countryList->appendRow(array("Country", "Three-letter code", "Postal Code"));
+            $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 18, 18)));
+            $countryList->appendRow(array("Country", "Three-letter code", "Example Postal Code"));
 
             //foreach ($data as $country => $tla)
             foreach ($data as $item)
