@@ -50,7 +50,7 @@ $availableCountries = array(
             array("fullName" => "United States", "shortName" => "USA", "postalCodeExample" => "12345", "postalCode" =>
                 "/\d{5}/"),
             array("fullName"   => "Canada", "shortName" => "CAN", "postalCodeExample" => "K1A0B1",
-                  "postalCode" => "/[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}/gm")
+                  "postalCode" => "/[A-Z]{1}[\d]{1}[A-Z]{1}[\d]{1}[A-Z]{1}[\d]{1}/gm")
         ),
 
     "Europe"        =>
