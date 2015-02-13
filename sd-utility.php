@@ -2097,7 +2097,6 @@ function printListOfAvailableCountries($fancyTable)
                 $countryList->appendRow(array($item["fullName"], $item["shortName"], $item["postalCodeExample"]));
             }
             print $countryList;
-            print "\n* The only valid postal code for this country.\n";
         }
         else
         {
@@ -2107,6 +2106,8 @@ function printListOfAvailableCountries($fancyTable)
             }
         }
     }
+
+    print "\n* The only valid postal code for this country.\n";
 }
 
 function getChannelLogoDirectory()
