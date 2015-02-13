@@ -50,14 +50,18 @@ $availableCountries = array(
         array("fullName"   => "Canada", "shortName" => "CAN", "postalCodeExample" => "K1A0B1",
               "postalCode" => "/[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}/gm"),
         array("fullName" => "Mexico", "shortName" => "MEX", "postalCodeExample" => "11500", "postalCode" =>
+            "/\d{5}/")),
+
+    "Europe"        => array(
+        array("fullName" => "Denmark", "shortName" => "DNK", "postalCodeExample" => "9260", "postalCode" => "/\d{4}/"),
+        array("fullName" => "Finland", "shortName" => "FIN", "postalCodeExample" => "91980", "postalCode" =>
+            "/\d{5}/"),
+        array("fullName"   => "Great Britain", "shortName" => "GBR", "postalCodeExample" => "CF31",
+              "postalCode" => "/[A-Z]{1,2}\d{1,2}/"),
+        array("fullName" => "Sweden", "shortName" => "SWE", "postalCodeExample" => "10005", "postalCode" =>
             "/\d{5}/")));
 /*
-    "Europe"        => array(
-        "Denmark"       => "DNK",
-        "Finland"       => "FIN",
-        "Great Britain" => "GBR",
-        "Sweden"        => "SWE"),
-    "Latin America" => array(
+"Latin America" => array(
         "Argentina"  => "ARG",
         "Belize"     => "BLZ",
         "Brazil"     => "BRA",
@@ -2023,7 +2027,6 @@ function printListOfAvailableCountries($fancyTable)
         print "\nRegion:$region\n";
 
         $countryWidth = 0;
-        //foreach ($data as $country => $tla)
         foreach ($data as $item)
         {
             if (strlen($item["fullName"]) > $countryWidth)
@@ -2041,20 +2044,16 @@ function printListOfAvailableCountries($fancyTable)
                                                                                    strlen($col3) + 2)));
             $countryList->appendRow(array($col1, $col2, $col3));
 
-            //foreach ($data as $country => $tla)
             foreach ($data as $item)
             {
-                // $countryList->appendRow(array($country, $tla));
                 $countryList->appendRow(array($item["fullName"], $item["shortName"], $item["postalCodeExample"]));
             }
             print $countryList;
         }
         else
         {
-            //foreach ($data as $country => $tla)
             foreach ($data as $item)
             {
-                //print "$country\n";
                 print "{$item["fullName"]}\n";
             }
         }
