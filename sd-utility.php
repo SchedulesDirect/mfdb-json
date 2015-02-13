@@ -45,9 +45,11 @@ $dbHostSD = "localhost";
 
 $availableCountries = array(
     "North America" => array(
-        "United States" => "USA",
-        "Canada"        => "CAN",
-        "Mexico"        => "MEX"),
+        array("fullName" => "United States", "shortName" => "USA", "postalCode" => "/\d{5}/"),
+        array("fullName"   => "Canada", "shortName" => "CAN",
+              "postalCode" => "/[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}[A-Z|a-z]{1}[\d]{1}/gm"),
+        array("fullName" => "Mexico", "shortName" => "MEX", "postalCode" => "/\d{5}/")));
+/*
     "Europe"        => array(
         "Denmark"       => "DNK",
         "Finland"       => "FIN",
@@ -90,6 +92,7 @@ $availableCountries = array(
         "St. Lucia"                    => "LCA",
         "Trinidad and Tobago"          => "TTO",
         "Turks and Caicos"             => "TCA"));
+*/
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -2018,11 +2021,12 @@ function printListOfAvailableCountries($fancyTable)
         print "\nRegion:$region\n";
 
         $countryWidth = 0;
-        foreach ($data as $country => $tla)
+        //foreach ($data as $country => $tla)
+        foreach ($data as $item)
         {
-            if (strlen($country) > $countryWidth)
+            if (strlen($item["fullName"]) > $countryWidth)
             {
-                $countryWidth = strlen($country);
+                $countryWidth = strlen($item["fullName"]);
             }
         }
 
@@ -2031,17 +2035,21 @@ function printListOfAvailableCountries($fancyTable)
             $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 18)));
             $countryList->appendRow(array("Country", "Three-letter code"));
 
-            foreach ($data as $country => $tla)
+            //foreach ($data as $country => $tla)
+            foreach ($data as $item)
             {
-                $countryList->appendRow(array($country, $tla));
+                // $countryList->appendRow(array($country, $tla));
+                $countryList->appendRow(array($item["fullName"], $item["shortName"]));
             }
             print $countryList;
         }
         else
         {
-            foreach ($data as $country => $tla)
+            //foreach ($data as $country => $tla)
+            foreach ($data as $item)
             {
-                print "$country\n";
+                //print "$country\n";
+                print "{$item["fullName"]}\n";
             }
         }
     }
