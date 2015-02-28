@@ -36,7 +36,6 @@ $passwordFromDB = "";
 $passwordHash = "";
 $dbWithoutMythtv = FALSE;
 $useServiceAPI = FALSE;
-//$lineupArray = array();
 $forceRun = FALSE;
 $printFancyTable = TRUE;
 $printCountries = FALSE;
@@ -44,52 +43,109 @@ $justExtract = FALSE;
 $dbHostSD = "localhost";
 
 $availableCountries = array(
-    "North America" => array(
-        "United States" => "USA",
-        "Canada"        => "CAN",
-        "Mexico"        => "MEX"),
-    "Europe"        => array(
-        "Denmark"       => "DNK",
-        "Finland"       => "FIN",
-        "Great Britain" => "GBR",
-        "Sweden"        => "SWE"),
-    "Latin America" => array(
-        "Argentina"  => "ARG",
-        "Belize"     => "BLZ",
-        "Brazil"     => "BRA",
-        "Chile"      => "CHL",
-        "Columbia"   => "COL",
-        "Costa Rica" => "CRI",
-        "Ecuador"    => "ECU",
-        "Guatemala"  => "GTM",
-        "Guyana"     => "GUY",
-        "Honduras"   => "HND",
-        "Panama"     => "PAN",
-        "Peru"       => "PER",
-        "Uruguay"    => "URY",
-        "Venezuela"  => "VEN"),
-    "Caribbean"     => array(
-        "Anguila"                      => "AIA",
-        "Antigua/Barbuda"              => "ATG",
-        "Aruba"                        => "ABW",
-        "Bahamas"                      => "BHS",
-        "Barbados"                     => "BRB",
-        "Bermuda"                      => "BMU",
-        "Bonaire, Saba, St. Eustatius" => "BES",
-        "British Virgin Islands"       => "VGB",
-        "Cayman Islands"               => "CYM",
-        "Curacao"                      => "CUW",
-        "Dominica"                     => "DMA",
-        "Dominican Republic"           => "DOM",
-        "Grenada"                      => "GRD",
-        "Jamaica"                      => "JAM",
-        "Puerto Rico"                  => "PRI",
-        "Saint Martin"                 => "MAF",
-        "Saint Vincent / Grenadines"   => "VCT",
-        "St. Kitts and Nevis"          => "KNA",
-        "St. Lucia"                    => "LCA",
-        "Trinidad and Tobago"          => "TTO",
-        "Turks and Caicos"             => "TCA"));
+    "North America" =>
+        array
+        (
+            array("fullName" => "United States", "shortName" => "USA", "postalCodeExample" => "12345", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName"   => "Canada", "shortName" => "CAN", "postalCodeExample" => "K1A0B1",
+                  "postalCode" => "/[A-Z]{1}[\d]{1}[A-Z]{1}[\d]{1}[A-Z]{1}[\d]{1}/gm")
+        ),
+
+    "Europe"        =>
+        array
+        (
+            array("fullName"   => "Denmark", "shortName" => "DNK", "postalCodeExample" => "9260",
+                  "postalCode" => "/\d{4}/"),
+            array("fullName" => "Finland", "shortName" => "FIN", "postalCodeExample" => "91980", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName"   => "Great Britain", "shortName" => "GBR", "postalCodeExample" => "CF31",
+                  "postalCode" => "/[A-Z]{1,2}\d{1,2}/"),
+            array("fullName" => "Sweden", "shortName" => "SWE", "postalCodeExample" => "10005", "postalCode" =>
+                "/\d{5}/")
+        ),
+
+    "Latin America" =>
+        array
+        (
+            array("fullName" => "Argentina", "shortName" => "ARG", "postalCodeExample" => "A4190", "postalCode" =>
+                "/[A-Z]\d{4}/"),
+            array("fullName" => "Belize", "shortName" => "BLZ", "postalCodeExample" => "BZ *", "postalCode" =>
+                "/BZ/"),
+            array("fullName" => "Brazil", "shortName" => "BRA", "postalCodeExample" => "01419", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName" => "Chile", "shortName" => "CHL", "postalCodeExample" => "1000000", "postalCode" =>
+                "/\d{7}/"),
+            array("fullName" => "Columbia", "shortName" => "COL", "postalCodeExample" => "CO *", "postalCode" =>
+                "/CO/"),
+            array("fullName" => "Costa Rica", "shortName" => "CRI", "postalCodeExample" => "10101", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName" => "Ecuador", "shortName" => "ECU", "postalCodeExample" => "170950", "postalCode" =>
+                "/\d{6}/"),
+            array("fullName" => "Guatemala", "shortName" => "GTM", "postalCodeExample" => "01001", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName" => "Guyana", "shortName" => "GUY", "postalCodeExample" => "GY *", "postalCode" =>
+                "/GY/"),
+            array("fullName" => "Honduras", "shortName" => "HND", "postalCodeExample" => "HN *", "postalCode" =>
+                "/HN/"),
+            array("fullName" => "Mexico", "shortName" => "MEX", "postalCodeExample" => "11500", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName" => "Panama", "shortName" => "PAN", "postalCodeExample" => "PA *", "postalCode" =>
+                "/PA/"),
+            array("fullName" => "Peru", "shortName" => "PER", "postalCodeExample" => "23006", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName" => "Uruguay", "shortName" => "URY", "postalCodeExample" => "11000", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName" => "Venezuela", "shortName" => "VEN", "postalCodeExample" => "1010", "postalCode" =>
+                "/\d{4}/")),
+
+    "Caribbean"     =>
+        array
+        (
+            array("fullName" => "Anguila", "shortName" => "AIA", "postalCodeExample" => "AI-2640 *", "postalCode" =>
+                "/AI-2640/"),
+            array("fullName" => "Antigua/Barbuda", "shortName" => "ATG", "postalCodeExample" => "AG *", "postalCode" =>
+                "/AG/"),
+            array("fullName" => "Aruba", "shortName" => "ABW", "postalCodeExample" => "AW *", "postalCode" =>
+                "/AW/"),
+            array("fullName" => "Bahamas", "shortName" => "BHS", "postalCodeExample" => "BS *", "postalCode" =>
+                "/BS/"),
+            array("fullName" => "Barbados", "shortName" => "BRB", "postalCodeExample" => "BB14001", "postalCode" =>
+                "/BB\d{5}/"),
+            array("fullName" => "Bermuda", "shortName" => "BMU", "postalCodeExample" => "CR01", "postalCode" =>
+                "/[A-Z]{2}\d{2}/"),
+            array("fullName"   => "Bonaire, Saba, St. Eustatius", "shortName" => "BES", "postalCodeExample" => "BQ *",
+                  "postalCode" => "/BQ/"),
+            array("fullName"   => "British Virgin Islands", "shortName" => "VGB", "postalCodeExample" => "VG1110",
+                  "postalCode" => "/VG\d{4}/"),
+            array("fullName"   => "Cayman Islands", "shortName" => "CYM", "postalCodeExample" => "KY1-0001",
+                  "postalCode" => "/KY\d{1}-\d{4}/"),
+            array("fullName" => "Curacao", "shortName" => "CUW", "postalCodeExample" => "CW *", "postalCode" =>
+                "/CW/"),
+            array("fullName" => "Dominica", "shortName" => "DMA", "postalCodeExample" => "DM *", "postalCode" =>
+                "/DM/"),
+            array("fullName"   => "Dominican Republic", "shortName" => "DOM", "postalCodeExample" => "10101",
+                  "postalCode" => "/\d{5}/"),
+            array("fullName" => "Grenada", "shortName" => "GRD", "postalCodeExample" => "GW *", "postalCode" =>
+                "/GD/"),
+            array("fullName" => "Jamaica", "shortName" => "JAM", "postalCodeExample" => "JMAAW01", "postalCode" =>
+                "/JM[A-Z]{3}\d{2}/"),
+            array("fullName" => "Puerto Rico", "shortName" => "PRI", "postalCodeExample" => "00601", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName" => "Saint Martin", "shortName" => "MAF", "postalCodeExample" => "97150 *", "postalCode" =>
+                "/97150/"),
+            array("fullName"   => "Saint Vincent / Grenadines", "shortName" => "VCT", "postalCodeExample" => "VC0100",
+                  "postalCode" => "/VC\d{4}/"),
+            array("fullName"   => "St. Kitts and Nevis", "shortName" => "KNA", "postalCodeExample" => "KN *",
+                  "postalCode" => "/KN/"),
+            array("fullName" => "St. Lucia", "shortName" => "LCA", "postalCodeExample" => "LC *", "postalCode" =>
+                "/LC/"),
+            array("fullName"   => "Trinidad and Tobago", "shortName" => "TTO", "postalCodeExample" => "TT *",
+                  "postalCode" => "/TT/"),
+            array("fullName"   => "Turks and Caicos", "shortName" => "TCA", "postalCodeExample" => "TKCA1ZZ *",
+                  "postalCode" => "/TKCA1ZZ/")
+        )
+);
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -114,6 +170,7 @@ $fh_error = fopen("$todayDate.debug.log", "a");
 
 $helpText = <<< eol
 The following options are available:
+--beta\t\tUse beta server. (Default: FALSE)
 --countries\tThe list of countries that have data.
 --debug\t\tEnable debugging. (Default: FALSE)
 --dbname=\tMySQL database name for MythTV. (Default: mythconverg)
@@ -137,10 +194,9 @@ The following options are available:
 --version\tPrint version information and exit.
 eol;
 
-$longoptions = array("countries", "debug", "extract", "forcelogo", "forcerun", "help", "host::", "dbname::", "dbuser::",
-                     "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
-                     "username::", "password::",
-                     "skipversion", "timezone::", "usedb", "version");
+$longoptions = array("beta", "countries", "debug", "extract", "forcelogo", "forcerun", "help", "host::", "dbname::",
+                     "dbuser::", "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
+                     "username::", "password::", "skipversion", "timezone::", "usedb", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -148,6 +204,11 @@ foreach ($options as $k => $v)
     $k = strtolower($k);
     switch ($k)
     {
+        case "beta":
+            $isBeta = TRUE;
+            $baseurl = getBaseURL($isBeta);
+            $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
+            break;
         case "countries":
             $printCountries = TRUE;
             break;
@@ -223,6 +284,12 @@ foreach ($options as $k => $v)
     }
 }
 
+if ($printCountries)
+{
+    printListOfAvailableCountries($printFancyTable);
+    exit;
+}
+
 if ($knownToBeBroken AND $forceRun === FALSE)
 {
     print "This version is known to be broken and --forcerun not specified. Exiting.\n";
@@ -232,12 +299,6 @@ if ($knownToBeBroken AND $forceRun === FALSE)
 if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === FALSE)
 {
     print "Can't determine directory for station logos. Please specify using --logo or use --skiplogo\n";
-    exit;
-}
-
-if ($printCountries)
-{
-    printListOfAvailableCountries($printFancyTable);
     exit;
 }
 
@@ -704,12 +765,20 @@ function updateChannelTable($lineup)
         {
             $transport = "Satellite";
 
-
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
             $stmt->execute(array("sourceid" => $sourceID));
         }
 
-        if ($transport != "QAM")
+        if ($json["metadata"]["transport"] == "FTA")
+        {
+            $transport = "FTA";
+        }
+
+        /*
+         * This whole next part needs to get rewritten.
+         */
+
+        if ($transport == "Satellite" OR $transport == "Antenna" OR $transport == "Cable")
         {
             $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
     xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
@@ -818,13 +887,13 @@ function updateChannelTable($lineup)
         else
         {
             /*
-             * It's QAM. We're going to run a match based on what the user had already scanned to avoid the manual
-             * matching step of correlating stationIDs.
+             * It's QAM or FTA. We're going to run a match based on what the user had already scanned to avoid the
+             * manual matching step of correlating stationIDs.
              */
 
             print "You can:\n";
-            print "1. Use the QAM lineup from SD to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
-            print "2. Use the QAM lineup information directly.\n";
+            print "1. Use the $transport lineup from SD to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
+            print "2. Use the $transport lineup information and update the database without running a scan.\n";
             $useScan = readline("Which do you want to do? (1 or 2)>");
 
             if ($useScan == "")
@@ -841,13 +910,13 @@ function updateChannelTable($lineup)
                 $useScan = TRUE;
             }
 
-            if (count($json["qamMappings"]) > 1)
+            if (count($json["mapping"]) > 1)
             {
                 /*
                  * TODO: Work on this some more. Kludgey.
                  */
-                print "Found more than one QAM mapping for your headend.\n";
-                foreach ($json["qamMappings"] as $m)
+                print "Found more than one $transport mapping for your headend.\n";
+                foreach ($json["mapping"] as $m)
                 {
                     print "Mapping: $m\n";
                 }
@@ -862,7 +931,7 @@ function updateChannelTable($lineup)
             {
                 $matchType = $json["map"][$mapToUse][0]["matchType"];
 
-                print "Matching QAM scan based on: $matchType\n";
+                print "Matching $transport scan based on: $matchType\n";
 
                 if ($matchType == "multiplex")
                 {
@@ -929,106 +998,154 @@ function updateChannelTable($lineup)
                  * Work-in-progress.
                  */
 
-                print "Inserting QAM data into tables.\n";
+                print "Inserting $transport data into tables.\n";
 
-                $insertDTVMultiplex = $dbh->prepare
-                ("INSERT INTO dtv_multiplex
+                $dtvMultiplex = array();
+
+                if ($transport == "QAM")
+                {
+                    $insertDTVMultiplex = $dbh->prepare
+                    ("INSERT INTO dtv_multiplex
         (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
         VALUES
         (:sourceid,:freq,0,'v',:modulation,1,:modulation,'a','UNDEFINED','0.35','atsc')");
-
-                $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,
+                    $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'
+                AND sourceid=:sourceid");
+                    $stmt->execute(array("sourceid" => $sourceID));
+                    $dtvMultiplex = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+                    $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,
 visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                      VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid,:atscMajor,
                      :atscMinor)");
 
-                $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'
-                AND sourceid=:sourceid");
-                $stmt->execute(array("sourceid" => $sourceID));
-                $dtvMultiplex = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-                foreach ($json["map"][$mapToUse] as $mapArray)
-                {
-                    $virtualChannel = $mapArray["virtualChannel"]; // "Channel 127"
-
-                    if (isset($mapArray["channel"]))
+                    foreach ($json["map"][$mapToUse] as $mapArray)
                     {
-                        $channel = $mapArray["channel"]; // "54-18" or whatever.
-                    }
-                    else
-                    {
-                        $channel = $virtualChannel;
-                    }
+                        $virtualChannel = $mapArray["virtualChannel"]; // "Channel 127"
 
-                    $modulation = $mapArray["modulation"];
-                    $frequency = $mapArray["frequency"];
-                    $serviceID = $mapArray["serviceID"];
-                    $stationID = $mapArray["stationID"];
-                    $atscMajor = (int)$mapArray["atscMajor"];
-                    $atscMinor = (int)$mapArray["atscMinor"];
-
-                    /*
-                     * Because multiple programs may end up on a single frequency, we only want to insert once,
-                     * but we want to track the mplexid assigned when we do the insert,
-                     * because that might be used more than once.
-                     */
-                    if (!isset($dtvMultiplex[$frequency]))
-                    {
-                        $insertDTVMultiplex->execute(array("sourceid"   => $sourceID,
-                                                           "freq"       => $frequency,
-                                                           "modulation" => $modulation));
-                        $dtvMultiplex[$frequency] = $dbh->lastInsertId();
-                    }
-
-                    /*
-                     * In order to insert a unique channel ID, we need to make sure that "39_1" and "39_2" map to two
-                     * different values. Old code resulted in 39_1 -> 39, then 39_2 had a collision because it also
-                     * turned into "39"
-                     */
-
-                    $strippedChannel = (int)str_replace(array("-", "_"), "", $channel);
-
-                    if ($atscMajor > 0)
-                    {
-                        $chanid = ($sourceID * 1000) + ($atscMajor * 10) + $atscMinor;
-                    }
-                    else
-                    {
-                        $chanid = ($sourceID * 1000) + ($strippedChannel * 10) + $serviceID;
-                    }
-
-                    try
-                    {
-                        $channelInsert->execute(array("chanid"    => $chanid,
-                                                      "channum"   => $channel,
-                                                      "freqid"    => $virtualChannel,
-                                                      "sourceid"  => $sourceID,
-                                                      "xmltvid"   => $stationID,
-                                                      "mplexid"   => $dtvMultiplex[$frequency],
-                                                      "serviceid" => $serviceID,
-                                                      "atscMajor" => $atscMajor,
-                                                      "atscMinor" => $atscMinor));
-                    } catch (PDOException $e)
-                    {
-                        if ($e->getCode() == 23000)
+                        if (isset($mapArray["channel"]))
                         {
-                            print "\n\n";
-                            print "*************************************************************\n";
-                            print "\n\n";
-                            print "Error inserting data. Duplicate channel number exists?\n";
-                            print "Send email to grabber@schedulesdirect.org with the following:\n\n";
-                            print "Duplicate channel error.\n";
-                            print "Transport: $transport\n";
-                            print "Lineup: $lineup\n";
-                            print "Channum: $channel\n";
-                            print "Virtual: $virtualChannel\n";
-                            print "stationID: $stationID\n";
-                            print "\n\n";
-                            print "*************************************************************\n";
+                            $channel = $mapArray["channel"]; // "54-18" or whatever.
+                        }
+                        else
+                        {
+                            $channel = $virtualChannel;
+                        }
+
+                        $modulation = $mapArray["modulation"];
+                        $frequency = $mapArray["frequency"];
+                        $serviceID = $mapArray["serviceID"];
+                        $stationID = $mapArray["stationID"];
+                        $atscMajor = (int)$mapArray["atscMajor"];
+                        $atscMinor = (int)$mapArray["atscMinor"];
+
+                        /*
+                         * Because multiple programs may end up on a single frequency, we only want to insert once,
+                         * but we want to track the mplexid assigned when we do the insert,
+                         * because that might be used more than once.
+                         */
+                        if (!isset($dtvMultiplex[$frequency]))
+                        {
+                            $insertDTVMultiplex->execute(array("sourceid"   => $sourceID,
+                                                               "freq"       => $frequency,
+                                                               "modulation" => $modulation));
+                            $dtvMultiplex[$frequency] = $dbh->lastInsertId();
+                        }
+
+                        /*
+                         * In order to insert a unique channel ID, we need to make sure that "39_1" and "39_2" map to two
+                         * different values. Old code resulted in 39_1 -> 39, then 39_2 had a collision because it also
+                         * turned into "39"
+                         */
+
+                        $strippedChannel = (int)str_replace(array("-", "_"), "", $channel);
+
+                        if ($atscMajor > 0)
+                        {
+                            $chanid = ($sourceID * 1000) + ($atscMajor * 10) + $atscMinor;
+                        }
+                        else
+                        {
+                            $chanid = ($sourceID * 1000) + ($strippedChannel * 10) + $serviceID;
+                        }
+
+                        try
+                        {
+                            $channelInsert->execute(array("chanid"    => $chanid,
+                                                          "channum"   => $channel,
+                                                          "freqid"    => $virtualChannel,
+                                                          "sourceid"  => $sourceID,
+                                                          "xmltvid"   => $stationID,
+                                                          "mplexid"   => $dtvMultiplex[$frequency],
+                                                          "serviceid" => $serviceID,
+                                                          "atscMajor" => $atscMajor,
+                                                          "atscMinor" => $atscMinor));
+                        } catch (PDOException $e)
+                        {
+                            if ($e->getCode() == 23000)
+                            {
+                                print "\n\n";
+                                print "*************************************************************\n";
+                                print "\n\n";
+                                print "Error inserting data. Duplicate channel number exists?\n";
+                                print "Send email to grabber@schedulesdirect.org with the following:\n\n";
+                                print "Duplicate channel error.\n";
+                                print "Transport: $transport\n";
+                                print "Lineup: $lineup\n";
+                                print "Channum: $channel\n";
+                                print "Virtual: $virtualChannel\n";
+                                print "stationID: $stationID\n";
+                                print "\n\n";
+                                print "*************************************************************\n";
+                            }
                         }
                     }
+                    print "Done inserting QAM tuning information directly into tables.\n";
                 }
-                print "Done inserting QAM tuning information directly into tables.\n";
+
+            }
+
+            if ($transport == "FTA")
+            {
+                $insertDTVMultiplex = $dbh->prepare
+                ("INSERT INTO dtv_multiplex
+        (sourceid,transportid,networkid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,
+        mod_sys,rolloff,sistandard)
+        VALUES
+        (:sourceid,:tid,:nid,:freq,:symbolrate,:polarity,:modulation,1,:constellation,'a','0.35','dvb')");
+
+                $channelInsert = $dbh->prepare("INSERT INTO channel
+                    (chanid,
+                    channum,
+                    sourceid,
+                    xmltvid,
+                    visible,
+                    mplexid,
+                    serviceid
+                    )
+                    VALUES(
+                    :chanid,
+                    :channum,
+                    :sourceid,
+                    :xmltvid,
+                    '1',
+                    :mplexid,
+                    :serviceid,
+                    )");
+            }
+
+            foreach ($json["satelliteDetail"] as $satellite)
+            {
+                foreach ($satellite as $entry)
+                {
+                    $transportID = $entry["transportID"];
+                    $networkID = $entry["networkID"];
+                    $frequency = $entry["frequencyMHz"] * 1000;
+                    $symbolrate = $entry["symbolrate"] * 1000;
+                    $polarity = $entry["polarization"];
+                    $modulation = strtolower($entry["modulationSystem"]);
+                    $constellation = strtolower($entry["modulationSystem"]);
+                    $mod_sys = $entry["deliverySystem"];
+                }
             }
         }
 
@@ -1957,33 +2074,39 @@ function printListOfAvailableCountries($fancyTable)
         print "\nRegion:$region\n";
 
         $countryWidth = 0;
-        foreach ($data as $country => $tla)
+        foreach ($data as $item)
         {
-            if (strlen($country) > $countryWidth)
+            if (strlen($item["fullName"]) > $countryWidth)
             {
-                $countryWidth = strlen($country);
+                $countryWidth = strlen($item["fullName"]);
             }
         }
 
         if ($fancyTable)
         {
-            $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, 18)));
-            $countryList->appendRow(array("Country", "Three-letter code"));
+            $col1 = "Country";
+            $col2 = "Three-letter code";
+            $col3 = "Example Postal Code";
+            $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, strlen($col2) + 2,
+                                                                                   strlen($col3) + 2)));
+            $countryList->appendRow(array($col1, $col2, $col3));
 
-            foreach ($data as $country => $tla)
+            foreach ($data as $item)
             {
-                $countryList->appendRow(array($country, $tla));
+                $countryList->appendRow(array($item["fullName"], $item["shortName"], $item["postalCodeExample"]));
             }
             print $countryList;
         }
         else
         {
-            foreach ($data as $country => $tla)
+            foreach ($data as $item)
             {
-                print "$country\n";
+                print "{$item["fullName"]}\n";
             }
         }
     }
+
+    print "\n* The only valid postal code for this country.\n";
 }
 
 function getChannelLogoDirectory()
