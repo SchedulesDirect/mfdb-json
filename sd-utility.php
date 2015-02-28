@@ -59,6 +59,10 @@ $availableCountries = array(
                   "postalCode" => "/\d{4}/"),
             array("fullName" => "Finland", "shortName" => "FIN", "postalCodeExample" => "91980", "postalCode" =>
                 "/\d{5}/"),
+            array("fullName" => "France", "shortName" => "FRA", "postalCodeExample" => "38800", "postalCode" =>
+                "/\d{5}/"),
+            array("fullName" => "Germany", "shortName" => "DEU", "postalCodeExample" => "14050", "postalCode" =>
+                "/\d{5}/"),
             array("fullName"   => "Great Britain", "shortName" => "GBR", "postalCodeExample" => "CF31",
                   "postalCode" => "/[A-Z]{1,2}\d{1,2}/"),
             array("fullName" => "Sweden", "shortName" => "SWE", "postalCodeExample" => "10005", "postalCode" =>
