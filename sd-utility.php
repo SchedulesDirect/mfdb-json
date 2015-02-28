@@ -36,7 +36,6 @@ $passwordFromDB = "";
 $passwordHash = "";
 $dbWithoutMythtv = FALSE;
 $useServiceAPI = FALSE;
-//$lineupArray = array();
 $forceRun = FALSE;
 $printFancyTable = TRUE;
 $printCountries = FALSE;
