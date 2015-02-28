@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 $scriptVersion = "0.25";
-$scriptDate = "2014-12-30";
+$scriptDate = "2015-01-14";
 $knownToBeBroken = FALSE;
 $skipVersionCheck = TRUE;
 
@@ -620,4 +620,20 @@ function checkForOS()
             return trim($line);
         }
     }
+}
+
+function getMplexID($frequency, $polarization, $modulation, $networkid, $transportid)
+{
+    global $dbh;
+    $stmt = $dbh->prepare("SELECT mplexid FROM dtv_multiplex WHERE
+      frequency=:frequency AND
+      polarity=:polarization AND
+      modulation=:modulation AND
+      networkid=:networkID AND
+      transportid=:transportID
+      ");
+    $stmt->execute(array("frequency" => $frequency, "polarization" => $polarization, "modulation" => $modulation,
+                         "networkID" => $networkid, "transportID" => $transportid));
+
+    $stmt->fetchColumn();
 }
