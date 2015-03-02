@@ -1115,49 +1115,52 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 continue;
             }
 
-            if (isset($jsonProgram["code"]) === TRUE)
+            foreach ($jsonProgram as $v)
             {
-                /*
-                 * Probably not good. :(
-                 */
-
-                if ($jsonProgram["code"] == 6000)
+                if (isset($v["code"]) === TRUE)
                 {
-                    print "FATAL ERROR: server couldn't find programID?\n";
+                    /*
+                     * Probably not good. :(
+                     */
+
+                    if ($v["code"] == 6000)
+                    {
+                        print "FATAL ERROR: server couldn't find programID?\n";
+                        print "$item\n";
+                        continue;
+                    }
+                }
+
+                if (isset($v["programID"]) === TRUE)
+                {
+                    $pid = $v["programID"];
+                }
+                else
+                {
+                    print "FATAL ERROR: No programID?\n";
                     print "$item\n";
                     continue;
                 }
-            }
 
-            if (isset($jsonProgram["programID"]) === TRUE)
-            {
-                $pid = $jsonProgram["programID"];
-            }
-            else
-            {
-                print "FATAL ERROR: No programID?\n";
-                print "$item\n";
-                continue;
-            }
+                if (isset($v["md5"]) === TRUE)
+                {
+                    $md5 = $v["md5"];
+                }
+                else
+                {
+                    print "FATAL ERROR: No md5?\n";
+                    print "$item\n";
+                    continue;
+                }
 
-            if (isset($jsonProgram["md5"]) === TRUE)
-            {
-                $md5 = $jsonProgram["md5"];
+                $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
+                                           "json"      => json_encode($v)));
             }
-            else
-            {
-                print "FATAL ERROR: No md5?\n";
-                print "$item\n";
-                continue;
-            }
-
-            $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-                                       "json"      => $item));
         }
 
         if ($debug === FALSE)
         {
-            unlink($jsonFileToProcess);
+            // unlink($jsonFileToProcess); don't delete for now.
         }
     }
 
