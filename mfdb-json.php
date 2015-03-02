@@ -727,7 +727,7 @@ function getSchedules($stationIDsToFetch)
                     $bar[] = $date;
                 }
             }
-            $baz[] = array("stationID" => $stationID, "date" => $bar);
+            $baz[] = array("stationID" => "$stationID", "date" => $bar);
         }
     }
     else
