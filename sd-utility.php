@@ -802,7 +802,7 @@ function updateChannelTable($lineup)
 
                 if ($transport == "Antenna")
                 {
-                    if (isset($mapArray["uhfVhf"]))
+                    if (isset($mapArray["uhfVhf"]) === TRUE)
                     {
                         $freqid = $mapArray["uhfVhf"];
                     }
@@ -811,7 +811,7 @@ function updateChannelTable($lineup)
                         $freqid = "";
                     }
 
-                    if (isset($mapArray["atscMajor"]))
+                    if (isset($mapArray["atscMajor"]) === TRUE)
                     {
                         $atscMajor = $mapArray["atscMajor"];
                         $atscMinor = $mapArray["atscMinor"];
@@ -967,7 +967,7 @@ function updateChannelTable($lineup)
                     {
                         $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
 
-                        if (isset($map[$toFind]))
+                        if (isset($map[$toFind]) === TRUE)
                         {
                             $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
                                                                   "mplexid"   => $foo["mplexid"],
@@ -1032,7 +1032,7 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                     {
                         $virtualChannel = $mapArray["virtualChannel"]; // "Channel 127"
 
-                        if (isset($mapArray["channel"]))
+                        if (isset($mapArray["channel"]) === TRUE)
                         {
                             $channel = $mapArray["channel"]; // "54-18" or whatever.
                         }
@@ -1053,7 +1053,7 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                          * but we want to track the mplexid assigned when we do the insert,
                          * because that might be used more than once.
                          */
-                        if (!isset($dtvMultiplex[$frequency]))
+                        if (isset($dtvMultiplex[$frequency]) === FALSE)
                         {
                             $insertDTVMultiplex->execute(array("sourceid"   => $sourceID,
                                                                "freq"       => $frequency,
@@ -1305,11 +1305,11 @@ function printLineup()
     {
         foreach ($response["map"] as $v)
         {
-            if (isset($v["atscMajor"]))
+            if (isset($v["atscMajor"]) === TRUE)
             {
                 $chanMap[$v["stationID"]] = "{$v["atscMajor"]}.{$v["atscMinor"]}";
             }
-            elseif (array_key_exists("uhfVhf", $v))
+            elseif (isset($v["uhfVhf"]) === TRUE)
             {
                 $chanMap[$v["stationID"]] = $v["uhfVhf"];
             }
@@ -1329,7 +1329,7 @@ function printLineup()
 
     foreach ($response["stations"] as $v)
     {
-        if (array_key_exists("affiliate", $v))
+        if (isset($v["affiliate"]) === TRUE)
         {
             $stationMap[$v["stationID"]] = "{$v["callsign"]} ({$v["affiliate"]})";
         }
@@ -1714,7 +1714,7 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         $res = array();
         $res = getLineup($k);
 
-        if (isset($res["code"]))
+        if (isset($res["code"])===TRUE)
         {
             print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
             print $res["message"] . "\n\n-----\n";
@@ -1737,12 +1737,12 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
 function tempdir()
 {
     $tempfile = tempnam(sys_get_temp_dir(), "mfdb");
-    if (file_exists($tempfile))
+    if (file_exists($tempfile) === TRUE)
     {
         unlink($tempfile);
     }
     mkdir($tempfile);
-    if (is_dir($tempfile))
+    if (is_dir($tempfile) === TRUE)
     {
         print "tempdir is $tempfile\n";
 
@@ -1758,7 +1758,7 @@ function displayLocalVideoSources()
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (count($result))
+    if (count($result) != 0)
     {
         print "\nMythTV local videosources:\n";
         foreach ($result as $v)
@@ -1963,7 +1963,7 @@ function checkForChannelIcon($stationID, $data)
 
     $result = $stmt->fetchColumn();
 
-    if ($result === FALSE OR $result != $md5 OR $forceLogoUpdate)
+    if ($result === FALSE OR $result != $md5 OR $forceLogoUpdate === TRUE)
     {
         /*
          * We don't already have this icon, or it's different, so it will have to be fetched.
@@ -2066,15 +2066,15 @@ function getLineupFromNumber($numberOrLineup)
 
     if (strlen($numberOrLineup) < 3)
     {
-        $foo = (int)$numberOrLineup;
+        $numberOrLineup = (int)$numberOrLineup;
 
-        if (array_key_exists($foo, $sdStatus["lineups"]) === FALSE)
+        if (isset($sdStatus["lineups"][$numberOrLineup]) === FALSE)
         {
             return array("", "");
         }
         else
         {
-            if (isset($sdStatus["lineups"][$numberOrLineup]["isDeleted"]))
+            if (isset($sdStatus["lineups"][$numberOrLineup]["isDeleted"]) === TRUE)
             {
                 return array($sdStatus["lineups"][$numberOrLineup]["ID"], TRUE);
             }
@@ -2136,12 +2136,12 @@ function printListOfAvailableCountries($fancyTable)
 
 function getChannelLogoDirectory()
 {
-    if (is_dir(getenv("HOME") . "/.mythtv/channels"))
+    if (is_dir(getenv("HOME") . "/.mythtv/channels") === TRUE)
     {
         return (getenv("HOME") . "/.mythtv/channels");
     }
 
-    if (is_dir("/home/mythtv/.mythtv/channels"))
+    if (is_dir("/home/mythtv/.mythtv/channels") === TRUE)
     {
         return ("/home/mythtv/.mythtv/channels");
     }

@@ -498,9 +498,9 @@ else
     $statusMessage = "Error connecting to Schedules Direct.";
 }
 
-if ($isMythTV)
+if ($isMythTV === TRUE)
 {
-    if (count($jsonProgramsToRetrieve) OR $forceDownload === TRUE)
+    if ((count($jsonProgramsToRetrieve) != 0) OR ($forceDownload === TRUE))
     {
         insertJSON($jsonProgramsToRetrieve);
         insertSchedule();
@@ -513,7 +513,7 @@ if ($isMythTV)
 }
 else
 {
-    if (file_exists("sd.json.programs.conf") AND $useProgramFile)
+    if ((file_exists("sd.json.programs.conf") === TRUE) AND ($useProgramFile === TRUE))
     {
         $jsonProgramsToRetrieve = file("sd.json.programs.conf");
         fetchPrograms($jsonProgramsToRetrieve);
@@ -540,7 +540,7 @@ if ($globalSinceStart->h)
 }
 printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.");
 
-if ($isMythTV)
+if ($isMythTV === TRUE)
 {
     printMSG("Updating status.");
 
@@ -563,7 +563,7 @@ if ($isMythTV)
 
 printMSG("Done.");
 
-if ($errorWarning)
+if ($errorWarning === TRUE)
 {
     debugMSG("NOTE! Errors encountered during processing. Check logs.");
 }
@@ -788,7 +788,7 @@ function getSchedules($stationIDsToFetch)
             exit;
         }
 
-        if (!is_null($response))
+        if (is_null($response) === FALSE)
         {
             break;
         }
@@ -835,7 +835,7 @@ function getSchedules($stationIDsToFetch)
         {
             if ($item["code"] == 7000)
             {
-                if (!isset($addToRetryQueue[$stationID]))
+                if (isset($addToRetryQueue[$stationID]) === FALSE)
                 {
                     $addToRetryQueue[$stationID] = 1;
                 }
@@ -866,7 +866,7 @@ function getSchedules($stationIDsToFetch)
 
         printMSG("Parsing schedule for stationID:$stationID");
 
-        if (isset($item["metadata"]["isDeleted"]))
+        if (isset($item["metadata"]["isDeleted"]) === TRUE)
         {
             printMSG("WARNING: $stationID has been marked as deleted.");
             $updateVisibleToFalse = $dbh->prepare("UPDATE channel SET visible = FALSE WHERE xmltvid=:sid");
@@ -874,7 +874,7 @@ function getSchedules($stationIDsToFetch)
             continue;
         }
 
-        if (!isset($item["programs"]))
+        if (isset($item["programs"]) === FALSE)
         {
             printMSG("WARNING: JSON does not contain any program elements.");
             printMSG("Send the following to grabber@schedulesdirect.org\n\n");
@@ -888,7 +888,7 @@ function getSchedules($stationIDsToFetch)
 
         foreach ($item["programs"] as $programData)
         {
-            if (isset($programData["md5"]))
+            if (isset($programData["md5"]) === TRUE)
             {
                 $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
             }
@@ -960,7 +960,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
             printMSG("Requesting more than 10000 programs. Please be patient.");
         }
 
-        if (count($jsonProgramsToRetrieve))
+        if (count($jsonProgramsToRetrieve) != 0)
         {
             $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
 
@@ -1017,7 +1017,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
                         sleep(30);
                     }
 
-                    if (!$hadError)
+                    if ($hadError === FALSE)
                     {
                         file_put_contents("$dlProgramTempDir/programs." . substr("00$index", -2) . ".json",
                             $schedulesDirectPrograms);
@@ -1027,7 +1027,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
                 } while ($retryCounter < 5);
             }
 
-            if (count($failedChunk))
+            if (count($failedChunk) != 0)
             {
                 printMSG("Failed to retrieve data after multiple retries.");
             }
@@ -1095,14 +1095,14 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
             $jsonProgram = json_decode($item, TRUE);
 
-            if (json_last_error())
+            if (json_last_error() === TRUE)
             {
                 debugMSG("*** ERROR: JSON decode error $jsonFileToProcess");
                 debugMSG(print_r($item, TRUE));
                 continue;
             }
 
-            if (isset($jsonProgram["code"]))
+            if (isset($jsonProgram["code"]) === TRUE)
             {
                 /*
                  * Probably not good. :(
@@ -1116,7 +1116,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 }
             }
 
-            if (isset($jsonProgram["programID"]))
+            if (isset($jsonProgram["programID"]) === TRUE)
             {
                 $pid = $jsonProgram["programID"];
             }
@@ -1127,7 +1127,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 continue;
             }
 
-            if (isset($jsonProgram["md5"]))
+            if (isset($jsonProgram["md5"]) === TRUE)
             {
                 $md5 = $jsonProgram["md5"];
             }
@@ -1291,7 +1291,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     while (list(, $item) = each($scheduleTemp))
     {
         $tempJSON = json_decode($item, TRUE);
-        if (isset($item["code"]))
+        if (isset($item["code"]) === TRUE)
         {
             if ($item["code"] == 7000)
             {
@@ -1299,7 +1299,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             }
         }
 
-        if (isset($tempJSON["stationID"]))
+        if (isset($tempJSON["stationID"]) === TRUE)
         {
             $stationID = $tempJSON["stationID"];
         }
@@ -1309,7 +1309,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             exit;
         }
 
-        if (isset($tempJSON["programs"]))
+        if (isset($tempJSON["programs"]) === TRUE)
         {
             $scheduleJSON[$stationID] = $tempJSON["programs"];
         }
@@ -1331,7 +1331,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
         $sourceID = $item["sourceid"];
         $stationID = $item["xmltvid"];
 
-        if (!isset($scheduleJSON[$stationID]))
+        if (isset($scheduleJSON[$stationID]) === FALSE)
         {
             continue; // If we don't have an updated schedule for the stationID, there's nothing to do.
         }
@@ -1427,7 +1427,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             $programJSON = json_decode($pj, TRUE);
 
-            if (json_last_error())
+            if (json_last_error() === TRUE)
             {
                 debugMSG("Error decoding $programID from local database. Raw data was:");
                 debugMSG(print_r($pj, TRUE));
@@ -1445,7 +1445,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             $skipPersonID = FALSE;
 
-            if (isset($programJSON["genres"]))
+            if (isset($programJSON["genres"]) === TRUE)
             {
                 foreach ($programJSON["genres"] as $g)
                 {
@@ -1458,11 +1458,11 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             foreach (array("cast", "crew") as $processing)
             {
-                if (isset($programJSON[$processing]))
+                if (isset($programJSON[$processing]) === TRUE)
                 {
                     foreach ($programJSON[$processing] as $credit)
                     {
-                        if (!isset($credit["role"]))
+                        if (isset($credit["role"]) === FALSE)
                         {
                             printMSG("No role?");
                             printMSG("Send the following to grabber@schedulesdirect.org\n\n");
@@ -1473,7 +1473,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
                         $name = $credit["name"];
 
-                        if (!isset($credit["personId"]))
+                        if (isset($credit["personId"]) === FALSE)
                         {
                             if ($skipPersonID === FALSE)
                             {
@@ -1481,7 +1481,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                             }
                         }
 
-                        if (!isset($peopleCacheMyth[$name]))
+                        if (isset($peopleCacheMyth[$name]) === FALSE)
                         {
                             $insertPersonMyth->execute(array("name" => $name));
                             $personID = $dbh->lastInsertId();
@@ -1492,7 +1492,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                             $personID = $peopleCacheMyth[$name];
                         }
 
-                        if (isset($SchedulesDirectRoleToMythTv[$credit["role"]]))
+                        if (isset($SchedulesDirectRoleToMythTv[$credit["role"]]) === TRUE)
                         {
                             $mythTVRole = $SchedulesDirectRoleToMythTv[$credit["role"]];
                             $insertCreditMyth->execute(array("person"    => $personID,
@@ -1504,7 +1504,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if (isset($schedule["audioProperties"]))
+            if (isset($schedule["audioProperties"]) === TRUE)
             {
                 foreach ($schedule["audioProperties"] as $ap)
                 {
@@ -1541,7 +1541,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if (isset($schedule["videoProperties"]))
+            if (isset($schedule["videoProperties"]) === TRUE)
             {
                 foreach ($schedule["videoProperties"] as $vp)
                 {
@@ -1567,7 +1567,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if (isset($schedule["isPremiereOrFinale"]))
+            if (isset($schedule["isPremiereOrFinale"]) === TRUE)
             {
                 switch ($schedule["isPremiereOrFinale"])
                 {
@@ -1587,7 +1587,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $isLast = FALSE;
             }
 
-            if (isset($schedule["contentRating"]))
+            if (isset($schedule["contentRating"]) === TRUE)
             {
                 foreach ($schedule["contentRating"] as $r)
                 {
@@ -1611,7 +1611,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
              */
             else
             {
-                if (isset($programJSON["contentRating"]))
+                if (isset($programJSON["contentRating"]) === TRUE)
                 {
                     foreach ($programJSON["contentRating"] as $r)
                     {
@@ -1633,7 +1633,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
              * Boolean types
              */
 
-            if (isset($schedule["new"]))
+            if (isset($schedule["new"]) === TRUE)
             {
                 $isNew = TRUE;
                 $previouslyshown = FALSE;
@@ -1648,7 +1648,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
              * Shouldn't be "new" and "repeat"
              */
 
-            if (isset($schedule["repeat"]))
+            if (isset($schedule["repeat"]) === TRUE)
             {
                 if ($isNew)
                 {
@@ -1663,62 +1663,62 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if (isset($schedule["cableInTheClassroom"]))
+            if (isset($schedule["cableInTheClassroom"]) === TRUE)
             {
                 $cableInTheClassroom = TRUE;
             }
 
-            if (isset($schedule["catchup"]))
+            if (isset($schedule["catchup"]) === TRUE)
             {
                 $catchupProgram = TRUE;
             }
 
-            if (isset($schedule["continued"]))
+            if (isset($schedule["continued"]) === TRUE)
             {
                 $continuedProgram = TRUE;
             }
 
-            if (isset($schedule["educational"]))
+            if (isset($schedule["educational"]) === TRUE)
             {
                 $isEducational = TRUE;
             }
 
-            if (isset($schedule["joinedInProgress"]))
+            if (isset($schedule["joinedInProgress"]) === TRUE)
             {
                 $joinedInProgress = TRUE;
             }
 
-            if (isset($schedule["leftInProgress"]))
+            if (isset($schedule["leftInProgress"]) === TRUE)
             {
                 $leftInProgress = TRUE;
             }
 
-            if (isset($schedule["premiere"]))
+            if (isset($schedule["premiere"]) === TRUE)
             {
                 $isPremiere = TRUE;
             }
 
-            if (isset($schedule["programBreak"]))
+            if (isset($schedule["programBreak"]) === TRUE)
             {
                 $programBreak = TRUE;
             }
 
-            if (isset($schedule["signed"]))
+            if (isset($schedule["signed"]) === TRUE)
             {
                 $isSigned = TRUE;
             }
 
-            if (isset($schedule["subjectToBlackout"]))
+            if (isset($schedule["subjectToBlackout"]) === TRUE)
             {
                 $subjectToBlackout = TRUE;
             }
 
-            if (isset($schedule["timeApproximate"]))
+            if (isset($schedule["timeApproximate"]) === TRUE)
             {
                 $timeApproximate = TRUE;
             }
 
-            if (isset($schedule["liveTapeDelay"]))
+            if (isset($schedule["liveTapeDelay"]) === TRUE)
             {
                 $liveOrTapeDelay = $schedule["liveTapeDelay"];
             }
@@ -1731,7 +1731,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 continue;
             }
 
-            if (isset($programJSON["episodeTitle150"]))
+            if (isset($programJSON["episodeTitle150"]) === TRUE)
             {
                 $subTitle = $programJSON["episodeTitle150"];
             }
@@ -1740,7 +1740,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $subTitle = "";
             }
 
-            if (isset($programJSON["descriptions"]["description1000"]))
+            if (isset($programJSON["descriptions"]["description1000"]) === TRUE)
             {
                 $description = $programJSON["descriptions"]["description1000"][0]["description"];
             }
@@ -1749,7 +1749,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $description = "";
             }
 
-            if (isset($programJSON["genres"]))
+            if (isset($programJSON["genres"]) === TRUE)
             {
                 $category = $programJSON["genres"][0];
             }
@@ -1758,14 +1758,14 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $category = "";
             }
 
-            if (isset($programJSON["metadata"]))
+            if (isset($programJSON["metadata"]) === TRUE)
             {
                 foreach ($programJSON["metadata"] as $md)
                 {
-                    if (isset($md["Tribune"]))
+                    if (isset($md["Gracenote"]) === TRUE)
                     {
-                        $season = $md["Tribune"]["season"];
-                        $episode = $md["Tribune"]["episode"];
+                        $season = $md["Gracenote"]["season"];
+                        $episode = $md["Gracenote"]["episode"];
                     }
                 }
             }
@@ -1796,9 +1796,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     break;
             }
 
-            if ($type == "mv" AND isset($programJSON["movie"]))
+            if ($type == "mv" AND (isset($programJSON["movie"]) === TRUE))
             {
-                if (isset($programJSON["movie"]["year"]))
+                if (isset($programJSON["movie"]["year"]) === TRUE)
                 {
                     $movieYear = $programJSON["movie"]["year"];
                 }
@@ -1807,69 +1807,69 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                  * MythTV uses a system where 4 stars would be a "1.0".
                  */
 
-                if (isset($programJSON["movie"]["qualityRating"]))
+                if (isset($programJSON["movie"]["qualityRating"]) === TRUE)
                 {
                     $starRating = $programJSON["movie"]["qualityRating"][0]["rating"] * 0.25;
                 }
             }
 
-            if (isset($programJSON["colorCode"]))
+            if (isset($programJSON["colorCode"]) === TRUE)
             {
                 $colorCode = $programJSON["colorCode"];
             }
 
-            if (isset($programJSON["syndicatedEpisodeNumber"]))
+            if (isset($programJSON["syndicatedEpisodeNumber"]) === TRUE)
             {
                 $syndicatedEpisodeNumber = $programJSON["syndicatedEpisodeNumber"];
             }
 
-            if ($isStereo)
+            if ($isStereo === TRUE)
             {
                 $audioprop = "STEREO";
             }
 
-            if ($dolbyType)
+            if ($dolbyType === TRUE)
             {
                 $audioprop = "DOLBY";
             }
 
-            if ($isSurround)
+            if ($isSurround === TRUE)
             {
                 $audioprop = "SURROUND";
             }
 
-            if (isset($programJSON["showType"]))
+            if (isset($programJSON["showType"]) === TRUE)
             {
                 $showType = $programJSON["showType"];
             }
 
-            if (isset($programJSON["originalAirDate"]))
+            if (isset($programJSON["originalAirDate"]) === TRUE)
             {
                 $oad = $programJSON["originalAirDate"];
             }
 
-            if ($isLetterboxed)
+            if ($isLetterboxed === TRUE)
             {
                 $videoProperties = "WIDESCREEN";
             }
 
-            if ($isHDTV)
+            if ($isHDTV === TRUE)
             {
                 $videoProperties = "HDTV";
             }
 
-            if ($isSigned)
+            if ($isSigned === TRUE)
             {
                 $subtitleTypes = "SIGNED";
             }
 
-            if (isset($schedule["multipart"]))
+            if (isset($schedule["multipart"]) === TRUE)
             {
                 $partNumber = $schedule["multipart"]["partNumber"];
                 $numberOfParts = $schedule["multipart"]["totalParts"];
             }
 
-            if (isset($programJSON["genres"]))
+            if (isset($programJSON["genres"]) === TRUE)
             {
                 $relevance = 0;
                 foreach ($programJSON["genres"] as $genre)
@@ -2127,7 +2127,7 @@ function tempdir($type)
         unlink($tempfile);
     }
     mkdir($tempfile);
-    if (is_dir($tempfile))
+    if (is_dir($tempfile) === TRUE)
     {
         return $tempfile;
     }
@@ -2143,7 +2143,7 @@ function updateStatus()
 
     $res = getStatus();
 
-    if ($isMythTV)
+    if ($isMythTV === TRUE)
     {
         $updateLocalMessageTable = $dbhSD->prepare("INSERT INTO messages(id,date,message,type)
     VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
@@ -2161,7 +2161,7 @@ function updateStatus()
             $msgDate = $a["date"];
             $message = $a["message"];
             printMSG("MessageID:$msgID : $msgDate : $message");
-            if ($isMythTV)
+            if ($isMythTV === TRUE)
             {
                 $updateLocalMessageTable->execute(array("id"      => $msgID, "date" => $msgDate,
                                                         "message" => $message,
@@ -2185,7 +2185,7 @@ function updateStatus()
     printMSG("Max number of lineups for your account: $maxLineups");
     printMSG("Next suggested connect time: $nextConnectTime");
 
-    if ($useServiceAPI)
+    if ($useServiceAPI === TRUE)
     {
         printMSG("Updating settings via the Services API.");
         $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
@@ -2195,7 +2195,7 @@ function updateStatus()
     }
     else
     {
-        if ($isMythTV)
+        if ($isMythTV === TRUE)
         {
             setting("MythFillSuggestedRunTime", $nextConnectTime);
             setting("DataDirectMessage", "Your subscription expires on $expires.");
@@ -2214,7 +2214,7 @@ function updateStatus()
         }
     }
 
-    if ($isMythTV)
+    if ($isMythTV === TRUE)
     {
         if (`which mythutil`)
         {
