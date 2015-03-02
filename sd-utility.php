@@ -288,7 +288,7 @@ foreach ($options as $k => $v)
     }
 }
 
-if ($printCountries)
+if ($printCountries === TRUE)
 {
     printListOfAvailableCountries($printFancyTable);
     exit;
@@ -409,19 +409,19 @@ if ($isMythTV OR $dbWithoutMythtv)
         }
     }
 
-    if (!$justExtract)
+    if ($justExtract === FALSE)
     {
         checkDatabase();
     }
     else
     {
-        if (!isset($dbh))
+        if (isset($dbh) === FALSE)
         {
             print "Don't have dbh. Exiting.\n";
             exit;
         }
 
-        if (!isset($dbhSD))
+        if (isset($dbhSD) === FALSE)
         {
             print "Don't have dbhSD. Exiting.\n";
             exit;
@@ -439,7 +439,7 @@ if ($isMythTV OR $dbWithoutMythtv)
 
 if ($skipChannelLogo === FALSE)
 {
-    if (!file_exists($channelLogoDirectory))
+    if (file_exists($channelLogoDirectory) === FALSE)
     {
         $result = @mkdir($channelLogoDirectory);
 
@@ -455,7 +455,7 @@ if ($skipChannelLogo === FALSE)
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
-if (!$skipVersionCheck)
+if ($skipVersionCheck === FALSE)
 {
     print "Checking to see if we're running the latest client.\n";
 
@@ -485,12 +485,12 @@ if (!$skipVersionCheck)
     }
 }
 
-if ($isMythTV)
+if ($isMythTV === TRUE)
 {
     $useServiceAPI = checkForServiceAPI();
 }
 
-if ($isMythTV OR $dbWithoutMythtv)
+if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
 {
     $userLoginInformation = settingSD("SchedulesDirectLogin");
 
@@ -503,7 +503,7 @@ if ($isMythTV OR $dbWithoutMythtv)
 }
 else
 {
-    if (file_exists("sd.json.conf"))
+    if (file_exists("sd.json.conf") === TRUE)
     {
         $userLoginInformation = file("sd.json.conf");
         $responseJSON = json_decode($userLoginInformation[0], TRUE);
@@ -559,14 +559,14 @@ if ($token == "ERROR")
     exit;
 }
 
-if ($needToStoreLogin)
+if ($needToStoreLogin === TRUE)
 {
     $userInformation["username"] = $username;
     $userInformation["password"] = $password;
 
     $credentials = json_encode($userInformation);
 
-    if ($isMythTV OR $dbWithoutMythtv)
+    if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
     {
         settingSD("SchedulesDirectLogin", $credentials);
 
@@ -582,7 +582,7 @@ if ($needToStoreLogin)
     }
 }
 
-while (!$done)
+while ($done === FALSE)
 {
     $sdStatus = getStatus();
 
@@ -594,7 +594,7 @@ while (!$done)
 
     printStatus($sdStatus);
 
-    if ($isMythTV)
+    if ($isMythTV === TRUE)
     {
         displayLocalVideoSources();
     }
@@ -607,7 +607,7 @@ while (!$done)
     print "5 Acknowledge a message\n";
     print "6 Print a channel table for a lineup\n";
 
-    if ($isMythTV)
+    if ($isMythTV === TRUE)
     {
         print "\nMythTV functions:\n";
         print "A to Add a new videosource to MythTV\n";
@@ -634,7 +634,7 @@ while (!$done)
             deleteLineupFromSchedulesDirect();
             break;
         case "4":
-            if (count($sdStatus["lineups"]))
+            if (count($sdStatus["lineups"]) != 0)
             {
                 foreach ($sdStatus["lineups"] as $v)
                 {
@@ -931,7 +931,7 @@ function updateChannelTable($lineup)
                 $mapToUse = "1";
             }
 
-            if ($useScan)
+            if ($useScan === TRUE)
             {
                 $matchType = $json["map"][$mapToUse][0]["matchType"];
 
@@ -1191,7 +1191,7 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
         $lineupLastModifiedJSON = settingSD("localLineupLastModified");
         $lineupLastModifiedArray = array();
 
-        if (count($lineupLastModifiedJSON))
+        if (count($lineupLastModifiedJSON) != 0)
         {
             $lineupLastModifiedArray = json_decode($lineupLastModifiedJSON, TRUE);
         }
@@ -1237,19 +1237,19 @@ function linkSchedulesDirectLineup()
 
     list ($lineup, $isDeleted) = getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
 
-    if ($lineup == "" OR $isDeleted === TRUE)
+    if (($lineup == "") OR ($isDeleted === TRUE))
     {
         return;
     }
 
-    $stmt = $dbhSD->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
+    $stmt = $dbhSD->prepare("SELECT json FROM lineups WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
-    if (!count($response)) // We've already decoded the JSON.
+    if (count($response) == 0) // We've already decoded the JSON.
     {
         print "Fatal Error in Link SchedulesDirect Lineup.\n";
-        print "No JSON stored in SDlineupCache?\n";
+        print "No JSON for lineup in schedules direct local cache?\n";
         print "lineup:$lineup\n";
         exit;
     }
@@ -1257,7 +1257,7 @@ function linkSchedulesDirectLineup()
     if ($response == "[]")
     {
         print "Fatal Error in Link SchedulesDirect Lineup.\n";
-        print "Empty JSON stored in SDlineupCache?\n";
+        print "Empty JSON for lineup in schedules direct local cache?\n";
         print "lineup:$lineup\n";
         exit;
     }
@@ -1281,7 +1281,7 @@ function printLineup()
         return;
     }
 
-    $stmt = $dbhSD->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
+    $stmt = $dbhSD->prepare("SELECT json FROM lineups WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $response = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -1377,7 +1377,7 @@ function addLineupsToSchedulesDirect()
     $done = FALSE;
     $country = "";
 
-    while (!$done)
+    while ($done === FALSE)
     {
         print "Three-character ISO-3166-1 alpha3 country code (? to list available countries):";
         $country = strtoupper(readline(">"));
@@ -1397,7 +1397,7 @@ function addLineupsToSchedulesDirect()
         }
     }
 
-    if (isset($arrayCountriesWithOnePostalCode[$country]))
+    if (isset($arrayCountriesWithOnePostalCode[$country]) === TRUE)
     {
         print "Only one valid postal code for this country: {$arrayCountriesWithOnePostalCode[$country]}\n";
         $postalcode = $arrayCountriesWithOnePostalCode[$country];
@@ -1825,10 +1825,10 @@ function checkDatabase()
     {
         print "Creating Schedules Direct tables.\n";
 
-        $stmt = $dbhSD->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
-    SDprogramrating,SDschedule,SDMessages,SDimageCache");
+        $stmt = $dbhSD->exec("DROP TABLE IF EXISTS messages,credits,lineups,people,programGenres,
+    programRating,schedules,imageCache");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDMessages` (
+        $stmt = $dbhSD->exec("CREATE TABLE `messages` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `id` char(22) DEFAULT NULL COMMENT 'Required to ACK a message from the server.',
   `date` char(20) DEFAULT NULL,
@@ -1839,16 +1839,16 @@ function checkDatabase()
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDcredits` (
-`personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
+        $stmt = $dbhSD->exec("CREATE TABLE `credits` (
+  `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `programID` varchar(64) NOT NULL,
   `role` varchar(100) DEFAULT NULL,
   KEY `personID` (`personID`),
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDlineupCache` (
-`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        $stmt = $dbhSD->exec("CREATE TABLE `lineups` (
+  `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `lineup` varchar(50) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
   `modified` char(20) DEFAULT '1970-01-01T00:00:00Z',
@@ -1857,15 +1857,15 @@ function checkDatabase()
   UNIQUE KEY `lineup` (`lineup`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDpeople` (
+        $stmt = $dbhSD->exec("CREATE TABLE `people` (
   `personID` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`personID`),
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramCache` (
-`row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        $stmt = $dbhSD->exec("CREATE TABLE `programs` (
+  `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `programID` varchar(64) NOT NULL,
   `md5` char(22) NOT NULL,
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1875,8 +1875,8 @@ function checkDatabase()
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramgenres` (
-`programID` varchar(64) NOT NULL,
+        $stmt = $dbhSD->exec("CREATE TABLE `programGenres` (
+  `programID` varchar(64) NOT NULL,
   `relevance` char(1) NOT NULL DEFAULT '0',
   `genre` varchar(30) NOT NULL,
   PRIMARY KEY (`programID`),
@@ -1884,21 +1884,22 @@ function checkDatabase()
   KEY `genre` (`genre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `SDprogramrating` (
-`programID` varchar(64) NOT NULL,
+        $stmt = $dbhSD->exec("CREATE TABLE `programRating` (
+  `programID` varchar(64) NOT NULL,
   `system` varchar(30) NOT NULL,
   `rating` varchar(16) DEFAULT NULL,
   PRIMARY KEY (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $dbhSD->exec("CREATE TABLE `SDschedule` (
+        $dbhSD->exec("CREATE TABLE `schedules` (
   `stationID` varchar(12) NOT NULL,
   `md5` char(22) NOT NULL,
-  UNIQUE KEY `sid` (`stationID`),
+  `date` CHAR(10) NOT NULL,
+  UNIQUE KEY `sid-date` (`stationID`,`date`),
   KEY `md5` (`md5`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $dbhSD->exec("CREATE TABLE `SDimageCache` (
+        $dbhSD->exec("CREATE TABLE `imageCache` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `item` varchar(128) NOT NULL,
   `md5` char(22) NOT NULL,
@@ -1919,6 +1920,20 @@ function checkDatabase()
         settingSD("SchedulesDirectJSONschemaVersion", "2");
     }
 
+    if ($schemaVersion == 2)
+    {
+        $dbhSD->exec("RENAME TABLE SDMessages TO messages");
+        $dbhSD->exec("RENAME TABLE SDcredits TO credits");
+        $dbhSD->exec("RENAME TABLE SDimageCache TO imageCache");
+        $dbhSD->exec("RENAME TABLE SDlineupCache TO lineups");
+        $dbhSD->exec("RENAME TABLE SDpeople TO people");
+        $dbhSD->exec("RENAME TABLE SDprogramCache TO programs");
+        $dbhSD->exec("RENAME TABLE SDprogramgenres TO programGenres");
+        $dbhSD->exec("RENAME TABLE SDprogramrating TO programRatings");
+        $dbhSD->exec("RENAME TABLE SDschedule TO schedules");
+        $dbhSD->exec("ALTER TABLE schedules ADD column date CHAR(10) NOT NULL");
+        settingSD("SchedulesDirectJSONschemaVersion", "3");
+    }
 }
 
 function checkForChannelIcon($stationID, $data)
@@ -2086,7 +2101,7 @@ function printListOfAvailableCountries($fancyTable)
             }
         }
 
-        if ($fancyTable)
+        if ($fancyTable === TRUE)
         {
             $col1 = "Country";
             $col2 = "Three-letter code";
