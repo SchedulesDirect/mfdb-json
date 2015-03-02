@@ -753,7 +753,7 @@ function getSchedules($stationIDsToFetch)
 
     $errorCount = 0;
 
-    $t1 = json_encode($baz;)
+    $t1 = json_encode($baz);
 
     do
     {
