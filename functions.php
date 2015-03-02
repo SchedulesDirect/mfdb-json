@@ -30,7 +30,7 @@ function getToken($username, $passwordHash)
 
     $body = json_encode(array("username" => $username, "password" => $passwordHash));
 
-    if ($debug)
+    if ($debug === TRUE)
     {
         print "getToken: Sending $body\n";
     }
@@ -91,7 +91,7 @@ function getToken($username, $passwordHash)
         exit;
     }
 
-    if ($debug)
+    if ($debug === TRUE)
     {
         print "\n\n******************************************\n";
         print "Raw headers:\n";
@@ -135,7 +135,7 @@ function getStatus()
 
     $res = $response->json();
 
-    if ($debug)
+    if ($debug === TRUE)
     {
         print "\n\n******************************************\n";
         print "Raw headers:\n";
@@ -197,7 +197,7 @@ function printStatus($sdStatus)
         }
     }
 
-    if ($debug)
+    if ($debug === TRUE)
     {
         print "isMythTV status is:\n";
         var_dump($isMythTV);
@@ -240,7 +240,7 @@ function printStatus($sdStatus)
         }
     }
 
-    if ($debug)
+    if ($debug === TRUE)
     {
         print "Temp printout.\n";
         print $lineupData;
@@ -259,7 +259,7 @@ function printStatus($sdStatus)
             $lineupIsDeleted = FALSE;
         }
 
-        if ($debug)
+        if ($debug === TRUE)
         {
             print "Raw lineup:\n";
             var_dump($v);

@@ -1433,7 +1433,7 @@ function addLineupsToSchedulesDirect()
 
     $res = $response->json();
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         debugMSG("addLineupsToSchedulesDirect:Response:$res");
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
@@ -1502,7 +1502,7 @@ function addLineupsToSchedulesDirect()
 
     $res = $response->json();
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         debugMSG("addLineupsToSchedulesDirect:Response:$res");
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
@@ -1545,7 +1545,7 @@ function directAddLineup($lineup)
 
     $res = $response->json();
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         debugMSG("addLineupsToSchedulesDirect:Response:$res");
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
@@ -1591,7 +1591,7 @@ function deleteLineupFromSchedulesDirect()
 
     $res = $response->json();
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         debugMSG("deleteLineupFromSchedulesDirect:Response:$res");
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
@@ -1629,7 +1629,7 @@ function deleteMessageFromSchedulesDirect()
 
     $res = $response->json();
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         print "\n\n******************************************\n";
         print "Raw headers:\n";
@@ -1682,7 +1682,7 @@ function getLineup($lineupToGet)
         return "";
     }
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         print "\n\n******************************************\n";
         print "Raw headers:\n";

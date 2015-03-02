@@ -583,7 +583,7 @@ function getSchedules($stationIDsToFetch)
     $downloadedStationIDs = array();
     $serverScheduleMD5 = array();
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         print "Station array:\n";
         var_dump($stationIDsToFetch);
@@ -598,7 +598,7 @@ function getSchedules($stationIDsToFetch)
 
     while (list(, $sid) = each($stationIDsToFetch))
     {
-        $requestArray[] = array("stationID" => $sid, "days" => 13);
+        $requestArray[] = array("stationID" => $sid);
     }
 
     if (count($requestArray) == 0)
@@ -607,7 +607,7 @@ function getSchedules($stationIDsToFetch)
         return ("");
     }
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         print "Request array:\n";
         var_dump($requestArray);
@@ -658,7 +658,7 @@ function getSchedules($stationIDsToFetch)
                 exit;
             }
 
-            if (!is_null($response))
+            if (is_null($response) === FALSE)
             {
                 break;
             }
@@ -673,7 +673,7 @@ function getSchedules($stationIDsToFetch)
 
         $schedulesDirectMD5s = $response->json();
 
-        if ($debug)
+        if ($debug===TRUE)
         {
             print "Schedules Direct MD5's\n";
             var_dump($schedulesDirectMD5s);
@@ -683,7 +683,7 @@ function getSchedules($stationIDsToFetch)
         $getLocalCache->execute();
         $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
 
-        if ($debug)
+        if ($debug===TRUE)
         {
             print "Local MD5\n";
             var_dump($localMD5);
@@ -691,7 +691,7 @@ function getSchedules($stationIDsToFetch)
 
         while (list($stationID, $data) = each($schedulesDirectMD5s))
         {
-            if ($debug)
+            if ($debug===TRUE)
             {
                 print "sid: $stationID\n";
                 print "data:\n";
@@ -702,7 +702,7 @@ function getSchedules($stationIDsToFetch)
             {
                 foreach ($data as $item)
                 {
-                    if ($debug)
+                    if ($debug===TRUE)
                     {
                         print "item is\n";
                         var_dump($item);
@@ -729,7 +729,7 @@ function getSchedules($stationIDsToFetch)
         $bar = $requestArray;
     }
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         print "bar is now\n";
         var_dump($bar);
@@ -911,7 +911,7 @@ function getSchedules($stationIDsToFetch)
 
     $jsonProgramsToRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
 
-    if ($debug)
+    if ($debug===TRUE)
     {
         /*
          * One user is reporting that after a run, a second run immediately afterwards still has programs that need
