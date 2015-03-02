@@ -693,6 +693,8 @@ function getSchedules($stationIDsToFetch)
 
         while (list($stationID, $data) = each($schedulesDirectMD5s))
         {
+            $bar = array();
+
             foreach ($data as $date => $arrayFoo)
             {
                 if ($arrayFoo["code"] != 0)
