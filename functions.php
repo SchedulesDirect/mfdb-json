@@ -512,7 +512,7 @@ function getBaseurl($isBeta)
 {
     global $api;
 
-    if ($isBeta)
+    if ($isBeta === TRUE)
     {
         # Test server. Things may be broken there.
         $baseurl = "https://json.schedulesdirect.org/20141201/";
