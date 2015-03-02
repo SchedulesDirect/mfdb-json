@@ -294,7 +294,7 @@ if ($printCountries === TRUE)
     exit;
 }
 
-if ($knownToBeBroken AND $forceRun === FALSE)
+if (($knownToBeBroken === TRUE) AND ($forceRun === FALSE))
 {
     print "This version is known to be broken and --forcerun not specified. Exiting.\n";
     exit;
@@ -1714,7 +1714,7 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         $res = array();
         $res = getLineup($k);
 
-        if (isset($res["code"])===TRUE)
+        if (isset($res["code"]) === TRUE)
         {
             print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
             print $res["message"] . "\n\n-----\n";
