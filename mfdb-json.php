@@ -725,7 +725,7 @@ function getSchedules($stationIDsToFetch)
                     $bar[] = $date;
                 }
             }
-            $baz[$stationID]["date"] = $bar;
+            $baz[] = array("stationID" => $stationID, "date" => $bar);
         }
     }
     else
@@ -754,6 +754,7 @@ function getSchedules($stationIDsToFetch)
     $errorCount = 0;
 
     $t1 = json_encode($baz);
+    print "Stop here.\n";
 
     do
     {
