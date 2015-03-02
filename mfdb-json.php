@@ -874,8 +874,10 @@ function getSchedules($stationIDsToFetch)
             }
 
             $downloadedStationIDs[] = $stationID;
+            $date = $v["metadata"]["startDate"];
+            $md5 = $v["metadata"]["md5"];
 
-            printMSG("Parsing schedule for stationID:$stationID");
+            printMSG("Parsing schedule stationID:$stationID for $date");
 
             if (isset($v["metadata"]["isDeleted"]) === TRUE)
             {
@@ -894,8 +896,6 @@ function getSchedules($stationIDsToFetch)
                 exit;
             }
 
-            $date = $v["metadata"]["startDate"];
-            $md5 = $v["metadata"]["md5"];
             $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5, "date" => $date));
 
             foreach ($v["programs"] as $programData)
