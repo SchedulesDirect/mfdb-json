@@ -829,7 +829,7 @@ function getSchedules($stationIDsToFetch)
     {
         $item = json_decode($json, TRUE);
 
-        foreach ($item as $k => $v)
+        foreach ($item as $v)
         {
             if (isset($v["stationID"]))
             {
@@ -894,11 +894,11 @@ function getSchedules($stationIDsToFetch)
                 exit;
             }
 
-            $date = $v["date"];
+            $date = $v["metadata"]["startDate"];
             $md5 = $v["metadata"]["md5"];
             $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5, "date" => $date));
 
-            foreach ($item["programs"] as $programData)
+            foreach ($v["programs"] as $programData)
             {
                 if (isset($programData["md5"]) === TRUE)
                 {
