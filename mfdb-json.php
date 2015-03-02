@@ -682,53 +682,49 @@ function getSchedules($stationIDsToFetch)
             var_dump($schedulesDirectMD5s);
         }
 
-        $getLocalCache = $dbhSD->prepare("SELECT stationID,md5 FROM SDschedule");
-        $getLocalCache->execute();
-        $localMD5 = $getLocalCache->fetchAll(PDO::FETCH_KEY_PAIR);
-
-        if ($debug === TRUE)
-        {
-            print "Local MD5\n";
-            var_dump($localMD5);
-        }
+        $getLocalCacheMD5 = $dbhSD->prepare("SELECT md5 FROM SDschedule WHERE stationID=:sid AND date=:date");
 
         while (list($stationID, $data) = each($schedulesDirectMD5s))
         {
-            if ($debug === TRUE)
+            foreach ($data as $date => $arrayFoo)
             {
-                print "sid: $stationID\n";
-                print "data:\n";
-                var_dump($data);
-            }
-
-            if (isset($localMD5[$stationID]))
-            {
-                foreach ($data as $item)
+                if ($arrayFoo["code"]!= 0)
                 {
-                    if ($debug === TRUE)
-                    {
-                        print "item is\n";
-                        var_dump($item);
-                    }
-
-                    if ($item["days"] == 13)
-                    {
-                        if ($localMD5[$stationID] != $item["md5"])
-                        {
-                            $bar[] = array("stationID" => $stationID, "days" => 13);
-                            continue;
-                        }
-                    }
+                    printMSG("Got error response for sid:$stationID, date:$date array:" . print_r($arrayFoo, TRUE));
+                    continue;
                 }
-            }
-            else
-            {
-                $bar[] = array("stationID" => $stationID, "days" => 13);
+
+                if ($debug === TRUE)
+                {
+                    print "sid: $stationID\n";
+                    print "data:\n";
+                    var_dump($data);
+                }
+
+                $getLocalCacheMD5->execute(array("sid" => $stationID, "date" => $date));
+                $localMD5 = $getLocalCacheMD5->fetchColumn();
+
+                if ($debug === TRUE)
+                {
+                    print "Local MD5\n";
+                    var_dump($localMD5);
+                }
+
+                if ($localMD5 != $arrayFoo["md5"])
+                {
+                    /*
+                     * We need to get that particular day.
+                     */
+                    $bar[] = array("stationID" => $stationID, "date" => $date);
+                }
             }
         }
     }
     else
     {
+        /*
+         * We need to generate a real request array here.
+         */
         $bar = $requestArray;
     }
 
