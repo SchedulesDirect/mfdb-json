@@ -538,7 +538,7 @@ function checkForClientUpdate($client)
     {
         if ($e->getCode() != 200)
         {
-            return ("ERROR");
+            return (array(TRUE, "ERROR"));
         }
     }
 
@@ -546,14 +546,14 @@ function checkForClientUpdate($client)
 
     if ($res["code"] == 0)
     {
-        return ($res["version"]);
+        return (array(FALSE, $res["version"]));
     }
 
     if ($res["code"] == 1005)
     {
         print "Got error message from server: unknown client.\n";
 
-        return ("ERROR");
+        return (array(1005, ""));
     }
 }
 

@@ -183,35 +183,38 @@ if ($skipVersionCheck === FALSE)
 {
     printMSG("Checking to see if we're running the latest client.");
 
-    $serverVersion = checkForClientUpdate($client);
+    list($hadError, $serverVersion) = checkForClientUpdate($client);
 
-    if ($serverVersion == "ERROR")
+    if ($hadError !== FALSE)
     {
-        printMSG("Received error response from server. Exiting.");
-        exit;
-    }
-
-    if ($serverVersion != $scriptVersion)
-    {
-        printMSG("***Version mismatch.***");
-        printMSG("Server version: $serverVersion");
-        printMSG("Our version: $scriptVersion");
-        if ($skipVersionCheck === FALSE)
+        if ($hadError != 1005)
         {
-            printMSG("Exiting. Do you need to run 'git pull' to refresh?");
-            printMSG("Restart script with --skipversion to ignore mismatch.");
+            printMSG("Received error response from server. Exiting.");
             exit;
         }
         else
         {
-            printMSG("Continuing because of --forcerun parameter.");
+            printMSG("Server doesn't recognize our client. Continuing.");
         }
     }
-
-    if ($serverVersion == "ERROR")
+    else
     {
-        printMSG("Received error response from server. Exiting.");
-        exit;
+        if ($serverVersion != $scriptVersion)
+        {
+            printMSG("***Version mismatch.***");
+            printMSG("Server version: $serverVersion");
+            printMSG("Our version: $scriptVersion");
+            if ($skipVersionCheck === FALSE)
+            {
+                printMSG("Exiting. Do you need to run 'git pull' to refresh?");
+                printMSG("Restart script with --skipversion to ignore mismatch.");
+                exit;
+            }
+            else
+            {
+                printMSG("Continuing because of --forcerun parameter.");
+            }
+        }
     }
 }
 
