@@ -829,85 +829,89 @@ function getSchedules($stationIDsToFetch)
     {
         $item = json_decode($json, TRUE);
 
-        if (isset($item["stationID"]))
+        foreach ($item as $k => $v)
         {
-            $stationID = $item["stationID"];
-        }
-        else
-        {
-            printMSG("Fatal: No stationID? Send the following to grabber@schedulesdirect.org");
-            printMSG($json);
-            continue;
-        }
-
-        if (isset($item["code"]))
-        {
-            if ($item["code"] == 7000)
+            if (isset($v["stationID"]))
             {
-                if (isset($addToRetryQueue[$stationID]) === FALSE)
+                $stationID = $v["stationID"];
+            }
+            else
+            {
+                printMSG("Fatal: No stationID? Send the following to grabber@schedulesdirect.org");
+                printMSG($json);
+                continue;
+            }
+
+            if (isset($v["code"]) === TRUE)
+            {
+                if ($v["code"] == 7000)
                 {
-                    $addToRetryQueue[$stationID] = 1;
+                    if (isset($addToRetryQueue[$stationID]) === FALSE)
+                    {
+                        $addToRetryQueue[$stationID] = 1;
+                    }
+                    else
+                    {
+                        $addToRetryQueue[$stationID]++;
+                    }
+
+                    printMSG("Adding $stationID to retry queue. Count is {$addToRetryQueue[$stationID]}");
+
+                    if ($addToRetryQueue[$stationID] == 10)
+                    {
+                        unset($addToRetryQueue[$stationID]); // Permanent error.
+                        printMSG("Permanent error attempting to fetch schedule for $stationID");
+                    }
+
+                    sleep(10); // We're going to sleep so that the server has the chance to generate the schedule.
+                    continue;
                 }
                 else
                 {
-                    $addToRetryQueue[$stationID]++;
+                    printMSG("getSchedules error: $json");
+                    continue;
                 }
+            }
 
-                printMSG("Adding $stationID to retry queue. Count is {$addToRetryQueue[$stationID]}");
+            $downloadedStationIDs[] = $stationID;
 
-                if ($addToRetryQueue[$stationID] == 10)
+            printMSG("Parsing schedule for stationID:$stationID");
+
+            if (isset($v["metadata"]["isDeleted"]) === TRUE)
+            {
+                printMSG("WARNING: $stationID has been marked as deleted.");
+                $updateVisibleToFalse = $dbh->prepare("UPDATE channel SET visible = FALSE WHERE xmltvid=:sid");
+                $updateVisibleToFalse->execute(array("sid" => $stationID));
+                continue;
+            }
+
+            if (isset($v["programs"]) === FALSE)
+            {
+                printMSG("WARNING: JSON does not contain any program elements.");
+                printMSG("Send the following to grabber@schedulesdirect.org\n\n");
+                var_dump($item);
+                printMSG("$json\n\n");
+                exit;
+            }
+
+            $date = $v["date"];
+            $md5 = $v["metadata"]["md5"];
+            $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5, "date" => $date));
+
+            foreach ($item["programs"] as $programData)
+            {
+                if (isset($programData["md5"]) === TRUE)
                 {
-                    unset($addToRetryQueue[$stationID]); // Permanent error.
-                    printMSG("Permanent error attempting to fetch schedule for $stationID");
+                    $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
                 }
-
-                sleep(10); // We're going to sleep so that the server has the chance to generate the schedule.
-                continue;
-            }
-            else
-            {
-                printMSG("getSchedules error: $json");
-                continue;
-            }
-        }
-
-        $downloadedStationIDs[] = $stationID;
-
-        printMSG("Parsing schedule for stationID:$stationID");
-
-        if (isset($item["metadata"]["isDeleted"]) === TRUE)
-        {
-            printMSG("WARNING: $stationID has been marked as deleted.");
-            $updateVisibleToFalse = $dbh->prepare("UPDATE channel SET visible = FALSE WHERE xmltvid=:sid");
-            $updateVisibleToFalse->execute(array("sid" => $stationID));
-            continue;
-        }
-
-        if (isset($item["programs"]) === FALSE)
-        {
-            printMSG("WARNING: JSON does not contain any program elements.");
-            printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-            var_dump($item);
-            printMSG("$json\n\n");
-            exit;
-        }
-
-        $md5 = $item["metadata"]["md5"];
-        $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5));
-
-        foreach ($item["programs"] as $programData)
-        {
-            if (isset($programData["md5"]) === TRUE)
-            {
-                $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
-            }
-            else
-            {
-                $quiet = FALSE;
-                printMSG("FATAL ERROR: no MD5 value for program.");
-                printMSG("Send the following to grabber@schedulesdirect.org\n");
-                printMSG("s:$stationID\n\njson:$json\n\nitem\n\n" . print_r($item, TRUE) . "\n\n");
-                continue;
+                else
+                {
+                    $quiet = FALSE;
+                    printMSG("FATAL ERROR: no MD5 value for program.");
+                    printMSG("Send the following to grabber@schedulesdirect.org\n");
+                    printMSG("s:$stationID\n\njson:$json\n\nitem\n\n" . print_r($item, TRUE) . "\n\n");
+                    continue;
+                }
             }
         }
     }
