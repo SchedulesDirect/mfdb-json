@@ -561,8 +561,9 @@ function getLoginFromFiles()
 {
     $etcFile = file_exists("/etc/mythtv/config.xml");
     $localFile = file_exists(getenv("HOME") . "/.mythtv/config.xml");
+    $xml = "";
 
-    if ($localFile)
+    if ($localFile === TRUE)
     {
         printMSG("Using database information from ~/.mythtv/config.xml");
         $xml = simplexml_load_file(getenv("HOME") . "/.mythtv/config.xml");
@@ -572,13 +573,13 @@ function getLoginFromFiles()
      * We want to use the file in the local directory first if it exists.
      */
 
-    if (!isset($xml) AND $etcFile)
+    if ((isset($xml) === FALSE) AND ($etcFile === TRUE))
     {
         printMSG("Using database information from /etc/mythtv/config.xml");
         $xml = simplexml_load_file("/etc/mythtv/config.xml");
     }
 
-    if (!isset($xml))
+    if (isset($xml) === FALSE)
     {
         return (array("NONE", "", "", ""));
     }
@@ -589,9 +590,9 @@ function getLoginFromFiles()
 
     $foo = json_decode(json_encode($xml), TRUE);
 
-    if (count($foo))
+    if (count($foo) != 0)
     {
-        if (isset($foo["Database"]))
+        if (isset($foo["Database"]) === TRUE)
         {
             return array($foo["Database"]["Host"], $foo["Database"]["DatabaseName"], $foo["Database"]["UserName"],
                          $foo["Database"]["Password"]);
