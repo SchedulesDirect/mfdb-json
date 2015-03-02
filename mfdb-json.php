@@ -605,6 +605,8 @@ function getSchedules($stationIDsToFetch)
         return ("");
     }
 
+    $stationIDsToFetch = array("20454", "10021");
+
     while (list(, $sid) = each($stationIDsToFetch))
     {
         // $requestArray[] = array("stationID" => "$sid");
