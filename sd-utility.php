@@ -309,9 +309,15 @@ if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === FALSE)
 print "Using timezone $tz\n";
 print "$agentString\n";
 
-if ($isMythTV)
+if ($isMythTV === TRUE)
 {
-    if (!isset($dbHost) AND !isset($dbName) AND !isset($dbUser) and !isset($dbPassword))
+    if
+    (
+        (isset($dbHost) === FALSE) AND
+        (isset($dbName) === FALSE) AND
+        (isset($dbUser) === FALSE) AND
+        (isset($dbPassword) === FALSE)
+    )
     {
         list($dbHost, $dbName, $dbUser, $dbPassword) = getLoginFromFiles();
         if ($dbHost == "NONE")
@@ -325,32 +331,32 @@ if ($isMythTV)
     }
 }
 
-if (!isset($dbHost))
+if (isset($dbHost) === FALSE)
 {
     $dbHost = "localhost";
 }
 
-if (!isset($dbName))
+if (isset($dbName) === FALSE)
 {
     $dbName = "mythconverg";
 }
 
-if (!isset($dbUser))
+if (isset($dbUser) === FALSE)
 {
     $dbUser = "mythtv";
 }
 
-if (!isset($dbPassword))
+if (isset($dbPassword) === FALSE)
 {
     $dbPassword = "mythtv";
 }
 
-if (!isset($host))
+if (isset($host) === FALSE)
 {
     $host = "localhost";
 }
 
-if ($isMythTV OR $dbWithoutMythtv)
+if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
 {
     print "Connecting to Schedules Direct database.\n";
     try
@@ -383,7 +389,7 @@ if ($isMythTV OR $dbWithoutMythtv)
         }
     }
 
-    if ($isMythTV)
+    if ($isMythTV === TRUE)
     {
         print "Connecting to MythTV database.\n";
         try
@@ -728,7 +734,7 @@ function updateChannelTable($lineup)
         return;
     }
 
-    $stmt = $dbhSD->prepare("SELECT json FROM SDlineupCache WHERE lineup=:lineup");
+    $stmt = $dbhSD->prepare("SELECT json FROM lineups WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
     $json = json_decode($stmt->fetchColumn(), TRUE);
 
@@ -1563,7 +1569,7 @@ function deleteLineupFromSchedulesDirect()
     global $token;
     global $updatedLineupsToRefresh;
 
-    $deleteFromLocalCache = $dbhSD->prepare("DELETE FROM SDlineupCache WHERE lineup=:lineup");
+    $deleteFromLocalCache = $dbhSD->prepare("DELETE FROM lineups WHERE lineup=:lineup");
     $removeFromVideosource = $dbh->prepare("UPDATE videosource SET lineupid='' WHERE lineupid=:lineup");
 
     list($toDelete,) = getLineupFromNumber(strtoupper(readline("Lineup to Delete (# or lineup):>")));
@@ -1718,7 +1724,7 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbhSD->prepare("INSERT INTO SDlineupCache(lineup,json,modified)
+        $stmt = $dbhSD->prepare("INSERT INTO lineups(lineup,json,modified)
         VALUES(:lineup,:json,:modified) ON DUPLICATE KEY UPDATE json=:json,modified=:modified");
 
         $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
@@ -1952,7 +1958,7 @@ function checkForChannelIcon($stationID, $data)
 
     $updateChannelTable = $dbh->prepare("UPDATE channel SET icon=:icon WHERE xmltvid=:stationID");
 
-    $stmt = $dbhSD->prepare("SELECT md5 FROM SDimageCache WHERE item=:item AND height=:height AND width=:width");
+    $stmt = $dbhSD->prepare("SELECT md5 FROM imageCache WHERE item=:item AND height=:height AND width=:width");
     $stmt->execute(array("item" => $iconFileName, "height" => $height, "width" => $width));
 
     $result = $stmt->fetchColumn();
@@ -1974,7 +1980,7 @@ function checkForChannelIcon($stationID, $data)
             return;
         }
 
-        $updateSDimageCache = $dbhSD->prepare("INSERT INTO SDimageCache(item,height,width,md5,type)
+        $updateSDimageCache = $dbhSD->prepare("INSERT INTO imageCache(item,height,width,md5,type)
         VALUES(:item,:height,:width,:md5,'L') ON DUPLICATE KEY UPDATE md5=:md5");
         $updateSDimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
                                            "md5"  => $md5));
