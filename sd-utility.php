@@ -1901,7 +1901,7 @@ function checkDatabase()
   `stationID` varchar(12) NOT NULL,
   `md5` char(22) NOT NULL,
   `date` CHAR(10) NOT NULL,
-  UNIQUE KEY `sid-date` (`stationID`,`date`),
+  UNIQUE KEY `station_date` (`stationID`,`date`),
   KEY `md5` (`md5`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
@@ -1938,6 +1938,8 @@ function checkDatabase()
         $dbhSD->exec("RENAME TABLE SDprogramrating TO programRatings");
         $dbhSD->exec("RENAME TABLE SDschedule TO schedules");
         $dbhSD->exec("ALTER TABLE schedules ADD column date CHAR(10) NOT NULL");
+        $dbhSD->exec("ALTER TABLE schedules DROP UNIQUE KEY sid");
+        $dbhSD->exec("ALTER TABLE schedules ADD UNIQUE KEY station_date (stationID,date)");
         settingSD("SchedulesDirectJSONschemaVersion", "3");
     }
 }
