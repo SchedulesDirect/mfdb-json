@@ -722,9 +722,10 @@ function getSchedules($stationIDsToFetch)
                     /*
                      * We need to get that particular day.
                      */
-                    $bar[] = array("stationID" => $stationID, "date" => $date);
+                    $bar[] = $date;
                 }
             }
+            $baz[$stationID]["date"] = $bar;
         }
     }
     else
@@ -737,20 +738,22 @@ function getSchedules($stationIDsToFetch)
 
     if ($debug === TRUE)
     {
-        print "bar is now\n";
-        var_dump($bar);
+        print "baz is now\n";
+        var_dump($baz);
     }
 
-    if (count($bar) == 0)
+    if (count($baz) == 0)
     {
         printMSG("No updated schedules.");
 
         return ($jsonProgramsToRetrieve);
     }
 
-    printMSG(count($bar) . " schedules to download.");
+    printMSG(count($baz) . " schedules to download.");
 
     $errorCount = 0;
+
+    $t1 = json_encode($baz;)
 
     do
     {
@@ -758,7 +761,7 @@ function getSchedules($stationIDsToFetch)
         try
         {
             $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-                json_encode($bar))->send();
+                json_encode($baz))->send();
         } catch (Guzzle\Http\Exception\BadResponseException $e)
         {
             $response = NULL;
