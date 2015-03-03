@@ -1266,45 +1266,10 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
     $getExistingChannels->execute();
     $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
-    $getProgramInformation = $dbhSD->prepare("SELECT json FROM programCache WHERE programID =:pid");
+    $getProgramInformation = $dbhSD->prepare("SELECT json FROM programs WHERE programID =:pid");
 
     $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
 
-    /*
-     * Move the schedule into an associative array so that we can process the items per stationID. We're going to
-     * decode this once so that we're not doing it over and over again. May increase memory footprint though.
-     * This next bit is very loopy, but it lets us make sure that we have good data before adding it to the array
-     * containing the schedules for the stationID.
-     */
-/*
-    foreach ($scheduleJSON as $stationID => $dateElement)
-    {
-        foreach ($dateElement as $item)
-        {
-            foreach ($item as $scheduleElement)
-            {
-                if (isset($scheduleElement["code"]) === TRUE)
-                {
-                    if ($scheduleElement["code"] == 7000)
-                    {
-                        continue; // The schedule was queued but wasn't ready yet. We may not actually get this anymore?
-                    }
-                }
-
-                if (isset($scheduleElement["programID"]) === FALSE)
-                {
-                    printMSG("WARNING: JSON does not contain a programID.");
-                    printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-                    var_dump($item);
-                    var_dump($scheduleElement);
-                    exit;
-                }
-
-                $scheduleJSON[$stationID][] = $scheduleElement;
-            }
-        }
-    }
-*/
     while (list(, $item) = each($existingChannels))
     {
         $chanID = $item["chanid"];
