@@ -587,6 +587,7 @@ function getSchedules($stationIDsToFetch)
     $jsonProgramsToRetrieve = array();
     $requestArray = array();
     $bar = array();
+    $schedulesToFetch = array();
 
     $dbProgramCache = array();
     $response = "";
@@ -736,7 +737,7 @@ function getSchedules($stationIDsToFetch)
 
             if ($needToFetch[$stationID] === TRUE)
             {
-                $baz[] = array("stationID" => "$stationID", "date" => $bar);
+                $schedulesToFetch[] = array("stationID" => "$stationID", "date" => $bar);
             }
         }
     }
@@ -750,22 +751,22 @@ function getSchedules($stationIDsToFetch)
 
     if ($debug === TRUE)
     {
-        print "baz is now\n";
-        var_dump($baz);
+        print "schedulesToFetch is now\n";
+        var_dump($schedulesToFetch);
     }
 
-    if (count($baz) == 0)
+    if (count($schedulesToFetch) == 0)
     {
         printMSG("No updated schedules.");
 
         return ($jsonProgramsToRetrieve);
     }
 
-    printMSG(count($baz) . " schedules to download.");
+    printMSG(count($schedulesToFetch) . " schedules to download.");
 
     $errorCount = 0;
 
-    $t1 = json_encode($baz);
+    $t1 = json_encode($schedulesToFetch);
     print "Stop here.\n";
 
     do
@@ -774,7 +775,7 @@ function getSchedules($stationIDsToFetch)
         try
         {
             $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
-                json_encode($baz))->send();
+                json_encode($schedulesToFetch))->send();
         } catch (Guzzle\Http\Exception\BadResponseException $e)
         {
             $response = NULL;
