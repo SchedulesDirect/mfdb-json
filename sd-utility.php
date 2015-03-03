@@ -1938,7 +1938,7 @@ function checkDatabase()
         $dbhSD->exec("RENAME TABLE SDprogramrating TO programRatings");
         $dbhSD->exec("RENAME TABLE SDschedule TO schedules");
         $dbhSD->exec("ALTER TABLE schedules ADD column date CHAR(10) NOT NULL");
-        $dbhSD->exec("ALTER TABLE schedules DROP UNIQUE KEY sid");
+        $dbhSD->exec("ALTER TABLE schedules DROP KEY sid");
         $dbhSD->exec("ALTER TABLE schedules ADD UNIQUE KEY station_date (stationID,date)");
         settingSD("SchedulesDirectJSONschemaVersion", "3");
     }
