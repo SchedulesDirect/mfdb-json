@@ -54,6 +54,7 @@ $dbWithoutMythtv = FALSE;
 $skipVersionCheck = FALSE;
 $jsonProgramsToRetrieve = array();
 $addToRetryQueue = array();
+$scheduleJSON = array();
 $dbHostSD = "localhost";
 
 date_default_timezone_set($tz);
@@ -1179,6 +1180,7 @@ function insertSchedule()
     global $peopleCacheMyth;
     global $debug;
     global $errorWarning;
+    global $scheduleJSON;
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
@@ -1293,32 +1295,18 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
     $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
 
-//$scheduleTemp = file("$dlSchedTempDir/schedule.json");
 
     /*
      * Move the schedule into an associative array so that we can process the items per stationID. We're going to
      * decode this once so that we're not doing it over and over again. May increase memory footprint though.
      */
 
-    $scheduleJSON = array();
-
-    foreach (file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $json)
+    foreach ($scheduleJSON as $stationID => $schedule)
     {
-        $item = json_decode($json, TRUE);
+        // $item = json_decode($schedule, TRUE);
 
-        foreach ($item as $v)
+        foreach ($schedule as $v)
         {
-            if (isset($v["stationID"]))
-            {
-                $stationID = $v["stationID"];
-            }
-            else
-            {
-                printMSG("Fatal: No stationID? Send the following to grabber@schedulesdirect.org");
-                printMSG($json);
-                continue;
-            }
-
             if (isset($v["code"]) === TRUE)
             {
                 if ($v["code"] == 7000)
