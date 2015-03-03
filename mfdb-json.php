@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * We need a bit of memory to process schedules, so request it right at the beginning.
  */
 
-ini_set("memory_limit", "768M");
+ini_set("memory_limit", "-1");
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
