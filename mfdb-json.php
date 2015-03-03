@@ -823,9 +823,7 @@ function getSchedules($stationIDsToFetch)
     $updateLocalMD5 = $dbhSD->prepare("INSERT INTO schedules(stationID, date, md5) VALUES(:sid, :date, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
 
-    $f = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-    foreach ($f as $json)
+    foreach (file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $json)
     {
         $item = json_decode($json, TRUE);
 
@@ -1176,85 +1174,85 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
 function insertSchedule()
 {
-    global $dbh;
-    global $dbhSD;
-    global $dlSchedTempDir;
-    global $peopleCacheMyth;
-    global $debug;
-    global $errorWarning;
+global $dbh;
+global $dbhSD;
+global $dlSchedTempDir;
+global $peopleCacheMyth;
+global $debug;
+global $errorWarning;
 
-    $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
+$insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
-    $SchedulesDirectRoleToMythTv = array("Actor"                               => "actor",
-                                         "Voice"                               => "actor",
-                                         "Director"                            => "director",
-                                         "Executive Producer"                  => "executive_producer",
-                                         "Co-Producer"                         => "producer",
-                                         "Associate Producer"                  => "producer",
-                                         "Producer"                            => "producer",
-                                         "Line Producer"                       => "producer",
-                                         "Co-Executive Producer"               => "executive_producer",
-                                         "Co-Associate Producer"               => "producer",
-                                         "Assistant Producer"                  => "producer",
-                                         "Supervising Producer"                => "producer",
-                                         "Executive Music Producer"            => "producer",
-                                         "Visual Effects Producer"             => "producer",
-                                         "Special Effects Makeup Producer"     => "producer",
-                                         "Makeup Effects Producer"             => "producer",
-                                         "Consulting Producer"                 => "producer",
-                                         "Score Producer"                      => "producer",
-                                         "Executive Producer, English Version" => "producer",
-                                         "Co-Writer"                           => "writer",
-                                         "Screenwriter"                        => "writer",
-                                         "Writer"                              => "writer",
-                                         "Guest Star"                          => "guest_star",
-                                         "Anchor"                              => "host",
-                                         "Host"                                => "host",
-                                         "Presenter"                           => "presenter",
-                                         "Guest"                               => "guest"
-    );
+$SchedulesDirectRoleToMythTv = array("Actor"                               => "actor",
+                                     "Voice"                               => "actor",
+                                     "Director"                            => "director",
+                                     "Executive Producer"                  => "executive_producer",
+                                     "Co-Producer"                         => "producer",
+                                     "Associate Producer"                  => "producer",
+                                     "Producer"                            => "producer",
+                                     "Line Producer"                       => "producer",
+                                     "Co-Executive Producer"               => "executive_producer",
+                                     "Co-Associate Producer"               => "producer",
+                                     "Assistant Producer"                  => "producer",
+                                     "Supervising Producer"                => "producer",
+                                     "Executive Music Producer"            => "producer",
+                                     "Visual Effects Producer"             => "producer",
+                                     "Special Effects Makeup Producer"     => "producer",
+                                     "Makeup Effects Producer"             => "producer",
+                                     "Consulting Producer"                 => "producer",
+                                     "Score Producer"                      => "producer",
+                                     "Executive Producer, English Version" => "producer",
+                                     "Co-Writer"                           => "writer",
+                                     "Screenwriter"                        => "writer",
+                                     "Writer"                              => "writer",
+                                     "Guest Star"                          => "guest_star",
+                                     "Anchor"                              => "host",
+                                     "Host"                                => "host",
+                                     "Presenter"                           => "presenter",
+                                     "Guest"                               => "guest"
+);
 
-    $roleTable = array();
+$roleTable = array();
 
+if (count($peopleCacheMyth) == 0)
+{
+    /*
+     * Shouldn't happen, but check for it anyway.
+     */
+    printMSG("peopleCache array is empty. Reading from database.");
+    $getPeople = $dbh->prepare("SELECT name,person FROM people");
+    $getPeople->execute();
+    $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
     if (count($peopleCacheMyth) == 0)
     {
-        /*
-         * Shouldn't happen, but check for it anyway.
-         */
-        printMSG("peopleCache array is empty. Reading from database.");
-        $getPeople = $dbh->prepare("SELECT name,person FROM people");
-        $getPeople->execute();
-        $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
-        if (count($peopleCacheMyth) == 0)
-        {
-            printMSG("peopleCache array is still empty. Exiting.");
-            exit;
-        }
+        printMSG("peopleCache array is still empty. Exiting.");
+        exit;
     }
+}
 
-    printMSG("Inserting schedules.");
+printMSG("Inserting schedules.");
 
-    $dbh->exec("DROP TABLE IF EXISTS t_program");
-    $dbh->exec("CREATE TABLE t_program LIKE program");
-    $dbh->exec("INSERT t_program SELECT * FROM program");
+$dbh->exec("DROP TABLE IF EXISTS t_program");
+$dbh->exec("CREATE TABLE t_program LIKE program");
+$dbh->exec("INSERT t_program SELECT * FROM program");
 
-    $dbh->exec("DROP TABLE IF EXISTS t_credits");
-    $dbh->exec("CREATE TABLE t_credits LIKE credits");
+$dbh->exec("DROP TABLE IF EXISTS t_credits");
+$dbh->exec("CREATE TABLE t_credits LIKE credits");
 
-    $dbh->exec("DROP TABLE IF EXISTS t_programrating");
-    $dbh->exec("CREATE TABLE t_programrating LIKE programrating");
+$dbh->exec("DROP TABLE IF EXISTS t_programrating");
+$dbh->exec("CREATE TABLE t_programrating LIKE programrating");
 
-    $dbh->exec("DROP TABLE IF EXISTS t_programgenres");
-    $dbh->exec("CREATE TABLE t_programgenres LIKE programgenres");
+$dbh->exec("DROP TABLE IF EXISTS t_programgenres");
+$dbh->exec("CREATE TABLE t_programgenres LIKE programgenres");
 
-    $dbSchema = setting("DBSchemaVer");
+$dbSchema = setting("DBSchemaVer");
 
-    if ($dbSchema > "1318")
-    {
-        /*
-         * program table will have season and episode.
-         */
-        $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
+if ($dbSchema > "1318")
+{
+    /*
+     * program table will have season and episode.
+     */
+    $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
     category,category_type,airdate,stars,previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,
     seriesid,originalairdate,showtype,colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,
     audioprop,subtitletypes,videoprop,season,episode)
@@ -1262,13 +1260,13 @@ function insertSchedule()
     :previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,
     :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop,:season,:episode)");
-    }
-    else
-    {
-        /*
-         * No season / episode insert.
-         */
-        $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
+}
+else
+{
+    /*
+     * No season / episode insert.
+     */
+    $insertSchedule = $dbh->prepare("INSERT INTO t_program(chanid,starttime,endtime,title,subtitle,description,
     category,category_type,airdate,stars,previouslyshown,stereo,subtitled,hdtv,closecaptioned,partnumber,parttotal,
     seriesid,originalairdate,showtype,colorcode,syndicatedepisodenumber,programid,generic,listingsource,first,last,
     audioprop,subtitletypes,videoprop)
@@ -1276,66 +1274,70 @@ function insertSchedule()
     :previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,
     :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop)");
-    }
+}
 
-    $insertCreditMyth = $dbh->prepare("INSERT IGNORE INTO t_credits(person, chanid, starttime, role)
+$insertCreditMyth = $dbh->prepare("INSERT IGNORE INTO t_credits(person, chanid, starttime, role)
     VALUES(:person,:chanid,:starttime,:role)");
 
-    $insertProgramRatingMyth = $dbh->prepare("INSERT INTO t_programrating(chanid, starttime, system, rating)
+$insertProgramRatingMyth = $dbh->prepare("INSERT INTO t_programrating(chanid, starttime, system, rating)
     VALUES(:chanid,:starttime,:system,:rating)");
 
-    $insertProgramGenreMyth = $dbh->prepare("INSERT INTO t_programgenres(chanid, starttime, relevance, genre)
+$insertProgramGenreMyth = $dbh->prepare("INSERT INTO t_programgenres(chanid, starttime, relevance, genre)
     VALUES(:chanid,:starttime,:relevance,:genre)");
 
-    $getExistingChannels = $dbh->prepare("SELECT chanid,sourceid, CAST(xmltvid AS UNSIGNED) AS xmltvid FROM channel
+$getExistingChannels = $dbh->prepare("SELECT chanid,sourceid, CAST(xmltvid AS UNSIGNED) AS xmltvid FROM channel
 WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
-    $getExistingChannels->execute();
-    $existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
+$getExistingChannels->execute();
+$existingChannels = $getExistingChannels->fetchAll(PDO::FETCH_ASSOC);
 
-    $getProgramInformation = $dbhSD->prepare("SELECT json FROM programCache WHERE programID =:pid");
+$getProgramInformation = $dbhSD->prepare("SELECT json FROM programCache WHERE programID =:pid");
 
-    $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
+$deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
 
-    $scheduleTemp = file("$dlSchedTempDir/schedule.json");
+$scheduleTemp = file("$dlSchedTempDir/schedule.json");
 
-    /*
-     * Move the schedule into an associative array so that we can process the items per stationID. We're going to
-     * decode this once so that we're not doing it over and over again. May increase memory footprint though.
-     */
+/*
+ * Move the schedule into an associative array so that we can process the items per stationID. We're going to
+ * decode this once so that we're not doing it over and over again. May increase memory footprint though.
+ */
 
-    $scheduleJSON = array();
-    while (list(, $item) = each($scheduleTemp))
+$scheduleJSON = array();
+
+foreach (file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $json)
+{
+    $item = json_decode($json, TRUE);
+
+    foreach ($item as $v)
     {
-        $tempJSON = json_decode($item, TRUE);
-        if (isset($item["code"]) === TRUE)
+        if (isset($v["stationID"]))
         {
-            if ($item["code"] == 7000)
+            $stationID = $v["stationID"];
+        }
+        else
+        {
+            printMSG("Fatal: No stationID? Send the following to grabber@schedulesdirect.org");
+            printMSG($json);
+            continue;
+        }
+
+        if (isset($v["code"]) === TRUE)
+        {
+            if ($v["code"] == 7000)
             {
                 continue; // The schedule was queued but wasn't ready yet.
             }
         }
 
-        if (isset($tempJSON["stationID"]) === TRUE)
+        if (isset($v["programs"]) === FALSE)
         {
-            $stationID = $tempJSON["stationID"];
-        }
-        else
-        {
-            printMSG("Fatal error in insertSchedules:No stationID:$item");
+            printMSG("WARNING: JSON does not contain any program elements.");
+            printMSG("Send the following to grabber@schedulesdirect.org\n\n");
+            var_dump($item);
+            printMSG("$json\n\n");
             exit;
         }
 
-        if (isset($tempJSON["programs"]) === TRUE)
-        {
-            $scheduleJSON[$stationID] = $tempJSON["programs"];
-        }
-        else
-        {
-            printMSG("Fatal error in insertSchedules:No programs:$item");
-            exit;
-        }
     }
-
     /*
      * Now that we're done, reset the array to empty to free up some memory.
      */
