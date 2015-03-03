@@ -698,6 +698,7 @@ function getSchedules($stationIDsToFetch)
         while (list($stationID, $data) = each($schedulesDirectMD5s))
         {
             $bar = array();
+            $needToFetch[$stationID] = FALSE;
 
             foreach ($data as $date => $arrayFoo)
             {
@@ -729,9 +730,14 @@ function getSchedules($stationIDsToFetch)
                      * We need to get that particular day.
                      */
                     $bar[] = $date;
+                    $needToFetch[$stationID] = TRUE;
                 }
             }
-            $baz[] = array("stationID" => "$stationID", "date" => $bar);
+
+            if ($needToFetch[$stationID] === TRUE)
+            {
+                $baz[] = array("stationID" => "$stationID", "date" => $bar);
+            }
         }
     }
     else

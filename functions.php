@@ -84,7 +84,7 @@ function getToken($username, $passwordHash)
     $res = array();
     $res = $response->json();
 
-    if (json_last_error())
+    if (json_last_error() === TRUE)
     {
         print "JSON decode error:\n";
         var_dump($response);
