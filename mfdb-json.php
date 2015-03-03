@@ -1337,7 +1337,7 @@ foreach (file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP
             exit;
         }
 
-        $scheduleJSON[$stationID] += $v;
+        $scheduleJSON[$stationID] += $v; // TODO: get this working.
 
     }
     /*
