@@ -583,7 +583,7 @@ function getSchedules($stationIDsToFetch)
     global $addToRetryQueue;
     global $scheduleJSON;
 
-    $jsonProgramsToRetrieve = array();
+    $arrayProgramsToRetrieveFromSchedulesDirect = array();
     $requestArray = array();
     $bar = array();
     $schedulesToFetch = array();
@@ -758,7 +758,7 @@ function getSchedules($stationIDsToFetch)
     {
         printMSG("No updated schedules.");
 
-        return ($jsonProgramsToRetrieve);
+        return ($arrayProgramsToRetrieveFromSchedulesDirect);
     }
 
     printMSG(count($schedulesToFetch) . " schedules to download.");
@@ -932,7 +932,7 @@ function getSchedules($stationIDsToFetch)
     $stmt->execute();
     $dbProgramCache = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    $jsonProgramsToRetrieve = array_diff_key($serverScheduleMD5, $dbProgramCache);
+    $arrayProgramsToRetrieveFromSchedulesDirect = array_diff_key($serverScheduleMD5, $dbProgramCache);
 
     if ($debug === TRUE)
     {
@@ -945,10 +945,10 @@ function getSchedules($stationIDsToFetch)
         printMSG("serverScheduleMD5 is");
         printMSG(print_r($serverScheduleMD5, TRUE));
         printMSG("jsonProrgamstoRetrieve is");
-        printMSG(print_r($jsonProgramsToRetrieve, TRUE));
+        printMSG(print_r($arrayProgramsToRetrieveFromSchedulesDirect, TRUE));
     }
 
-    return ($jsonProgramsToRetrieve);
+    return ($arrayProgramsToRetrieveFromSchedulesDirect);
 }
 
 function fetchPrograms($jsonProgramsToRetrieve)
