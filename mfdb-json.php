@@ -1337,6 +1337,8 @@ foreach (file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP
             exit;
         }
 
+        $scheduleJSON[$stationID] += $v;
+
     }
     /*
      * Now that we're done, reset the array to empty to free up some memory.
