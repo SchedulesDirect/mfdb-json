@@ -426,7 +426,7 @@ else
     {
         $stationIDs[] = $station;
     }
-    elseif (!$useProgramFile)
+    elseif ($useProgramFile === FALSE)
     {
         printMSG("Nothing to do: did not find file sd.json.stations.conf or no station to retrieve passed as parameter.");
         exit;
