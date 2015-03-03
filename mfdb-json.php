@@ -826,7 +826,7 @@ function getSchedules($stationIDsToFetch)
 
     printMSG("Writing to $dlSchedTempDir/schedule.json");
 
-    file_put_contents("$dlSchedTempDir/schedule.json", $schedules, FILE_APPEND);
+    file_put_contents("$dlSchedTempDir/schedule.json", $schedules);
 
     $updateLocalMD5 = $dbhSD->prepare("INSERT INTO schedules(stationID, date, md5) VALUES(:sid, :date, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
