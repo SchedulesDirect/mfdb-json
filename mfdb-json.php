@@ -1051,7 +1051,6 @@ function fetchPrograms($jsonProgramsToRetrieve)
 
 function insertJSON(array $jsonProgramsToRetrieve)
 {
-    global $dbh;
     global $dbhSD;
     global $dlProgramTempDir;
     global $debug;
@@ -1294,7 +1293,7 @@ $getProgramInformation = $dbhSD->prepare("SELECT json FROM programCache WHERE pr
 
 $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
 
-$scheduleTemp = file("$dlSchedTempDir/schedule.json");
+//$scheduleTemp = file("$dlSchedTempDir/schedule.json");
 
 /*
  * Move the schedule into an associative array so that we can process the items per stationID. We're going to
@@ -1337,13 +1336,13 @@ foreach (file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP
             exit;
         }
 
-        $scheduleJSON[$stationID] += $v; // TODO: get this working.
+        $scheduleJSON[$stationID][] = $v; // TODO: get this working.
 
     }
     /*
      * Now that we're done, reset the array to empty to free up some memory.
      */
-    $scheduleTemp = array();
+    // $scheduleTemp = array();
 
     while (list(, $item) = each($existingChannels))
     {
