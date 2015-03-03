@@ -53,6 +53,7 @@ $dbWithoutMythtv = FALSE;
 $skipVersionCheck = FALSE;
 $jsonProgramsToRetrieve = array();
 $addToRetryQueue = array();
+$permanentDownloadFailure = array();
 $scheduleJSON = array();
 $dbHostSD = "localhost";
 
@@ -481,8 +482,11 @@ if ($token != "ERROR" AND $response != "ERROR")
             $forceDownload = TRUE;
             foreach ($addToRetryQueue as $k => $v)
             {
-                $bar[] = $k;
-                printMSG("StationID: $k");
+                if (isset($permanentDownloadFailure[$k]) === FALSE)
+                {
+                    $bar[] = $k;
+                    printMSG("StationID: $k");
+                }
             }
             $addToRetryQueue = array(); // Otherwise we may never exit.
             $foo = getSchedules($bar);
@@ -581,6 +585,7 @@ function getSchedules($stationIDsToFetch)
     global $debug;
     global $forceDownload;
     global $addToRetryQueue;
+    global $permanentDownloadFailure;
     global $scheduleJSON;
 
     $arrayProgramsToRetrieveFromSchedulesDirect = array();
@@ -859,6 +864,7 @@ function getSchedules($stationIDsToFetch)
                 case 7000:
                     if (isset($addToRetryQueue[$stationID]))
                     {
+                        $permanentDownloadFailure[$stationID] = 1;
                         unset($addToRetryQueue[$stationID]); // Permanent error.
                     }
                     printMSG("Permanent error attempting to fetch schedule for $stationID");
@@ -879,6 +885,7 @@ function getSchedules($stationIDsToFetch)
                     if ($addToRetryQueue[$stationID] == 10)
                     {
                         unset($addToRetryQueue[$stationID]); // Permanent error.
+                        $permanentDownloadFailure[$stationID] = 1;
                         printMSG("Permanent error attempting to fetch schedule for $stationID");
                     }
 
