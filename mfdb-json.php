@@ -1166,7 +1166,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
     if ($debug === FALSE)
     {
-        rmdir("$dlProgramTempDir");
+        // rmdir("$dlProgramTempDir"); don't delete for now.
     }
 
     $dbhSD->commit();
