@@ -832,6 +832,13 @@ function getSchedules($stationIDsToFetch)
 
     $item = json_decode($jsonSchedule, TRUE);
 
+    if (json_last_error())
+    {
+        printMSG("Couldn't decode $dlSchedTempDir/schedule.json from JSON.");
+        printMSG(json_last_error_msg());
+        exit;
+    }
+
     foreach ($item as $v)
     {
         if (isset($v["stationID"]))
