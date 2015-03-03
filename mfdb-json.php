@@ -1323,7 +1323,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
         $dbh->beginTransaction();
 
         reset($scheduleJSON[$stationID]);
-        while (list(, $schedule) = each($scheduleJSON[$stationID]))
+        while (list(, $scheduleElement) = each($scheduleJSON[$stationID]))
         {
             /*
              * Pre-declare what we'll be using to quiet warning about unused variables.
@@ -1394,7 +1394,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             $isFirst = 0;
             $isLast = 0;
 
-            $programID = $schedule["programID"];
+            $programID = $scheduleElement["programID"];
             $getProgramInformation->execute(array("pid" => $programID));
             $pj = $getProgramInformation->fetchColumn();
 
@@ -1415,9 +1415,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 continue;
             }
 
-            $md5 = $schedule["md5"];
-            $air_datetime = $schedule["airDateTime"];
-            $duration = $schedule["duration"];
+            $md5 = $scheduleElement["md5"];
+            $air_datetime = $scheduleElement["airDateTime"];
+            $duration = $scheduleElement["duration"];
 
             $programStartTimeMyth = str_replace("T", " ", $air_datetime);
             $programStartTimeMyth = rtrim($programStartTimeMyth, "Z");
@@ -1484,9 +1484,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if (isset($schedule["audioProperties"]) === TRUE)
+            if (isset($scheduleElement["audioProperties"]) === TRUE)
             {
-                foreach ($schedule["audioProperties"] as $ap)
+                foreach ($scheduleElement["audioProperties"] as $ap)
                 {
                     switch ($ap)
                     {
@@ -1521,9 +1521,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if (isset($schedule["videoProperties"]) === TRUE)
+            if (isset($scheduleElement["videoProperties"]) === TRUE)
             {
-                foreach ($schedule["videoProperties"] as $vp)
+                foreach ($scheduleElement["videoProperties"] as $vp)
                 {
                     switch ($vp)
                     {
@@ -1547,9 +1547,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if (isset($schedule["isPremiereOrFinale"]) === TRUE)
+            if (isset($scheduleElement["isPremiereOrFinale"]) === TRUE)
             {
-                switch ($schedule["isPremiereOrFinale"])
+                switch ($scheduleElement["isPremiereOrFinale"])
                 {
                     case "Series Premiere":
                     case "Season Premiere":
@@ -1567,9 +1567,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $isLast = FALSE;
             }
 
-            if (isset($schedule["contentRating"]) === TRUE)
+            if (isset($scheduleElement["contentRating"]) === TRUE)
             {
-                foreach ($schedule["contentRating"] as $r)
+                foreach ($scheduleElement["contentRating"] as $r)
                 {
                     if ($r["body"] == "USA Parental Rating")
                     {
@@ -1613,7 +1613,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
              * Boolean types
              */
 
-            if (isset($schedule["new"]) === TRUE)
+            if (isset($scheduleElement["new"]) === TRUE)
             {
                 $isNew = TRUE;
                 $previouslyshown = FALSE;
@@ -1628,12 +1628,12 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
              * Shouldn't be "new" and "repeat"
              */
 
-            if (isset($schedule["repeat"]) === TRUE)
+            if (isset($scheduleElement["repeat"]) === TRUE)
             {
                 if ($isNew)
                 {
                     debugMSG("*** WARNING sid:$stationID pid:$programID has 'new' and 'repeat' set. Open SD ticket:");
-                    debugMSG(print_r($schedule, TRUE));
+                    debugMSG(print_r($scheduleElement, TRUE));
                     $errorWarning = TRUE;
                 }
                 else
@@ -1643,64 +1643,64 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if (isset($schedule["cableInTheClassroom"]) === TRUE)
+            if (isset($scheduleElement["cableInTheClassroom"]) === TRUE)
             {
                 $cableInTheClassroom = TRUE;
             }
 
-            if (isset($schedule["catchup"]) === TRUE)
+            if (isset($scheduleElement["catchup"]) === TRUE)
             {
                 $catchupProgram = TRUE;
             }
 
-            if (isset($schedule["continued"]) === TRUE)
+            if (isset($scheduleElement["continued"]) === TRUE)
             {
                 $continuedProgram = TRUE;
             }
 
-            if (isset($schedule["educational"]) === TRUE)
+            if (isset($scheduleElement["educational"]) === TRUE)
             {
                 $isEducational = TRUE;
             }
 
-            if (isset($schedule["joinedInProgress"]) === TRUE)
+            if (isset($scheduleElement["joinedInProgress"]) === TRUE)
             {
                 $joinedInProgress = TRUE;
             }
 
-            if (isset($schedule["leftInProgress"]) === TRUE)
+            if (isset($scheduleElement["leftInProgress"]) === TRUE)
             {
                 $leftInProgress = TRUE;
             }
 
-            if (isset($schedule["premiere"]) === TRUE)
+            if (isset($scheduleElement["premiere"]) === TRUE)
             {
                 $isPremiere = TRUE;
             }
 
-            if (isset($schedule["programBreak"]) === TRUE)
+            if (isset($scheduleElement["programBreak"]) === TRUE)
             {
                 $programBreak = TRUE;
             }
 
-            if (isset($schedule["signed"]) === TRUE)
+            if (isset($scheduleElement["signed"]) === TRUE)
             {
                 $isSigned = TRUE;
             }
 
-            if (isset($schedule["subjectToBlackout"]) === TRUE)
+            if (isset($scheduleElement["subjectToBlackout"]) === TRUE)
             {
                 $subjectToBlackout = TRUE;
             }
 
-            if (isset($schedule["timeApproximate"]) === TRUE)
+            if (isset($scheduleElement["timeApproximate"]) === TRUE)
             {
                 $timeApproximate = TRUE;
             }
 
-            if (isset($schedule["liveTapeDelay"]) === TRUE)
+            if (isset($scheduleElement["liveTapeDelay"]) === TRUE)
             {
-                $liveOrTapeDelay = $schedule["liveTapeDelay"];
+                $liveOrTapeDelay = $scheduleElement["liveTapeDelay"];
             }
 
             $title = $programJSON["titles"][0]["title120"];
@@ -1843,10 +1843,10 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $subtitleTypes = "SIGNED";
             }
 
-            if (isset($schedule["multipart"]) === TRUE)
+            if (isset($scheduleElement["multipart"]) === TRUE)
             {
-                $partNumber = $schedule["multipart"]["partNumber"];
-                $numberOfParts = $schedule["multipart"]["totalParts"];
+                $partNumber = $scheduleElement["multipart"]["partNumber"];
+                $numberOfParts = $scheduleElement["multipart"]["totalParts"];
             }
 
             if (isset($programJSON["genres"]) === TRUE)
