@@ -765,8 +765,8 @@ function getSchedules($stationIDsToFetch)
 
     $errorCount = 0;
 
-    $t1 = json_encode($schedulesToFetch);
-    print "Stop here.\n";
+    //$t1 = json_encode($schedulesToFetch);
+    //print "Stop here.\n";
 
     do
     {
@@ -831,7 +831,7 @@ function getSchedules($stationIDsToFetch)
     $updateLocalMD5 = $dbhSD->prepare("INSERT INTO schedules(stationID, date, md5) VALUES(:sid, :date, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
 
-    $jsonSchedule = file("$dlSchedTempDir/schedule.json", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $jsonSchedule = file_get_contents("$dlSchedTempDir/schedule.json");
 
     $item = json_decode($jsonSchedule, TRUE);
 
