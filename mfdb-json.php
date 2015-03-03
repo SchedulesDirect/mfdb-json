@@ -502,7 +502,7 @@ if ($isMythTV === TRUE)
 {
     if ((count($jsonProgramsToRetrieve) != 0) OR ($forceDownload === TRUE))
     {
-        insertJSON($jsonProgramsToRetrieve);
+        updateLocalProgramCache($jsonProgramsToRetrieve);
         insertSchedule();
         $statusMessage = "Successful.";
     }
@@ -1056,7 +1056,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
 }
 
 
-function insertJSON(array $jsonProgramsToRetrieve)
+function updateLocalProgramCache(array $jsonProgramsToRetrieve)
 {
     global $dbhSD;
     global $dlProgramTempDir;
@@ -1094,9 +1094,18 @@ function insertJSON(array $jsonProgramsToRetrieve)
 
     foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
     {
-        $a = file($jsonFileToProcess);
+        $rawProgramJSON = file_get_contents($jsonFileToProcess);
+        $jsonProgram = json_decode($rawProgramJSON, TRUE);
 
-        while (list(, $item) = each($a))
+        if (json_last_error() === TRUE)
+        {
+            debugMSG("*** ERROR: JSON decode error $jsonFileToProcess");
+            debugMSG(print_r($jsonProgram, TRUE));
+            continue;
+        }
+
+        $counter = 0;
+        foreach ($jsonProgram as $v)
         {
             $counter++;
             if ($counter % 100 == 0)
@@ -1105,80 +1114,58 @@ function insertJSON(array $jsonProgramsToRetrieve)
                 $dbhSD->commit();
                 $dbhSD->beginTransaction();
             }
-
-            if ($item == "")
+            if (isset($v["code"]) === TRUE)
             {
-                continue;
-            }
-
-            $jsonProgram = json_decode($item, TRUE);
-
-            if (json_last_error() === TRUE)
-            {
-                debugMSG("*** ERROR: JSON decode error $jsonFileToProcess");
-                debugMSG(print_r($item, TRUE));
-                continue;
-            }
-
-            foreach ($jsonProgram as $v)
-            {
-                if (isset($v["code"]) === TRUE)
-                {
-                    /*
-                     * Probably not good. :(
-                     */
-
-                    if ($v["code"] == 6000)
-                    {
-                        print "FATAL ERROR: server couldn't find programID?\n";
-                        print "$item\n";
-                        continue;
-                    }
-                }
-
-                if (isset($v["programID"]) === TRUE)
-                {
-                    $pid = $v["programID"];
-                }
-                else
-                {
-                    print "FATAL ERROR: No programID?\n";
-                    print "$item\n";
-                    continue;
-                }
-
-                if (isset($v["md5"]) === TRUE)
-                {
-                    $md5 = $v["md5"];
-                }
-                else
-                {
-                    print "FATAL ERROR: No md5?\n";
-                    print "$item\n";
-                    continue;
-                }
-
-                $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-                                           "json"      => json_encode($v)));
-
                 /*
-                 * Since we're touching the program item, we should process the cast and crew here.
+                 * Probably not good. :(
                  */
-            }
-        }
 
-        if ($debug === FALSE)
-        {
-            // unlink($jsonFileToProcess); don't delete for now.
+                if ($v["code"] == 6000)
+                {
+                    print "FATAL ERROR: server couldn't find programID?\n";
+                    print "$jsonProgram\n";
+                    continue;
+                }
+            }
+
+            if (isset($v["programID"]) === TRUE)
+            {
+                $pid = $v["programID"];
+            }
+            else
+            {
+                print "FATAL ERROR: No programID?\n";
+                print "$jsonProgram\n";
+                continue;
+            }
+
+            if (isset($v["md5"]) === TRUE)
+            {
+                $md5 = $v["md5"];
+            }
+            else
+            {
+                print "FATAL ERROR: No md5?\n";
+                print "$jsonProgram\n";
+                continue;
+            }
+
+            $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
+                                       "json"      => json_encode($v)));
         }
+        $dbhSD->commit();
+    }
+    $dbhSD->commit(); // Just in case.
+
+    if ($debug === FALSE)
+    {
+        // unlink($jsonFileToProcess); don't delete for now.
     }
 
     if ($debug === FALSE)
     {
         // rmdir("$dlProgramTempDir"); don't delete for now.
     }
-
-    $dbhSD->commit();
 
     printMSG("Completed local database program updates.");
 }
