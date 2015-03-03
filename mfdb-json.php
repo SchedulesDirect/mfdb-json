@@ -854,32 +854,41 @@ function getSchedules($stationIDsToFetch)
 
         if (isset($v["code"]) === TRUE)
         {
-            if ($v["code"] == 7001)
+            switch ($v["code"])
             {
-                if (isset($addToRetryQueue[$stationID]) === FALSE)
-                {
-                    $addToRetryQueue[$stationID] = 1;
-                }
-                else
-                {
-                    $addToRetryQueue[$stationID]++;
-                }
-
-                printMSG("Adding $stationID to retry queue. Count is {$addToRetryQueue[$stationID]}");
-
-                if ($addToRetryQueue[$stationID] == 10)
-                {
-                    unset($addToRetryQueue[$stationID]); // Permanent error.
+                case 7000:
+                    if (isset($addToRetryQueue[$stationID]))
+                    {
+                        unset($addToRetryQueue[$stationID]); // Permanent error.
+                    }
                     printMSG("Permanent error attempting to fetch schedule for $stationID");
-                }
+                    continue;
+                    break;
+                case 7001:
+                    if (isset($addToRetryQueue[$stationID]) === FALSE)
+                    {
+                        $addToRetryQueue[$stationID] = 1;
+                    }
+                    else
+                    {
+                        $addToRetryQueue[$stationID]++;
+                    }
 
-                sleep(10); // We're going to sleep so that the server has the chance to generate the schedule.
-                continue;
-            }
-            else
-            {
-                printMSG("getSchedules error: $item");
-                continue;
+                    printMSG("Adding $stationID to retry queue. Count is {$addToRetryQueue[$stationID]}");
+
+                    if ($addToRetryQueue[$stationID] == 10)
+                    {
+                        unset($addToRetryQueue[$stationID]); // Permanent error.
+                        printMSG("Permanent error attempting to fetch schedule for $stationID");
+                    }
+
+                    sleep(10); // We're going to sleep so that the server has the chance to generate the schedule.
+                    continue;
+                    break;
+                default:
+                    printMSG("getSchedules error: $item");
+                    continue;
+                    break;
             }
         }
 
