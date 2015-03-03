@@ -765,9 +765,6 @@ function getSchedules($stationIDsToFetch)
 
     $errorCount = 0;
 
-    //$t1 = json_encode($schedulesToFetch);
-    //print "Stop here.\n";
-
     do
     {
         $response = NULL;
@@ -1061,7 +1058,6 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
     global $dbhSD;
     global $dlProgramTempDir;
     global $debug;
-    // global $schedulesJSON;
 
     $insertJSON = $dbhSD->prepare("INSERT INTO programs(programID,md5,json)
             VALUES (:programID,:md5,:json)
@@ -1095,17 +1091,17 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
     foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
     {
         $rawProgramJSON = file_get_contents($jsonFileToProcess);
-        $jsonProgram = json_decode($rawProgramJSON, TRUE);
+        $jsonPrograms = json_decode($rawProgramJSON, TRUE);
 
         if (json_last_error() === TRUE)
         {
             debugMSG("*** ERROR: JSON decode error $jsonFileToProcess");
-            debugMSG(print_r($jsonProgram, TRUE));
+            debugMSG(print_r($jsonPrograms, TRUE));
             continue;
         }
 
         $counter = 0;
-        foreach ($jsonProgram as $v)
+        foreach ($jsonPrograms as $v)
         {
             $counter++;
             if ($counter % 100 == 0)
@@ -1123,7 +1119,7 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
                 if ($v["code"] == 6000)
                 {
                     print "FATAL ERROR: server couldn't find programID?\n";
-                    print "$jsonProgram\n";
+                    print "$jsonPrograms\n";
                     continue;
                 }
             }
@@ -1135,7 +1131,7 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
             else
             {
                 print "FATAL ERROR: No programID?\n";
-                print "$jsonProgram\n";
+                print "$jsonPrograms\n";
                 continue;
             }
 
@@ -1146,7 +1142,7 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
             else
             {
                 print "FATAL ERROR: No md5?\n";
-                print "$jsonProgram\n";
+                print "$jsonPrograms\n";
                 continue;
             }
 
@@ -1155,7 +1151,6 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
         }
         $dbhSD->commit();
     }
-    $dbhSD->commit(); // Just in case.
 
     if ($debug === FALSE)
     {
