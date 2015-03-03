@@ -1052,7 +1052,6 @@ function fetchPrograms($jsonProgramsToRetrieve)
     return ($jsonProgramsToRetrieve);
 }
 
-
 function updateLocalProgramCache(array $jsonProgramsToRetrieve)
 {
     global $dbhSD;
@@ -1292,12 +1291,12 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     }
                 }
 
-                if (isset($scheduleElement["programs"]) === FALSE)
+                if (isset($scheduleElement["programID"]) === FALSE)
                 {
-                    printMSG("WARNING: JSON does not contain any program elements.");
+                    printMSG("WARNING: JSON does not contain a programID.");
                     printMSG("Send the following to grabber@schedulesdirect.org\n\n");
                     var_dump($item);
-                    // printMSG("$json\n\n");
+                    var_dump($scheduleElement);
                     exit;
                 }
 
@@ -1305,9 +1304,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             }
         }
     }
-    /*
-     * Now that we're done, reset the array to empty to free up some memory.
-     */
 
     while (list(, $item) = each($existingChannels))
     {
