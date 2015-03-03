@@ -1271,43 +1271,43 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
     $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
 
-
     /*
      * Move the schedule into an associative array so that we can process the items per stationID. We're going to
      * decode this once so that we're not doing it over and over again. May increase memory footprint though.
+     * This next bit is very loopy, but it lets us make sure that we have good data before adding it to the array
+     * containing the schedules for the stationID.
      */
 
-    foreach ($scheduleJSON as $stationID => $schedule)
+    foreach ($scheduleJSON as $stationID => $dateElement)
     {
-        // $item = json_decode($schedule, TRUE);
-
-        foreach ($schedule as $v)
+        foreach ($dateElement as $item)
         {
-            if (isset($v["code"]) === TRUE)
+            foreach ($item as $scheduleElement)
             {
-                if ($v["code"] == 7000)
+                if (isset($scheduleElement["code"]) === TRUE)
                 {
-                    continue; // The schedule was queued but wasn't ready yet.
+                    if ($scheduleElement["code"] == 7000)
+                    {
+                        continue; // The schedule was queued but wasn't ready yet. We may not actually get this anymore?
+                    }
                 }
+
+                if (isset($scheduleElement["programs"]) === FALSE)
+                {
+                    printMSG("WARNING: JSON does not contain any program elements.");
+                    printMSG("Send the following to grabber@schedulesdirect.org\n\n");
+                    var_dump($item);
+                    // printMSG("$json\n\n");
+                    exit;
+                }
+
+                $scheduleJSON[$stationID][] = $scheduleElement;
             }
-
-            if (isset($v["programs"]) === FALSE)
-            {
-                printMSG("WARNING: JSON does not contain any program elements.");
-                printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-                var_dump($item);
-                printMSG("$json\n\n");
-                exit;
-            }
-
-            $scheduleJSON[$stationID][] = $v; // TODO: get this working.
-
         }
     }
     /*
      * Now that we're done, reset the array to empty to free up some memory.
      */
-    // $scheduleTemp = array();
 
     while (list(, $item) = each($existingChannels))
     {
