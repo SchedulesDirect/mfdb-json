@@ -864,7 +864,7 @@ function getSchedules($stationIDsToFetch)
                     printMSG("Permanent error attempting to fetch schedule for $stationID");
                     continue;
                     break;
-                case 7001:
+                case 7100:
                     if (isset($addToRetryQueue[$stationID]) === FALSE)
                     {
                         $addToRetryQueue[$stationID] = 1;
