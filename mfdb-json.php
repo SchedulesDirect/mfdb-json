@@ -832,8 +832,6 @@ function getSchedules($stationIDsToFetch)
 
     $item = json_decode($jsonSchedule, TRUE);
 
-    print "Encoding of file appears to be: " . mb_detect_encoding($item) . "\n";
-
     if (json_last_error())
     {
         printMSG("Couldn't decode $dlSchedTempDir/schedule.json from JSON.");
@@ -856,7 +854,7 @@ function getSchedules($stationIDsToFetch)
 
         if (isset($v["code"]) === TRUE)
         {
-            if ($v["code"] == 7000)
+            if ($v["code"] == 7001)
             {
                 if (isset($addToRetryQueue[$stationID]) === FALSE)
                 {
