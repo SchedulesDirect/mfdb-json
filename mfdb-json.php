@@ -612,7 +612,7 @@ function getSchedules($stationIDsToFetch)
     while (list(, $sid) = each($stationIDsToFetch))
     {
         // $requestArray[] = array("stationID" => "$sid");
-        $requestArray[] = array("stationID" => "$sid", "date" => array("2015-03-02", "2015-03-03"));
+        $requestArray[] = array("stationID" => "$sid", "date" => array("2015-03-03", "2015-03-04"));
     }
 
     if (count($requestArray) == 0)
