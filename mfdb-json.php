@@ -899,13 +899,13 @@ function getSchedules($stationIDsToFetch)
         }
 
         $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5, "date" => $date));
-        $scheduleJSON[$stationID][] = $v["programs"];
 
         foreach ($v["programs"] as $programData)
         {
             if (isset($programData["md5"]) === TRUE)
             {
                 $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
+                $scheduleJSON[$stationID][] = $programData;
             }
             else
             {
@@ -1276,7 +1276,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
      * This next bit is very loopy, but it lets us make sure that we have good data before adding it to the array
      * containing the schedules for the stationID.
      */
-
+/*
     foreach ($scheduleJSON as $stationID => $dateElement)
     {
         foreach ($dateElement as $item)
@@ -1304,7 +1304,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             }
         }
     }
-
+*/
     while (list(, $item) = each($existingChannels))
     {
         $chanID = $item["chanid"];
