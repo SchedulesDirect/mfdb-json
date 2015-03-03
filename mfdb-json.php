@@ -582,6 +582,7 @@ function getSchedules($stationIDsToFetch)
     global $debug;
     global $forceDownload;
     global $addToRetryQueue;
+    global $scheduleJSON;
 
     $jsonProgramsToRetrieve = array();
     $requestArray = array();
@@ -896,6 +897,7 @@ function getSchedules($stationIDsToFetch)
             }
 
             $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5, "date" => $date));
+            $scheduleJSON[$stationID][] = $v["programs"];
 
             foreach ($v["programs"] as $programData)
             {
@@ -1055,6 +1057,7 @@ function insertJSON(array $jsonProgramsToRetrieve)
     global $dbhSD;
     global $dlProgramTempDir;
     global $debug;
+    global $schedulesJSON;
 
     $insertJSON = $dbhSD->prepare("INSERT INTO programs(programID,md5,json)
             VALUES (:programID,:md5,:json)
@@ -1176,7 +1179,7 @@ function insertSchedule()
 {
     global $dbh;
     global $dbhSD;
-    global $dlSchedTempDir;
+    // global $dlSchedTempDir;
     global $peopleCacheMyth;
     global $debug;
     global $errorWarning;
