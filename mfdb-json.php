@@ -935,7 +935,7 @@ function getSchedules($stationIDsToFetch)
                 $quiet = FALSE;
                 printMSG("FATAL ERROR: no MD5 value for program.");
                 printMSG("Send the following to grabber@schedulesdirect.org\n");
-                printMSG("s:$stationID\n\n\n\nitem\n\n" . print_r($item, TRUE) . "\n\n");
+                printMSG("s:$stationID\n\n\n\nitem\n\n" . print_r($programData, TRUE) . "\n\n");
                 continue;
             }
         }
@@ -1153,7 +1153,7 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
             else
             {
                 print "FATAL ERROR: No programID?\n";
-                print "$jsonPrograms\n";
+                var_dump($v);
                 continue;
             }
 
