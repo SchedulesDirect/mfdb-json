@@ -1354,57 +1354,59 @@ function printLineup()
 
 function addLineupsToSchedulesDirect()
 {
-    global $client;
-    global $debug;
-    global $token;
-    global $availableCountries;
+global $client;
+global $debug;
+global $token;
+global $availableCountries;
 
-    $sdLineupArray = array();
+$sdLineupArray = array();
 
-    $arrayCountriesWithOnePostalCode = array(
-        "BLZ" => "BZ",
-        "COL" => "CO",
-        "GUY" => "GY",
-        "HND" => "HN",
-        "PAN" => "PA",
-        "AIA" => "AI-2640",
-        "ATG" => "AG",
-        "ABW" => "AW",
-        "BHS" => "BS",
-        "BES" => "BQ",
-        "CUW" => "CW",
-        "DMA" => "DM",
-        "GRD" => "GD",
-        "MAF" => "97150",
-        "KNA" => "KN",
-        "LCA" => "LC",
-        "TTO" => "TT",
-        "TCA" => "TKCA1ZZ");
+$arrayCountriesWithOnePostalCode = array(
+    "BLZ" => "BZ",
+    "COL" => "CO",
+    "GUY" => "GY",
+    "HND" => "HN",
+    "PAN" => "PA",
+    "AIA" => "AI-2640",
+    "ATG" => "AG",
+    "ABW" => "AW",
+    "BHS" => "BS",
+    "BES" => "BQ",
+    "CUW" => "CW",
+    "DMA" => "DM",
+    "GRD" => "GD",
+    "MAF" => "97150",
+    "KNA" => "KN",
+    "LCA" => "LC",
+    "TTO" => "TT",
+    "TCA" => "TKCA1ZZ");
 
-    $done = FALSE;
-    $country = "";
+$done = FALSE;
+$country = "";
 
-    while ($done === FALSE)
+while ($done === FALSE)
+{
+    print "Three-character ISO-3166-1 alpha3 country code (? to list available countries):";
+    $country = strtoupper(readline(">"));
+
+    if ($country == "")
     {
-        print "Three-character ISO-3166-1 alpha3 country code (? to list available countries):";
-        $country = strtoupper(readline(">"));
-
-        if ($country == "")
-        {
-            return;
-        }
-
-        if ($country == "?")
-        {
-            printListOfAvailableCountries(TRUE);
-        }
-        else
-        {
-            $done = TRUE;
-        }
+        return;
     }
 
-    foreach ($availableCountries as $region => $item)
+    if ($country == "?")
+    {
+        printListOfAvailableCountries(TRUE);
+    }
+    else
+    {
+        $done = TRUE;
+    }
+}
+
+foreach ($availableCountries as $region => $foo)
+{
+    foreach ($foo as $item)
     {
         if (isset($item["shortName"]["onePostalCode"]) === TRUE)
         {
@@ -1421,6 +1423,7 @@ function addLineupsToSchedulesDirect()
             {
                 return;
             }
+            break;
         }
     }
 
