@@ -1131,7 +1131,6 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
             continue;
         }
 
-        $counter = 0;
         debugMSG("Processing $jsonFileToProcess");
 
         $dbhSD->beginTransaction();
