@@ -1108,8 +1108,6 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
     $total = count($jsonProgramsToRetrieve);
     printMSG("Performing inserts of JSON data.");
 
-    $dbhSD->beginTransaction();
-
     foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
     {
         $rawProgramJSON = file_get_contents($jsonFileToProcess);
@@ -1123,6 +1121,10 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
         }
 
         $counter = 0;
+        debugMSG("Processing $jsonFileToProcess");
+
+        $dbhSD->beginTransaction();
+
         foreach ($jsonPrograms as $v)
         {
             $counter++;
@@ -1171,6 +1173,7 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
             $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
                                        "json"      => json_encode($v)));
         }
+
         $dbhSD->commit();
     }
 
