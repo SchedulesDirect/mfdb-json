@@ -1357,6 +1357,7 @@ function addLineupsToSchedulesDirect()
     global $client;
     global $debug;
     global $token;
+    global $availableCountries;
 
     $sdLineupArray = array();
 
