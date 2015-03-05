@@ -1400,6 +1400,7 @@ function addLineupsToSchedulesDirect()
     if (isset($countriesWithOnePostalCode[$country]) === TRUE)
     {
         $postalCode = $countriesWithOnePostalCode[$country];
+        print "This country has only one postal code: $postalCode\n";
     }
     else
     {
