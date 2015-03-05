@@ -1366,9 +1366,9 @@ function addLineupsToSchedulesDirect()
     {
         foreach ($foo as $item)
         {
-            if (isset($item["shortName"]["onePostalCode"]) === TRUE)
+            if (isset($item["onePostalCode"]) === TRUE)
             {
-                $countriesWithOnePostalCode[$item["shortName"]] = $item["shortName"]["postalCodeExample"];
+                $countriesWithOnePostalCode[$item["shortName"]] = $item["postalCodeExample"];
             }
         }
     }
