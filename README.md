@@ -2,7 +2,7 @@
 
 Grabber for the Schedules Direct JSON service.
 
-v20140530.01, 2014-12-04
+v20141201.01, 2015-03-05
 
 Robert Kulagowski
 
@@ -11,18 +11,7 @@ grabber@schedulesdirect.org
 These programs can be used as a replacement to mythfilldatabase and
 for downloading data from Schedules Direct using the new JSON format.
 
-This file describes API 20140530.
-
-**2014-10-17 Update**: The scripts no longer use mythconverg. Please note the
-updated instruction below on using sd.sql to create the tables. You should
-also use function 4 in sd-utility.php to refresh your local lineup cache
-before doing anything else.  Also, your first run of mfdb-json.php will
-re-download program data.
-
-**NOTE**: You are strongly encouraged to run "git pull" to refresh your client before each use; the software is under
-active development and this will ensure that you stay up-to-date.
-
-**NOTE**: Versions of the client after 0.12 will now query the server and report if they're not the current version.
+This file describes API 20141201.
 
 #Features:
 ##MythTV-only
@@ -78,7 +67,7 @@ git clone https://github.com/SchedulesDirect/mfdb-json.git
 
 cd mfdb-json
 
-git checkout API-20140530
+git checkout API-20141201
 
 ###Install Composer
 
@@ -126,9 +115,11 @@ MythTV database.
 You can run it with **--help** to see the various options.
 
 ```
-sd-utility.php utility program API:20140530 v0.19/2014-10-16
+Using beta server.
+sd-utility.php utility program API:20141201 v0.25/2015-02-28
 
 The following options are available:
+--beta          Use beta server. (Default: FALSE)
 --countries     The list of countries that have data.
 --debug         Enable debugging. (Default: FALSE)
 --dbname=       MySQL database name for MythTV. (Default: mythconverg)
@@ -137,6 +128,8 @@ The following options are available:
 --dbhost=       MySQL database hostname for MythTV. (Default: localhost)
 --dbhostsd=     MySQL database hostname for SchedulesDirect JSON data. (Default: localhost)
 --extract       Don't do anything but extract data from the table for QAM/ATSC. (Default: FALSE)
+--forcelogo     Force update of channel logos.
+--forcerun      Continue to run even if we're known to be broken. (Default: FALSE)
 --help          (this text)
 --host=         IP address of the MythTV backend. (Default: localhost)
 --logo=         Directory where channel logos are stored (Default: /home/rkulagow/.mythtv/channels)
@@ -144,8 +137,9 @@ The following options are available:
 --skiplogo      Don't download channel logos.
 --username=     Schedules Direct username.
 --password=     Schedules Direct password.
---usedb         Use a database to store data, even if you're not running MythTV. (Default: FALSE)
 --timezone=     Set the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:UTC)
+--skipversion   Force the program to run even if there's a version mismatch between the client and the server.
+--usedb         Use a database to store data, even if you're not running MythTV. (Default: FALSE)
 --version       Print version information and exit.
 ```
 
@@ -163,6 +157,67 @@ information on the command line if you intend on using a database.
 Add your lineup to your Schedules Direct JSON-service account.  (Your
 existing Schedules Direct information for the XML service isn't
 automatically copied over, and the service is running on different hosts.)
+
+You may run
+```
+./sd-utility.php --countries --notfancy
+
+Region:North America
+United States
+Canada
+
+Region:Europe
+Denmark
+Finland
+France
+Germany
+Great Britain
+Sweden
+
+Region:Latin America
+Argentina
+Belize
+Brazil
+Chile
+Columbia
+Costa Rica
+Ecuador
+Guatemala
+Guyana
+Honduras
+Mexico
+Panama
+Peru
+Uruguay
+Venezuela
+
+Region:Caribbean
+Anguila
+Antigua/Barbuda
+Aruba
+Bahamas
+Barbados
+Bermuda
+Bonaire, Saba, St. Eustatius
+British Virgin Islands
+Cayman Islands
+Curacao
+Dominica
+Dominican Republic
+Grenada
+Jamaica
+Puerto Rico
+Saint Martin
+Saint Vincent / Grenadines
+St. Kitts and Nevis
+St. Lucia
+Trinidad and Tobago
+Turks and Caicos
+```
+
+To get the list of supported countries. 
+
+Running without **--notfancy** will generate a prettier table.
 
 ```
 Attempting to connect to database.
