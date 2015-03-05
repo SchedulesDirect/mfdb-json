@@ -1375,6 +1375,7 @@ function addLineupsToSchedulesDirect()
 
     $done = FALSE;
     $country = "";
+    $postalCode = "";
 
     while ($done === FALSE)
     {
@@ -1403,9 +1404,9 @@ function addLineupsToSchedulesDirect()
     else
     {
         print "Enter postal code:";
-        $postalcode = strtoupper(readline(">"));
+        $postalCode = strtoupper(readline(">"));
 
-        if ($postalcode == "")
+        if ($postalCode == "")
         {
             return;
         }
@@ -1414,7 +1415,7 @@ function addLineupsToSchedulesDirect()
     try
     {
         $response = $client->get("headends", array(), array(
-            "query"   => array("country" => $country, "postalcode" => $postalcode),
+            "query"   => array("country" => $country, "postalcode" => $postalCode),
             "headers" => array("token" => $token)))->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
