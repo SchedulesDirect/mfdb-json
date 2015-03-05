@@ -1508,7 +1508,6 @@ function addLineupsToSchedulesDirect()
 
     print "Message from server: {$res["message"]}\n";
 }
-}
 
 function directAddLineup($lineup)
 {
