@@ -74,13 +74,13 @@ $availableCountries = array(
         (
             array("fullName" => "Argentina", "shortName" => "ARG", "postalCodeExample" => "A4190", "postalCode" =>
                 "/[A-Z]\d{4}/"),
-            array("fullName" => "Belize", "shortName" => "BLZ", "postalCodeExample" => "BZ *", "postalCode" =>
+            array("fullName"            => "Belize", "shortName" => "BLZ", "postalCodeExample" => "BZ", "postalCode" =>
                 "/BZ/", "onePostalCode" => TRUE),
             array("fullName" => "Brazil", "shortName" => "BRA", "postalCodeExample" => "01419", "postalCode" =>
                 "/\d{5}/"),
             array("fullName" => "Chile", "shortName" => "CHL", "postalCodeExample" => "1000000", "postalCode" =>
                 "/\d{7}/"),
-            array("fullName" => "Columbia", "shortName" => "COL", "postalCodeExample" => "CO *", "postalCode" =>
+            array("fullName" => "Columbia", "shortName" => "COL", "postalCodeExample" => "CO", "postalCode" =>
                 "/CO/", "onePostalCode" => TRUE),
             array("fullName" => "Costa Rica", "shortName" => "CRI", "postalCodeExample" => "10101", "postalCode" =>
                 "/\d{5}/"),
@@ -88,13 +88,13 @@ $availableCountries = array(
                 "/\d{6}/"),
             array("fullName" => "Guatemala", "shortName" => "GTM", "postalCodeExample" => "01001", "postalCode" =>
                 "/\d{5}/"),
-            array("fullName" => "Guyana", "shortName" => "GUY", "postalCodeExample" => "GY *", "postalCode" =>
+            array("fullName"            => "Guyana", "shortName" => "GUY", "postalCodeExample" => "GY", "postalCode" =>
                 "/GY/", "onePostalCode" => TRUE),
-            array("fullName" => "Honduras", "shortName" => "HND", "postalCodeExample" => "HN *", "postalCode" =>
+            array("fullName" => "Honduras", "shortName" => "HND", "postalCodeExample" => "HN", "postalCode" =>
                 "/HN/", "onePostalCode" => TRUE),
             array("fullName" => "Mexico", "shortName" => "MEX", "postalCodeExample" => "11500", "postalCode" =>
                 "/\d{5}/"),
-            array("fullName" => "Panama", "shortName" => "PAN", "postalCodeExample" => "PA *", "postalCode" =>
+            array("fullName"            => "Panama", "shortName" => "PAN", "postalCodeExample" => "PA", "postalCode" =>
                 "/PA/", "onePostalCode" => TRUE),
             array("fullName" => "Peru", "shortName" => "PER", "postalCodeExample" => "23006", "postalCode" =>
                 "/\d{5}/"),
@@ -106,47 +106,47 @@ $availableCountries = array(
     "Caribbean"     =>
         array
         (
-            array("fullName" => "Anguila", "shortName" => "AIA", "postalCodeExample" => "AI-2640 *", "postalCode" =>
+            array("fullName" => "Anguila", "shortName" => "AIA", "postalCodeExample" => "AI-2640", "postalCode" =>
                 "/AI-2640/", "onePostalCode" => TRUE),
-            array("fullName" => "Antigua/Barbuda", "shortName" => "ATG", "postalCodeExample" => "AG *", "postalCode" =>
+            array("fullName" => "Antigua/Barbuda", "shortName" => "ATG", "postalCodeExample" => "AG", "postalCode" =>
                 "/AG/", "onePostalCode" => TRUE),
-            array("fullName"            => "Aruba", "shortName" => "ABW", "postalCodeExample" => "AW *", "postalCode" =>
+            array("fullName"            => "Aruba", "shortName" => "ABW", "postalCodeExample" => "AW", "postalCode" =>
                 "/AW/", "onePostalCode" => TRUE),
-            array("fullName" => "Bahamas", "shortName" => "BHS", "postalCodeExample" => "BS *", "postalCode" =>
+            array("fullName"            => "Bahamas", "shortName" => "BHS", "postalCodeExample" => "BS", "postalCode" =>
                 "/BS/", "onePostalCode" => TRUE),
             array("fullName" => "Barbados", "shortName" => "BRB", "postalCodeExample" => "BB14001", "postalCode" =>
                 "/BB\d{5}/"),
             array("fullName" => "Bermuda", "shortName" => "BMU", "postalCodeExample" => "CR01", "postalCode" =>
                 "/[A-Z]{2}\d{2}/"),
-            array("fullName"   => "Bonaire, Saba, St. Eustatius", "shortName" => "BES", "postalCodeExample" => "BQ *",
+            array("fullName"   => "Bonaire, Saba, St. Eustatius", "shortName" => "BES", "postalCodeExample" => "BQ",
                   "postalCode" => "/BQ/", "onePostalCode" => TRUE),
             array("fullName"   => "British Virgin Islands", "shortName" => "VGB", "postalCodeExample" => "VG1110",
                   "postalCode" => "/VG\d{4}/"),
             array("fullName"   => "Cayman Islands", "shortName" => "CYM", "postalCodeExample" => "KY1-0001",
                   "postalCode" => "/KY\d{1}-\d{4}/"),
-            array("fullName" => "Curacao", "shortName" => "CUW", "postalCodeExample" => "CW *", "postalCode" =>
+            array("fullName"            => "Curacao", "shortName" => "CUW", "postalCodeExample" => "CW", "postalCode" =>
                 "/CW/", "onePostalCode" => TRUE),
-            array("fullName" => "Dominica", "shortName" => "DMA", "postalCodeExample" => "DM *", "postalCode" =>
+            array("fullName" => "Dominica", "shortName" => "DMA", "postalCodeExample" => "DM", "postalCode" =>
                 "/DM/", "onePostalCode" => TRUE),
             array("fullName"   => "Dominican Republic", "shortName" => "DOM", "postalCodeExample" => "10101",
                   "postalCode" => "/\d{5}/"),
-            array("fullName" => "Grenada", "shortName" => "GRD", "postalCodeExample" => "GW *", "postalCode" =>
+            array("fullName"            => "Grenada", "shortName" => "GRD", "postalCodeExample" => "GW", "postalCode" =>
                 "/GD/", "onePostalCode" => TRUE),
             array("fullName" => "Jamaica", "shortName" => "JAM", "postalCodeExample" => "JMAAW01", "postalCode" =>
                 "/JM[A-Z]{3}\d{2}/"),
             array("fullName" => "Puerto Rico", "shortName" => "PRI", "postalCodeExample" => "00601", "postalCode" =>
                 "/\d{5}/"),
-            array("fullName" => "Saint Martin", "shortName" => "MAF", "postalCodeExample" => "97150 *", "postalCode" =>
+            array("fullName" => "Saint Martin", "shortName" => "MAF", "postalCodeExample" => "97150", "postalCode" =>
                 "/97150/", "onePostalCode" => TRUE),
             array("fullName"   => "Saint Vincent / Grenadines", "shortName" => "VCT", "postalCodeExample" => "VC0100",
                   "postalCode" => "/VC\d{4}/"),
-            array("fullName"   => "St. Kitts and Nevis", "shortName" => "KNA", "postalCodeExample" => "KN *",
+            array("fullName"   => "St. Kitts and Nevis", "shortName" => "KNA", "postalCodeExample" => "KN",
                   "postalCode" => "/KN/", "onePostalCode" => TRUE),
-            array("fullName" => "St. Lucia", "shortName" => "LCA", "postalCodeExample" => "LC *", "postalCode" =>
+            array("fullName" => "St. Lucia", "shortName" => "LCA", "postalCodeExample" => "LC", "postalCode" =>
                 "/LC/", "onePostalCode" => TRUE),
-            array("fullName"   => "Trinidad and Tobago", "shortName" => "TTO", "postalCodeExample" => "TT *",
+            array("fullName"   => "Trinidad and Tobago", "shortName" => "TTO", "postalCodeExample" => "TT",
                   "postalCode" => "/TT/", "onePostalCode" => TRUE),
-            array("fullName"   => "Turks and Caicos", "shortName" => "TCA", "postalCodeExample" => "TKCA1ZZ *",
+            array("fullName"   => "Turks and Caicos", "shortName" => "TCA", "postalCodeExample" => "TKCA1ZZ",
                   "postalCode" => "/TKCA1ZZ/", "onePostalCode" => TRUE)
         )
 );
@@ -2121,7 +2121,15 @@ function printListOfAvailableCountries($fancyTable)
 
             foreach ($data as $item)
             {
-                $countryList->appendRow(array($item["fullName"], $item["shortName"], $item["postalCodeExample"]));
+                if (isset($item["onePostalCode"]) === TRUE)
+                {
+                    $countryList->appendRow(array($item["fullName"], $item["shortName"],
+                                                  $item["postalCodeExample"] . " *"));
+                }
+                else
+                {
+                    $countryList->appendRow(array($item["fullName"], $item["shortName"], $item["postalCodeExample"]));
+                }
             }
             print $countryList;
         }
