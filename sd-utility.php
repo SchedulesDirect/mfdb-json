@@ -1404,19 +1404,23 @@ function addLineupsToSchedulesDirect()
         }
     }
 
-    if (isset($arrayCountriesWithOnePostalCode[$country]) === TRUE)
+    foreach ($availableCountries as $region => $item)
     {
-        print "Only one valid postal code for this country: {$arrayCountriesWithOnePostalCode[$country]}\n";
-        $postalcode = $arrayCountriesWithOnePostalCode[$country];
-    }
-    else
-    {
-        print "Enter postal code:";
-        $postalcode = strtoupper(readline(">"));
-
-        if ($postalcode == "")
+        if (isset($item["shortName"]["onePostalCode"]) === TRUE)
         {
-            return;
+            print "Only one valid postal code for this country: {$item["shortName"]["onePostalCode"]}\n";
+            $postalcode = $item["shortName"]["onePostalCode"];
+            break;
+        }
+        else
+        {
+            print "Enter postal code:";
+            $postalcode = strtoupper(readline(">"));
+
+            if ($postalcode == "")
+            {
+                return;
+            }
         }
     }
 
