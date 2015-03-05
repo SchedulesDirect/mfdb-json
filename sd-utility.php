@@ -1379,7 +1379,7 @@ function addLineupsToSchedulesDirect()
     while ($done === FALSE)
     {
         print "Three-character ISO-3166-1 alpha3 country code (? to list available countries):";
-        $country = strtoupper(readline(">"));
+        $country = trim(strtoupper(readline(">")));
 
         if ($country == "")
         {
