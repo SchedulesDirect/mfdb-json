@@ -837,7 +837,7 @@ function getSchedules($stationIDsToFetch)
 
     $item = json_decode($jsonSchedule, TRUE);
 
-    if (json_last_error())
+    if (json_last_error() === TRUE)
     {
         printMSG("Couldn't decode $dlSchedTempDir/schedule.json from JSON.");
         printMSG(json_last_error_msg());
@@ -846,7 +846,7 @@ function getSchedules($stationIDsToFetch)
 
     foreach ($item as $v)
     {
-        if (isset($v["stationID"]))
+        if (isset($v["stationID"]) === TRUE)
         {
             $stationID = $v["stationID"];
         }
@@ -862,7 +862,7 @@ function getSchedules($stationIDsToFetch)
             switch ($v["code"])
             {
                 case 7000:
-                    if (isset($addToRetryQueue[$stationID]))
+                    if (isset($addToRetryQueue[$stationID]) === TRUE)
                     {
                         $permanentDownloadFailure[$stationID] = 1;
                         unset($addToRetryQueue[$stationID]); // Permanent error.
@@ -1618,7 +1618,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
             if (isset($scheduleElement["repeat"]) === TRUE)
             {
-                if ($isNew)
+                if ($isNew === TRUE)
                 {
                     debugMSG("*** WARNING sid:$stationID pid:$programID has 'new' and 'repeat' set. Open SD ticket:");
                     debugMSG(print_r($scheduleElement, TRUE));
@@ -2090,7 +2090,7 @@ function tempdir($type)
         $tempfile = tempnam(sys_get_temp_dir(), "mfdb_schedules_");
     }
 
-    if (file_exists($tempfile))
+    if (file_exists($tempfile) === TRUE)
     {
         unlink($tempfile);
     }
