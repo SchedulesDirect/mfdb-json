@@ -2168,7 +2168,7 @@ function updateStatus()
         return ("ERROR");
     }
 
-    $nextConnectTime = date("Y-m-d\Th:i:s\Z", strtotime("tomorrow"));
+    $nextConnectTime = date("Y-m-d\TH:i:s\Z", strtotime("tomorrow"));
     printMSG("Server: {$res["serverID"]}");
     printMSG("Last data refresh: {$res["lastDataUpdate"]}");
     printMSG("Account expires: $expires");
