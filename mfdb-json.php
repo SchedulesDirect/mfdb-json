@@ -2134,7 +2134,7 @@ function updateStatus()
     {
         $expires = $res["account"]["expires"];
         $maxLineups = $res["account"]["maxLineups"];
-        $nextConnectTime = $res["account"]["nextSuggestedConnectTime"];
+        //$nextConnectTime = $res["account"]["nextSuggestedConnectTime"];
 
         foreach ($res["account"]["messages"] as $a)
         {
@@ -2148,6 +2148,15 @@ function updateStatus()
                                                         "message" => $message,
                                                         "type"    => "U"));
             }
+        }
+
+        foreach ($res["account"]["systemStatus"] as $a)
+        {
+            $date = $a["date"];
+            $status = $a["status"];
+            $message = $a["message"];
+
+            printMSG(":$date : $status : $message");
         }
     }
     else

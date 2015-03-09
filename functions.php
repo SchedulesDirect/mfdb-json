@@ -163,11 +163,16 @@ function printStatus($sdStatus)
     {
         $expires = $sdStatus["account"]["expires"];
         $maxHeadends = $sdStatus["account"]["maxLineups"];
-        $nextConnectTime = $sdStatus["account"]["nextSuggestedConnectTime"];
+        // $nextConnectTime = $sdStatus["account"]["nextSuggestedConnectTime"];
 
         foreach ($sdStatus["account"]["messages"] as $a)
         {
-            print "MessageID: " . $a["msgID"] . " : " . $a["date"] . " : " . $a["message"] . "\n";
+            print "MessageID: " . $a["messageID"] . " : " . $a["date"] . " : " . $a["message"] . "\n";
+        }
+
+        foreach ($sdStatus["account"]["systemStatus"] as $a)
+        {
+            print $a["date"] . " : " . $a["message"] . "\n";
         }
     }
     else
@@ -183,11 +188,11 @@ function printStatus($sdStatus)
     print "Last data refresh: " . $sdStatus["lastDataUpdate"] . "\n";
     print "Account expires: $expires\n";
     print "Max number of headends for your account: $maxHeadends\n";
-    print "Next suggested connect time: $nextConnectTime\n";
+    //print "Next suggested connect time: $nextConnectTime\n";
 
     $videosourceModifiedArray = array();
 
-    if ($isMythTV)
+    if ($isMythTV === TRUE)
     {
         $videosourceModifiedJSON = settingSD("localLineupLastModified");
 
@@ -415,7 +420,7 @@ function printMSG($str)
         $str = date("Y-m-d H:i:s") . ":$str";
     }
 
-    if (!$quiet)
+    if ($quiet === FALSE)
     {
         print "$str\n";
     }
