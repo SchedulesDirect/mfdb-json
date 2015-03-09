@@ -171,7 +171,7 @@ function printStatus($sdStatus)
 
         foreach ($sdStatus["systemStatus"] as $a)
         {
-            print $a["date"] . " : " . $a["message"] . "\n";
+            print $a["date"] . " : " . $a["status"] . " : " . $a["message"] . "\n";
         }
     }
     else
