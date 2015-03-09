@@ -163,14 +163,13 @@ function printStatus($sdStatus)
     {
         $expires = $sdStatus["account"]["expires"];
         $maxHeadends = $sdStatus["account"]["maxLineups"];
-        // $nextConnectTime = $sdStatus["account"]["nextSuggestedConnectTime"];
 
         foreach ($sdStatus["account"]["messages"] as $a)
         {
             print "MessageID: " . $a["messageID"] . " : " . $a["date"] . " : " . $a["message"] . "\n";
         }
 
-        foreach ($sdStatus["account"]["systemStatus"] as $a)
+        foreach ($sdStatus["systemStatus"] as $a)
         {
             print $a["date"] . " : " . $a["message"] . "\n";
         }

@@ -2134,7 +2134,6 @@ function updateStatus()
     {
         $expires = $res["account"]["expires"];
         $maxLineups = $res["account"]["maxLineups"];
-        //$nextConnectTime = $res["account"]["nextSuggestedConnectTime"];
 
         foreach ($res["account"]["messages"] as $a)
         {
@@ -2150,7 +2149,7 @@ function updateStatus()
             }
         }
 
-        foreach ($res["account"]["systemStatus"] as $a)
+        foreach ($res["systemStatus"] as $a)
         {
             $date = $a["date"];
             $status = $a["status"];
@@ -2169,6 +2168,7 @@ function updateStatus()
         return ("ERROR");
     }
 
+    $nextConnectTime = date("Y-m-d\Th:i:s\Z", strtotime("tomorrow"));
     printMSG("Server: {$res["serverID"]}");
     printMSG("Last data refresh: {$res["lastDataUpdate"]}");
     printMSG("Account expires: $expires");
