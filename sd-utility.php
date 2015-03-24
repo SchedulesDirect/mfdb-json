@@ -784,6 +784,11 @@ function updateChannelTable($lineup)
             $transport = "FTA";
         }
 
+        if ($json["metadata"]["transport"] == "DVB-S")
+        {
+            $transport = "DVB-S";
+        }
+
         /*
          * This whole next part needs to get rewritten.
          */
@@ -925,7 +930,7 @@ function updateChannelTable($lineup)
                 /*
                  * TODO: Work on this some more. Kludgey.
                  */
-                print "Found more than one $transport mapping for your headend.\n";
+                print "Found more than one $transport mapping for your lineup.\n";
                 foreach ($json["mapping"] as $m)
                 {
                     print "Mapping: $m\n";
@@ -939,81 +944,84 @@ function updateChannelTable($lineup)
 
             if ($useScan === TRUE)
             {
-                $matchType = $json["map"][$mapToUse][0]["matchType"];
-
-                print "Matching $transport scan based on: $matchType\n";
-
-                if ($matchType == "multiplex")
+                if ($transport == "QAM")
                 {
-                    $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
-                    $stmt->execute();
-                    $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+                    $matchType = $json["map"][$mapToUse][0]["matchType"];
 
-                    $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
-                    $stmt->execute(array("sid" => $sourceID));
-                    $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    print "Matching $transport scan based on: $matchType\n";
 
-                    $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
+                    if ($matchType == "multiplex")
+                    {
+                        $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
+                        $stmt->execute();
+                        $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                        $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
+                        $stmt->execute(array("sid" => $sourceID));
+                        $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                        $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
                 mplexid=:mplexid AND serviceid=:serviceid");
 
-                    $map = array();
+                        $map = array();
 
-                    foreach ($json["map"][$mapToUse] as $foo)
-                    {
-                        $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
-                    }
-
-                    foreach ($existingChannelNumbers as $foo)
-                    {
-                        $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
-
-                        if (isset($map[$toFind]) === TRUE)
+                        foreach ($json["map"][$mapToUse] as $foo)
                         {
-                            $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
-                                                                  "mplexid"   => $foo["mplexid"],
-                                                                  "serviceid" => $foo["serviceID"]));
+                            $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
+                        }
+
+                        foreach ($existingChannelNumbers as $foo)
+                        {
+                            $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
+
+                            if (isset($map[$toFind]) === TRUE)
+                            {
+                                $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
+                                                                      "mplexid"   => $foo["mplexid"],
+                                                                      "serviceid" => $foo["serviceID"]));
+                            }
                         }
                     }
-                }
 
-                if ($matchType == "providerCallsign")
-                {
-                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    if ($matchType == "providerCallsign")
+                    {
+                        $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
                     WHERE callsign=:providerCallsign");
-                    foreach ($json["map"][$mapToUse] as $foo)
-                    {
-                        $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
-                                                           "virtualChannel"   => $foo["virtualChannel"],
-                                                           "providerCallsign" => $foo["providerCallsign"]));
+                        foreach ($json["map"][$mapToUse] as $foo)
+                        {
+                            $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
+                                                               "virtualChannel"   => $foo["virtualChannel"],
+                                                               "providerCallsign" => $foo["providerCallsign"]));
+                        }
                     }
-                }
 
-                if ($matchType == "channel")
-                {
-                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
-                    WHERE channum=:channel");
-                    foreach ($json["map"][$mapToUse] as $foo)
+                    if ($matchType == "channel")
                     {
-                        $updateChannelTable->execute(array("stationID"      => $foo["stationID"],
-                                                           "virtualChannel" => $foo["virtualChannel"],
-                                                           "channum"        => $foo["channel"]));
+                        $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE channum=:channel");
+                        foreach ($json["map"][$mapToUse] as $foo)
+                        {
+                            $updateChannelTable->execute(array("stationID"      => $foo["stationID"],
+                                                               "virtualChannel" => $foo["virtualChannel"],
+                                                               "channum"        => $foo["channel"]));
+                        }
                     }
+                    print "Done updating QAM scan with stationIDs.\n";
                 }
-                print "Done updating QAM scan with stationIDs.\n";
             }
             else
             {
-                /*
-                 * The user has chosen to not run a QAM scan and just use the values that we're supplying.
-                 * Work-in-progress.
-                 */
-
-                print "Inserting $transport data into tables.\n";
-
-                $dtvMultiplex = array();
-
                 if ($transport == "QAM")
                 {
+                    /*
+                     * The user has chosen to not run a QAM scan and just use the values that we're supplying.
+                     * Work-in-progress.
+                     */
+
+                    print "Inserting $transport data into tables.\n";
+
+                    $dtvMultiplex = array();
+
                     $insertDTVMultiplex = $dbh->prepare
                     ("INSERT INTO dtv_multiplex
         (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
@@ -1111,7 +1119,6 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                     }
                     print "Done inserting QAM tuning information directly into tables.\n";
                 }
-
             }
 
             if ($transport == "FTA")
