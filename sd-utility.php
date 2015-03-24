@@ -1355,7 +1355,6 @@ function printLineup()
 function addLineupsToSchedulesDirect()
 {
     global $client;
-    global $debug;
     global $token;
     global $availableCountries;
     global $debug;
@@ -1437,6 +1436,7 @@ function addLineupsToSchedulesDirect()
     if ($debug === TRUE)
     {
         debugMSG("addLineupsToSchedulesDirect:Response: $response");
+        $tt = fgets(STDIN);
         debugMSG("addLineupsToSchedulesDirect:Response: " . print_r($res, TRUE));
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
