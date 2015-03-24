@@ -1436,16 +1436,15 @@ function addLineupsToSchedulesDirect()
     if ($debug === TRUE)
     {
         debugMSG("addLineupsToSchedulesDirect:Response: $response");
-        $tt = fgets(STDIN);
         debugMSG("addLineupsToSchedulesDirect:Response: " . print_r($res, TRUE));
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
 
     $counter = "0";
 
-    foreach ($res as $he => $details)
+    foreach ($res as $details)
     {
-        print "\nheadend: $he\n";
+        print "\nheadend: {$details["headend"]}\n";
         print "location: {$details["location"]}\n";
         foreach ($details["lineups"] as $v)
         {
