@@ -1435,7 +1435,8 @@ function addLineupsToSchedulesDirect()
 
     if ($debug === TRUE)
     {
-        debugMSG("addLineupsToSchedulesDirect:Response:$res");
+        debugMSG("addLineupsToSchedulesDirect:Response: $response");
+        debugMSG("addLineupsToSchedulesDirect:Response: " . print_r($res, TRUE));
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
 
