@@ -1407,7 +1407,7 @@ function addLineupsToSchedulesDirect()
         print "Enter postal code:";
         $postalCode = strtoupper(readline(">"));
 
-        if ($postalCode == "")
+        if ($country != "DVB" AND $postalCode == "")
         {
             return;
         }
