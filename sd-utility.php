@@ -2072,11 +2072,11 @@ function getLineupFromNumber($numberOrLineup)
         {
             if (isset($sdStatus["lineups"][$numberOrLineup]["isDeleted"]) === TRUE)
             {
-                return array($sdStatus["lineups"][$numberOrLineup]["ID"], TRUE);
+                return array($sdStatus["lineups"][$numberOrLineup]["lineup"], TRUE);
             }
             else
             {
-                return array($sdStatus["lineups"][$numberOrLineup]["ID"], FALSE);
+                return array($sdStatus["lineups"][$numberOrLineup]["lineup"], FALSE);
             }
         }
     }

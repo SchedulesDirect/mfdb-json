@@ -218,9 +218,9 @@ function printStatus($sdStatus)
 
     print "The following lineups are in your account at Schedules Direct:\n\n";
 
-    if ($isMythTV)
+    if ($isMythTV === TRUE)
     {
-        if ($printFancyTable)
+        if ($printFancyTable === TRUE)
         {
             $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
             $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update",
@@ -233,7 +233,7 @@ function printStatus($sdStatus)
     }
     else
     {
-        if ($printFancyTable)
+        if ($printFancyTable === TRUE)
         {
             $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20)));
             $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
@@ -252,9 +252,9 @@ function printStatus($sdStatus)
 
     foreach ($sdStatus["lineups"] as $lineupNumber => $v)
     {
-        $lineup = $v["ID"];
+        $lineup = $v["lineup"];
         $serverModified = $v["modified"];
-        if (isset($v["isDeleted"]))
+        if (isset($v["isDeleted"]) === TRUE)
         {
             $lineupIsDeleted = TRUE;
         }
@@ -269,11 +269,11 @@ function printStatus($sdStatus)
             var_dump($v);
         }
 
-        if ($isMythTV)
+        if ($isMythTV === TRUE)
         {
-            if (count($videosourceModifiedArray))
+            if (count($videosourceModifiedArray) != 0)
             {
-                if (array_key_exists($lineup, $videosourceModifiedArray))
+                if (isset($videosourceModifiedArray[$lineup]) === TRUE)
                 {
                     $mythModified = $videosourceModifiedArray[$lineup];
                 }
@@ -314,7 +314,7 @@ function printStatus($sdStatus)
                 }
             }
 
-            if ($printFancyTable)
+            if ($printFancyTable === TRUE)
             {
                 $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
             }
@@ -325,7 +325,7 @@ function printStatus($sdStatus)
         }
         else
         {
-            if ($printFancyTable)
+            if ($printFancyTable === TRUE)
             {
                 $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
             }
@@ -340,12 +340,12 @@ function printStatus($sdStatus)
         }
     }
 
-    if ($printFancyTable)
+    if ($printFancyTable === TRUE)
     {
         print $lineupData;
     }
 
-    if (count($updatedLineupsToRefresh))
+    if (count($updatedLineupsToRefresh) != 0)
     {
         updateLocalLineupCache($updatedLineupsToRefresh);
     }
@@ -399,7 +399,7 @@ function debugMSG($str)
 
     $str = date("Y-m-d H:i:s") . ":$str";
 
-    if (!$quiet)
+    if ($quiet === FALSE)
     {
         print "$str\n";
     }
@@ -414,7 +414,7 @@ function printMSG($str)
     global $quiet;
     global $printTimeStamp;
 
-    if ($printTimeStamp)
+    if ($printTimeStamp=== TRUE)
     {
         $str = date("Y-m-d H:i:s") . ":$str";
     }
