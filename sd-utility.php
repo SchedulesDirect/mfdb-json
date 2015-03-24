@@ -1358,6 +1358,7 @@ function addLineupsToSchedulesDirect()
     global $debug;
     global $token;
     global $availableCountries;
+    global $debug;
 
     $sdLineupArray = array();
     $countriesWithOnePostalCode = array();
