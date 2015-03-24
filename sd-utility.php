@@ -1402,12 +1402,12 @@ function addLineupsToSchedulesDirect()
         $postalCode = $countriesWithOnePostalCode[$country];
         print "This country has only one postal code: $postalCode\n";
     }
-    else
+    elseif ($country != "DVB")
     {
         print "Enter postal code:";
         $postalCode = strtoupper(readline(">"));
 
-        if ($country != "DVB" AND $postalCode == "")
+        if ($postalCode == "")
         {
             return;
         }
