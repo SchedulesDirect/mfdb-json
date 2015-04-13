@@ -1709,6 +1709,15 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
 {
     global $dbhSD;
 
+    if (is_null($dbhSD) === TRUE)
+    {
+        global $argv;
+        print "Send the following to grabber@schedulesdirect.org\n";
+        print "updateLocalLineupCache->dbhSD is null?\n";
+        var_dump($argv);
+        exit;
+    }
+
     print "Checking for updated lineups from Schedules Direct.\n";
 
     foreach ($updatedLineupsToRefresh as $k => $v)
