@@ -284,7 +284,6 @@ foreach ($options as $k => $v)
             print "$agentString\n\n";
             exit;
             break;
-
     }
 }
 
