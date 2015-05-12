@@ -56,6 +56,7 @@ $addToRetryQueue = array();
 $permanentDownloadFailure = array();
 $scheduleJSON = array();
 $dbHostSD = "localhost";
+$daysToRetrieve = 30;
 
 date_default_timezone_set($tz);
 $date = new DateTime();
@@ -75,6 +76,7 @@ $helpText = <<< eol
 The following options are available:
 --beta
 --help\t\t(this text)
+--days\t\tNumber of days to retrieve. (Default: 30)
 --dbname=\tMySQL database name for MythTV. (Default: mythconverg)
 --dbuser=\tUsername for database access for MythTV. (Default: mythtv)
 --dbpassword=\tPassword for database access for MythTV. (Default: mythtv)
@@ -97,7 +99,7 @@ The following options are available:
 
 eol;
 
-$longoptions = array("debug", "help", "host::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
+$longoptions = array("debug", "help", "host::", "days::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
                      "forcedownload", "forcerun", "nomyth", "max::", "program", "quiet", "station::", "schedule",
                      "skipversion", "timezone::",
                      "usedb", "version");
@@ -115,6 +117,9 @@ foreach ($options as $k => $v)
             printMSG("$agentString");
             printMSG("$helpText");
             exit;
+            break;
+        case "days":
+            $daysToRetrieve = $v;
             break;
         case "dbhost":
             $dbHost = $v;
@@ -386,7 +391,7 @@ if ($isMythTV === TRUE)
         $stmt->execute();
         $sources = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if (!count($sources))
+        if (count($sources) == 0)
         {
             printMSG("Error: no videosources configured for Schedules Direct JSON service. Check videosource table.");
             exit;
@@ -587,9 +592,12 @@ function getSchedules($stationIDsToFetch)
     global $addToRetryQueue;
     global $permanentDownloadFailure;
     global $scheduleJSON;
+    global $daysToRetrieve;
+    global $todayDate;
 
     $arrayProgramsToRetrieveFromSchedulesDirect = array();
     $requestArray = array();
+    $dateArray = array();
     $bar = array();
     $schedulesToFetch = array();
 
@@ -614,10 +622,14 @@ function getSchedules($stationIDsToFetch)
 
     //$stationIDsToFetch = array("20454", "10021");
 
+    foreach (range(0, $daysToRetrieve) as $j)
+    {
+        $dateArray[] = date("Y-m-d", strtotime("$todayDate + $j days"));
+    }
+
     while (list(, $sid) = each($stationIDsToFetch))
     {
-        $requestArray[] = array("stationID" => "$sid");
-        // $requestArray[] = array("stationID" => "$sid", "date" => array("2015-03-03", "2015-03-04"));
+        $requestArray[] = array("stationID" => "$sid", "date" => $dateArray);
     }
 
     if (count($requestArray) == 0)
@@ -1053,8 +1065,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
                         $hadError = TRUE;
                         debugMSG("Had error retrieving chunk $index: retrying.");
                         sleep(30);
-                    }
-                    catch (Guzzle\Http\Exception\RequestException $e)
+                    } catch (Guzzle\Http\Exception\RequestException $e)
                     {
                         $errorReq = $e->getRequest();
                         $errorResp = $e->getResponse();

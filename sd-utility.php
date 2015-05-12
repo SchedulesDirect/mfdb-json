@@ -198,9 +198,9 @@ The following options are available:
 --version\tPrint version information and exit.
 eol;
 
-$longoptions = array("beta", "countries", "debug", "extract", "forcelogo", "forcerun", "help", "host::", "dbname::",
-                     "dbuser::", "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth", "skiplogo",
-                     "username::", "password::", "skipversion", "timezone::", "usedb", "version");
+$longoptions = array("beta", "countries", "debug", "extract", "forcelogo", "forcerun", "help", "host::",
+                     "dbname::", "dbuser::", "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth",
+                     "skiplogo", "username::", "password::", "skipversion", "timezone::", "usedb", "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
