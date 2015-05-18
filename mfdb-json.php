@@ -2184,7 +2184,7 @@ function updateStatus()
     printMSG("Last data refresh: {$res["lastDataUpdate"]}");
     printMSG("Account expires: $expires");
     printMSG("Max number of lineups for your account: $maxLineups");
-    printMSG("Next suggested connect time: $nextConnectTime");
+    //printMSG("Next suggested connect time: $nextConnectTime");
 
     if ($useServiceAPI === TRUE)
     {
