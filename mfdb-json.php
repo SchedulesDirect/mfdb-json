@@ -622,7 +622,7 @@ function getSchedules($stationIDsToFetch)
 
     //$stationIDsToFetch = array("20454", "10021");
 
-    foreach (range(0, $daysToRetrieve) as $j)
+    foreach (range(0, ($daysToRetrieve - 1)) as $j)
     {
         $dateArray[] = date("Y-m-d", strtotime("$todayDate + $j days"));
     }
