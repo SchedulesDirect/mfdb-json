@@ -1010,87 +1010,84 @@ function fetchPrograms($jsonProgramsToRetrieve)
             printMSG("Requesting more than 10000 programs. Please be patient.");
         }
 
-        if (count($jsonProgramsToRetrieve) != 0)
+        $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
+
+        $counter = 0;
+        $retrieveList = array();
+
+        for ($i = 0; $i <= $totalChunks; $i++)
         {
-            $totalChunks = intval($toRetrieveTotal / $maxProgramsToGet);
+            $startOffset = $i * $maxProgramsToGet;
+            $chunk = array_slice($jsonProgramsToRetrieve, $startOffset, $maxProgramsToGet);
+            $retrieveList[] = json_encode($chunk);
 
-            $counter = 0;
-            $retrieveList = array();
+            $counter += count($chunk);
+        }
 
-            for ($i = 0; $i <= $totalChunks; $i++)
+        $failedChunk = array();
+
+        foreach ($retrieveList as $index => $chunk)
+        {
+            $retryCounter = 0;
+            $hadError = FALSE;
+            $failedChunk[$index] = TRUE;
+
+            printMSG("Retrieving chunk " . ($index + 1) . " of " . count($retrieveList) . ".");
+            do
             {
-                $startOffset = $i * $maxProgramsToGet;
-                $chunk = array_slice($jsonProgramsToRetrieve, $startOffset, $maxProgramsToGet);
-                $retrieveList[] = json_encode($chunk);
+                $schedulesDirectPrograms = $client->post("programs",
+                    array("token"           => $token,
+                          "Accept-Encoding" => "deflate,gzip"), $chunk);
+                $response = $schedulesDirectPrograms->send();
 
-                $counter += count($chunk);
-            }
-
-            $failedChunk = array();
-
-            foreach ($retrieveList as $index => $chunk)
-            {
-                $retryCounter = 0;
-                $hadError = FALSE;
-                $failedChunk[$index] = TRUE;
-
-                printMSG("Retrieving chunk " . ($index + 1) . " of " . count($retrieveList) . ".");
-                do
+                try
                 {
-                    $schedulesDirectPrograms = $client->post("programs",
-                        array("token"           => $token,
-                              "Accept-Encoding" => "deflate,gzip"), $chunk);
-                    $response = $schedulesDirectPrograms->send();
+                    $schedulesDirectPrograms = $response->getBody();
+                } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
+                {
+                    $errorReq = $e->getRequest();
+                    $errorResp = $e->getResponse();
+                    $errorMessage = $e->getMessage();
+                    exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+                    $retryCounter++;
+                    $hadError = TRUE;
+                    debugMSG("Had error retrieving chunk $index: retrying.");
+                    sleep(30);
+                } catch (Guzzle\Http\Exception\CurlException $e)
+                {
+                    $errorReq = $e->getRequest();
+                    $errorResp = $e->getResponse();
+                    $errorMessage = $e->getMessage();
+                    exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+                    $retryCounter++;
+                    $hadError = TRUE;
+                    debugMSG("Had error retrieving chunk $index: retrying.");
+                    sleep(30);
+                } catch (Guzzle\Http\Exception\RequestException $e)
+                {
+                    $errorReq = $e->getRequest();
+                    $errorResp = $e->getResponse();
+                    $errorMessage = $e->getMessage();
+                    exceptionErrorDump($errorReq, $errorResp, $errorMessage);
+                    $retryCounter++;
+                    $hadError = TRUE;
+                    debugMSG("Had error retrieving chunk $index: retrying.");
+                    sleep(30);
+                }
 
-                    try
-                    {
-                        $schedulesDirectPrograms = $response->getBody();
-                    } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
-                    {
-                        $errorReq = $e->getRequest();
-                        $errorResp = $e->getResponse();
-                        $errorMessage = $e->getMessage();
-                        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
-                        $retryCounter++;
-                        $hadError = TRUE;
-                        debugMSG("Had error retrieving chunk $index: retrying.");
-                        sleep(30);
-                    } catch (Guzzle\Http\Exception\CurlException $e)
-                    {
-                        $errorReq = $e->getRequest();
-                        $errorResp = $e->getResponse();
-                        $errorMessage = $e->getMessage();
-                        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
-                        $retryCounter++;
-                        $hadError = TRUE;
-                        debugMSG("Had error retrieving chunk $index: retrying.");
-                        sleep(30);
-                    } catch (Guzzle\Http\Exception\RequestException $e)
-                    {
-                        $errorReq = $e->getRequest();
-                        $errorResp = $e->getResponse();
-                        $errorMessage = $e->getMessage();
-                        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
-                        $retryCounter++;
-                        $hadError = TRUE;
-                        debugMSG("Had error retrieving chunk $index: retrying.");
-                        sleep(30);
-                    }
+                if ($hadError === FALSE)
+                {
+                    file_put_contents("$dlProgramTempDir/programs." . substr("00$index", -2) . ".json",
+                        $schedulesDirectPrograms);
+                    unset($failedChunk[$index]);
+                    break;
+                }
+            } while ($retryCounter < 5);
+        }
 
-                    if ($hadError === FALSE)
-                    {
-                        file_put_contents("$dlProgramTempDir/programs." . substr("00$index", -2) . ".json",
-                            $schedulesDirectPrograms);
-                        unset($failedChunk[$index]);
-                        break;
-                    }
-                } while ($retryCounter < 5);
-            }
-
-            if (count($failedChunk) != 0)
-            {
-                printMSG("Failed to retrieve data after multiple retries.");
-            }
+        if (count($failedChunk) != 0)
+        {
+            printMSG("Failed to retrieve data after multiple retries.");
         }
     }
 
