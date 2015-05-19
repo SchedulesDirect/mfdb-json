@@ -166,8 +166,7 @@ $needToStoreLogin = FALSE;
 $tz = "UTC";
 
 date_default_timezone_set($tz);
-$date = new DateTime();
-$todayDate = $date->format("Y-m-d");
+$todayDate = date("Y-m-d");
 
 $fh_log = fopen("$todayDate.log", "a");
 $fh_error = fopen("$todayDate.debug.log", "a");
