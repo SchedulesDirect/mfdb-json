@@ -657,7 +657,8 @@ function getSchedules($stationIDsToFetch)
             {
                 $response = $client->post("schedules/md5",
                     array("token"           => $token,
-                          "Accept-Encoding" => "deflate,gzip"),
+                          "Accept-Encoding" => "deflate,gzip",
+                          "timeout"         => 60),
                     json_encode($requestArray))->send();
             } catch (Guzzle\Http\Exception\BadResponseException $e)
             {
@@ -679,6 +680,15 @@ function getSchedules($stationIDsToFetch)
                         print "Message: " . $e->getMessage() . "\n";
                         var_dump($e);
                         break;
+                }
+            } catch (Guzzle\Http\Exception\CurlException $e)
+            {
+                if (strpos($e->getMessage(), "Operation timed out") > 0)
+                {
+                    $errorCount++;
+                    printMSG("No response from server; retrying. Code is " . $e->getCode());
+                    sleep(10); // Hammering away isn't going to make things better.
+                    break;
                 }
             } catch (Exception $e)
             {
