@@ -797,7 +797,8 @@ function getSchedules($stationIDsToFetch)
         $response = NULL;
         try
         {
-            $response = $client->post("schedules", array("token" => $token, "Accept-Encoding" => "deflate,gzip"),
+            $response = $client->post("schedules", array("token"   => $token, "Accept-Encoding" => "deflate,gzip",
+                                                         "timeout" => 60),
                 json_encode($schedulesToFetch))->send();
         } catch (Guzzle\Http\Exception\BadResponseException $e)
         {
