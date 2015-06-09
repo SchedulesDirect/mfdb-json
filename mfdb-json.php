@@ -925,7 +925,14 @@ function getSchedules($stationIDsToFetch)
         $date = $v["metadata"]["startDate"];
         $md5 = $v["metadata"]["md5"];
 
-        printMSG("Parsing schedule stationID:$stationID for $date");
+        if ($debug === TRUE)
+        {
+            printMSG("Parsing schedule stationID:$stationID for $date");
+        }
+        else
+        {
+            printMSG("Parsing schedules.");
+        }
 
         if (isset($v["metadata"]["isDeleted"]) === TRUE)
         {
