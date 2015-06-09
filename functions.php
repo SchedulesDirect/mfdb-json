@@ -23,6 +23,13 @@ $scriptDate = "2015-05-18";
 $knownToBeBroken = FALSE;
 $skipVersionCheck = TRUE;
 
+$tz = "UTC";
+date_default_timezone_set($tz);
+$todayDate = date("Y-m-d");
+
+$fh_log = fopen("$todayDate.log", "a");
+$fh_error = fopen("$todayDate.debug.log", "a");
+
 function getToken($username, $passwordHash)
 {
     global $client;

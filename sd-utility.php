@@ -163,14 +163,6 @@ $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptD
 $updatedLineupsToRefresh = array();
 $needToStoreLogin = FALSE;
 
-$tz = "UTC";
-
-date_default_timezone_set($tz);
-$todayDate = date("Y-m-d");
-
-$fh_log = fopen("$todayDate.log", "a");
-$fh_error = fopen("$todayDate.debug.log", "a");
-
 $helpText = <<< eol
 The following options are available:
 --beta\t\tUse beta server. (Default: FALSE)
