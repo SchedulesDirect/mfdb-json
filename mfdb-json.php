@@ -642,17 +642,21 @@ function getSchedules($stationIDsToFetch)
         printMSG("Determining if there are updated schedules.");
 
         $errorCount = 0;
+        $timeout = 30;
 
         do
         {
             $response = NULL;
+
             try
             {
-                $response = $client->post("schedules/md5",
+                $request = $client->post("schedules/md5",
                     array("token"           => $token,
-                          "Accept-Encoding" => "deflate,gzip",
-                          "timeout"         => 60),
-                    json_encode($requestArray))->send();
+                          "Accept-Encoding" => "deflate,gzip"),
+                    json_encode($requestArray),
+                    array("timeout" => $timeout));
+                $response = $request->send();
+
             } catch (Guzzle\Http\Exception\BadResponseException $e)
             {
                 $response = NULL;
@@ -680,6 +684,7 @@ function getSchedules($stationIDsToFetch)
                 {
                     $errorCount++;
                     printMSG("No response from server; retrying. Code is " . $e->getCode());
+                    $timeout *= 2;
                     sleep(10); // Hammering away isn't going to make things better.
                     break;
                 }
@@ -696,9 +701,9 @@ function getSchedules($stationIDsToFetch)
             {
                 break;
             }
-        } while ($errorCount < 10);
+        } while ($errorCount < 5);
 
-        if ($errorCount == 10)
+        if ($errorCount == 5)
         {
             printMSG("Fatal error trying to get MD5 for schedules.");
 
@@ -790,9 +795,10 @@ function getSchedules($stationIDsToFetch)
         $response = NULL;
         try
         {
-            $response = $client->post("schedules", array("token"   => $token, "Accept-Encoding" => "deflate,gzip",
-                                                         "timeout" => 60),
-                json_encode($schedulesToFetch))->send();
+            $response = $client->post("schedules",
+                array("token"           => $token,
+                      "Accept-Encoding" => "deflate,gzip"),
+                json_encode($schedulesToFetch), array("timeout" => 120))->send();
         } catch (Guzzle\Http\Exception\BadResponseException $e)
         {
             $response = NULL;
