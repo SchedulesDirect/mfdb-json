@@ -866,6 +866,8 @@ function getSchedules($stationIDsToFetch)
         exit;
     }
 
+    printMSG("Parsing schedules.");
+
     foreach ($item as $v)
     {
         if (isset($v["stationID"]) === TRUE)
@@ -928,10 +930,6 @@ function getSchedules($stationIDsToFetch)
         if ($debug === TRUE)
         {
             printMSG("Parsing schedule stationID:$stationID for $date");
-        }
-        else
-        {
-            printMSG("Parsing schedules.");
         }
 
         if (isset($v["metadata"]["isDeleted"]) === TRUE)
