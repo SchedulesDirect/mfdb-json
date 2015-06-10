@@ -421,7 +421,7 @@ function printMSG($str)
     global $quiet;
     global $printTimeStamp;
 
-    if ($printTimeStamp=== TRUE)
+    if ($printTimeStamp === TRUE)
     {
         $str = date("Y-m-d H:i:s") . ":$str";
     }
@@ -431,8 +431,16 @@ function printMSG($str)
         print "$str\n";
     }
 
-    $str = str_replace("\r", "\n", $str);
-    fwrite($fh_log, "$str\n");
+    if (substr($str, -1) == "\r")
+    {
+        $str = str_replace("\r", "\n", $str);
+        fwrite($fh_log, $str); // We don't need a double CR
+    }
+    else
+    {
+        fwrite($fh_log, "$str\n");
+    }
+
 }
 
 function setting()
