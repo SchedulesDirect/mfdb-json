@@ -643,11 +643,10 @@ function getSchedules($stationIDsToFetch)
 
         $errorCount = 0;
         $timeout = 30;
+        $response = NULL;
 
         do
         {
-            $response = NULL;
-
             try
             {
                 $request = $client->post("schedules/md5",
