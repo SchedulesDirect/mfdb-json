@@ -83,7 +83,7 @@ The following options are available:
     Must specify --schedule and/or --program
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --program\tDownload programs based on programIDs in sd.json.programs.conf file.
---purge=\tPurge cached data. Specify schedule or program. **NOTE** use for troubleshooting only!
+--purge=\tPurge cached data. Specify schedules or programs. **NOTE** use for troubleshooting only!
 --quiet\t\tDon't print to screen; put all output into the logfile.
 --skipversion\tForce the program to run even if there's a version mismatch between the client and the server.
 --station=\tDownload the schedule for a single stationID in your lineup.
