@@ -57,6 +57,7 @@ $permanentDownloadFailure = array();
 $scheduleJSON = array();
 $dbHostSD = "localhost";
 $daysToRetrieve = 30;
+$whatToPurge = "";
 
 $baseurl = getBaseURL($isBeta);
 
@@ -82,6 +83,7 @@ The following options are available:
     Must specify --schedule and/or --program
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --program\tDownload programs based on programIDs in sd.json.programs.conf file.
+--purge=\tPurge cached data. Specify schedule or program. **NOTE** use for troubleshooting only!
 --quiet\t\tDon't print to screen; put all output into the logfile.
 --skipversion\tForce the program to run even if there's a version mismatch between the client and the server.
 --station=\tDownload the schedule for a single stationID in your lineup.
@@ -93,9 +95,8 @@ The following options are available:
 eol;
 
 $longoptions = array("debug", "help", "host::", "days::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "forcedownload", "forcerun", "nomyth", "max::", "program", "quiet", "station::", "schedule",
-                     "skipversion", "timezone::",
-                     "usedb", "version");
+                     "forcedownload", "forcerun", "nomyth", "max::", "program", "purge::", "quiet", "station::",
+                     "schedule", "skipversion", "timezone::", "usedb", "version");
 $options = getopt("h::", $longoptions);
 
 foreach ($options as $k => $v)
@@ -146,6 +147,9 @@ foreach ($options as $k => $v)
             break;
         case "program":
             $useProgramFile = TRUE;
+            break;
+        case "purge":
+            $whatToPurge = $v;
             break;
         case "quiet":
             $quiet = TRUE;
@@ -371,6 +375,22 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
         }
     }
 }
+
+if ($whatToPurge != "")
+{
+    switch ($whatToPurge)
+    {
+        case "schedules":
+            printMSG("TRUNCATING schedules.");
+            $dbhSD->exec("TRUNCATE schedules");
+            break;
+        case "programs":
+            printMSG("TRUNCATING programs.");
+            $dbhSD->exec("TRUNCATE programs");
+            break;
+    }
+}
+
 $globalStartTime = time();
 $globalStartDate = new DateTime();
 
