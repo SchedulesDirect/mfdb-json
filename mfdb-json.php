@@ -1467,7 +1467,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 continue;
             }
 
-            $md5 = $scheduleElement["md5"];
+            // $md5 = $scheduleElement["md5"];
             $air_datetime = $scheduleElement["airDateTime"];
             $duration = $scheduleElement["duration"];
 
