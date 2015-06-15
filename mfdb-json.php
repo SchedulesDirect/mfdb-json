@@ -1140,7 +1140,7 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
 
     $counter = 0;
     $total = count($jsonProgramsToRetrieve);
-    printMSG("Performing inserts of JSON data.");
+    printMSG("Updating local copy of JSON programs.");
 
     foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
     {
