@@ -675,6 +675,7 @@ function getSchedules($stationIDsToFetch)
                         print "Code: " . $e->getCode() . "\n";
                         print "Message: " . $e->getMessage() . "\n";
                         var_dump($e);
+                        exit;
                         break;
                 }
             } catch (Guzzle\Http\Exception\CurlException $e)
