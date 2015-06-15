@@ -613,7 +613,7 @@ function getSchedules($stationIDsToFetch)
         return ("");
     }
 
-    //$stationIDsToFetch = array("20454", "10021");
+    $stationIDsToFetch = array("11670");
 
     foreach (range(0, ($daysToRetrieve - 1)) as $j)
     {
@@ -883,7 +883,7 @@ function getSchedules($stationIDsToFetch)
         if (isset($v["code"]) === TRUE)
         {
             switch ($v["code"])
-            {
+            { // Add a case for "0" just to be complete.
                 case 7000:
                     if (isset($addToRetryQueue[$stationID]) === TRUE)
                     {
