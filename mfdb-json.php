@@ -633,7 +633,7 @@ function getSchedules($stationIDsToFetch)
         return ("");
     }
 
-    $stationIDsToFetch = array("11670");
+    //$stationIDsToFetch = array("11670");
 
     foreach (range(0, ($daysToRetrieve - 1)) as $j)
     {
