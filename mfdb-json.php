@@ -1356,13 +1356,14 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
     $getProgramInformation = $dbhSD->prepare("SELECT json FROM programs WHERE programID =:pid");
 
-    $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid");
+    $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid AND starttime LIKE :start");
 
     while (list(, $item) = each($existingChannels))
     {
         $chanID = $item["chanid"];
         $sourceID = $item["sourceid"];
         $stationID = $item["xmltvid"];
+        $purgedSchedule = array();
 
         if (isset($scheduleJSON[$stationID]) === FALSE)
         {
@@ -1370,8 +1371,6 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
         }
 
         printMSG("Inserting schedule for chanid:$chanID sourceid:$sourceID stationID:$stationID");
-
-        $deleteExistingSchedule->execute(array("chanid" => $chanID));
 
         $dbh->beginTransaction();
 
@@ -1475,6 +1474,13 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             $programStartTimeMyth = str_replace("T", " ", $air_datetime);
             $programStartTimeMyth = rtrim($programStartTimeMyth, "Z");
             $programEndTimeMyth = gmdate("Y-m-d H:i:s", strtotime("$air_datetime + $duration seconds"));
+            list($currentProcessingDate,) = explode("T", $scheduleElement["airDateTime"]);
+
+            if (isset($purgedSchedule[$currentProcessingDate]) === FALSE)
+            {
+                $deleteExistingSchedule->execute(array("chanid" => $chanID, "start" => "$currentProcessingDate%"));
+                $purgedSchedule[$currentProcessingDate] = TRUE;
+            }
 
             $skipPersonID = FALSE;
 
