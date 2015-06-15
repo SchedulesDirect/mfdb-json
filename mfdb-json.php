@@ -968,6 +968,15 @@ function getSchedules($stationIDsToFetch)
             exit;
         }
 
+        if ($md5 == "zO9OPuxbtUh2Bu6EVaNLFQ")
+        {
+            printMSG("md5 is magic value?");
+            printMSG("dlDirectory: $dlSchedTempDir/schedule.json");
+            printMSG("Dumping item to debug log.");
+            debugMSG(print_r($item, TRUE));
+            exit;
+        }
+
         $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5, "date" => $date));
 
         foreach ($v["programs"] as $programData)
