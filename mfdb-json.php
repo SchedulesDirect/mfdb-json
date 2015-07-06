@@ -670,6 +670,7 @@ function getSchedules($stationIDsToFetch)
         {
             try
             {
+                printMSG("Schedule download attempt #" . ($errorCount + 1) . " timeout: $timeout");
                 $request = $client->post("schedules/md5",
                     array("token"           => $token,
                           "Accept-Encoding" => "deflate,gzip"),
@@ -704,7 +705,7 @@ function getSchedules($stationIDsToFetch)
                 if (strpos($e->getMessage(), "Operation timed out") > 0)
                 {
                     $errorCount++;
-                    printMSG("No response from server; retrying. Code is " . $e->getCode());
+                    printMSG("No response from server; retrying.");
                     $timeout *= 2;
                     sleep(10); // Hammering away isn't going to make things better.
                 }
@@ -817,7 +818,7 @@ function getSchedules($stationIDsToFetch)
     {
         try
         {
-            printMSG("Schedule download attempt " . ($errorCount + 1) . " timeout: $timeout");
+            printMSG("Schedule download attempt #" . ($errorCount + 1) . " timeout: $timeout");
             $request = $client->post("schedules",
                 array("token"           => $token,
                       "Accept-Encoding" => "deflate,gzip"),
@@ -852,7 +853,7 @@ function getSchedules($stationIDsToFetch)
             if (strpos($e->getMessage(), "Operation timed out") > 0)
             {
                 $errorCount++;
-                printMSG("No response from server; retrying. Code is " . $e->getCode());
+                printMSG("No response from server; retrying.");
                 $timeout *= 2;
                 sleep(10); // Hammering away isn't going to make things better.
             }
