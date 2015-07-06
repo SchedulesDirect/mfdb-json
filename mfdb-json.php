@@ -1064,6 +1064,12 @@ function getSchedules($stationIDsToFetch)
         }
     }
 
+    if (count($serverScheduleMD5) == 0)
+    {
+        printMSG("No programs in schedule? Fatal error.");
+        exit;
+    }
+
     printMSG("There are " . count($serverScheduleMD5) . " programIDs in the upcoming schedule.");
     printMSG("Retrieving existing MD5 values from local cache.");
 
