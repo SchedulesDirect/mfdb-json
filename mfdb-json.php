@@ -707,7 +707,6 @@ function getSchedules($stationIDsToFetch)
                     printMSG("No response from server; retrying. Code is " . $e->getCode());
                     $timeout *= 2;
                     sleep(10); // Hammering away isn't going to make things better.
-                    break;
                 }
             } catch (Exception $e)
             {
@@ -812,11 +811,13 @@ function getSchedules($stationIDsToFetch)
     $errorCount = 0;
     $maxAttempts = 4;
     $timeout = 30;
+    $response = NULL;
 
     do
     {
         try
         {
+            printMSG("Schedule download attempt " . ($errorCount + 1));
             $request = $client->post("schedules",
                 array("token"           => $token,
                       "Accept-Encoding" => "deflate,gzip"),
@@ -854,7 +855,6 @@ function getSchedules($stationIDsToFetch)
                 printMSG("No response from server; retrying. Code is " . $e->getCode());
                 $timeout *= 2;
                 sleep(10); // Hammering away isn't going to make things better.
-                break;
             }
         } catch (Exception $e)
         {
