@@ -817,7 +817,7 @@ function getSchedules($stationIDsToFetch)
     {
         try
         {
-            printMSG("Schedule download attempt " . ($errorCount + 1));
+            printMSG("Schedule download attempt " . ($errorCount + 1) . " timeout: $timeout");
             $request = $client->post("schedules",
                 array("token"           => $token,
                       "Accept-Encoding" => "deflate,gzip"),
