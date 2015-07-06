@@ -455,9 +455,9 @@ if ($skipVersionCheck === FALSE)
 {
     print "Checking to see if we're running the latest client.\n";
 
-    $serverVersion = checkForClientUpdate($client);
+    list($hadError, $serverVersion) = checkForClientUpdate($client);
 
-    if ($serverVersion == "ERROR")
+    if ($hadError !== FALSE)
     {
         print "Received error response from server. Exiting.\n";
         exit;
@@ -468,7 +468,7 @@ if ($skipVersionCheck === FALSE)
         print "***Version mismatch.***\n";
         print "Server version: $serverVersion\n";
         print "Our version: $scriptVersion\n";
-        if (!$forceRun)
+        if ($forceRun === FALSE)
         {
             print "Exiting. Do you need to run 'git pull' to refresh?\n";
             print "Restart script with --skipversion to ignore mismatch.\n";
