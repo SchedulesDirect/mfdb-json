@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.26";
-$scriptDate = "2015-06-15";
+$scriptVersion = "0.27";
+$scriptDate = "2015-07-06";
 $knownToBeBroken = FALSE;
 $skipVersionCheck = FALSE;
 
