@@ -872,53 +872,53 @@ function getSchedules($stationIDsToFetch)
     } while ($errorCount <= $maxAttempts);
 
 
-/*
+    /*
 
-    do
-    {
-        $response = NULL;
-        try
-        {
-            $response = $client->post("schedules",
-                array("token"           => $token,
-                      "Accept-Encoding" => "deflate,gzip"),
-                json_encode($schedulesToFetch), array("timeout" => 120))->send();
-        } catch (Guzzle\Http\Exception\BadResponseException $e)
+        do
         {
             $response = NULL;
-            switch ($e->getCode())
+            try
             {
-                case 400:
-                    return ("ERROR");
-                    break;
-                case 504:
-                    $errorCount++;
-                    printMSG("Got timeout from gateway; retrying in 10 seconds.");
-                    sleep(10); // Hammering away isn't going to make things better.
-                    break;
-                default:
-                    print "Unhandled BadResponseException in getSchedules.\n";
-                    print "Send the following to grabber@schedulesdirect.org\n";
-                    print "Code: " . $e->getCode() . "\n";
-                    print "Message: " . $e->getMessage() . "\n";
-                    var_dump($e);
-                    break;
+                $response = $client->post("schedules",
+                    array("token"           => $token,
+                          "Accept-Encoding" => "deflate,gzip"),
+                    json_encode($schedulesToFetch), array("timeout" => 120))->send();
+            } catch (Guzzle\Http\Exception\BadResponseException $e)
+            {
+                $response = NULL;
+                switch ($e->getCode())
+                {
+                    case 400:
+                        return ("ERROR");
+                        break;
+                    case 504:
+                        $errorCount++;
+                        printMSG("Got timeout from gateway; retrying in 10 seconds.");
+                        sleep(10); // Hammering away isn't going to make things better.
+                        break;
+                    default:
+                        print "Unhandled BadResponseException in getSchedules.\n";
+                        print "Send the following to grabber@schedulesdirect.org\n";
+                        print "Code: " . $e->getCode() . "\n";
+                        print "Message: " . $e->getMessage() . "\n";
+                        var_dump($e);
+                        break;
+                }
+            } catch (Exception $e)
+            {
+                print "Other exception in getSchedules.\n";
+                print "Code: " . $e->getCode() . "\n";
+                print "Message: " . $e->getMessage() . "\n";
+                var_dump($e);
+                exit;
             }
-        } catch (Exception $e)
-        {
-            print "Other exception in getSchedules.\n";
-            print "Code: " . $e->getCode() . "\n";
-            print "Message: " . $e->getMessage() . "\n";
-            var_dump($e);
-            exit;
-        }
 
-        if (is_null($response) === FALSE)
-        {
-            break;
-        }
-    } while ($errorCount < 10);
-*/
+            if (is_null($response) === FALSE)
+            {
+                break;
+            }
+        } while ($errorCount < 10);
+    */
 
     if ($errorCount == $maxAttempts)
     {
@@ -969,7 +969,9 @@ function getSchedules($stationIDsToFetch)
         if (isset($v["code"]) === TRUE)
         {
             switch ($v["code"])
-            { // Add a case for "0" just to be complete.
+            {
+                case 0:
+                    break;
                 case 7000:
                     if (isset($addToRetryQueue[$stationID]) === TRUE)
                     {
