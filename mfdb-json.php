@@ -962,7 +962,7 @@ function getSchedules($stationIDsToFetch)
         else
         {
             printMSG("Fatal: No stationID? Send the following to grabber@schedulesdirect.org");
-            printMSG($item);
+            printMSG(print_r($v, TRUE));
             continue;
         }
 
