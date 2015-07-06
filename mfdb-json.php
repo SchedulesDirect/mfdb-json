@@ -670,7 +670,7 @@ function getSchedules($stationIDsToFetch)
         {
             try
             {
-                printMSG("Schedule download attempt #" . ($errorCount + 1) . " timeout: $timeout");
+                printMSG("Schedule MD5 download attempt #" . ($errorCount + 1) . " timeout: $timeout");
                 $request = $client->post("schedules/md5",
                     array("token"           => $token,
                           "Accept-Encoding" => "deflate,gzip"),
