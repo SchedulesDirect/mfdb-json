@@ -158,6 +158,8 @@ use Guzzle\Http\Client;
 $baseurl = getBaseURL($isBeta);
 $channelLogoDirectory = getChannelLogoDirectory();
 
+$availableCountries = getListOfAvailableCountries();
+
 $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
 
 $updatedLineupsToRefresh = array();
@@ -2091,6 +2093,30 @@ function getLineupFromNumber($numberOrLineup)
     {
         return ($numberOrLineup); //We're actually just returning the name of the array.
     }
+}
+
+function getListOfAvailableCountries()
+{
+    global $client;
+
+    try
+    {
+        $response = $client->get("/available/countries", array(), array())->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e)
+    {
+        if ($e->getCode() != 200)
+        {
+            return ("ERROR");
+        }
+    }
+
+    $res = $response->json();
+
+    var_dump($res);
+
+
+    return $res;
+
 }
 
 function printListOfAvailableCountries($fancyTable)
