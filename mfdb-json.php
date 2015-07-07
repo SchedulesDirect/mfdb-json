@@ -1938,11 +1938,18 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 $relevance = 0;
                 foreach ($programJSON["genres"] as $genre)
                 {
-                    $insertProgramGenreMyth->execute(array("chanid"    => $chanID,
-                                                           "starttime" => $programStartTimeMyth,
-                                                           "relevance" => $relevance,
-                                                           "genre"     => $genre));
-                    $relevance++;
+                    try
+                    {
+                        $insertProgramGenreMyth->execute(array("chanid"    => $chanID,
+                                                               "starttime" => $programStartTimeMyth,
+                                                               "relevance" => $relevance,
+                                                               "genre"     => $genre));
+                        $relevance++;
+                    } catch (PDOException $e)
+                    {
+                        print "Exception: " . $e->getMessage();
+                        print "Code: " . $e->getCode();
+                    }
                 }
             }
 
