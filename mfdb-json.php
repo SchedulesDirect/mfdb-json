@@ -788,10 +788,7 @@ function getSchedules($stationIDsToFetch)
     }
     else
     {
-        /*
-         * We need to generate a real request array here.
-         */
-        $bar = $requestArray;
+        $schedulesToFetch = $requestArray;
     }
 
     if ($debug === TRUE)
