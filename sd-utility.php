@@ -155,15 +155,15 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
-$client = new Guzzle\Http\Client($baseurl);
-$client->setUserAgent($agentString);
-
 $baseurl = getBaseURL($isBeta);
 $channelLogoDirectory = getChannelLogoDirectory();
 
-$availableCountries = getListOfAvailableCountries();
-
 $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
+
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
+
+$availableCountries = getListOfAvailableCountries();
 
 $updatedLineupsToRefresh = array();
 $needToStoreLogin = FALSE;
