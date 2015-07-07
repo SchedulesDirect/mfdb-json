@@ -904,6 +904,8 @@ function getSchedules($stationIDsToFetch)
 
     foreach ($item as $v)
     {
+        $hadError = FALSE;
+
         if (isset($v["stationID"]) === TRUE)
         {
             $stationID = $v["stationID"];
@@ -928,7 +930,12 @@ function getSchedules($stationIDsToFetch)
                         unset($addToRetryQueue[$stationID]); // Permanent error.
                     }
                     printMSG("Permanent error attempting to fetch schedule for $stationID");
+                    $hadError = TRUE;
                     continue;
+                    break;
+                case 7020:
+                    // "Error" 7020 just means that we requested dates that don't exist on the server.
+                    $hadError = TRUE;
                     break;
                 case 7100:
                     if (isset($addToRetryQueue[$stationID]) === FALSE)
@@ -949,66 +956,71 @@ function getSchedules($stationIDsToFetch)
                         printMSG("Permanent error attempting to fetch schedule for $stationID");
                     }
 
+                    $hadError = TRUE;
                     sleep(10); // We're going to sleep so that the server has the chance to generate the schedule.
                     continue;
                     break;
                 default:
                     printMSG("getSchedules error: " . print_r($v, TRUE));
+                    $hadError = TRUE;
                     continue;
                     break;
             }
         }
 
-        $downloadedStationIDs[] = $stationID;
-        $date = $v["metadata"]["startDate"];
-        $md5 = $v["metadata"]["md5"];
-
-        if ($debug === TRUE)
+        if ($hadError === FALSE)
         {
-            printMSG("Parsing schedule stationID:$stationID for $date");
-        }
+            $downloadedStationIDs[] = $stationID;
+            $date = $v["metadata"]["startDate"];
+            $md5 = $v["metadata"]["md5"];
 
-        if (isset($v["metadata"]["isDeleted"]) === TRUE)
-        {
-            printMSG("WARNING: $stationID has been marked as deleted.");
-            $updateVisibleToFalse = $dbh->prepare("UPDATE channel SET visible = FALSE WHERE xmltvid=:sid");
-            $updateVisibleToFalse->execute(array("sid" => $stationID));
-            continue;
-        }
-
-        if (isset($v["programs"]) === FALSE)
-        {
-            printMSG("WARNING: JSON does not contain any program elements.");
-            printMSG("Send the following to grabber@schedulesdirect.org\n\n");
-            var_dump($item);
-            exit;
-        }
-
-        if ($md5 == "zO9OPuxbtUh2Bu6EVaNLFQ")
-        {
-            printMSG("md5 is magic value?");
-            printMSG("dlDirectory: $dlSchedTempDir/schedule.json");
-            printMSG("Dumping item to debug log.");
-            debugMSG(print_r($item, TRUE));
-            exit;
-        }
-
-        $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5, "date" => $date));
-
-        foreach ($v["programs"] as $programData)
-        {
-            if (isset($programData["md5"]) === TRUE)
+            if ($debug === TRUE)
             {
-                $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
-                $scheduleJSON[$stationID][] = $programData;
+                printMSG("Parsing schedule stationID:$stationID for $date");
             }
-            else
+
+            if (isset($v["metadata"]["isDeleted"]) === TRUE)
             {
-                $quiet = FALSE;
-                printMSG("FATAL ERROR: no MD5 value for program.");
-                printMSG("Send the following to grabber@schedulesdirect.org\n");
-                printMSG("s:$stationID\n\n\n\nitem\n\n" . print_r($programData, TRUE) . "\n\n");
+                printMSG("WARNING: $stationID has been marked as deleted.");
+                $updateVisibleToFalse = $dbh->prepare("UPDATE channel SET visible = FALSE WHERE xmltvid=:sid");
+                $updateVisibleToFalse->execute(array("sid" => $stationID));
                 continue;
+            }
+
+            if (isset($v["programs"]) === FALSE)
+            {
+                printMSG("WARNING: JSON does not contain any program elements.");
+                printMSG("Send the following to grabber@schedulesdirect.org\n\n");
+                var_dump($item);
+                exit;
+            }
+
+            if ($md5 == "zO9OPuxbtUh2Bu6EVaNLFQ")
+            {
+                printMSG("md5 is magic value?");
+                printMSG("dlDirectory: $dlSchedTempDir/schedule.json");
+                printMSG("Dumping item to debug log.");
+                debugMSG(print_r($item, TRUE));
+                exit;
+            }
+
+            $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5, "date" => $date));
+
+            foreach ($v["programs"] as $programData)
+            {
+                if (isset($programData["md5"]) === TRUE)
+                {
+                    $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
+                    $scheduleJSON[$stationID][] = $programData;
+                }
+                else
+                {
+                    $quiet = FALSE;
+                    printMSG("FATAL ERROR: no MD5 value for program.");
+                    printMSG("Send the following to grabber@schedulesdirect.org\n");
+                    printMSG("s:$stationID\n\n\n\nitem\n\n" . print_r($programData, TRUE) . "\n\n");
+                    continue;
+                }
             }
         }
     }
