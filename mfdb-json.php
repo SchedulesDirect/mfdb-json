@@ -953,7 +953,7 @@ function getSchedules($stationIDsToFetch)
                     continue;
                     break;
                 default:
-                    printMSG("getSchedules error: $item");
+                    printMSG("getSchedules error: " . print_r($v, TRUE));
                     continue;
                     break;
             }
