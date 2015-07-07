@@ -2101,7 +2101,7 @@ function getListOfAvailableCountries()
 
     try
     {
-        $response = $client->get("/available/countries", array(), array())->send();
+        $response = $client->get("/20141201/available/countries", array(), array())->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         if ($e->getCode() != 200)
