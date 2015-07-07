@@ -1949,6 +1949,8 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     {
                         print "Exception: " . $e->getMessage();
                         print "Code: " . $e->getCode();
+                        var_dump($programJSON);
+                        $tt = fgets(STDIN);
                     }
                 }
             }
