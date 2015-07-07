@@ -1721,7 +1721,7 @@ function checkDatabase()
     SDprogramrating,SDschedule,SDMessages,SDimageCache");
     }
 
-    if ($createBaseTables)
+    if ($createBaseTables === TRUE)
     {
         print "Creating Schedules Direct tables.\n";
 
