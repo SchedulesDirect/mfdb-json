@@ -309,7 +309,7 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
         }
     }
 
-    if ($isMythTV)
+    if ($isMythTV === TRUE)
     {
         printMSG("Connecting to MythTV database.");
         try
@@ -663,7 +663,7 @@ function getSchedules($stationIDsToFetch)
 
         $errorCount = 0;
         $maxAttempts = 4;
-        $timeout = 30;
+        $timeout = 60;
         $response = NULL;
 
         do
@@ -811,7 +811,7 @@ function getSchedules($stationIDsToFetch)
 
     $errorCount = 0;
     $maxAttempts = 4;
-    $timeout = 30;
+    $timeout = 60;
     $response = NULL;
 
     do
