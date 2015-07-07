@@ -155,6 +155,9 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
+
 $baseurl = getBaseURL($isBeta);
 $channelLogoDirectory = getChannelLogoDirectory();
 
@@ -449,9 +452,6 @@ if ($skipChannelLogo === FALSE)
         }
     }
 }
-
-$client = new Guzzle\Http\Client($baseurl);
-$client->setUserAgent($agentString);
 
 if ($skipVersionCheck === FALSE)
 {
