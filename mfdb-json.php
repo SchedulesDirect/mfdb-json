@@ -303,8 +303,8 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
         else
         {
             printMSG("Got error connecting to database.");
-            printMSG("Code: " . $e->getCode() . "");
-            printMSG("Message: " . $e->getMessage() . "");
+            printMSG("Code: " . $e->getCode());
+            printMSG("Message: " . $e->getMessage());
             exit;
         }
     }
