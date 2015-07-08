@@ -527,7 +527,7 @@ while ($done === FALSE)
             {
                 foreach ($sdStatus["lineups"] as $v)
                 {
-                    $lineupToRefresh[$v["ID"]] = 1;
+                    $lineupToRefresh[$v["lineup"]] = 1;
                 }
                 updateLocalLineupCache($lineupToRefresh);
             }
