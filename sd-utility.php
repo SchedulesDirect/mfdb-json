@@ -1674,6 +1674,8 @@ function checkDatabase()
 
     $createBaseTables = FALSE;
 
+    printMSG("Checking for database upgrades.");
+
     $stmt = $dbhSD->prepare("DESCRIBE settings");
     try
     {
@@ -1720,15 +1722,19 @@ function checkDatabase()
         $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
     SDprogramrating,SDschedule,SDMessages,SDimageCache");
     }
+    else
+    {
+        printMSG("Schema version is $schemaVersion");
+    }
 
     if ($createBaseTables === TRUE)
     {
-        print "Creating Schedules Direct tables.\n";
+        printMSG("Creating Schedules Direct tables.");
 
-        $stmt = $dbhSD->exec("DROP TABLE IF EXISTS messages,credits,lineups,people,programGenres,
+        $dbhSD->exec("DROP TABLE IF EXISTS messages,credits,lineups,people,programGenres,
     programRating,schedules,imageCache");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `messages` (
+        $dbhSD->exec("CREATE TABLE `messages` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `id` char(22) DEFAULT NULL COMMENT 'Required to ACK a message from the server.',
   `date` char(20) DEFAULT NULL,
@@ -1739,7 +1745,7 @@ function checkDatabase()
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `credits` (
+        $dbhSD->exec("CREATE TABLE `credits` (
   `personID` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `programID` varchar(64) NOT NULL,
   `role` varchar(100) DEFAULT NULL,
@@ -1747,7 +1753,7 @@ function checkDatabase()
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `lineups` (
+        $dbhSD->exec("CREATE TABLE `lineups` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `lineup` varchar(50) NOT NULL DEFAULT '',
   `md5` char(22) NOT NULL,
@@ -1757,14 +1763,14 @@ function checkDatabase()
   UNIQUE KEY `lineup` (`lineup`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `people` (
+        $dbhSD->exec("CREATE TABLE `people` (
   `personID` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`personID`),
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `programs` (
+        $dbhSD->exec("CREATE TABLE `programs` (
   `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `programID` varchar(64) NOT NULL,
   `md5` char(22) NOT NULL,
@@ -1775,7 +1781,7 @@ function checkDatabase()
   KEY `programID` (`programID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `programGenres` (
+        $dbhSD->exec("CREATE TABLE `programGenres` (
   `programID` varchar(64) NOT NULL,
   `relevance` char(1) NOT NULL DEFAULT '0',
   `genre` varchar(30) NOT NULL,
@@ -1784,7 +1790,7 @@ function checkDatabase()
   KEY `genre` (`genre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        $stmt = $dbhSD->exec("CREATE TABLE `programRating` (
+        $dbhSD->exec("CREATE TABLE `programRating` (
   `programID` varchar(64) NOT NULL,
   `system` varchar(30) NOT NULL,
   `rating` varchar(16) DEFAULT NULL,
@@ -1814,13 +1820,13 @@ function checkDatabase()
         settingSD("SchedulesDirectJSONschemaVersion", "1");
     }
 
-    if ($schemaVersion == 1)
+    if ($schemaVersion == "1")
     {
         $dbhSD->exec("ALTER TABLE SDpeople ADD INDEX(name)");
         settingSD("SchedulesDirectJSONschemaVersion", "2");
     }
 
-    if ($schemaVersion == 2)
+    if ($schemaVersion == "2")
     {
         $dbhSD->exec("RENAME TABLE SDMessages TO messages");
         $dbhSD->exec("RENAME TABLE SDcredits TO credits");
