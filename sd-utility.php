@@ -439,9 +439,9 @@ else
 }
 
 print "Logging into Schedules Direct.\n";
-$token = getToken($username, $passwordHash);
+list($hadError, $token) = getToken($username, $passwordHash);
 
-if ($token == "ERROR")
+if ($hadError === TRUE)
 {
     printMSG("Got error when attempting to retrieve token from Schedules Direct.");
     printMSG("Check if you entered username/password incorrectly.");

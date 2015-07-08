@@ -52,7 +52,7 @@ function getToken($username, $passwordHash)
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return ("ERROR");
+        return array(TRUE, "ERROR");
     } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
     {
         $errorReq = $e->getRequest();
@@ -60,7 +60,7 @@ function getToken($username, $passwordHash)
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return ("ERROR");
+        return array(TRUE, "ERROR");
     } catch (Guzzle\Http\Exception\BadResponseException $e)
     {
         $errorReq = $e->getRequest();
@@ -68,7 +68,7 @@ function getToken($username, $passwordHash)
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return ("ERROR");
+        return array(TRUE, "ERROR");
     } catch (Guzzle\HTTP\Exception\RequestException $e)
     {
         $errorReq = $e->getRequest();
@@ -76,16 +76,17 @@ function getToken($username, $passwordHash)
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return ("ERROR");
+        return array(TRUE, "ERROR");
+
     } catch (Exception $e)
     {
         print "getToken:HCF. Uncaught exception.\n";
-        print $e->getMessage() . "\n";
+        $errorReq = $e->getRequest();
+        $errorResp = $e->getResponse();
+        $errorMessage = $e->getMessage();
+        exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        print "e is \n";
-        var_dump($e);
-
-        return ("ERROR");
+        return array(TRUE, "ERROR");
     }
 
     $res = array();
@@ -112,7 +113,7 @@ function getToken($username, $passwordHash)
 
     if ($res["code"] == 0)
     {
-        return $res["token"];
+        return array(FALSE, $res["token"]);
     }
 
     print "Response: {$res["response"]}\n";
@@ -120,7 +121,7 @@ function getToken($username, $passwordHash)
     print "serverID: {$res["serverID"]}\n";
     print "message: {$res["message"]}\n";
 
-    return "ERROR";
+    return array(TRUE, "ERROR");
 }
 
 function getStatus()

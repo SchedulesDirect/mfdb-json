@@ -453,9 +453,9 @@ else
 }
 
 printMSG("Logging into Schedules Direct.");
-$token = getToken($usernameFromDB, sha1($passwordFromDB));
+list($hadError, $token) = getToken($usernameFromDB, sha1($passwordFromDB));
 
-if ($token == "ERROR")
+if ($hadError === TRUE)
 {
     printMSG("Got error when attempting to retrieve token from Schedules Direct.");
     if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
