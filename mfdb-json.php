@@ -30,36 +30,24 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
-$isBeta = TRUE;
+$addToRetryQueue = array();
 $api = "";
-$debug = FALSE;
-$quiet = FALSE;
-$forceDownload = FALSE;
-$forceRun = FALSE;
-$sdStatus = "";
-$printTimeStamp = TRUE;
-$maxProgramsToGet = 2000;
+$daysToRetrieve = 30;
 $errorWarning = FALSE;
+$forceDownload = FALSE;
+$jsonProgramsToRetrieve = array();
+$maxProgramsToGet = 2000;
+$permanentDownloadFailure = array();
+$printTimeStamp = TRUE;
+$scheduleJSON = array();
+$skipVersionCheck = FALSE;
 $station = "";
+$stationIDs = array();
 $useScheduleFile = FALSE;
 $useProgramFile = FALSE;
-$useServiceAPI = FALSE;
-$isMythTV = TRUE;
-$tz = "UTC";
-$usernameFromDB = "";
-$passwordFromDB = "";
-$stationIDs = array();
-$dbWithoutMythtv = FALSE;
-$skipVersionCheck = FALSE;
-$jsonProgramsToRetrieve = array();
-$addToRetryQueue = array();
-$permanentDownloadFailure = array();
-$scheduleJSON = array();
-$dbHostSD = "localhost";
-$daysToRetrieve = 30;
 $whatToPurge = "";
 
-$baseurl = getBaseURL($isBeta);
+list ($api, $baseurl) = getBaseURL($isBeta);
 
 $agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$scriptDate";
 
@@ -68,7 +56,6 @@ $client->setUserAgent($agentString);
 
 $helpText = <<< eol
 The following options are available:
---beta
 --help\t\t(this text)
 --days\t\tNumber of days to retrieve. (Default: 30)
 --dbname=\tMySQL database name for MythTV. (Default: mythconverg)
@@ -332,6 +319,15 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
                 printMSG("Message: " . $e->getMessage());
                 exit;
             }
+        }
+
+        $dbSchedulesDirectJSONschemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
+        if ($schemaVersion != $dbSchedulesDirectJSONschemaVersion)
+        {
+            printMSG("FATAL: Schema version mismatch.");
+            printMSG("This code is: $schemaVersion but the database is $dbSchedulesDirectJSONschemaVersion");
+            printMSG("Did you run the sd-utility.php program yet?");
+            exit;
         }
 
         $useServiceAPI = checkForServiceAPI();

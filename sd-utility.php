@@ -21,32 +21,25 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$isBeta = TRUE;
-$debug = FALSE;
 $done = FALSE;
-$isMythTV = TRUE;
 $skipChannelLogo = FALSE;
 $forceLogoUpdate = FALSE;
 $schedulesDirectLineups = array();
-$sdStatus = "";
 $username = "";
-$usernameFromDB = "";
 $password = "";
-$passwordFromDB = "";
 $passwordHash = "";
-$dbWithoutMythtv = FALSE;
-$useServiceAPI = FALSE;
-$forceRun = FALSE;
 $printFancyTable = TRUE;
 $printCountries = FALSE;
 $justExtract = FALSE;
-$dbHostSD = "localhost";
+$updatedLineupsToRefresh = array();
+$needToStoreLogin = FALSE;
+
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
-$baseurl = getBaseURL($isBeta);
+list ($api, $baseurl) = getBaseURL($isBeta);
 $channelLogoDirectory = getChannelLogoDirectory();
 
 $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
@@ -55,9 +48,6 @@ $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
 
 $availableCountries = getListOfAvailableCountries();
-
-$updatedLineupsToRefresh = array();
-$needToStoreLogin = FALSE;
 
 $helpText = <<< eol
 The following options are available:
@@ -97,8 +87,7 @@ foreach ($options as $k => $v)
     {
         case "beta":
             $isBeta = TRUE;
-            $baseurl = getBaseURL($isBeta);
-            $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
+            list ($api, $baseurl) = getBaseURL($isBeta);
             break;
         case "countries":
             $printCountries = TRUE;

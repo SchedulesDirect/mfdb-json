@@ -23,6 +23,22 @@ $scriptDate = "2015-07-06";
 $knownToBeBroken = FALSE;
 $skipVersionCheck = FALSE;
 
+$dbName = "";
+$dbUser = "";
+$dbPassword = "";
+$dbHostSchedulesDirectData = "localhost";
+$dbWithoutMythtv = FALSE;
+$debug = FALSE;
+$forceRun = FALSE;
+$isBeta = FALSE;
+$isMythTV = TRUE;
+$passwordFromDB = "";
+$quiet = FALSE;
+$schemaVersion = "3";
+$sdStatus = "";
+$usernameFromDB = "";
+$useServiceAPI = FALSE;
+
 $tz = "UTC";
 date_default_timezone_set($tz);
 $todayDate = date("Y-m-d");
@@ -530,8 +546,6 @@ function settingSD()
 
 function getBaseurl($isBeta)
 {
-    global $api;
-
     if ($isBeta === TRUE)
     {
         # Test server. Things may be broken there.
@@ -541,12 +555,12 @@ function getBaseurl($isBeta)
     }
     else
     {
-        $baseurl = "https://json.schedulesdirect.org/20140530/";
+        $baseurl = "https://json.schedulesdirect.org/20141201/";
         print "Using production server.\n";
-        $api = 20140530;
+        $api = 20141201;
     }
 
-    return ($baseurl);
+    return array($api, $baseurl);
 }
 
 function checkForClientUpdate($client)
