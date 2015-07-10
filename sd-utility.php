@@ -1713,7 +1713,7 @@ function checkDatabase()
     }
     else
     {
-        printMSG("Schema version is $schemaVersion");
+        printMSG("Schema version is $schemaVersion.");
     }
 
     if ($createBaseTables === TRUE)
