@@ -31,7 +31,6 @@ require_once "functions.php";
 use Guzzle\Http\Client;
 
 $addToRetryQueue = array();
-$api = "";
 $daysToRetrieve = 30;
 $errorWarning = FALSE;
 $forceDownload = FALSE;
