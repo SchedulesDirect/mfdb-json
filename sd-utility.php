@@ -1616,6 +1616,7 @@ function getLineup($lineupToGet)
 function updateLocalLineupCache($updatedLineupsToRefresh)
 {
     global $dbhSD;
+    global $useSQLite;
 
     if (is_null($dbhSD) === TRUE)
     {
@@ -1643,11 +1644,27 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbhSD->prepare("INSERT INTO lineups(lineup,json,modified)
+        if ($useSQLite === FALSE)
+        {
+            $stmt = $dbhSD->prepare("INSERT INTO lineups(lineup,json,modified)
         VALUES(:lineup,:json,:modified) ON DUPLICATE KEY UPDATE json=:json,modified=:modified");
 
-        $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
-                             "json"   => json_encode($res)));
+            $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
+                                 "json"   => json_encode($res)));
+        }
+        else
+        {
+            $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO lineups(lineup,json,modified)
+        VALUES(:lineup,:json,:modified)");
+
+            $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
+                                 "json"   => json_encode($res)));
+
+            $stmt = $dbhSD->prepare("UPDATE lineups SET json=:json,modified=:modified WHERE lineup=:lineup");
+            $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
+                                 "json"   => json_encode($res)));
+
+        }
 
         unset ($updatedLineupsToRefresh[$k]);
     }
