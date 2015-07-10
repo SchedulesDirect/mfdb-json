@@ -1697,7 +1697,7 @@ function createDatabase($useSQLite)
     global $dbhSD;
     $createBaseTables = FALSE;
 
-    printMSG("Creating settings table.\n");
+    printMSG("Creating settings table.");
 
     if ($useSQLite === TRUE)
     {
@@ -1876,9 +1876,9 @@ function createDatabase($useSQLite)
   UNIQUE KEY `id` (`item`,`height`,`width`),
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-
-        settingSD("SchedulesDirectJSONschemaVersion", "3");
     }
+
+    settingSD("SchedulesDirectJSONschemaVersion", "3");
 }
 
 function checkForSchemaUpdate($useSQLite)
