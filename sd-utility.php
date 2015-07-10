@@ -327,11 +327,7 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
         }
     }
 
-    if ($justExtract === FALSE)
-    {
-        checkDatabase($useSQLite);
-    }
-    else
+    if ($justExtract === TRUE)
     {
         if (isset($dbh) === FALSE)
         {
@@ -353,6 +349,8 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
         }
         exit;
     }
+
+    checkForSchemaUpdate($useSQLite);
 }
 
 if ($skipChannelLogo === FALSE)
@@ -1883,14 +1881,20 @@ function createDatabase($useSQLite)
     }
 }
 
-function upgradeDatabase($useSQLite)
+function checkForSchemaUpdate($useSQLite)
 {
     global $dbhSD;
+    global $schemaVersion;
 
-    printMSG("Checking for database upgrades.");
+    printMSG("Checking for schema updates.");
 
-    $schemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
-    printMSG("Schema version is $schemaVersion.");
+    $dbSchemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
+    printMSG("Database schema version is $dbSchemaVersion.");
+
+    if ($dbSchemaVersion == $schemaVersion)
+    {
+        return;
+    }
 
     $stmt = $dbhSD->prepare("DESCRIBE settings");
     try
