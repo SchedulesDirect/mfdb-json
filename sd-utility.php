@@ -34,7 +34,6 @@ $justExtract = FALSE;
 $updatedLineupsToRefresh = array();
 $needToStoreLogin = FALSE;
 
-
 require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;

@@ -23,9 +23,9 @@ $scriptDate = "2015-07-06";
 $knownToBeBroken = FALSE;
 $skipVersionCheck = FALSE;
 
-$dbName = "";
-$dbUser = "";
-$dbPassword = "";
+$dbName = NULL;
+$dbUser = NULL;
+$dbPassword = NULL;
 $dbHostSchedulesDirectData = "localhost";
 $dbWithoutMythtv = FALSE;
 $debug = FALSE;
