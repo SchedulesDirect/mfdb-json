@@ -1932,6 +1932,7 @@ function checkForChannelIcon($stationID, $data)
     global $dbhSD;
     global $channelLogoDirectory;
     global $forceLogoUpdate;
+    global $useSQLite;
 
     $a = explode("/", $data["URL"]);
     $iconFileName = end($a);
@@ -1964,10 +1965,26 @@ function checkForChannelIcon($stationID, $data)
             return;
         }
 
-        $updateSDimageCache = $dbhSD->prepare("INSERT INTO imageCache(item,height,width,md5,type)
+        if ($useSQLite === FALSE)
+        {
+            $updateSDimageCache = $dbhSD->prepare("INSERT INTO imageCache(item,height,width,md5,type)
         VALUES(:item,:height,:width,:md5,'L') ON DUPLICATE KEY UPDATE md5=:md5");
-        $updateSDimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
-                                           "md5"  => $md5));
+            $updateSDimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
+                                               "md5"  => $md5));
+        }
+        else
+        {
+            $updateSDimageCache = $dbhSD->prepare("INSERT OR IGNORE INTO imageCache(item,height,width,md5,type)
+        VALUES(:item,:height,:width,:md5,'L')");
+            $updateSDimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
+                                               "md5"  => $md5));
+
+            $updateSDimageCache = $dbhSD->prepare("UPDATE imageCache SET
+            item=:item,height=:height,width=:width,md5=:md5,type='L' WHERE md5=:md5");
+            $updateSDimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
+                                               "md5"  => $md5));
+        }
+
         $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));
     }
 }
