@@ -71,12 +71,14 @@ The following options are available:
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --skipversion\tForce the program to run even if there's a version mismatch between the client and the server.
 --usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
+--usesqlite\t\tUse a SQLite database to store Schedules Direct data. (Default: FALSE)
 --version\tPrint version information and exit.
 eol;
 
 $longoptions = array("beta", "countries", "debug", "extract", "forcelogo", "forcerun", "help", "host::",
                      "dbname::", "dbuser::", "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth",
-                     "skiplogo", "username::", "password::", "skipversion", "timezone::", "usedb", "version");
+                     "skiplogo", "username::", "password::", "skipversion", "timezone::", "usedb", "usesqlite",
+                     "version");
 
 $options = getopt("h::", $longoptions);
 foreach ($options as $k => $v)
@@ -155,6 +157,9 @@ foreach ($options as $k => $v)
         case "usedb":
             $dbWithoutMythtv = TRUE;
             break;
+        case "usesqlite":
+            $useSQLite = TRUE;
+            break;
         case "version":
             print "$agentString\n\n";
             exit;
@@ -232,27 +237,60 @@ if (isset($host) === FALSE)
 
 if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
 {
-    print "Connecting to Schedules Direct database.\n";
+    printMSG("Connecting to Schedules Direct database.");
+
+    if ($useSQLite === TRUE)
+    {
+        $dbhSD = new PDO("sqlite:schedulesdirect.db");
+        $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+    else
+    {
+        try
+        {
+            $dbhSD = new PDO("mysql:host=$dbHostSchedulesDirectData;dbname=schedulesdirect;charset=utf8", "sd", "sd");
+            $dbhSD->exec("SET CHARACTER SET utf8");
+            $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e)
+        {
+            if ($e->getCode() == 2002)
+            {
+                print "Could not connect to database:\n" . $e->getMessage() . "\n";
+                exit;
+            }
+
+            if ($e->getCode() == 1049)
+            {
+                print "Initial database not created for Schedules Direct tables.\n";
+                print "Please run\nmysql -uroot -p < sd.sql\n";
+                print "Then re-run this script.\n";
+                print "Please check the updated README.md for more information.\n";
+                exit;
+            }
+            else
+            {
+                print "Got error connecting to database.\n";
+                print "Code: " . $e->getCode() . "\n";
+                print "Message: " . $e->getMessage() . "\n";
+                exit;
+            }
+        }
+    }
+
+    /*
+     * OK, so we have a connection, but that doesn't mean that there's anything in the database yet.
+     */
+
     try
     {
-        $dbhSD = new PDO("mysql:host=$dbHostSchedulesDirectData;dbname=schedulesdirect;charset=utf8", "sd", "sd");
-        $dbhSD->exec("SET CHARACTER SET utf8");
-        $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $stmt = $dbhSD->prepare("SELECT * FROM settings");
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e)
     {
-        if ($e->getCode() == 2002)
+        if ($e->getCode() == "HY000")
         {
-            print "Could not connect to database:\n" . $e->getMessage() . "\n";
-            exit;
-        }
-
-        if ($e->getCode() == 1049)
-        {
-            print "Initial database not created for Schedules Direct tables.\n";
-            print "Please run\nmysql -uroot -p < sd.sql\n";
-            print "Then re-run this script.\n";
-            print "Please check the updated README.md for more information.\n";
-            exit;
+            createDatabase($useSQLite);
         }
         else
         {
@@ -291,7 +329,7 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
 
     if ($justExtract === FALSE)
     {
-        checkDatabase();
+        checkDatabase($useSQLite);
     }
     else
     {
@@ -700,7 +738,8 @@ function updateChannelTable($lineup)
                     else
                     {
                         $channum = $freqid;
-                        $updateChannelTableAnalog->execute(array("channum" => ltrim($channum, "0"), "sid" => $stationID,
+                        $updateChannelTableAnalog->execute(array("channum" => ltrim($channum, "0"),
+                                                                 "sid"     => $stationID,
                                                                  "freqID"  => $freqid));
                     }
                 }
@@ -1655,68 +1694,103 @@ function displayLocalVideoSources()
     }
 }
 
-function checkDatabase()
+function createDatabase($useSQLite)
 {
-    global $dbh;
     global $dbhSD;
-
     $createBaseTables = FALSE;
 
-    printMSG("Checking for database upgrades.");
+    printMSG("Creating settings table.\n");
 
-    $stmt = $dbhSD->prepare("DESCRIBE settings");
-    try
+    if ($useSQLite === TRUE)
     {
-        $stmt->execute();
-    } catch (PDOException $ex)
+        printMSG("Creating initial database.");
+        $dbhSD->exec(
+            "CREATE TABLE settings
+          (
+            keyColumn TEXT NOT NULL UNIQUE,
+            valueColumn TEXT NOT NULL
+          )");
+        print "Creating Schedules Direct tables.\n";
+        $dbhSD->exec("CREATE TABLE messages
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    id char(22) NOT NULL UNIQUE, -- Required to ACK a message from the server.
+                    date char(20) DEFAULT NULL,
+                    message varchar(512) DEFAULT NULL,
+                    type char(1) DEFAULT NULL, -- Message type. G-global, S-service status, U-user specific
+                    modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+  )");
+        $dbhSD->exec("CREATE TABLE credits
+                  (
+                    personID INTEGER,
+                    programID varchar(64) NOT NULL,
+                    role varchar(100) DEFAULT NULL
+                  )");
+        $dbhSD->exec("CREATE INDEX programID ON credits (programID)");
+        $dbhSD->exec("CREATE UNIQUE INDEX person_pid_role ON credits (personID,programID,role)");
+        $dbhSD->exec("CREATE TABLE lineups
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    lineup varchar(50) NOT NULL,
+                    modified char(20) DEFAULT '1970-01-01T00:00:00Z',
+                    json TEXT
+                  )");
+        $dbhSD->exec("CREATE UNIQUE INDEX lineup ON lineups (lineup)");
+        $dbhSD->exec("CREATE TABLE people
+                  (
+                    personID INTEGER PRIMARY KEY,
+                    name varchar(128)
+                  )");
+        $dbhSD->exec("CREATE TABLE programs
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    programID varchar(64) NOT NULL UNIQUE,
+                    md5 char(22) NOT NULL,
+                    modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                    json TEXT NOT NULL
+                  )");
+        $dbhSD->exec("CREATE TABLE programGenres
+                  (
+                    programID varchar(64) PRIMARY KEY NOT NULL,
+                    relevance char(1) NOT NULL DEFAULT '0',
+                    genre varchar(30) NOT NULL
+                  )");
+        $dbhSD->exec("CREATE INDEX genre ON programGenres (genre)");
+        $dbhSD->exec("CREATE UNIQUE INDEX pid_relevance ON programGenres (programID,relevance)");
+        $dbhSD->exec("CREATE TABLE programRatings
+                  (
+                    programID varchar(64) PRIMARY KEY NOT NULL,
+                    system varchar(30) NOT NULL,
+                    rating varchar(16) DEFAULT NULL
+                  )");
+        $dbhSD->exec("CREATE TABLE schedules
+                  (
+                    stationID varchar(12) NOT NULL UNIQUE,
+                    md5 char(22) NOT NULL
+                  )");
+        $dbhSD->exec("CREATE INDEX md5 ON schedules (md5)");
+        $dbhSD->exec("CREATE TABLE imageCache
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    item varchar(128) NOT NULL,
+                    md5 char(22) NOT NULL,
+                    height varchar(128) NOT NULL,
+                    width varchar(128) NOT NULL,
+                    type char(1) NOT NULL -- COMMENT 'L-Channel Logo'
+                  )");
+        $dbhSD->exec("CREATE UNIQUE INDEX id ON imageCache (item,height,width)");
+        $dbhSD->exec("CREATE INDEX type ON imageCache (type)");
+    }
+    else
     {
-        if ($ex->getCode() == "42S02")
-        {
-            printMSG("Creating settings table.\n");
-            $stmt = $dbhSD->exec(
-                "CREATE TABLE `settings` (
+        $dbhSD->exec(
+            "CREATE TABLE `settings` (
                     `keyColumn` varchar(255) NOT NULL,
                     `valueColumn` varchar(255) NOT NULL,
                     PRIMARY KEY (`keyColumn`),
                     UNIQUE KEY `keyColumn` (`keyColumn`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-            //settingSD("SchedulesDirectWithoutMythTV", "TRUE");
-            $createBaseTables = TRUE;
-        }
-    }
-
-    $schemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
-
-    if ($schemaVersion === FALSE)
-    {
-        printMSG("Copying existing data from MythTV");
-
-        $lineups = setting("localLineupLastModified");
-        settingSD("localLineupLastModified", $lineups);
-
-        $login = setting("SchedulesDirectLogin");
-        settingSD("SchedulesDirectLogin", $login);
-
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLogin'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
-
-        $createBaseTables = TRUE;
-        $schemaVersion = 1;
-
-        $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
-    SDprogramrating,SDschedule,SDMessages,SDimageCache");
-    }
-    else
-    {
-        printMSG("Schema version is $schemaVersion.");
-    }
-
-    if ($createBaseTables === TRUE)
-    {
         printMSG("Creating Schedules Direct tables.");
 
         $dbhSD->exec("DROP TABLE IF EXISTS messages,credits,lineups,people,programGenres,
@@ -1805,30 +1879,29 @@ function checkDatabase()
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        settingSD("SchedulesDirectJSONschemaVersion", "1");
-    }
-
-    if ($schemaVersion == "1")
-    {
-        $dbhSD->exec("ALTER TABLE SDpeople ADD INDEX(name)");
-        settingSD("SchedulesDirectJSONschemaVersion", "2");
-    }
-
-    if ($schemaVersion == "2")
-    {
-        $dbhSD->exec("RENAME TABLE SDMessages TO messages");
-        $dbhSD->exec("RENAME TABLE SDcredits TO credits");
-        $dbhSD->exec("RENAME TABLE SDimageCache TO imageCache");
-        $dbhSD->exec("RENAME TABLE SDlineupCache TO lineups");
-        $dbhSD->exec("RENAME TABLE SDpeople TO people");
-        $dbhSD->exec("RENAME TABLE SDprogramCache TO programs");
-        $dbhSD->exec("RENAME TABLE SDprogramgenres TO programGenres");
-        $dbhSD->exec("RENAME TABLE SDprogramrating TO programRatings");
-        $dbhSD->exec("RENAME TABLE SDschedule TO schedules");
-        $dbhSD->exec("ALTER TABLE schedules ADD column date CHAR(10) NOT NULL");
-        $dbhSD->exec("ALTER TABLE schedules DROP KEY sid");
-        $dbhSD->exec("ALTER TABLE schedules ADD UNIQUE KEY station_date (stationID,date)");
         settingSD("SchedulesDirectJSONschemaVersion", "3");
+    }
+}
+
+function upgradeDatabase($useSQLite)
+{
+    global $dbhSD;
+
+    printMSG("Checking for database upgrades.");
+
+    $schemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
+    printMSG("Schema version is $schemaVersion.");
+
+    $stmt = $dbhSD->prepare("DESCRIBE settings");
+    try
+    {
+        $stmt->execute();
+    } catch (PDOException $ex)
+    {
+        if ($ex->getCode() == "42S02")
+        {
+
+        }
     }
 }
 
@@ -1853,7 +1926,7 @@ function checkForChannelIcon($stationID, $data)
 
     $result = $stmt->fetchColumn();
 
-    if ($result === FALSE OR $result != $md5 OR $forceLogoUpdate === TRUE)
+    if (($result === FALSE) OR ($result != $md5) OR ($forceLogoUpdate === TRUE))
     {
         /*
          * We don't already have this icon, or it's different, so it will have to be fetched.

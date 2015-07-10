@@ -38,6 +38,7 @@ $schemaVersion = "3";
 $sdStatus = "";
 $usernameFromDB = "";
 $useServiceAPI = FALSE;
+$useSQLite = FALSE;
 
 $tz = "UTC";
 date_default_timezone_set($tz);
