@@ -920,7 +920,19 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                             $channel = $virtualChannel;
                         }
 
-                        $modulation = $mapArray["modulation"];
+                        switch ($mapArray["modulation"])
+                        {
+                            case "QAM64":
+                                $modulation = "qam_64";
+                                break;
+                            case "QAM256":
+                                $modulation = "qam_256";
+                                break;
+                            default:
+                                print "Unknown modulation: {$mapArray["modulation"]}\n";
+                                exit;
+                        }
+
                         $frequency = $mapArray["frequency"];
                         $serviceID = $mapArray["serviceID"];
                         $stationID = $mapArray["stationID"];
