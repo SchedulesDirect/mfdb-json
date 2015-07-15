@@ -1940,10 +1940,13 @@ atsc_minor_chan FROM channel where sourceid=:sid");
 
         $extractMultiplex[$v["mplexid"]] = array("transportID" => $dtv[0]["transportid"],
                                                  "frequency"   => $dtv[0]["frequency"],
-                                                 "modulation"  => $dtv[0]["modulation"]);
+                                                 "modulation"  => strtoupper(
+                                                     str_replace("_", "", $dtv[0]["modulation"])
+                                                 )
+        );
     }
 
-    $extractArray["version"] = "0.07";
+    $extractArray["version"] = "0.08";
     $extractArray["date"] = $todayDate;
     $extractArray["lineup"] = $lineupName;
     $extractArray["channel"] = $extractChannel;
