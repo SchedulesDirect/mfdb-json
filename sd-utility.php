@@ -933,7 +933,7 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                                 exit;
                         }
 
-                        $frequency = $mapArray["frequency"];
+                        $frequency = $mapArray["frequencyHz"];
                         $serviceID = $mapArray["serviceID"];
                         $stationID = $mapArray["stationID"];
                         $atscMajor = (int)$mapArray["atscMajor"];
