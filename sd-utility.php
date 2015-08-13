@@ -1169,7 +1169,7 @@ function linkSchedulesDirectLineup()
     if ($response == "[]")
     {
         print "Fatal Error in Link SchedulesDirect Lineup.\n";
-        print "Empty JSON for lineup in schedules direct local cache?\n";
+        print "Empty JSON for lineup in Schedules Direct local cache?\n";
         print "lineup:$lineup\n";
         exit;
     }
