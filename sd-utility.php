@@ -631,15 +631,17 @@ function updateChannelTable($lineup)
 
         if ($json["metadata"]["transport"] == "Cable")
         {
-            $transport = "Cable";
+            if (isset($json["metadata"]["modulation"]) === TRUE)
+            {
+                $transport = "QAM";
+            }
+            else
+            {
+                $transport = "Cable";
 
-            $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
-            $stmt->execute(array("sourceid" => $sourceID));
-        }
-
-        if ($json["metadata"]["transport"] == "QAM")
-        {
-            $transport = "QAM";
+                $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
+                $stmt->execute(array("sourceid" => $sourceID));
+            }
         }
 
         if ($json["metadata"]["transport"] == "Satellite")
