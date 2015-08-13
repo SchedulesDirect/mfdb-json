@@ -632,9 +632,9 @@ function updateChannelTable($lineup)
 
     $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid=:lineup");
     $stmt->execute(array("lineup" => $lineup));
-    $sID = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $sourceID = $stmt->fetch(PDO::FETCH_COLUMN);
 
-    if (count($sID) == 0)
+    if ($sourceID == "")
     {
         print "ERROR: Can't update channel table; lineup not associated with a videosource.\n";
 
@@ -651,123 +651,355 @@ function updateChannelTable($lineup)
 
     $dbh->exec("DROP TABLE IF EXISTS t_channel");
     $dbh->exec("CREATE TABLE t_channel LIKE channel");
-    $dbh->exec("INSERT INTO t_channel (SELECT * FROM channel)");
+    $dbh->exec("INSERT INTO t_channel SELECT * FROM channel");
 
-    foreach ($sID as $sourceID)
+    if ($json["metadata"]["transport"] == "Antenna")
     {
-        if ($json["metadata"]["transport"] == "Antenna")
+        /*
+         * For antenna lineups, we're not going to delete the existing channel table or dtv_multiplex; we're still
+         * going to use the scan, but use the atsc major and minor to correlate what we've scanned with what's in the
+         * lineup file.
+         */
+        $transport = "Antenna";
+    }
+
+    if ($json["metadata"]["transport"] == "Cable")
+    {
+        if (isset($json["metadata"]["modulation"]) === TRUE)
         {
-            /*
-             * For antenna lineups, we're not going to delete the existing channel table or dtv_multiplex; we're still
-             * going to use the scan, but use the atsc major and minor to correlate what we've scanned with what's in the
-             * lineup file.
-             */
-            $transport = "Antenna";
+            $transport = "QAM";
         }
-
-        if ($json["metadata"]["transport"] == "Cable")
+        else
         {
-            if (isset($json["metadata"]["modulation"]) === TRUE)
-            {
-                $transport = "QAM";
-            }
-            else
-            {
-                $transport = "Cable";
-
-                $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
-                $stmt->execute(array("sourceid" => $sourceID));
-            }
-        }
-
-        if ($json["metadata"]["transport"] == "Satellite")
-        {
-            $transport = "Satellite";
+            $transport = "Cable";
 
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
             $stmt->execute(array("sourceid" => $sourceID));
         }
+    }
 
-        if ($json["metadata"]["transport"] == "FTA")
-        {
-            $transport = "FTA";
-        }
+    if ($json["metadata"]["transport"] == "Satellite")
+    {
+        $transport = "Satellite";
 
-        if ($json["metadata"]["transport"] == "DVB-S")
-        {
-            $transport = "DVB-S";
-        }
+        $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
+        $stmt->execute(array("sourceid" => $sourceID));
+    }
 
-        /*
-         * This whole next part needs to get rewritten.
-         */
+    if ($json["metadata"]["transport"] == "FTA")
+    {
+        $transport = "FTA";
+    }
 
-        if ($transport == "Satellite" OR $transport == "Antenna" OR $transport == "Cable")
-        {
-            $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
+    if ($json["metadata"]["transport"] == "DVB-S")
+    {
+        $transport = "DVB-S";
+    }
+
+    /*
+     * This whole next part needs to get rewritten.
+     */
+
+    if ($transport == "Satellite" OR $transport == "Antenna" OR $transport == "Cable")
+    {
+        $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
     xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
 
-            $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
+        $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
     xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=0 AND atsc_minor_chan=0 AND freqID=:freqID");
 
-            foreach ($json["map"] as $mapArray)
+        foreach ($json["map"] as $mapArray)
+        {
+            $stationID = $mapArray["stationID"];
+
+            if ($transport == "Antenna")
             {
-                $stationID = $mapArray["stationID"];
-
-                if ($transport == "Antenna")
+                if (isset($mapArray["uhfVhf"]) === TRUE)
                 {
-                    if (isset($mapArray["uhfVhf"]) === TRUE)
-                    {
-                        $freqid = $mapArray["uhfVhf"];
-                    }
-                    else
-                    {
-                        $freqid = "";
-                    }
-
-                    if (isset($mapArray["atscMajor"]) === TRUE)
-                    {
-                        $atscMajor = $mapArray["atscMajor"];
-                        $atscMinor = $mapArray["atscMinor"];
-                        $channum = "$atscMajor.$atscMinor";
-
-                        $updateChannelTableATSC->execute(array("channum"   => $channum, "sid" => $stationID,
-                                                               "atscMajor" => $atscMajor,
-                                                               "atscMinor" => $atscMinor));
-                    }
-                    else
-                    {
-                        $channum = $freqid;
-                        $updateChannelTableAnalog->execute(array("channum" => ltrim($channum, "0"),
-                                                                 "sid"     => $stationID,
-                                                                 "freqID"  => $freqid));
-                    }
+                    $freqid = $mapArray["uhfVhf"];
+                }
+                else
+                {
+                    $freqid = "";
                 }
 
-                if ($transport == "IP")
+                if (isset($mapArray["atscMajor"]) === TRUE)
                 {
-                    /*
-                     * Nothing yet.
-                     */
-                }
+                    $atscMajor = $mapArray["atscMajor"];
+                    $atscMinor = $mapArray["atscMinor"];
+                    $channum = "$atscMajor.$atscMinor";
 
-                if ($transport == "Cable" OR $transport == "Satellite")
+                    $updateChannelTableATSC->execute(array("channum"   => $channum, "sid" => $stationID,
+                                                           "atscMajor" => $atscMajor,
+                                                           "atscMinor" => $atscMinor));
+                }
+                else
                 {
-                    $channum = $mapArray["channel"];
-                    $stmt = $dbh->prepare(
-                        "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,mplexid,serviceid,atsc_major_chan)
+                    $channum = $freqid;
+                    $updateChannelTableAnalog->execute(array("channum" => ltrim($channum, "0"),
+                                                             "sid"     => $stationID,
+                                                             "freqID"  => $freqid));
+                }
+            }
+
+            if ($transport == "IP")
+            {
+                /*
+                 * Nothing yet.
+                 */
+            }
+
+            if ($transport == "Cable" OR $transport == "Satellite")
+            {
+                $channum = $mapArray["channel"];
+                $stmt = $dbh->prepare(
+                    "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,mplexid,serviceid,atsc_major_chan)
                          VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:mplexid,:serviceid,:atsc_major_chan)");
+
+                try
+                {
+                    $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$channum,
+                                         "channum"         => ltrim($channum, "0"),
+                                         "freqid"          => (int)$channum,
+                                         "sourceid"        => $sourceID,
+                                         "xmltvid"         => $stationID,
+                                         "mplexid"         => 32767,
+                                         "serviceid"       => 0,
+                                         "atsc_major_chan" => $channum));
+                } catch (PDOException $e)
+                {
+                    if ($e->getCode() == 23000)
+                    {
+                        print "\n\n";
+                        print "*************************************************************\n";
+                        print "\n\n";
+                        print "Error inserting data. Duplicate channel number exists?\n";
+                        print "Send email to grabber@schedulesdirect.org with the following:\n\n";
+                        print "Duplicate channel error.\n";
+                        print "Transport: $transport\n";
+                        print "Lineup: $lineup\n";
+                        print "Channum: $channum\n";
+                        print "stationID: $stationID\n";
+                        print "\n\n";
+                        print "*************************************************************\n";
+                    }
+                }
+
+                $getOriginalRecPriority = $dbh->prepare("SELECT t_channel.chanid,t_channel.recpriority FROM
+                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
+                $getOriginalRecPriority->execute(array("sid" => $sourceID));
+                $originalRecPriorityArray = $getOriginalRecPriority->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                $getOriginalVisibility = $dbh->prepare("SELECT t_channel.chanid,t_channel.visible FROM
+                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
+                $getOriginalVisibility->execute(array("sid" => $sourceID));
+                $originalVisibilityArray = $getOriginalVisibility->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                $updateChannel = $dbh->prepare("UPDATE channel SET recpriority=:rp,
+                    visible=:visible WHERE chanid=:chanid");
+
+                foreach ($originalRecPriorityArray as $chanid => $foo)
+                {
+                    $updateChannel->execute(array("rp"      => $originalRecPriorityArray[$chanid],
+                                                  "visible" => $originalVisibilityArray[$chanid],
+                                                  "chanid"  => $chanid));
+                }
+            }
+        }
+    }
+    else
+    {
+        /*
+         * It's QAM or FTA. We're going to run a match based on what the user had already scanned to avoid the
+         * manual matching step of correlating stationIDs.
+         */
+
+        print "You can:\n";
+        print "1. Use the $transport lineup from SD to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
+        print "2. Use the $transport lineup information and update the database without running a scan.\n";
+        $useScan = readline("Which do you want to do? (1 or 2)>");
+
+        if ($useScan == "")
+        {
+            return;
+        }
+
+        if ($useScan == "2")
+        {
+            $useScan = FALSE;
+        }
+        else
+        {
+            $useScan = TRUE;
+        }
+
+        if ($useScan === TRUE)
+        {
+            if ($transport == "QAM")
+            {
+                $matchType = $json["map"][0]["matchType"];
+
+                print "Matching $transport scan based on: $matchType\n";
+
+                if ($matchType == "multiplex")
+                {
+                    $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
+                    $stmt->execute();
+                    $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                    $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
+                    $stmt->execute(array("sid" => $sourceID));
+                    $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
+                mplexid=:mplexid AND serviceid=:serviceid");
+
+                    $map = array();
+
+                    foreach ($json["map"] as $foo)
+                    {
+                        $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
+                    }
+
+                    foreach ($existingChannelNumbers as $foo)
+                    {
+                        $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
+
+                        if (isset($map[$toFind]) === TRUE)
+                        {
+                            $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
+                                                                  "mplexid"   => $foo["mplexid"],
+                                                                  "serviceid" => $foo["serviceID"]));
+                        }
+                    }
+                }
+
+                if ($matchType == "providerCallsign")
+                {
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE callsign=:providerCallsign");
+                    foreach ($json["map"] as $foo)
+                    {
+                        $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
+                                                           "virtualChannel"   => $foo["virtualChannel"],
+                                                           "providerCallsign" => $foo["providerCallsign"]));
+                    }
+                }
+
+                if ($matchType == "channel")
+                {
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE channum=:channel");
+                    foreach ($json["map"] as $foo)
+                    {
+                        $updateChannelTable->execute(array("stationID"      => $foo["stationID"],
+                                                           "virtualChannel" => $foo["virtualChannel"],
+                                                           "channum"        => $foo["channel"]));
+                    }
+                }
+                print "Done updating QAM scan with stationIDs.\n";
+            }
+        }
+        else
+        {
+            if ($transport == "QAM")
+            {
+                /*
+                 * The user has chosen to not run a QAM scan and just use the values that we're supplying.
+                 * Work-in-progress.
+                 */
+
+                print "Inserting $transport data into tables.\n";
+
+                $dtvMultiplex = array();
+
+                $insertDTVMultiplex = $dbh->prepare
+                ("INSERT INTO dtv_multiplex
+        (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
+        VALUES
+        (:sourceid,:freq,0,'v',:modulation,1,:modulation,'a','UNDEFINED','0.35','atsc')");
+                $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'
+                AND sourceid=:sourceid");
+                $stmt->execute(array("sourceid" => $sourceID));
+                $dtvMultiplex = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+                $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,
+visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
+                     VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid,:channelMajor,
+                     :channelMinor)");
+
+                foreach ($json["map"] as $mapArray)
+                {
+                    $virtualChannel = $mapArray["virtualChannel"]; // "Channel 127"
+
+                    if (isset($mapArray["channel"]) === TRUE)
+                    {
+                        $channel = $mapArray["channel"]; // "54-18" or whatever.
+                    }
+                    else
+                    {
+                        $channel = $virtualChannel;
+                    }
+
+                    switch ($mapArray["modulation"])
+                    {
+                        case "QAM64":
+                            $modulation = "qam_64";
+                            break;
+                        case "QAM256":
+                            $modulation = "qam_256";
+                            break;
+                        default:
+                            print "Unknown modulation: {$mapArray["modulation"]}\n";
+                            exit;
+                    }
+
+                    $frequency = $mapArray["frequencyHz"];
+                    $serviceID = $mapArray["serviceID"];
+                    $stationID = $mapArray["stationID"];
+                    $channelMajor = (int)$mapArray["channelMajor"];
+                    $channelMinor = (int)$mapArray["channelMinor"];
+
+                    /*
+                     * Because multiple programs may end up on a single frequency, we only want to insert once,
+                     * but we want to track the mplexid assigned when we do the insert,
+                     * because that might be used more than once.
+                     */
+                    if (isset($dtvMultiplex[$frequency]) === FALSE)
+                    {
+                        $insertDTVMultiplex->execute(array("sourceid"   => $sourceID,
+                                                           "freq"       => $frequency,
+                                                           "modulation" => $modulation));
+                        $dtvMultiplex[$frequency] = $dbh->lastInsertId();
+                    }
+
+                    /*
+                     * In order to insert a unique channel ID, we need to make sure that "39_1" and "39_2" map to two
+                     * different values. Old code resulted in 39_1 -> 39, then 39_2 had a collision because it also
+                     * turned into "39"
+                     */
+
+                    $strippedChannel = (int)str_replace(array("-", "_"), "", $channel);
+
+                    if ($channelMajor > 0)
+                    {
+                        $chanid = ($sourceID * 1000) + ($channelMajor * 10) + $channelMinor;
+                    }
+                    else
+                    {
+                        $chanid = ($sourceID * 1000) + ($strippedChannel * 10) + $serviceID;
+                    }
 
                     try
                     {
-                        $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$channum,
-                                             "channum"         => ltrim($channum, "0"),
-                                             "freqid"          => (int)$channum,
-                                             "sourceid"        => $sourceID,
-                                             "xmltvid"         => $stationID,
-                                             "mplexid"         => 32767,
-                                             "serviceid"       => 0,
-                                             "atsc_major_chan" => $channum));
+                        $channelInsert->execute(array("chanid"    => $chanid,
+                                                      "channum"   => $channel,
+                                                      "freqid"    => $virtualChannel,
+                                                      "sourceid"  => $sourceID,
+                                                      "xmltvid"   => $stationID,
+                                                      "mplexid"   => $dtvMultiplex[$frequency],
+                                                      "serviceid" => $serviceID,
+                                                      "atscMajor" => $channelMajor,
+                                                      "atscMinor" => $channelMinor));
                     } catch (PDOException $e)
                     {
                         if ($e->getCode() == 23000)
@@ -780,279 +1012,28 @@ function updateChannelTable($lineup)
                             print "Duplicate channel error.\n";
                             print "Transport: $transport\n";
                             print "Lineup: $lineup\n";
-                            print "Channum: $channum\n";
+                            print "Channum: $channel\n";
+                            print "Virtual: $virtualChannel\n";
                             print "stationID: $stationID\n";
                             print "\n\n";
                             print "*************************************************************\n";
                         }
                     }
-
-                    $getOriginalRecPriority = $dbh->prepare("SELECT t_channel.chanid,t_channel.recpriority FROM
-                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
-                    $getOriginalRecPriority->execute(array("sid" => $sourceID));
-                    $originalRecPriorityArray = $getOriginalRecPriority->fetchAll(PDO::FETCH_KEY_PAIR);
-
-                    $getOriginalVisibility = $dbh->prepare("SELECT t_channel.chanid,t_channel.visible FROM
-                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
-                    $getOriginalVisibility->execute(array("sid" => $sourceID));
-                    $originalVisibilityArray = $getOriginalVisibility->fetchAll(PDO::FETCH_KEY_PAIR);
-
-                    $updateChannel = $dbh->prepare("UPDATE channel SET recpriority=:rp,
-                    visible=:visible WHERE chanid=:chanid");
-
-                    foreach ($originalRecPriorityArray as $chanid => $foo)
-                    {
-                        $updateChannel->execute(array("rp"      => $originalRecPriorityArray[$chanid],
-                                                      "visible" => $originalVisibilityArray[$chanid],
-                                                      "chanid"  => $chanid));
-                    }
                 }
+                print "Done inserting QAM tuning information directly into tables.\n";
             }
         }
-        else
+
+        if ($transport == "FTA")
         {
-            /*
-             * It's QAM or FTA. We're going to run a match based on what the user had already scanned to avoid the
-             * manual matching step of correlating stationIDs.
-             */
-
-            print "You can:\n";
-            print "1. Use the $transport lineup from SD to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
-            print "2. Use the $transport lineup information and update the database without running a scan.\n";
-            $useScan = readline("Which do you want to do? (1 or 2)>");
-
-            if ($useScan == "")
-            {
-                return;
-            }
-
-            if ($useScan == "2")
-            {
-                $useScan = FALSE;
-            }
-            else
-            {
-                $useScan = TRUE;
-            }
-
-            if (count($json["mapping"]) > 1)
-            {
-                /*
-                 * TODO: Work on this some more. Kludgey.
-                 */
-                print "Found more than one $transport mapping for your lineup.\n";
-                foreach ($json["mapping"] as $m)
-                {
-                    print "Mapping: $m\n";
-                }
-                $mapToUse = readline("Which map do you want to use>");
-            }
-            else
-            {
-                $mapToUse = "1";
-            }
-
-            if ($useScan === TRUE)
-            {
-                if ($transport == "QAM")
-                {
-                    $matchType = $json["map"][$mapToUse][0]["matchType"];
-
-                    print "Matching $transport scan based on: $matchType\n";
-
-                    if ($matchType == "multiplex")
-                    {
-                        $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
-                        $stmt->execute();
-                        $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-                        $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
-                        $stmt->execute(array("sid" => $sourceID));
-                        $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                        $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
-                mplexid=:mplexid AND serviceid=:serviceid");
-
-                        $map = array();
-
-                        foreach ($json["map"][$mapToUse] as $foo)
-                        {
-                            $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
-                        }
-
-                        foreach ($existingChannelNumbers as $foo)
-                        {
-                            $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
-
-                            if (isset($map[$toFind]) === TRUE)
-                            {
-                                $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
-                                                                      "mplexid"   => $foo["mplexid"],
-                                                                      "serviceid" => $foo["serviceID"]));
-                            }
-                        }
-                    }
-
-                    if ($matchType == "providerCallsign")
-                    {
-                        $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
-                    WHERE callsign=:providerCallsign");
-                        foreach ($json["map"][$mapToUse] as $foo)
-                        {
-                            $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
-                                                               "virtualChannel"   => $foo["virtualChannel"],
-                                                               "providerCallsign" => $foo["providerCallsign"]));
-                        }
-                    }
-
-                    if ($matchType == "channel")
-                    {
-                        $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
-                    WHERE channum=:channel");
-                        foreach ($json["map"][$mapToUse] as $foo)
-                        {
-                            $updateChannelTable->execute(array("stationID"      => $foo["stationID"],
-                                                               "virtualChannel" => $foo["virtualChannel"],
-                                                               "channum"        => $foo["channel"]));
-                        }
-                    }
-                    print "Done updating QAM scan with stationIDs.\n";
-                }
-            }
-            else
-            {
-                if ($transport == "QAM")
-                {
-                    /*
-                     * The user has chosen to not run a QAM scan and just use the values that we're supplying.
-                     * Work-in-progress.
-                     */
-
-                    print "Inserting $transport data into tables.\n";
-
-                    $dtvMultiplex = array();
-
-                    $insertDTVMultiplex = $dbh->prepare
-                    ("INSERT INTO dtv_multiplex
-        (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
-        VALUES
-        (:sourceid,:freq,0,'v',:modulation,1,:modulation,'a','UNDEFINED','0.35','atsc')");
-                    $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'
-                AND sourceid=:sourceid");
-                    $stmt->execute(array("sourceid" => $sourceID));
-                    $dtvMultiplex = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-                    $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,
-visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
-                     VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid,:atscMajor,
-                     :atscMinor)");
-
-                    foreach ($json["map"][$mapToUse] as $mapArray)
-                    {
-                        $virtualChannel = $mapArray["virtualChannel"]; // "Channel 127"
-
-                        if (isset($mapArray["channel"]) === TRUE)
-                        {
-                            $channel = $mapArray["channel"]; // "54-18" or whatever.
-                        }
-                        else
-                        {
-                            $channel = $virtualChannel;
-                        }
-
-                        switch ($mapArray["modulation"])
-                        {
-                            case "QAM64":
-                                $modulation = "qam_64";
-                                break;
-                            case "QAM256":
-                                $modulation = "qam_256";
-                                break;
-                            default:
-                                print "Unknown modulation: {$mapArray["modulation"]}\n";
-                                exit;
-                        }
-
-                        $frequency = $mapArray["frequencyHz"];
-                        $serviceID = $mapArray["serviceID"];
-                        $stationID = $mapArray["stationID"];
-                        $atscMajor = (int)$mapArray["atscMajor"];
-                        $atscMinor = (int)$mapArray["atscMinor"];
-
-                        /*
-                         * Because multiple programs may end up on a single frequency, we only want to insert once,
-                         * but we want to track the mplexid assigned when we do the insert,
-                         * because that might be used more than once.
-                         */
-                        if (isset($dtvMultiplex[$frequency]) === FALSE)
-                        {
-                            $insertDTVMultiplex->execute(array("sourceid"   => $sourceID,
-                                                               "freq"       => $frequency,
-                                                               "modulation" => $modulation));
-                            $dtvMultiplex[$frequency] = $dbh->lastInsertId();
-                        }
-
-                        /*
-                         * In order to insert a unique channel ID, we need to make sure that "39_1" and "39_2" map to two
-                         * different values. Old code resulted in 39_1 -> 39, then 39_2 had a collision because it also
-                         * turned into "39"
-                         */
-
-                        $strippedChannel = (int)str_replace(array("-", "_"), "", $channel);
-
-                        if ($atscMajor > 0)
-                        {
-                            $chanid = ($sourceID * 1000) + ($atscMajor * 10) + $atscMinor;
-                        }
-                        else
-                        {
-                            $chanid = ($sourceID * 1000) + ($strippedChannel * 10) + $serviceID;
-                        }
-
-                        try
-                        {
-                            $channelInsert->execute(array("chanid"    => $chanid,
-                                                          "channum"   => $channel,
-                                                          "freqid"    => $virtualChannel,
-                                                          "sourceid"  => $sourceID,
-                                                          "xmltvid"   => $stationID,
-                                                          "mplexid"   => $dtvMultiplex[$frequency],
-                                                          "serviceid" => $serviceID,
-                                                          "atscMajor" => $atscMajor,
-                                                          "atscMinor" => $atscMinor));
-                        } catch (PDOException $e)
-                        {
-                            if ($e->getCode() == 23000)
-                            {
-                                print "\n\n";
-                                print "*************************************************************\n";
-                                print "\n\n";
-                                print "Error inserting data. Duplicate channel number exists?\n";
-                                print "Send email to grabber@schedulesdirect.org with the following:\n\n";
-                                print "Duplicate channel error.\n";
-                                print "Transport: $transport\n";
-                                print "Lineup: $lineup\n";
-                                print "Channum: $channel\n";
-                                print "Virtual: $virtualChannel\n";
-                                print "stationID: $stationID\n";
-                                print "\n\n";
-                                print "*************************************************************\n";
-                            }
-                        }
-                    }
-                    print "Done inserting QAM tuning information directly into tables.\n";
-                }
-            }
-
-            if ($transport == "FTA")
-            {
-                $insertDTVMultiplex = $dbh->prepare
-                ("INSERT INTO dtv_multiplex
+            $insertDTVMultiplex = $dbh->prepare
+            ("INSERT INTO dtv_multiplex
         (sourceid,transportid,networkid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,
         mod_sys,rolloff,sistandard)
         VALUES
         (:sourceid,:tid,:nid,:freq,:symbolrate,:polarity,:modulation,1,:constellation,'a','0.35','dvb')");
 
-                $channelInsert = $dbh->prepare("INSERT INTO channel
+            $channelInsert = $dbh->prepare("INSERT INTO channel
                     (chanid,
                     channum,
                     sourceid,
@@ -1070,89 +1051,85 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                     :mplexid,
                     :serviceid,
                     )");
-            }
-
-            foreach ($json["satelliteDetail"] as $satellite)
-            {
-                foreach ($satellite as $entry)
-                {
-                    $transportID = $entry["transportID"];
-                    $networkID = $entry["networkID"];
-                    $frequency = $entry["frequencyMHz"] * 1000;
-                    $symbolrate = $entry["symbolrate"] * 1000;
-                    $polarity = $entry["polarization"];
-                    $modulation = strtolower($entry["modulationSystem"]);
-                    $constellation = strtolower($entry["modulationSystem"]);
-                    $mod_sys = $entry["deliverySystem"];
-                }
-            }
         }
 
-        /*
-         * Now that we have basic information in the database, we can start filling in other things, like
-         * callsigns, etc.
-         */
-
-        $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
-
-        foreach ($json["stations"] as $stationArray)
+        foreach ($json["satelliteDetail"] as $satellite)
         {
-            $stationID = $stationArray["stationID"];
-            $callsign = $stationArray["callsign"];
-
-            if (array_key_exists("name", $stationArray))
+            foreach ($satellite as $entry)
             {
-                /*
-                 * Not all stations have names, so don't try to insert a name if that field isn't included.
-                 */
-                $name = $stationArray["name"];
+                $transportID = $entry["transportID"];
+                $networkID = $entry["networkID"];
+                $frequency = $entry["frequencyMHz"] * 1000;
+                $symbolrate = $entry["symbolrate"] * 1000;
+                $polarity = $entry["polarization"];
+                $modulation = strtolower($entry["modulationSystem"]);
+                $constellation = strtolower($entry["modulationSystem"]);
+                $mod_sys = $entry["deliverySystem"];
             }
-            else
-            {
-                $name = "";
-            }
-
-            if (array_key_exists("logo", $stationArray))
-            {
-                if ($skipChannelLogo === FALSE)
-                {
-                    checkForChannelIcon($stationID, $stationArray["logo"]);
-                }
-            }
-
-            $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
         }
+    }
 
-        $lineupLastModifiedJSON = settingSD("localLineupLastModified");
-        $lineupLastModifiedArray = array();
+    /*
+     * Now that we have basic information in the database, we can start filling in other things, like
+     * callsigns, etc.
+     */
 
-        if (count($lineupLastModifiedJSON) != 0)
+    $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
+
+    foreach ($json["stations"] as $stationArray)
+    {
+        $stationID = $stationArray["stationID"];
+        $callsign = $stationArray["callsign"];
+
+        if (array_key_exists("name", $stationArray))
         {
-            $lineupLastModifiedArray = json_decode($lineupLastModifiedJSON, TRUE);
+            /*
+             * Not all stations have names, so don't try to insert a name if that field isn't included.
+             */
+            $name = $stationArray["name"];
+        }
+        else
+        {
+            $name = "";
         }
 
-        $lineupLastModifiedArray[$lineup] = $modified;
+        if (array_key_exists("logo", $stationArray))
+        {
+            if ($skipChannelLogo === FALSE)
+            {
+                checkForChannelIcon($stationID, $stationArray["logo"]);
+            }
+        }
 
-        settingSD("localLineupLastModified", json_encode($lineupLastModifiedArray));
+        $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
+    }
 
-        /*
-         * Set the startchan to a non-bogus value.
-         */
-        $getChanNum = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid
+    $lineupLastModifiedJSON = settingSD("localLineupLastModified");
+    $lineupLastModifiedArray = array();
+
+    if (count($lineupLastModifiedJSON) != 0)
+    {
+        $lineupLastModifiedArray = json_decode($lineupLastModifiedJSON, TRUE);
+    }
+
+    $lineupLastModifiedArray[$lineup] = $modified;
+
+    settingSD("localLineupLastModified", json_encode($lineupLastModifiedArray));
+
+    /*
+     * Set the startchan to a non-bogus value.
+     */
+    $getChanNum = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid
     ORDER BY CAST(channum AS SIGNED) LIMIT 1");
 
-        foreach ($sID as $updateSourceID)
-        {
-            $getChanNum->execute(array("sourceid" => $updateSourceID));
-            $result = $getChanNum->fetchColumn();
+    $getChanNum->execute(array("sourceid" => $sourceID));
+    $result = $getChanNum->fetchColumn();
 
-            if ($result != "")
-            {
-                $startChan = $result;
-                $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
-                $setStartChannel->execute(array("sourceid" => $updateSourceID, "startChan" => $startChan));
-            }
-        }
+    if ($result != "")
+    {
+        $startChan = $result;
+        $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
+        $setStartChannel->execute(array("sourceid" => $sourceID, "startChan" => $startChan));
     }
 
     $dbh->exec("DROP TABLE t_channel");
