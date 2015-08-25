@@ -32,18 +32,18 @@ use Guzzle\Http\Client;
 
 $addToRetryQueue = array();
 $daysToRetrieve = 30;
-$errorWarning = FALSE;
-$forceDownload = FALSE;
+$errorWarning = false;
+$forceDownload = false;
 $jsonProgramsToRetrieve = array();
 $maxProgramsToGet = 2000;
 $permanentDownloadFailure = array();
-$printTimeStamp = TRUE;
+$printTimeStamp = true;
 $scheduleJSON = array();
-$skipVersionCheck = FALSE;
+$skipVersionCheck = false;
 $station = "";
 $stationIDs = array();
-$useScheduleFile = FALSE;
-$useProgramFile = FALSE;
+$useScheduleFile = false;
+$useProgramFile = false;
 $whatToPurge = "";
 
 list ($api, $baseurl) = getBaseURL($isBeta);
@@ -80,17 +80,35 @@ The following options are available:
 
 eol;
 
-$longoptions = array("debug", "help", "host::", "days::", "dbname::", "dbuser::", "dbpassword::", "dbhost::",
-                     "forcedownload", "forcerun", "nomyth", "max::", "program", "purge::", "quiet", "station::",
-                     "schedule", "skipversion", "timezone::", "usedb", "version");
+$longoptions = array(
+    "debug",
+    "help",
+    "host::",
+    "days::",
+    "dbname::",
+    "dbuser::",
+    "dbpassword::",
+    "dbhost::",
+    "forcedownload",
+    "forcerun",
+    "nomyth",
+    "max::",
+    "program",
+    "purge::",
+    "quiet",
+    "station::",
+    "schedule",
+    "skipversion",
+    "timezone::",
+    "usedb",
+    "version"
+);
 $options = getopt("h::", $longoptions);
 
-foreach ($options as $k => $v)
-{
-    switch ($k)
-    {
+foreach ($options as $k => $v) {
+    switch ($k) {
         case "debug":
-            $debug = TRUE;
+            $debug = true;
             break;
         case "help":
         case "h":
@@ -120,31 +138,31 @@ foreach ($options as $k => $v)
             $host = $v;
             break;
         case "forcedownload":
-            $forceDownload = TRUE;
+            $forceDownload = true;
             break;
         case "forcerun":
-            $forceRun = TRUE;
+            $forceRun = true;
             break;
         case "nomyth":
-            $isMythTV = FALSE;
+            $isMythTV = false;
             break;
         case "max":
             $maxProgramsToGet = $v;
             break;
         case "program":
-            $useProgramFile = TRUE;
+            $useProgramFile = true;
             break;
         case "purge":
             $whatToPurge = $v;
             break;
         case "quiet":
-            $quiet = TRUE;
+            $quiet = true;
             break;
         case "schedule":
-            $useScheduleFile = TRUE;
+            $useScheduleFile = true;
             break;
         case "skipversion":
-            $skipVersionCheck = TRUE;
+            $skipVersionCheck = true;
             break;
         case "station":
             $station = $v;
@@ -153,7 +171,7 @@ foreach ($options as $k => $v)
             date_default_timezone_set($v);
             break;
         case "usedb":
-            $dbWithoutMythtv = TRUE;
+            $dbWithoutMythtv = true;
             break;
         case "version":
             print "$agentString\n\n";
@@ -162,45 +180,33 @@ foreach ($options as $k => $v)
     }
 }
 
-if ($knownToBeBroken === TRUE AND $forceRun === FALSE)
-{
+if ($knownToBeBroken === true AND $forceRun === false) {
     print "This version is known to be broken and --forcerun option not specified. Exiting.\n";
     exit;
 }
 
-if ($skipVersionCheck === FALSE)
-{
+if ($skipVersionCheck === false) {
     printMSG("Checking to see if we're running the latest client.");
 
     list($hadError, $serverVersion) = checkForClientUpdate($client);
 
-    if ($hadError !== FALSE)
-    {
-        if ($hadError != 1005)
-        {
+    if ($hadError !== false) {
+        if ($hadError != 1005) {
             printMSG("Received error response from server. Exiting.");
             exit;
-        }
-        else
-        {
+        } else {
             printMSG("Server doesn't recognize our client. Continuing.");
         }
-    }
-    else
-    {
-        if ($serverVersion != $scriptVersion)
-        {
+    } else {
+        if ($serverVersion != $scriptVersion) {
             printMSG("***Version mismatch.***");
             printMSG("Server version: $serverVersion");
             printMSG("Our version: $scriptVersion");
-            if ($skipVersionCheck === FALSE)
-            {
+            if ($skipVersionCheck === false) {
                 printMSG("Exiting. Do you need to run 'git pull' to refresh?");
                 printMSG("Restart script with --skipversion to ignore mismatch.");
                 exit;
-            }
-            else
-            {
+            } else {
                 printMSG("Continuing because of --forcerun parameter.");
             }
         }
@@ -214,20 +220,17 @@ printMSG("Temp directory for Schedules is $dlSchedTempDir");
 $dlProgramTempDir = tempdir("programs");
 printMSG("Temp directory for Programs is $dlProgramTempDir");
 
-if ($isMythTV === TRUE)
-{
+if ($isMythTV === true) {
     if
     (
-        (isset($dbHost) === FALSE) AND
-        (isset($dbName) === FALSE) AND
-        (isset($dbUser) === FALSE) AND
-        (isset($dbPassword) === FALSE)
-    )
-    {
+        (isset($dbHost) === false) AND
+        (isset($dbName) === false) AND
+        (isset($dbUser) === false) AND
+        (isset($dbPassword) === false)
+    ) {
         list($dbHost, $dbName, $dbUser, $dbPassword) = getLoginFromFiles();
     }
-    if ($dbHost == "NONE")
-    {
+    if ($dbHost == "NONE") {
         $dbUser = "mythtv";
         $dbPassword = "mythtv";
         $dbHost = "localhost";
@@ -236,58 +239,46 @@ if ($isMythTV === TRUE)
     }
 }
 
-if (isset($dbHost) === FALSE)
-{
+if (isset($dbHost) === false) {
     $dbHost = "localhost";
 }
 
-if (isset($dbName) === FALSE)
-{
+if (isset($dbName) === false) {
     $dbName = "mythconverg";
 }
 
-if (isset($dbUser) === FALSE)
-{
+if (isset($dbUser) === false) {
     $dbUser = "mythtv";
 }
 
-if (isset($dbPassword) === FALSE)
-{
+if (isset($dbPassword) === false) {
     $dbPassword = "mythtv";
 }
 
-if (isset($host) === FALSE)
-{
+if (isset($host) === false) {
     $host = "localhost";
 }
 
-if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
-{
+if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
     printMSG("Connecting to Schedules Direct database.");
-    try
-    {
+    try {
         $dbhSD = new PDO("mysql:host=$dbHostSchedulesDirectData;dbname=schedulesdirect;charset=utf8", "sd", "sd");
         $dbhSD->exec("SET CHARACTER SET utf8");
         $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e)
-    {
-        if ($e->getCode() == 2002)
-        {
+    } catch (PDOException $e) {
+        if ($e->getCode() == 2002) {
             printMSG("Could not connect to database:\n" . $e->getMessage());
             exit;
         }
 
-        if ($e->getCode() == 1049)
-        {
+        if ($e->getCode() == 1049) {
             printMSG("Initial database not created for Schedules Direct tables.");
             printMSG("Please run\nmysql -uroot -p < sd.sql");
             printMSG("Then run sd-utility.php to complete the initialization.");
             printMSG("Make sure you use function '4' to refresh the local lineup cache.");
             printMSG("Please check the updated README.md for more information.");
             exit;
-        }
-        else
-        {
+        } else {
             printMSG("Got error connecting to database.");
             printMSG("Code: " . $e->getCode());
             printMSG("Message: " . $e->getMessage());
@@ -295,24 +286,18 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
         }
     }
 
-    if ($isMythTV === TRUE)
-    {
+    if ($isMythTV === true) {
         printMSG("Connecting to MythTV database.");
-        try
-        {
+        try {
             $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword);
             $dbh->exec("SET CHARACTER SET utf8");
             $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e)
-        {
-            if ($e->getCode() == 2002)
-            {
+        } catch (PDOException $e) {
+            if ($e->getCode() == 2002) {
                 printMSG("Could not connect to database:\n" . $e->getMessage());
                 printMSG("If you're running the grabber as standalone, use --nomyth");
                 exit;
-            }
-            else
-            {
+            } else {
                 printMSG("Got error connecting to database.");
                 printMSG("Code: " . $e->getCode());
                 printMSG("Message: " . $e->getMessage());
@@ -321,8 +306,7 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
         }
 
         $dbSchedulesDirectJSONschemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
-        if ($schemaVersion != $dbSchedulesDirectJSONschemaVersion)
-        {
+        if ($schemaVersion != $dbSchedulesDirectJSONschemaVersion) {
             printMSG("FATAL: Schema version mismatch.");
             printMSG("This code is: $schemaVersion but the database is $dbSchedulesDirectJSONschemaVersion");
             printMSG("Did you run the sd-utility.php program yet?");
@@ -333,14 +317,11 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
 
         $userLoginInformation = settingSD("SchedulesDirectLogin");
 
-        if ($userLoginInformation !== FALSE)
-        {
-            $responseJSON = json_decode($userLoginInformation, TRUE);
+        if ($userLoginInformation !== false) {
+            $responseJSON = json_decode($userLoginInformation, true);
             $usernameFromDB = $responseJSON["username"];
             $passwordFromDB = $responseJSON["password"];
-        }
-        else
-        {
+        } else {
             printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
             printMSG("Did you run the sd-utility.php program yet?");
             exit;
@@ -352,18 +333,13 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
         $getPeople = $dbh->prepare("SELECT name,person FROM people");
         $getPeople->execute();
         $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
-    }
-    else
-    {
-        if (file_exists("sd.json.conf") === TRUE)
-        {
+    } else {
+        if (file_exists("sd.json.conf") === true) {
             $userLoginInformation = file("sd.json.conf");
-            $responseJSON = json_decode($userLoginInformation[0], TRUE);
+            $responseJSON = json_decode($userLoginInformation[0], true);
             $usernameFromDB = $responseJSON["username"];
             $passwordFromDB = $responseJSON["password"];
-        }
-        else
-        {
+        } else {
             printMSG("FATAL: Could not read Schedules Direct login information from sd.json.conf file.");
             printMSG("Did you run the sd-utility.php program yet?");
             exit;
@@ -371,10 +347,8 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
     }
 }
 
-if ($whatToPurge != "")
-{
-    switch ($whatToPurge)
-    {
+if ($whatToPurge != "") {
+    switch ($whatToPurge) {
         case "schedules":
             printMSG("TRUNCATING schedules.");
             $dbhSD->exec("TRUNCATE schedules");
@@ -389,24 +363,20 @@ if ($whatToPurge != "")
 $globalStartTime = time();
 $globalStartDate = new DateTime();
 
-if ($isMythTV === TRUE)
-{
-    if ($station == "")
-    {
+if ($isMythTV === true) {
+    if ($station == "") {
         printMSG("Retrieving list of channels to download.");
 
         $stmt = $dbh->prepare("SELECT sourceID FROM videosource WHERE xmltvgrabber='schedulesdirect2'");
         $stmt->execute();
         $sources = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if (count($sources) == 0)
-        {
+        if (count($sources) == 0) {
             printMSG("Error: no videosources configured for Schedules Direct JSON service. Check videosource table.");
             exit;
         }
 
-        foreach ($sources as $sourceid)
-        {
+        foreach ($sources as $sourceid) {
             $stmt = $dbh->prepare("SELECT xmltvid FROM channel WHERE visible=TRUE AND xmltvid != '' AND xmltvid > 0 AND
         sourceid=:sourceid");
             $stmt->execute(array("sourceid" => $sourceid));
@@ -418,30 +388,20 @@ if ($isMythTV === TRUE)
          */
         $stationIDs = array_flip(array_flip($stationIDs));
 
-        if (count($stationIDs) == 0)
-        {
+        if (count($stationIDs) == 0) {
             printMSG("Error: no channels retrieved from database. Check channel table.");
             exit;
         }
-    }
-    else
-    {
+    } else {
         printMSG("Downloading data only for $station");
         $stationIDs[] = $station;
     }
-}
-else
-{
-    if ((file_exists("sd.json.stations.conf") === TRUE) AND ($useScheduleFile === TRUE))
-    {
+} else {
+    if ((file_exists("sd.json.stations.conf") === true) AND ($useScheduleFile === true)) {
         $stationIDs = file("sd.json.stations.conf");
-    }
-    elseif ($station != "")
-    {
+    } elseif ($station != "") {
         $stationIDs[] = $station;
-    }
-    elseif ($useProgramFile === FALSE)
-    {
+    } elseif ($useProgramFile === false) {
         printMSG("Nothing to do: did not find file sd.json.stations.conf or no station to retrieve passed as parameter.");
         exit;
     }
@@ -450,15 +410,11 @@ else
 printMSG("Logging into Schedules Direct.");
 list($hadError, $token) = getToken($usernameFromDB, sha1($passwordFromDB));
 
-if ($hadError === TRUE)
-{
+if ($hadError === true) {
     printMSG("Got error when attempting to retrieve token from Schedules Direct.");
-    if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
-    {
+    if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
         printMSG("Check username / password in settings table.");
-    }
-    else
-    {
+    } else {
         printMSG("Check username / password in sd.json.conf file.");
     }
     exit;
@@ -468,35 +424,28 @@ printMSG("Retrieving server status message.");
 
 $response = updateStatus();
 
-if ($response == "No new data on server." AND $forceDownload === FALSE)
-{
+if ($response == "No new data on server." AND $forceDownload === false) {
     $statusMessage = "No new programs to retrieve.";
 }
 
-if ($token != "ERROR" AND $response != "ERROR")
-{
-    if (count($stationIDs) != 0)
-    {
+if ($token != "ERROR" AND $response != "ERROR") {
+    if (count($stationIDs) != 0) {
         $jsonProgramsToRetrieve = getSchedules($stationIDs);
 
-        if ($jsonProgramsToRetrieve == "ERROR")
-        {
+        if ($jsonProgramsToRetrieve == "ERROR") {
             printMSG("Could not get schedules. Exiting.");
             exit;
         }
 
-        while (count($addToRetryQueue))
-        {
+        while (count($addToRetryQueue)) {
             /*
              * Recursive; hopefully we don't get a runaway.
              */
             $bar = array();
             printMSG("Retrying schedule fetch for the following:");
-            $forceDownload = TRUE;
-            foreach ($addToRetryQueue as $k => $v)
-            {
-                if (isset($permanentDownloadFailure[$k]) === FALSE)
-                {
+            $forceDownload = true;
+            foreach ($addToRetryQueue as $k => $v) {
+                if (isset($permanentDownloadFailure[$k]) === false) {
                     $bar[] = $k;
                     printMSG("StationID: $k");
                 }
@@ -508,36 +457,25 @@ if ($token != "ERROR" AND $response != "ERROR")
 
         fetchPrograms($jsonProgramsToRetrieve);
     }
-}
-else
-{
+} else {
     debugMSG("Error connecting to Schedules Direct.");
     $statusMessage = "Error connecting to Schedules Direct.";
 }
 
-if ($isMythTV === TRUE)
-{
-    if ((count($jsonProgramsToRetrieve) != 0) OR ($forceDownload === TRUE))
-    {
+if ($isMythTV === true) {
+    if ((count($jsonProgramsToRetrieve) != 0) OR ($forceDownload === true)) {
         updateLocalProgramCache($jsonProgramsToRetrieve);
         insertSchedule();
         $statusMessage = "Successful.";
-    }
-    else
-    {
+    } else {
         $statusMessage = "No new programs to retrieve.";
     }
-}
-else
-{
-    if ((file_exists("sd.json.programs.conf") === TRUE) AND ($useProgramFile === TRUE))
-    {
+} else {
+    if ((file_exists("sd.json.programs.conf") === true) AND ($useProgramFile === true)) {
         $jsonProgramsToRetrieve = file("sd.json.programs.conf");
         fetchPrograms($jsonProgramsToRetrieve);
         $statusMessage = "Successful.";
-    }
-    else
-    {
+    } else {
         printMSG("Nothing to do: Not running MythTV and did not find sd.json.programs.conf");
         exit;
     }
@@ -551,14 +489,12 @@ $globalEndTime = date("Y-m-d H:i:s");
 printMSG("Global. Start Time:$globalStartTime");
 printMSG("Global. End Time:  $globalEndTime");
 $globalSinceStart = $globalStartDate->diff(new DateTime());
-if ($globalSinceStart->h)
-{
+if ($globalSinceStart->h) {
     printMSG($globalSinceStart->h . " hour ");
 }
 printMSG($globalSinceStart->i . " minutes " . $globalSinceStart->s . " seconds.");
 
-if ($isMythTV === TRUE)
-{
+if ($isMythTV === true) {
     printMSG("Updating status.");
 
     $stmt = $dbh->prepare("UPDATE settings SET data=:data WHERE value='mythfilldatabaseLastRunStart' AND hostname IS NULL");
@@ -572,16 +508,14 @@ if ($isMythTV === TRUE)
 
     printMSG("Sending reschedule request to mythbackend.");
 
-    if (`which mythutil`)
-    {
+    if (`which mythutil`) {
         exec("mythutil --resched");
     }
 }
 
 printMSG("Done.");
 
-if ($errorWarning === TRUE)
-{
+if ($errorWarning === true) {
     debugMSG("NOTE! Errors encountered during processing. Check logs.");
 }
 
@@ -615,14 +549,12 @@ function getSchedules($stationIDsToFetch)
     $downloadedStationIDs = array();
     $serverScheduleMD5 = array();
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "Station array:\n";
         var_dump($stationIDsToFetch);
     }
 
-    if (count($stationIDsToFetch) == 0)
-    {
+    if (count($stationIDsToFetch) == 0) {
         print "1. No schedules to fetch.\n";
 
         return ("");
@@ -630,54 +562,47 @@ function getSchedules($stationIDsToFetch)
 
     //$stationIDsToFetch = array("11670");
 
-    foreach (range(0, ($daysToRetrieve - 1)) as $j)
-    {
+    foreach (range(0, ($daysToRetrieve - 1)) as $j) {
         $dateArray[] = date("Y-m-d", strtotime("$todayDate + $j days"));
     }
 
-    while (list(, $sid) = each($stationIDsToFetch))
-    {
+    while (list(, $sid) = each($stationIDsToFetch)) {
         $requestArray[] = array("stationID" => "$sid", "date" => $dateArray);
     }
 
-    if (count($requestArray) == 0)
-    {
+    if (count($requestArray) == 0) {
         print "2. No schedules to fetch.\n"; // Should never hit this.
         return ("");
     }
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "Request array:\n";
         var_dump($requestArray);
     }
 
-    if ($forceDownload === FALSE)
-    {
+    if ($forceDownload === false) {
         printMSG("Determining if there are updated schedules.");
 
         $errorCount = 0;
         $maxAttempts = 4;
         $timeout = 60;
-        $response = NULL;
+        $response = null;
 
-        do
-        {
-            try
-            {
+        do {
+            try {
                 printMSG("Schedule MD5 download attempt #" . ($errorCount + 1) . " timeout: $timeout");
                 $request = $client->post("schedules/md5",
-                    array("token"           => $token,
-                          "Accept-Encoding" => "deflate,gzip"),
+                    array(
+                        "token"           => $token,
+                        "Accept-Encoding" => "deflate,gzip"
+                    ),
                     json_encode($requestArray),
                     array("timeout" => $timeout));
                 $response = $request->send();
 
-            } catch (Guzzle\Http\Exception\BadResponseException $e)
-            {
-                $response = NULL;
-                switch ($e->getCode())
-                {
+            } catch (Guzzle\Http\Exception\BadResponseException $e) {
+                $response = null;
+                switch ($e->getCode()) {
                     case 400:
                         return ("ERROR");
                         break;
@@ -695,17 +620,14 @@ function getSchedules($stationIDsToFetch)
                         exit;
                         break;
                 }
-            } catch (Guzzle\Http\Exception\CurlException $e)
-            {
-                if (strpos($e->getMessage(), "Operation timed out") > 0)
-                {
+            } catch (Guzzle\Http\Exception\CurlException $e) {
+                if (strpos($e->getMessage(), "Operation timed out") > 0) {
                     $errorCount++;
                     printMSG("No response from server; retrying.");
                     $timeout *= 2;
                     sleep(10); // Hammering away isn't going to make things better.
                 }
-            } catch (Exception $e)
-            {
+            } catch (Exception $e) {
                 print "Other exception in getSchedules.\n";
                 print "Code: " . $e->getCode() . "\n";
                 print "Message: " . $e->getMessage() . "\n";
@@ -713,14 +635,12 @@ function getSchedules($stationIDsToFetch)
                 exit;
             }
 
-            if (is_null($response) === FALSE)
-            {
+            if (is_null($response) === false) {
                 break;
             }
         } while ($errorCount <= $maxAttempts);
 
-        if ($errorCount == $maxAttempts)
-        {
+        if ($errorCount == $maxAttempts) {
             printMSG("Fatal error trying to get MD5 for schedules.");
 
             return ("ERROR");
@@ -728,29 +648,24 @@ function getSchedules($stationIDsToFetch)
 
         $schedulesDirectMD5s = $response->json();
 
-        if ($debug === TRUE)
-        {
+        if ($debug === true) {
             print "Schedules Direct MD5's\n";
             var_dump($schedulesDirectMD5s);
         }
 
         $getLocalCacheMD5 = $dbhSD->prepare("SELECT md5 FROM schedules WHERE stationID=:sid AND date=:date");
 
-        while (list($stationID, $data) = each($schedulesDirectMD5s))
-        {
+        while (list($stationID, $data) = each($schedulesDirectMD5s)) {
             $bar = array();
-            $needToFetch[$stationID] = FALSE;
+            $needToFetch[$stationID] = false;
 
-            foreach ($data as $date => $arrayFoo)
-            {
-                if ($arrayFoo["code"] != 0)
-                {
-                    printMSG("Got error response for sid:$stationID, date:$date array:" . print_r($arrayFoo, TRUE));
+            foreach ($data as $date => $arrayFoo) {
+                if ($arrayFoo["code"] != 0) {
+                    printMSG("Got error response for sid:$stationID, date:$date array:" . print_r($arrayFoo, true));
                     continue;
                 }
 
-                if ($debug === TRUE)
-                {
+                if ($debug === true) {
                     print "sid: $stationID\n";
                     print "data:\n";
                     var_dump($data);
@@ -759,41 +674,34 @@ function getSchedules($stationIDsToFetch)
                 $getLocalCacheMD5->execute(array("sid" => $stationID, "date" => $date));
                 $localMD5 = $getLocalCacheMD5->fetchColumn();
 
-                if ($debug === TRUE)
-                {
+                if ($debug === true) {
                     print "Local MD5\n";
                     var_dump($localMD5);
                 }
 
-                if ($localMD5 != $arrayFoo["md5"])
-                {
+                if ($localMD5 != $arrayFoo["md5"]) {
                     /*
                      * We need to get that particular day.
                      */
                     $bar[] = $date;
-                    $needToFetch[$stationID] = TRUE;
+                    $needToFetch[$stationID] = true;
                 }
             }
 
-            if ($needToFetch[$stationID] === TRUE)
-            {
+            if ($needToFetch[$stationID] === true) {
                 $schedulesToFetch[] = array("stationID" => "$stationID", "date" => $bar);
             }
         }
-    }
-    else
-    {
+    } else {
         $schedulesToFetch = $requestArray;
     }
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "schedulesToFetch is now\n";
         var_dump($schedulesToFetch);
     }
 
-    if (count($schedulesToFetch) == 0)
-    {
+    if (count($schedulesToFetch) == 0) {
         printMSG("No updated schedules.");
 
         return ($arrayProgramsToRetrieveFromSchedulesDirect);
@@ -804,25 +712,23 @@ function getSchedules($stationIDsToFetch)
     $errorCount = 0;
     $maxAttempts = 4;
     $timeout = 60;
-    $response = NULL;
+    $response = null;
 
-    do
-    {
-        try
-        {
+    do {
+        try {
             printMSG("Schedule download attempt #" . ($errorCount + 1) . " timeout: $timeout");
             $request = $client->post("schedules",
-                array("token"           => $token,
-                      "Accept-Encoding" => "deflate,gzip"),
+                array(
+                    "token"           => $token,
+                    "Accept-Encoding" => "deflate,gzip"
+                ),
                 json_encode($schedulesToFetch),
                 array("timeout" => $timeout));
             $response = $request->send();
 
-        } catch (Guzzle\Http\Exception\BadResponseException $e)
-        {
-            $response = NULL;
-            switch ($e->getCode())
-            {
+        } catch (Guzzle\Http\Exception\BadResponseException $e) {
+            $response = null;
+            switch ($e->getCode()) {
                 case 400:
                     return ("ERROR");
                     break;
@@ -840,17 +746,14 @@ function getSchedules($stationIDsToFetch)
                     exit;
                     break;
             }
-        } catch (Guzzle\Http\Exception\CurlException $e)
-        {
-            if (strpos($e->getMessage(), "Operation timed out") > 0)
-            {
+        } catch (Guzzle\Http\Exception\CurlException $e) {
+            if (strpos($e->getMessage(), "Operation timed out") > 0) {
                 $errorCount++;
                 printMSG("No response from server; retrying.");
                 $timeout *= 2;
                 sleep(10); // Hammering away isn't going to make things better.
             }
-        } catch (Exception $e)
-        {
+        } catch (Exception $e) {
             print "Other exception in getSchedules.\n";
             print "Code: " . $e->getCode() . "\n";
             print "Message: " . $e->getMessage() . "\n";
@@ -858,14 +761,12 @@ function getSchedules($stationIDsToFetch)
             exit;
         }
 
-        if (is_null($response) === FALSE)
-        {
+        if (is_null($response) === false) {
             break;
         }
     } while ($errorCount <= $maxAttempts);
 
-    if ($errorCount == $maxAttempts)
-    {
+    if ($errorCount == $maxAttempts) {
         printMSG("Fatal error trying to get schedules.");
 
         return ("ERROR");
@@ -886,10 +787,9 @@ function getSchedules($stationIDsToFetch)
 
     $jsonSchedule = file_get_contents("$dlSchedTempDir/schedule.json");
 
-    $item = json_decode($jsonSchedule, TRUE);
+    $item = json_decode($jsonSchedule, true);
 
-    if (json_last_error() === TRUE)
-    {
+    if (json_last_error() === true) {
         printMSG("Couldn't decode $dlSchedTempDir/schedule.json from JSON.");
         printMSG(json_last_error_msg());
         exit;
@@ -897,131 +797,110 @@ function getSchedules($stationIDsToFetch)
 
     printMSG("Parsing schedules.");
 
-    foreach ($item as $v)
-    {
-        $hadError = FALSE;
+    foreach ($item as $v) {
+        $hadError = false;
 
-        if (isset($v["stationID"]) === TRUE)
-        {
+        if (isset($v["stationID"]) === true) {
             $stationID = $v["stationID"];
-        }
-        else
-        {
+        } else {
             printMSG("Fatal: No stationID? Send the following to grabber@schedulesdirect.org");
-            printMSG(print_r($v, TRUE));
+            printMSG(print_r($v, true));
             continue;
         }
 
-        if (isset($v["code"]) === TRUE)
-        {
-            switch ($v["code"])
-            {
+        if (isset($v["code"]) === true) {
+            switch ($v["code"]) {
                 case 0:
                     break;
                 case 7000:
-                    if (isset($addToRetryQueue[$stationID]) === TRUE)
-                    {
+                    if (isset($addToRetryQueue[$stationID]) === true) {
                         $permanentDownloadFailure[$stationID] = 1;
                         unset($addToRetryQueue[$stationID]); // Permanent error.
                     }
                     printMSG("Permanent error attempting to fetch schedule for $stationID");
-                    $hadError = TRUE;
+                    $hadError = true;
                     continue;
                     break;
                 case 7020:
                     // "Error" 7020 just means that we requested dates that don't exist on the server.
-                    $hadError = TRUE;
+                    $hadError = true;
                     break;
                 case 7100:
-                    if (isset($addToRetryQueue[$stationID]) === FALSE)
-                    {
+                    if (isset($addToRetryQueue[$stationID]) === false) {
                         $addToRetryQueue[$stationID] = 1;
-                    }
-                    else
-                    {
+                    } else {
                         $addToRetryQueue[$stationID]++;
                     }
 
                     printMSG("Adding $stationID to retry queue. Count is {$addToRetryQueue[$stationID]}");
 
-                    if ($addToRetryQueue[$stationID] == 10)
-                    {
+                    if ($addToRetryQueue[$stationID] == 10) {
                         unset($addToRetryQueue[$stationID]); // Permanent error.
                         $permanentDownloadFailure[$stationID] = 1;
                         printMSG("Permanent error attempting to fetch schedule for $stationID");
                     }
 
-                    $hadError = TRUE;
+                    $hadError = true;
                     sleep(10); // We're going to sleep so that the server has the chance to generate the schedule.
                     continue;
                     break;
                 default:
-                    printMSG("getSchedules error: " . print_r($v, TRUE));
-                    $hadError = TRUE;
+                    printMSG("getSchedules error: " . print_r($v, true));
+                    $hadError = true;
                     continue;
                     break;
             }
         }
 
-        if ($hadError === FALSE)
-        {
+        if ($hadError === false) {
             $downloadedStationIDs[] = $stationID;
             $date = $v["metadata"]["startDate"];
             $md5 = $v["metadata"]["md5"];
 
-            if ($debug === TRUE)
-            {
+            if ($debug === true) {
                 printMSG("Parsing schedule stationID:$stationID for $date");
             }
 
-            if (isset($v["metadata"]["isDeleted"]) === TRUE)
-            {
+            if (isset($v["metadata"]["isDeleted"]) === true) {
                 printMSG("WARNING: $stationID has been marked as deleted.");
                 $updateVisibleToFalse = $dbh->prepare("UPDATE channel SET visible = FALSE WHERE xmltvid=:sid");
                 $updateVisibleToFalse->execute(array("sid" => $stationID));
                 continue;
             }
 
-            if (isset($v["programs"]) === FALSE)
-            {
+            if (isset($v["programs"]) === false) {
                 printMSG("WARNING: JSON does not contain any program elements.");
                 printMSG("Send the following to grabber@schedulesdirect.org\n\n");
                 var_dump($item);
                 exit;
             }
 
-            if ($md5 == "zO9OPuxbtUh2Bu6EVaNLFQ")
-            {
+            if ($md5 == "zO9OPuxbtUh2Bu6EVaNLFQ") {
                 printMSG("md5 is magic value?");
                 printMSG("dlDirectory: $dlSchedTempDir/schedule.json");
                 printMSG("Dumping item to debug log.");
-                debugMSG(print_r($item, TRUE));
+                debugMSG(print_r($item, true));
                 exit;
             }
 
             $updateLocalMD5->execute(array("sid" => $stationID, "md5" => $md5, "date" => $date));
 
-            foreach ($v["programs"] as $programData)
-            {
-                if (isset($programData["md5"]) === TRUE)
-                {
+            foreach ($v["programs"] as $programData) {
+                if (isset($programData["md5"]) === true) {
                     $serverScheduleMD5[$programData["md5"]] = $programData["programID"];
                     $scheduleJSON[$stationID][] = $programData;
-                }
-                else
-                {
-                    $quiet = FALSE;
+                } else {
+                    $quiet = false;
                     printMSG("FATAL ERROR: no MD5 value for program.");
                     printMSG("Send the following to grabber@schedulesdirect.org\n");
-                    printMSG("s:$stationID\n\n\n\nitem\n\n" . print_r($programData, TRUE) . "\n\n");
+                    printMSG("s:$stationID\n\n\n\nitem\n\n" . print_r($programData, true) . "\n\n");
                     continue;
                 }
             }
         }
     }
 
-    if (count($serverScheduleMD5) == 0)
-    {
+    if (count($serverScheduleMD5) == 0) {
         printMSG("No programs in schedule? Fatal error.");
         exit;
     }
@@ -1039,18 +918,17 @@ function getSchedules($stationIDsToFetch)
 
     $arrayProgramsToRetrieveFromSchedulesDirect = array_diff_key($serverScheduleMD5, $dbProgramCache);
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         /*
          * One user is reporting that after a run, a second run immediately afterwards still has programs that need
          * to be downloaded. That shouldn't happen, so dump the array to the log file for analysis.
          */
         printMSG("dbProgramCache is");
-        printMSG(print_r($dbProgramCache, TRUE));
+        printMSG(print_r($dbProgramCache, true));
         printMSG("serverScheduleMD5 is");
-        printMSG(print_r($serverScheduleMD5, TRUE));
+        printMSG(print_r($serverScheduleMD5, true));
         printMSG("jsonProrgamstoRetrieve is");
-        printMSG(print_r($arrayProgramsToRetrieveFromSchedulesDirect, TRUE));
+        printMSG(print_r($arrayProgramsToRetrieveFromSchedulesDirect, true));
     }
 
     return ($arrayProgramsToRetrieveFromSchedulesDirect);
@@ -1070,16 +948,12 @@ function fetchPrograms($jsonProgramsToRetrieve)
      * either because we didn't have them, or they have different md5's.
      */
 
-    if ($toRetrieveTotal == 0)
-    {
+    if ($toRetrieveTotal == 0) {
         printMSG("No programs to fetch.");
-    }
-    else
-    {
+    } else {
         printMSG("Need to download $toRetrieveTotal new or updated programs.");
 
-        if ($toRetrieveTotal > 10000)
-        {
+        if ($toRetrieveTotal > 10000) {
             printMSG("Requesting more than 10000 programs. Please be patient.");
         }
 
@@ -1088,8 +962,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
         $counter = 0;
         $retrieveList = array();
 
-        for ($i = 0; $i <= $totalChunks; $i++)
-        {
+        for ($i = 0; $i <= $totalChunks; $i++) {
             $startOffset = $i * $maxProgramsToGet;
             $chunk = array_slice($jsonProgramsToRetrieve, $startOffset, $maxProgramsToGet);
             $retrieveList[] = json_encode($chunk);
@@ -1099,57 +972,52 @@ function fetchPrograms($jsonProgramsToRetrieve)
 
         $failedChunk = array();
 
-        foreach ($retrieveList as $index => $chunk)
-        {
+        foreach ($retrieveList as $index => $chunk) {
             $retryCounter = 0;
-            $hadError = FALSE;
-            $failedChunk[$index] = TRUE;
+            $hadError = false;
+            $failedChunk[$index] = true;
 
             printMSG("Retrieving chunk " . ($index + 1) . " of " . count($retrieveList) . ".");
-            do
-            {
+            do {
                 $schedulesDirectPrograms = $client->post("programs",
-                    array("token"           => $token,
-                          "Accept-Encoding" => "deflate,gzip"), $chunk);
+                    array(
+                        "token"           => $token,
+                        "Accept-Encoding" => "deflate,gzip"
+                    ), $chunk);
                 $response = $schedulesDirectPrograms->send();
 
-                try
-                {
+                try {
                     $schedulesDirectPrograms = $response->getBody();
-                } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
-                {
+                } catch (Guzzle\Http\Exception\ServerErrorResponseException $e) {
                     $errorReq = $e->getRequest();
                     $errorResp = $e->getResponse();
                     $errorMessage = $e->getMessage();
                     exceptionErrorDump($errorReq, $errorResp, $errorMessage);
                     $retryCounter++;
-                    $hadError = TRUE;
+                    $hadError = true;
                     debugMSG("Had error retrieving chunk $index: retrying.");
                     sleep(30);
-                } catch (Guzzle\Http\Exception\CurlException $e)
-                {
+                } catch (Guzzle\Http\Exception\CurlException $e) {
                     $errorReq = $e->getRequest();
                     $errorResp = $e->getResponse();
                     $errorMessage = $e->getMessage();
                     exceptionErrorDump($errorReq, $errorResp, $errorMessage);
                     $retryCounter++;
-                    $hadError = TRUE;
+                    $hadError = true;
                     debugMSG("Had error retrieving chunk $index: retrying.");
                     sleep(30);
-                } catch (Guzzle\Http\Exception\RequestException $e)
-                {
+                } catch (Guzzle\Http\Exception\RequestException $e) {
                     $errorReq = $e->getRequest();
                     $errorResp = $e->getResponse();
                     $errorMessage = $e->getMessage();
                     exceptionErrorDump($errorReq, $errorResp, $errorMessage);
                     $retryCounter++;
-                    $hadError = TRUE;
+                    $hadError = true;
                     debugMSG("Had error retrieving chunk $index: retrying.");
                     sleep(30);
                 }
 
-                if ($hadError === FALSE)
-                {
+                if ($hadError === false) {
                     file_put_contents("$dlProgramTempDir/programs." . substr("00$index", -2) . ".json",
                         $schedulesDirectPrograms);
                     unset($failedChunk[$index]);
@@ -1158,8 +1026,7 @@ function fetchPrograms($jsonProgramsToRetrieve)
             } while ($retryCounter < 5);
         }
 
-        if (count($failedChunk) != 0)
-        {
+        if (count($failedChunk) != 0) {
             printMSG("Failed to retrieve data after multiple retries.");
         }
     }
@@ -1200,15 +1067,13 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
     $total = count($jsonProgramsToRetrieve);
     printMSG("Updating local copy of JSON programs.");
 
-    foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess)
-    {
+    foreach (glob("$dlProgramTempDir/*.json") as $jsonFileToProcess) {
         $rawProgramJSON = file_get_contents($jsonFileToProcess);
-        $jsonPrograms = json_decode($rawProgramJSON, TRUE);
+        $jsonPrograms = json_decode($rawProgramJSON, true);
 
-        if (json_last_error() === TRUE)
-        {
+        if (json_last_error() === true) {
             debugMSG("*** ERROR: JSON decode error $jsonFileToProcess");
-            debugMSG(print_r($jsonPrograms, TRUE));
+            debugMSG(print_r($jsonPrograms, true));
             continue;
         }
 
@@ -1216,65 +1081,56 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
 
         $dbhSD->beginTransaction();
 
-        foreach ($jsonPrograms as $v)
-        {
+        foreach ($jsonPrograms as $v) {
             $counter++;
-            if ($counter % 100 == 0)
-            {
+            if ($counter % 100 == 0) {
                 printMSG("$counter / $total             \r");
                 $dbhSD->commit();
                 $dbhSD->beginTransaction();
             }
-            if (isset($v["code"]) === TRUE)
-            {
+            if (isset($v["code"]) === true) {
                 /*
                  * Probably not good. :(
                  */
 
-                if ($v["code"] == 6000)
-                {
+                if ($v["code"] == 6000) {
                     print "FATAL ERROR: server couldn't find programID?\n";
                     print "$jsonPrograms\n";
                     continue;
                 }
             }
 
-            if (isset($v["programID"]) === TRUE)
-            {
+            if (isset($v["programID"]) === true) {
                 $pid = $v["programID"];
-            }
-            else
-            {
+            } else {
                 print "FATAL ERROR: No programID?\n";
                 var_dump($v);
                 continue;
             }
 
-            if (isset($v["md5"]) === TRUE)
-            {
+            if (isset($v["md5"]) === true) {
                 $md5 = $v["md5"];
-            }
-            else
-            {
+            } else {
                 print "FATAL ERROR: No md5?\n";
                 print "$jsonPrograms\n";
                 continue;
             }
 
-            $insertJSON->execute(array("programID" => $pid, "md5" => $md5,
-                                       "json"      => json_encode($v)));
+            $insertJSON->execute(array(
+                "programID" => $pid,
+                "md5"       => $md5,
+                "json"      => json_encode($v)
+            ));
         }
 
         $dbhSD->commit();
     }
 
-    if ($debug === FALSE)
-    {
+    if ($debug === false) {
         // unlink($jsonFileToProcess); don't delete for now.
     }
 
-    if ($debug === FALSE)
-    {
+    if ($debug === false) {
         // rmdir("$dlProgramTempDir"); don't delete for now.
     }
 
@@ -1292,33 +1148,34 @@ function insertSchedule()
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
-    $SchedulesDirectRoleToMythTv = array("Actor"                               => "actor",
-                                         "Voice"                               => "actor",
-                                         "Director"                            => "director",
-                                         "Executive Producer"                  => "executive_producer",
-                                         "Co-Producer"                         => "producer",
-                                         "Associate Producer"                  => "producer",
-                                         "Producer"                            => "producer",
-                                         "Line Producer"                       => "producer",
-                                         "Co-Executive Producer"               => "executive_producer",
-                                         "Co-Associate Producer"               => "producer",
-                                         "Assistant Producer"                  => "producer",
-                                         "Supervising Producer"                => "producer",
-                                         "Executive Music Producer"            => "producer",
-                                         "Visual Effects Producer"             => "producer",
-                                         "Special Effects Makeup Producer"     => "producer",
-                                         "Makeup Effects Producer"             => "producer",
-                                         "Consulting Producer"                 => "producer",
-                                         "Score Producer"                      => "producer",
-                                         "Executive Producer, English Version" => "producer",
-                                         "Co-Writer"                           => "writer",
-                                         "Screenwriter"                        => "writer",
-                                         "Writer"                              => "writer",
-                                         "Guest Star"                          => "guest_star",
-                                         "Anchor"                              => "host",
-                                         "Host"                                => "host",
-                                         "Presenter"                           => "presenter",
-                                         "Guest"                               => "guest"
+    $SchedulesDirectRoleToMythTv = array(
+        "Actor"                               => "actor",
+        "Voice"                               => "actor",
+        "Director"                            => "director",
+        "Executive Producer"                  => "executive_producer",
+        "Co-Producer"                         => "producer",
+        "Associate Producer"                  => "producer",
+        "Producer"                            => "producer",
+        "Line Producer"                       => "producer",
+        "Co-Executive Producer"               => "executive_producer",
+        "Co-Associate Producer"               => "producer",
+        "Assistant Producer"                  => "producer",
+        "Supervising Producer"                => "producer",
+        "Executive Music Producer"            => "producer",
+        "Visual Effects Producer"             => "producer",
+        "Special Effects Makeup Producer"     => "producer",
+        "Makeup Effects Producer"             => "producer",
+        "Consulting Producer"                 => "producer",
+        "Score Producer"                      => "producer",
+        "Executive Producer, English Version" => "producer",
+        "Co-Writer"                           => "writer",
+        "Screenwriter"                        => "writer",
+        "Writer"                              => "writer",
+        "Guest Star"                          => "guest_star",
+        "Anchor"                              => "host",
+        "Host"                                => "host",
+        "Presenter"                           => "presenter",
+        "Guest"                               => "guest"
     );
 
     $roleTable = array();
@@ -1340,8 +1197,7 @@ function insertSchedule()
 
     $dbSchema = setting("DBSchemaVer");
 
-    if ($dbSchema > "1318")
-    {
+    if ($dbSchema > "1318") {
         /*
          * program table will have season and episode.
          */
@@ -1353,9 +1209,7 @@ function insertSchedule()
     :previouslyshown,:stereo,:subtitled,:hdtv,:closecaptioned,:partnumber,:parttotal,
     :seriesid,:originalairdate,:showtype,:colorcode,:syndicatedepisodenumber,:programid,:generic,:listingsource,
     :first,:last,:audioprop,:subtitletypes,:videoprop,:season,:episode)");
-    }
-    else
-    {
+    } else {
         /*
          * No season / episode insert.
          */
@@ -1387,15 +1241,13 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
     $deleteExistingSchedule = $dbh->prepare("DELETE FROM t_program WHERE chanid = :chanid AND starttime LIKE :start");
 
-    while (list(, $item) = each($existingChannels))
-    {
+    while (list(, $item) = each($existingChannels)) {
         $chanID = $item["chanid"];
         $sourceID = $item["sourceid"];
         $stationID = $item["xmltvid"];
         $purgedSchedule = array();
 
-        if (isset($scheduleJSON[$stationID]) === FALSE)
-        {
+        if (isset($scheduleJSON[$stationID]) === false) {
             continue; // If we don't have an updated schedule for the stationID, there's nothing to do.
         }
 
@@ -1404,14 +1256,13 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
         $dbh->beginTransaction();
 
         reset($scheduleJSON[$stationID]);
-        while (list(, $scheduleElement) = each($scheduleJSON[$stationID]))
-        {
+        while (list(, $scheduleElement) = each($scheduleJSON[$stationID])) {
             /*
              * Pre-declare what we'll be using to quiet warning about unused variables.
              */
 
-            $isNew = FALSE;
-            $previouslyshown = FALSE;
+            $isNew = false;
+            $previouslyshown = false;
 
             $title = "";
             $ratingSystem = "";
@@ -1421,7 +1272,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             $colorCode = "";
             $syndicatedEpisodeNumber = "";
             $showType = "";
-            $oad = NULL;
+            $oad = null;
             $audioprop = "";
             $subtitleTypes = "";
             $videoProperties = "";
@@ -1433,41 +1284,41 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             /*
              * The various audio properties
              */
-            $isClosedCaption = FALSE;
-            $dvs = FALSE;
-            $dolbyType = NULL;
-            $dubbed = FALSE;
-            $isStereo = FALSE;
-            $isSubtitled = FALSE;
-            $isSurround = FALSE;
+            $isClosedCaption = false;
+            $dvs = false;
+            $dolbyType = null;
+            $dubbed = false;
+            $isStereo = false;
+            $isSubtitled = false;
+            $isSurround = false;
 
             /*
              * Video properties
              */
-            $is3d = FALSE;
-            $isEnhancedResolution = FALSE; // Better than SD, not as good as HD
-            $isHDTV = FALSE;
-            $isLetterboxed = FALSE;
-            $isSDTV = FALSE;
+            $is3d = false;
+            $isEnhancedResolution = false; // Better than SD, not as good as HD
+            $isHDTV = false;
+            $isLetterboxed = false;
+            $isSDTV = false;
 
             /*
              * Optional booleans, some of which aren't used by MythTV
              */
 
-            $cableInTheClassroom = FALSE; // Not used by MythTV
-            $catchupProgram = FALSE; // Used in the UK; indicates that a program is available online
-            $continuedProgram = FALSE; // Continued from a previous broadcast
-            $isEducational = FALSE;
-            $joinedInProgress = FALSE;
-            $leftInProgress = FALSE;
-            $isPremiere = FALSE; // First showing of a movie or TV series
-            $programBreak = FALSE; // Program stops and will continue later; typically only found in UK
-            $repeat = FALSE;
-            $isSigned = FALSE; // supplemented with a person signing for the hearing impaired
-            $subjectToBlackout = FALSE;
-            $timeApproximate = FALSE;
-            $isPremiereOrFinale = FALSE; // Season Premiere | Season Finale | Series Premiere | Series Finale
-            $liveOrTapeDelay = NULL;
+            $cableInTheClassroom = false; // Not used by MythTV
+            $catchupProgram = false; // Used in the UK; indicates that a program is available online
+            $continuedProgram = false; // Continued from a previous broadcast
+            $isEducational = false;
+            $joinedInProgress = false;
+            $leftInProgress = false;
+            $isPremiere = false; // First showing of a movie or TV series
+            $programBreak = false; // Program stops and will continue later; typically only found in UK
+            $repeat = false;
+            $isSigned = false; // supplemented with a person signing for the hearing impaired
+            $subjectToBlackout = false;
+            $timeApproximate = false;
+            $isPremiereOrFinale = false; // Season Premiere | Season Finale | Series Premiere | Series Finale
+            $liveOrTapeDelay = null;
 
             /*
              * These are updated in another part of mfdb?
@@ -1479,20 +1330,18 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             $getProgramInformation->execute(array("pid" => $programID));
             $pj = $getProgramInformation->fetchColumn();
 
-            if ($pj == "")
-            {
+            if ($pj == "") {
                 debugMSG("Error retrieving $programID from local database.");
-                $errorWarning = TRUE;
+                $errorWarning = true;
                 continue;
             }
 
-            $programJSON = json_decode($pj, TRUE);
+            $programJSON = json_decode($pj, true);
 
-            if (json_last_error() === TRUE)
-            {
+            if (json_last_error() === true) {
                 debugMSG("Error decoding $programID from local database. Raw data was:");
-                debugMSG(print_r($pj, TRUE));
-                $errorWarning = TRUE;
+                debugMSG(print_r($pj, true));
+                $errorWarning = true;
                 continue;
             }
 
@@ -1505,33 +1354,25 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
             $programEndTimeMyth = gmdate("Y-m-d H:i:s", strtotime("$air_datetime + $duration seconds"));
             list($currentProcessingDate,) = explode("T", $scheduleElement["airDateTime"]);
 
-            if (isset($purgedSchedule[$currentProcessingDate]) === FALSE)
-            {
+            if (isset($purgedSchedule[$currentProcessingDate]) === false) {
                 $deleteExistingSchedule->execute(array("chanid" => $chanID, "start" => "$currentProcessingDate%"));
-                $purgedSchedule[$currentProcessingDate] = TRUE;
+                $purgedSchedule[$currentProcessingDate] = true;
             }
 
-            $skipPersonID = FALSE;
+            $skipPersonID = false;
 
-            if (isset($programJSON["genres"]) === TRUE)
-            {
-                foreach ($programJSON["genres"] as $g)
-                {
-                    if (in_array($g, array("Adults only", "Erotic")))
-                    {
-                        $skipPersonID = TRUE; // Adult content typically does not have personID.
+            if (isset($programJSON["genres"]) === true) {
+                foreach ($programJSON["genres"] as $g) {
+                    if (in_array($g, array("Adults only", "Erotic"))) {
+                        $skipPersonID = true; // Adult content typically does not have personID.
                     }
                 }
             }
 
-            foreach (array("cast", "crew") as $processing)
-            {
-                if (isset($programJSON[$processing]) === TRUE)
-                {
-                    foreach ($programJSON[$processing] as $credit)
-                    {
-                        if (isset($credit["role"]) === FALSE)
-                        {
+            foreach (array("cast", "crew") as $processing) {
+                if (isset($programJSON[$processing]) === true) {
+                    foreach ($programJSON[$processing] as $credit) {
+                        if (isset($credit["role"]) === false) {
                             printMSG("No role?");
                             printMSG("Send the following to grabber@schedulesdirect.org\n\n");
                             printMSG("Program: $programID. No role in cast.");
@@ -1541,48 +1382,41 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
                         $name = $credit["name"];
 
-                        if (isset($credit["personId"]) === FALSE)
-                        {
-                            if ($skipPersonID === FALSE)
-                            {
+                        if (isset($credit["personId"]) === false) {
+                            if ($skipPersonID === false) {
                                 printMSG("$programID does not have a personId.");
                             }
                         }
 
-                        if (isset($peopleCacheMyth[$name]) === FALSE)
-                        {
+                        if (isset($peopleCacheMyth[$name]) === false) {
                             $insertPersonMyth->execute(array("name" => $name));
                             $personID = $dbh->lastInsertId();
                             $peopleCacheMyth[$name] = $personID;
-                        }
-                        else
-                        {
+                        } else {
                             $personID = $peopleCacheMyth[$name];
                         }
 
-                        if (isset($SchedulesDirectRoleToMythTv[$credit["role"]]) === TRUE)
-                        {
+                        if (isset($SchedulesDirectRoleToMythTv[$credit["role"]]) === true) {
                             $mythTVRole = $SchedulesDirectRoleToMythTv[$credit["role"]];
-                            $insertCreditMyth->execute(array("person"    => $personID,
-                                                             "chanid"    => $chanID,
-                                                             "starttime" => $programStartTimeMyth,
-                                                             "role"      => $mythTVRole));
+                            $insertCreditMyth->execute(array(
+                                "person"    => $personID,
+                                "chanid"    => $chanID,
+                                "starttime" => $programStartTimeMyth,
+                                "role"      => $mythTVRole
+                            ));
                         }
                     }
                 }
             }
 
-            if (isset($scheduleElement["audioProperties"]) === TRUE)
-            {
-                foreach ($scheduleElement["audioProperties"] as $ap)
-                {
-                    switch ($ap)
-                    {
+            if (isset($scheduleElement["audioProperties"]) === true) {
+                foreach ($scheduleElement["audioProperties"] as $ap) {
+                    switch ($ap) {
                         case "cc":
-                            $isClosedCaption = TRUE;
+                            $isClosedCaption = true;
                             break;
                         case "dvs":
-                            $dvs = TRUE;
+                            $dvs = true;
                             break;
                         case "Dolby":
                             $dolbyType = "dolby";
@@ -1594,102 +1428,84 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                             $dolbyType = "Dolby Digital 5.1";
                             break;
                         case "dubbed":
-                            $dubbed = TRUE;
+                            $dubbed = true;
                             break;
                         case "stereo":
-                            $isStereo = TRUE;
+                            $isStereo = true;
                             break;
                         case "subtitled":
-                            $isSubtitled = TRUE;
+                            $isSubtitled = true;
                             break;
                         case "surround":
-                            $isSurround = TRUE;
+                            $isSurround = true;
                             break;
                     }
                 }
             }
 
-            if (isset($scheduleElement["videoProperties"]) === TRUE)
-            {
-                foreach ($scheduleElement["videoProperties"] as $vp)
-                {
-                    switch ($vp)
-                    {
+            if (isset($scheduleElement["videoProperties"]) === true) {
+                foreach ($scheduleElement["videoProperties"] as $vp) {
+                    switch ($vp) {
                         case "3d":
-                            $is3d = TRUE;
+                            $is3d = true;
                             break;
                         case "enhanced":
-                            $isEnhancedResolution = TRUE;
+                            $isEnhancedResolution = true;
                             break;
                         case "hdtv":
-                            $isHDTV = TRUE;
+                            $isHDTV = true;
                             break;
                         case "letterbox":
-                            $isLetterboxed = TRUE;
+                            $isLetterboxed = true;
                             break;
                         case "sdtv":
-                            $isSDTV = TRUE; // Not used in MythTV
+                            $isSDTV = true; // Not used in MythTV
                             break;
 
                     }
                 }
             }
 
-            if (isset($scheduleElement["isPremiereOrFinale"]) === TRUE)
-            {
-                switch ($scheduleElement["isPremiereOrFinale"])
-                {
+            if (isset($scheduleElement["isPremiereOrFinale"]) === true) {
+                switch ($scheduleElement["isPremiereOrFinale"]) {
                     case "Series Premiere":
                     case "Season Premiere":
-                        $isFirst = TRUE;
+                        $isFirst = true;
                         break;
                     case "Series Finale":
                     case "Season Finale":
-                        $isLast = TRUE;
+                        $isLast = true;
                         break;
                 }
-            }
-            else
-            {
-                $isFirst = FALSE;
-                $isLast = FALSE;
+            } else {
+                $isFirst = false;
+                $isLast = false;
             }
 
-            if (isset($scheduleElement["contentRating"]) === TRUE)
-            {
-                foreach ($scheduleElement["contentRating"] as $r)
-                {
-                    if ($r["body"] == "USA Parental Rating")
-                    {
+            if (isset($scheduleElement["contentRating"]) === true) {
+                foreach ($scheduleElement["contentRating"] as $r) {
+                    if ($r["body"] == "USA Parental Rating") {
                         $ratingSystem = "V-CHIP";
                         $rating = $r["code"];
                     }
-                    if ($r["body"] == "Motion Picture Association of America")
-                    {
+                    if ($r["body"] == "Motion Picture Association of America") {
                         $ratingSystem = "MPAA";
                         $rating = $r["code"];
                     }
                 }
-            }
-
-            /*
+            } /*
              * Yes, there may be two different places that ratings exist. But the schedule rating should be used if
              * it exists, because a program may have different version, some edited for language, etc,
              * and that's indicated in the schedule.
              */
-            else
-            {
-                if (isset($programJSON["contentRating"]) === TRUE)
-                {
-                    foreach ($programJSON["contentRating"] as $r)
-                    {
-                        if ($r["body"] == "USA Parental Rating")
-                        {
+            else {
+                if (isset($programJSON["contentRating"]) === true) {
+                    foreach ($programJSON["contentRating"] as $r) {
+                        if ($r["body"] == "USA Parental Rating") {
                             $ratingSystem = "V-CHIP";
                             $rating = $r["code"];
                         }
-                        if ($r["body"] == "Motion Picture Association of America")
-                        {
+                        if ($r["body"] == "Motion Picture Association of America") {
                             $ratingSystem = "MPAA";
                             $rating = $r["code"];
                         }
@@ -1701,151 +1517,118 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
              * Boolean types
              */
 
-            if (isset($scheduleElement["new"]) === TRUE)
-            {
-                $isNew = TRUE;
-                $previouslyshown = FALSE;
-            }
-            else
-            {
-                $isNew = FALSE;
-                $previouslyshown = TRUE;
+            if (isset($scheduleElement["new"]) === true) {
+                $isNew = true;
+                $previouslyshown = false;
+            } else {
+                $isNew = false;
+                $previouslyshown = true;
             }
 
             /*
              * Shouldn't be "new" and "repeat"
              */
 
-            if (isset($scheduleElement["repeat"]) === TRUE)
-            {
-                if ($isNew === TRUE)
-                {
+            if (isset($scheduleElement["repeat"]) === true) {
+                if ($isNew === true) {
                     debugMSG("*** WARNING sid:$stationID pid:$programID has 'new' and 'repeat' set. Open SD ticket:");
-                    debugMSG(print_r($scheduleElement, TRUE));
-                    $errorWarning = TRUE;
-                }
-                else
-                {
-                    $isNew = FALSE;
-                    $previouslyshown = TRUE;
+                    debugMSG(print_r($scheduleElement, true));
+                    $errorWarning = true;
+                } else {
+                    $isNew = false;
+                    $previouslyshown = true;
                 }
             }
 
-            if (isset($scheduleElement["cableInTheClassroom"]) === TRUE)
-            {
-                $cableInTheClassroom = TRUE;
+            if (isset($scheduleElement["cableInTheClassroom"]) === true) {
+                $cableInTheClassroom = true;
             }
 
-            if (isset($scheduleElement["catchup"]) === TRUE)
-            {
-                $catchupProgram = TRUE;
+            if (isset($scheduleElement["catchup"]) === true) {
+                $catchupProgram = true;
             }
 
-            if (isset($scheduleElement["continued"]) === TRUE)
-            {
-                $continuedProgram = TRUE;
+            if (isset($scheduleElement["continued"]) === true) {
+                $continuedProgram = true;
             }
 
-            if (isset($scheduleElement["educational"]) === TRUE)
-            {
-                $isEducational = TRUE;
+            if (isset($scheduleElement["educational"]) === true) {
+                $isEducational = true;
             }
 
-            if (isset($scheduleElement["joinedInProgress"]) === TRUE)
-            {
-                $joinedInProgress = TRUE;
+            if (isset($scheduleElement["joinedInProgress"]) === true) {
+                $joinedInProgress = true;
             }
 
-            if (isset($scheduleElement["leftInProgress"]) === TRUE)
-            {
-                $leftInProgress = TRUE;
+            if (isset($scheduleElement["leftInProgress"]) === true) {
+                $leftInProgress = true;
             }
 
-            if (isset($scheduleElement["premiere"]) === TRUE)
-            {
-                $isPremiere = TRUE;
+            if (isset($scheduleElement["premiere"]) === true) {
+                $isPremiere = true;
             }
 
-            if (isset($scheduleElement["programBreak"]) === TRUE)
-            {
-                $programBreak = TRUE;
+            if (isset($scheduleElement["programBreak"]) === true) {
+                $programBreak = true;
             }
 
-            if (isset($scheduleElement["signed"]) === TRUE)
-            {
-                $isSigned = TRUE;
+            if (isset($scheduleElement["signed"]) === true) {
+                $isSigned = true;
             }
 
-            if (isset($scheduleElement["subjectToBlackout"]) === TRUE)
-            {
-                $subjectToBlackout = TRUE;
+            if (isset($scheduleElement["subjectToBlackout"]) === true) {
+                $subjectToBlackout = true;
             }
 
-            if (isset($scheduleElement["timeApproximate"]) === TRUE)
-            {
-                $timeApproximate = TRUE;
+            if (isset($scheduleElement["timeApproximate"]) === true) {
+                $timeApproximate = true;
             }
 
-            if (isset($scheduleElement["liveTapeDelay"]) === TRUE)
-            {
+            if (isset($scheduleElement["liveTapeDelay"]) === true) {
                 $liveOrTapeDelay = $scheduleElement["liveTapeDelay"];
             }
 
             $title = $programJSON["titles"][0]["title120"];
 
-            if ($title == NULL OR $title == "")
-            {
+            if ($title == null OR $title == "") {
                 debugMSG("FATAL ERROR: Empty title? $programID");
                 continue;
             }
 
-            if (isset($programJSON["episodeTitle150"]) === TRUE)
-            {
+            if (isset($programJSON["episodeTitle150"]) === true) {
                 $subTitle = $programJSON["episodeTitle150"];
-            }
-            else
-            {
+            } else {
                 $subTitle = "";
             }
 
-            if (isset($programJSON["descriptions"]["description1000"]) === TRUE)
-            {
+            if (isset($programJSON["descriptions"]["description1000"]) === true) {
                 $description = $programJSON["descriptions"]["description1000"][0]["description"];
-            }
-            else
-            {
+            } else {
                 $description = "";
             }
 
-            if (isset($programJSON["genres"]) === TRUE)
-            {
+            if (isset($programJSON["genres"]) === true) {
                 $category = $programJSON["genres"][0];
-            }
-            else
-            {
+            } else {
                 $category = "";
             }
 
-            if (isset($programJSON["metadata"]) === TRUE)
-            {
-                foreach ($programJSON["metadata"] as $md)
-                {
-                    if (isset($md["Gracenote"]) === TRUE)
-                    {
+            if (isset($programJSON["metadata"]) === true) {
+                foreach ($programJSON["metadata"] as $md) {
+                    if (isset($md["Gracenote"]) === true) {
                         $season = $md["Gracenote"]["season"];
                         $episode = $md["Gracenote"]["episode"];
                     }
                 }
             }
 
-            $isGeneric = FALSE;
+            $isGeneric = false;
             $seriesID = "";
             $type = strtolower(substr($programID, 0, 2));
-            switch ($type)
-            {
+            switch ($type) {
                 case "sh":
                     $categoryType = "series";
-                    $isGeneric = TRUE;
+                    $isGeneric = true;
                     $seriesID = "EP" . substr($programID, 2, 8);
                     break;
                 case "ep":
@@ -1864,10 +1647,8 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     break;
             }
 
-            if ($type == "mv" AND (isset($programJSON["movie"]) === TRUE))
-            {
-                if (isset($programJSON["movie"]["year"]) === TRUE)
-                {
+            if ($type == "mv" AND (isset($programJSON["movie"]) === true)) {
+                if (isset($programJSON["movie"]["year"]) === true) {
                     $movieYear = $programJSON["movie"]["year"];
                 }
 
@@ -1875,82 +1656,68 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                  * MythTV uses a system where 4 stars would be a "1.0".
                  */
 
-                if (isset($programJSON["movie"]["qualityRating"]) === TRUE)
-                {
+                if (isset($programJSON["movie"]["qualityRating"]) === true) {
                     $starRating = $programJSON["movie"]["qualityRating"][0]["rating"] * 0.25;
                 }
             }
 
-            if (isset($programJSON["colorCode"]) === TRUE)
-            {
+            if (isset($programJSON["colorCode"]) === true) {
                 $colorCode = $programJSON["colorCode"];
             }
 
-            if (isset($programJSON["syndicatedEpisodeNumber"]) === TRUE)
-            {
+            if (isset($programJSON["syndicatedEpisodeNumber"]) === true) {
                 $syndicatedEpisodeNumber = $programJSON["syndicatedEpisodeNumber"];
             }
 
-            if ($isStereo === TRUE)
-            {
+            if ($isStereo === true) {
                 $audioprop = "STEREO";
             }
 
-            if ($dolbyType === TRUE)
-            {
+            if ($dolbyType === true) {
                 $audioprop = "DOLBY";
             }
 
-            if ($isSurround === TRUE)
-            {
+            if ($isSurround === true) {
                 $audioprop = "SURROUND";
             }
 
-            if (isset($programJSON["showType"]) === TRUE)
-            {
+            if (isset($programJSON["showType"]) === true) {
                 $showType = $programJSON["showType"];
             }
 
-            if (isset($programJSON["originalAirDate"]) === TRUE)
-            {
+            if (isset($programJSON["originalAirDate"]) === true) {
                 $oad = $programJSON["originalAirDate"];
             }
 
-            if ($isLetterboxed === TRUE)
-            {
+            if ($isLetterboxed === true) {
                 $videoProperties = "WIDESCREEN";
             }
 
-            if ($isHDTV === TRUE)
-            {
+            if ($isHDTV === true) {
                 $videoProperties = "HDTV";
             }
 
-            if ($isSigned === TRUE)
-            {
+            if ($isSigned === true) {
                 $subtitleTypes = "SIGNED";
             }
 
-            if (isset($scheduleElement["multipart"]) === TRUE)
-            {
+            if (isset($scheduleElement["multipart"]) === true) {
                 $partNumber = $scheduleElement["multipart"]["partNumber"];
                 $numberOfParts = $scheduleElement["multipart"]["totalParts"];
             }
 
-            if (isset($programJSON["genres"]) === TRUE)
-            {
+            if (isset($programJSON["genres"]) === true) {
                 $relevance = 0;
-                foreach ($programJSON["genres"] as $genre)
-                {
-                    try
-                    {
-                        $insertProgramGenreMyth->execute(array("chanid"    => $chanID,
-                                                               "starttime" => $programStartTimeMyth,
-                                                               "relevance" => $relevance,
-                                                               "genre"     => $genre));
+                foreach ($programJSON["genres"] as $genre) {
+                    try {
+                        $insertProgramGenreMyth->execute(array(
+                            "chanid"    => $chanID,
+                            "starttime" => $programStartTimeMyth,
+                            "relevance" => $relevance,
+                            "genre"     => $genre
+                        ));
                         $relevance++;
-                    } catch (PDOException $e)
-                    {
+                    } catch (PDOException $e) {
                         print "Exception: " . $e->getMessage();
                         print "Code: " . $e->getCode();
                         var_dump($programJSON);
@@ -1959,10 +1726,8 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 }
             }
 
-            if ($dbSchema > "1318")
-            {
-                try
-                {
+            if ($dbSchema > "1318") {
+                try {
                     $insertSchedule->execute(array(
                         "chanid"                  => $chanID,
                         "starttime"               => $programStartTimeMyth,
@@ -1997,17 +1762,13 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         "season"                  => $season,
                         "episode"                 => $episode
                     ));
-                } catch (PDOException $e)
-                {
+                } catch (PDOException $e) {
                     print "Exception: " . $e->getMessage();
-                    $debug = TRUE;
+                    $debug = true;
                     var_dump($programJSON);
                 }
-            }
-            else
-            {
-                try
-                {
+            } else {
+                try {
                     $insertSchedule->execute(array(
                         "chanid"                  => $chanID,
                         "starttime"               => $programStartTimeMyth,
@@ -2040,26 +1801,24 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         "subtitletypes"           => $subtitleTypes,
                         "videoprop"               => $videoProperties
                     ));
-                } catch (PDOException $e)
-                {
+                } catch (PDOException $e) {
                     print "Exception: " . $e->getMessage();
-                    $debug = TRUE;
+                    $debug = true;
                     var_dump($programJSON);
                 }
             }
 
-            if ($ratingSystem != "")
-            {
-                try
-                {
-                    $insertProgramRatingMyth->execute(array("chanid"    => $chanID,
-                                                            "starttime" => $programStartTimeMyth,
-                                                            "system"    => $ratingSystem,
-                                                            "rating"    => $rating));
-                } catch (PDOException $e)
-                {
+            if ($ratingSystem != "") {
+                try {
+                    $insertProgramRatingMyth->execute(array(
+                        "chanid"    => $chanID,
+                        "starttime" => $programStartTimeMyth,
+                        "system"    => $ratingSystem,
+                        "rating"    => $rating
+                    ));
+                } catch (PDOException $e) {
                     print "Exception: " . $e->getMessage();
-                    $debug = TRUE;
+                    $debug = true;
                 }
             }
         }
@@ -2189,23 +1948,19 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
 function tempdir($type)
 {
-    if ($type == "programs")
-    {
+    if ($type == "programs") {
         $tempfile = tempnam(sys_get_temp_dir(), "mfdb_programs_");
     }
 
-    if ($type == "schedules")
-    {
+    if ($type == "schedules") {
         $tempfile = tempnam(sys_get_temp_dir(), "mfdb_schedules_");
     }
 
-    if (file_exists($tempfile) === TRUE)
-    {
+    if (file_exists($tempfile) === true) {
         unlink($tempfile);
     }
     mkdir($tempfile);
-    if (is_dir($tempfile) === TRUE)
-    {
+    if (is_dir($tempfile) === true) {
         return $tempfile;
     }
 }
@@ -2220,42 +1975,38 @@ function updateStatus()
 
     $res = getStatus();
 
-    if ($isMythTV === TRUE)
-    {
+    if ($isMythTV === true) {
         $updateLocalMessageTable = $dbhSD->prepare("INSERT INTO messages(id,date,message,type)
     VALUES(:id,:date,:message,:type) ON DUPLICATE KEY UPDATE message=:message,date=:date,type=:type");
     }
 
-    if ($res["code"] == 0)
-    {
+    if ($res["code"] == 0) {
         $expires = $res["account"]["expires"];
         $maxLineups = $res["account"]["maxLineups"];
 
-        foreach ($res["account"]["messages"] as $a)
-        {
+        foreach ($res["account"]["messages"] as $a) {
             $msgID = $a["msgID"];
             $msgDate = $a["date"];
             $message = $a["message"];
             printMSG("MessageID:$msgID : $msgDate : $message");
-            if ($isMythTV === TRUE)
-            {
-                $updateLocalMessageTable->execute(array("id"      => $msgID, "date" => $msgDate,
-                                                        "message" => $message,
-                                                        "type"    => "U"));
+            if ($isMythTV === true) {
+                $updateLocalMessageTable->execute(array(
+                    "id"      => $msgID,
+                    "date"    => $msgDate,
+                    "message" => $message,
+                    "type"    => "U"
+                ));
             }
         }
 
-        foreach ($res["systemStatus"] as $a)
-        {
+        foreach ($res["systemStatus"] as $a) {
             $date = $a["date"];
             $status = $a["status"];
             $message = $a["message"];
 
             printMSG(":$date : $status : $message");
         }
-    }
-    else
-    {
+    } else {
         debugMSG("Received error response from server!");
         debugMSG("ServerID: {$res["serverID"]}");
         debugMSG("Message: {$res["message"]}");
@@ -2271,39 +2022,30 @@ function updateStatus()
     printMSG("Max number of lineups for your account: $maxLineups");
     //printMSG("Next suggested connect time: $nextConnectTime");
 
-    if ($useServiceAPI === TRUE)
-    {
+    if ($useServiceAPI === true) {
         printMSG("Updating settings via the Services API.");
         $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
             array("Key" => "MythFillSuggestedRunTime", "Value" => $nextConnectTime))->send();
         $request = $client->post("http://$host:6544/Myth/PutSetting", array(),
             array("Key" => "DataDirectMessage", "Value" => "Your subscription expires on $expires."))->send();
-    }
-    else
-    {
-        if ($isMythTV === TRUE)
-        {
+    } else {
+        if ($isMythTV === true) {
             setting("MythFillSuggestedRunTime", $nextConnectTime);
             setting("DataDirectMessage", "Your subscription expires on $expires.");
 
             $getLastUpdate = settingSD("SchedulesDirectLastUpdate");
 
-            if ($res["lastDataUpdate"] == $getLastUpdate)
-            {
+            if ($res["lastDataUpdate"] == $getLastUpdate) {
                 return ("No new data on server.");
-            }
-            else
-            {
+            } else {
                 printMSG("Updating settings using MySQL.");
                 settingSD("SchedulesDirectLastUpdate", $res["lastDataUpdate"]);
             }
         }
     }
 
-    if ($isMythTV === TRUE)
-    {
-        if (`which mythutil`)
-        {
+    if ($isMythTV === true) {
+        if (`which mythutil`) {
             exec("mythutil --clearcache"); // Force a clearcache to make sure that everyone is in sync.
         }
 
