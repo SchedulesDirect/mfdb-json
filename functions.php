@@ -491,7 +491,7 @@ function getBaseurl($isBeta)
 {
     if ($isBeta === true) {
         # Test server. Things may be broken there.
-        $baseurl = "https://json.schedulesdirect.org/20141201/";
+        $baseurl = "http://ec2-52-4-159-146.compute-1.amazonaws.com/";
         print "Using beta server.\n";
         $api = 20141201;
     } else {
