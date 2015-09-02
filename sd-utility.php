@@ -38,7 +38,6 @@ require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
-list ($api, $baseurl) = getBaseURL($isBeta);
 $channelLogoDirectory = getChannelLogoDirectory();
 
 $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
@@ -108,7 +107,6 @@ foreach ($options as $k => $v) {
     switch ($k) {
         case "beta":
             $isBeta = true;
-            list ($api, $baseurl) = getBaseURL($isBeta);
             break;
         case "countries":
             $printCountries = true;
@@ -200,6 +198,10 @@ if (($knownToBeBroken === true) AND ($forceRun === false)) {
 if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === false) {
     print "Can't determine directory for station logos. Please specify using --logo or use --skiplogo\n";
     exit;
+}
+
+if ($isBeta === true) {
+    list ($api, $baseurl) = getBaseURL(true);
 }
 
 print "Using timezone $tz\n";
