@@ -39,7 +39,6 @@ require_once "functions.php";
 use Guzzle\Http\Client;
 
 $channelLogoDirectory = getChannelLogoDirectory();
-$availableCountries = getListOfAvailableCountries();
 $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
 
 $helpText = <<< eol
@@ -181,6 +180,7 @@ foreach ($options as $k => $v) {
 }
 
 if ($printCountries === true) {
+    $availableCountries = getListOfAvailableCountries();
     printListOfAvailableCountries($printFancyTable);
     exit;
 }
