@@ -39,13 +39,8 @@ require_once "functions.php";
 use Guzzle\Http\Client;
 
 $channelLogoDirectory = getChannelLogoDirectory();
-
-$agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
-
-$client = new Guzzle\Http\Client($baseurl);
-$client->setUserAgent($agentString);
-
 $availableCountries = getListOfAvailableCountries();
+$agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
 
 $helpText = <<< eol
 The following options are available:
@@ -201,8 +196,11 @@ if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === false) {
 }
 
 if ($isBeta === true) {
-    list ($api, $baseurl) = getBaseURL(true);
+    $baseurl = getBaseURL(true);
 }
+
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
 
 print "Using timezone $tz\n";
 print "$agentString\n";

@@ -39,6 +39,7 @@ $sdStatus = "";
 $usernameFromDB = "";
 $useServiceAPI = false;
 $useSQLite = false;
+$api = 20141201;
 
 $tz = "UTC";
 date_default_timezone_set($tz);
@@ -493,14 +494,12 @@ function getBaseurl($isBeta)
         # Test server. Things may be broken there.
         $baseurl = "http://ec2-52-2-81-144.compute-1.amazonaws.com/20141201/";
         print "Using beta server.\n";
-        $api = 20141201;
     } else {
         $baseurl = "https://json.schedulesdirect.org/20141201/";
         print "Using production server.\n";
-        $api = 20141201;
     }
 
-    return array($api, $baseurl);
+    return $baseurl;
 }
 
 function checkForClientUpdate($client)
