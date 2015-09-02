@@ -491,7 +491,7 @@ function getBaseurl($isBeta)
 {
     if ($isBeta === true) {
         # Test server. Things may be broken there.
-        $baseurl = "http://ec2-52-4-159-146.compute-1.amazonaws.com/";
+        $baseurl = "http://ec2-52-2-81-144.compute-1.amazonaws.com/20141201/";
         print "Using beta server.\n";
         $api = 20141201;
     } else {
