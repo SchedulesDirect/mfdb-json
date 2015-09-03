@@ -1824,24 +1824,72 @@ function checkDatabase()
 
     if ($schemaVersion == "1")
     {
-        $dbhSD->exec("ALTER TABLE SDpeople ADD INDEX(name)");
+        $dbhSD->exec("ALTER TABLE people ADD INDEX(name)");
         settingSD("SchedulesDirectJSONschemaVersion", "2");
     }
 
     if ($schemaVersion == "2")
     {
-        $dbhSD->exec("RENAME TABLE SDMessages TO messages");
-        $dbhSD->exec("RENAME TABLE SDcredits TO credits");
-        $dbhSD->exec("RENAME TABLE SDimageCache TO imageCache");
-        $dbhSD->exec("RENAME TABLE SDlineupCache TO lineups");
-        $dbhSD->exec("RENAME TABLE SDpeople TO people");
-        $dbhSD->exec("RENAME TABLE SDprogramCache TO programs");
-        $dbhSD->exec("RENAME TABLE SDprogramgenres TO programGenres");
-        $dbhSD->exec("RENAME TABLE SDprogramrating TO programRatings");
-        $dbhSD->exec("RENAME TABLE SDschedule TO schedules");
-        $dbhSD->exec("ALTER TABLE schedules ADD column date CHAR(10) NOT NULL");
-        $dbhSD->exec("ALTER TABLE schedules DROP KEY sid");
-        $dbhSD->exec("ALTER TABLE schedules ADD UNIQUE KEY station_date (stationID,date)");
+	try {
+        	$dbhSD->exec("RENAME TABLE SDMessages TO messages");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("RENAME TABLE SDcredits TO credits");
+	} catch (PDOException $ex) {
+		//do nothing
+	}        
+	try {
+		$dbhSD->exec("RENAME TABLE SDimageCache TO imageCache");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("RENAME TABLE SDlineupCache TO lineups");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("RENAME TABLE SDpeople TO people");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("RENAME TABLE SDprogramCache TO programs");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("RENAME TABLE SDprogramgenres TO programGenres");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("RENAME TABLE SDprogramrating TO programRatings");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("RENAME TABLE SDschedule TO schedules");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("ALTER TABLE schedules ADD column date CHAR(10) NOT NULL");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("ALTER TABLE schedules DROP KEY sid");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
+	try {
+        	$dbhSD->exec("ALTER TABLE schedules ADD UNIQUE KEY station_date (stationID,date)");
+	} catch (PDOException $ex) {
+		//do nothing
+	}
         settingSD("SchedulesDirectJSONschemaVersion", "3");
     }
 }
