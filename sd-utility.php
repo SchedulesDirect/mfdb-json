@@ -1914,10 +1914,9 @@ atsc_minor_chan FROM channel where sourceid=:sid");
     $stmt->execute(array("sid" => $sourceIDtoExtract));
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $getDTVMultiplex = $dbh->prepare("SELECT transportid, frequency, modulation FROM dtv_multiplex WHERE mplexid=:mplexid");
+    $getDTVMultiplex = $dbh->prepare("SELECT * FROM dtv_multiplex WHERE mplexid=:mplexid");
 
-    if (count($result) == 0)
-    {
+    if (count($result) == 0) {
         print "Channel table is empty; nothing to do.\n";
 
         return;
@@ -1925,30 +1924,36 @@ atsc_minor_chan FROM channel where sourceid=:sid");
 
     $fhExtract = fopen("$lineupName.extract.conf", "w");
 
-    foreach ($result as $v)
-    {
+    foreach ($result as $v) {
         $getDTVMultiplex->execute(array("mplexid" => $v["mplexid"]));
-        $dtv = $getDTVMultiplex->fetchAll(PDO::FETCH_ASSOC);
+        $dtv = $getDTVMultiplex->fetch(PDO::FETCH_ASSOC);
 
-        $extractChannel[] = array("channel"        => $v["channum"],
-                                  "virtualChannel" => $v["freqid"],
-                                  "callsign"       => $v["callsign"],
-                                  "name"           => $v["name"],
-                                  "mplexID"        => $v["mplexid"],
-                                  "stationID"      => $v["xmltvid"],
-                                  "serviceID"      => $v["serviceid"],
-                                  "atscMajor"      => $v["atsc_major_chan"],
-                                  "atscMinor"      => $v["atsc_minor_chan"]);
+        $extractChannel[] = array(
+            "channel"        => $v["channum"],
+            "virtualChannel" => $v["freqid"],
+            "callsign"       => $v["callsign"],
+            "name"           => $v["name"],
+            "mplexID"        => $v["mplexid"],
+            "stationID"      => $v["xmltvid"],
+            "serviceID"      => $v["serviceid"],
+            "atscMajor"      => $v["atsc_major_chan"],
+            "atscMinor"      => $v["atsc_minor_chan"]
+        );
 
-        $extractMultiplex[$v["mplexid"]] = array("transportID" => $dtv[0]["transportid"],
-                                                 "frequency"   => $dtv[0]["frequency"],
-                                                 "modulation"  => strtoupper(
-                                                     str_replace("_", "", $dtv[0]["modulation"])
-                                                 )
+        $extractMultiplex[$v["mplexid"]] = array(
+            "transportID" => $dtv["transportid"],
+            "networkID"   => $dtv["networkid"],
+            "frequency"   => $dtv["frequency"],
+            "symbolRate"  => $dtv["symbolrate"],
+            "fec"         => $dtv["fec"],
+            "polarity"    => $dtv["polarity"],
+            "modulation"  => strtoupper(
+                str_replace("_", "", $dtv["modulation"])),
+            "transport"   => $dtv["mod_sys"]
         );
     }
 
-    $extractArray["version"] = "0.08";
+    $extractArray["version"] = "0.09";
     $extractArray["date"] = $todayDate;
     $extractArray["lineup"] = $lineupName;
     $extractArray["channel"] = $extractChannel;
