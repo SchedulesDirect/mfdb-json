@@ -195,9 +195,7 @@ if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === false) {
     exit;
 }
 
-if ($isBeta === true) {
-    $baseurl = getBaseURL(true);
-}
+$baseurl = getBaseURL($isBeta);
 
 $client = new Guzzle\Http\Client($baseurl);
 $client->setUserAgent($agentString);
