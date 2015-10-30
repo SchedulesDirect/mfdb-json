@@ -504,8 +504,10 @@ function getBaseurl($isBeta)
 
 function checkForClientUpdate($client)
 {
+    global $baseurl;
+
     try {
-        $response = $client->get("version/mfdb-json", array(), array())->send();
+        $response = $client->get("$baseurl/version/mfdb-json", array(), array())->send();
     } catch (Guzzle\Http\Exception\BadResponseException $e) {
         if ($e->getCode() != 200) {
             return (array(true, "ERROR"));
