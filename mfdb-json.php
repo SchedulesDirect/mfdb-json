@@ -46,7 +46,7 @@ $useScheduleFile = false;
 $useProgramFile = false;
 $whatToPurge = "";
 
-list ($api, $baseurl) = getBaseURL($isBeta);
+$baseurl = getBaseURL($isBeta);
 
 $agentString = "mfdb-json.php developer grabber API:$api v$scriptVersion/$scriptDate";
 
