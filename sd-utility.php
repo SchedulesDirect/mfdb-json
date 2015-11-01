@@ -1628,7 +1628,7 @@ function createDatabase($useSQLite)
     } else {
         printMSG("Creating Schedules Direct tables.");
 
-        $dbhSD->exec("DROP TABLE IF EXISTS settings, messages,credits,lineups,people,programGenres,
+        $dbhSD->exec("DROP TABLE IF EXISTS settings, messages,credits,lineups,programs,people,programGenres,
     programRating,schedules,imageCache");
 
         $dbhSD->exec(
