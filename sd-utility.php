@@ -289,7 +289,7 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        if ($e->getCode() == "HY000" OR $resetDatabase===true) {
+        if ($e->getCode() == "HY000") {
             createDatabase($useSQLite);
         } else {
             print "Got error connecting to database.\n";
@@ -297,6 +297,10 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
             print "Message: " . $e->getMessage() . "\n";
             exit;
         }
+    }
+
+    if ($resetDatabase === true) {
+        createDatabase($useSQLite);
     }
 
     if ($isMythTV === true) {
