@@ -1626,6 +1626,11 @@ function createDatabase($useSQLite)
         $dbhSD->exec("CREATE UNIQUE INDEX id ON imageCache (item,height,width)");
         $dbhSD->exec("CREATE INDEX type ON imageCache (type)");
     } else {
+        printMSG("Creating Schedules Direct tables.");
+
+        $dbhSD->exec("DROP TABLE IF EXISTS settings, messages,credits,lineups,people,programGenres,
+    programRating,schedules,imageCache");
+
         $dbhSD->exec(
             "CREATE TABLE `settings` (
                     `keyColumn` varchar(255) NOT NULL,
@@ -1633,11 +1638,6 @@ function createDatabase($useSQLite)
                     PRIMARY KEY (`keyColumn`),
                     UNIQUE KEY `keyColumn` (`keyColumn`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-
-        printMSG("Creating Schedules Direct tables.");
-
-        $dbhSD->exec("DROP TABLE IF EXISTS messages,credits,lineups,people,programGenres,
-    programRating,schedules,imageCache");
 
         $dbhSD->exec("CREATE TABLE `messages` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
