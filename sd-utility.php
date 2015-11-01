@@ -62,11 +62,11 @@ The following options are available:
 --skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
---reset\tReset the database.
+--reset\t\tReset the database.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --skipversion\tForce the program to run even if there's a version mismatch between the client and the server.
 --usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
---usesqlite\t\tUse a SQLite database to store Schedules Direct data. (Default: FALSE)
+--usesqlite\tUse a SQLite database to store Schedules Direct data. (Default: FALSE)
 --version\tPrint version information and exit.
 eol;
 
