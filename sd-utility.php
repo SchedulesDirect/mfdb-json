@@ -33,6 +33,7 @@ $printCountries = false;
 $justExtract = false;
 $updatedLineupsToRefresh = array();
 $needToStoreLogin = false;
+$resetDatabase = false;
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -61,6 +62,7 @@ The following options are available:
 --skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
+--reset\tReset the database.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --skipversion\tForce the program to run even if there's a version mismatch between the client and the server.
 --usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
@@ -88,6 +90,7 @@ $longoptions = array(
     "skiplogo",
     "username::",
     "password::",
+    "reset",
     "skipversion",
     "timezone::",
     "usedb",
@@ -159,6 +162,9 @@ foreach ($options as $k => $v) {
         case "password":
             $password = $v;
             $passwordHash = sha1($v);
+            break;
+        case "reset":
+            $resetDatabase = true;
             break;
         case "skipversion":
             $skipVersionCheck = true;
@@ -283,7 +289,7 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        if ($e->getCode() == "HY000") {
+        if ($e->getCode() == "HY000" OR $resetDatabase===true) {
             createDatabase($useSQLite);
         } else {
             print "Got error connecting to database.\n";
