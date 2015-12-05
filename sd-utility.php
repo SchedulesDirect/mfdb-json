@@ -1544,6 +1544,7 @@ function createDatabase($useSQLite)
 {
     global $dbhSD;
     $createBaseTables = false;
+    global $schemaVersion;
 
     printMSG("Creating settings table.");
 
