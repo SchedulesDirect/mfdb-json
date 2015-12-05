@@ -18,26 +18,28 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.27";
-$scriptDate = "2015-07-06";
-$knownToBeBroken = FALSE;
-$skipVersionCheck = FALSE;
+$scriptVersion = "0.28";
+$scriptDate = "2015-12-04";
+$knownToBeBroken = false;
+$skipVersionCheck = false;
 
-$dbName = NULL;
-$dbUser = NULL;
-$dbPassword = NULL;
+$dbName = null;
+$dbUser = null;
+$dbPassword = null;
 $dbHostSchedulesDirectData = "localhost";
-$dbWithoutMythtv = FALSE;
-$debug = FALSE;
-$forceRun = FALSE;
-$isBeta = FALSE;
-$isMythTV = TRUE;
+$dbWithoutMythtv = false;
+$debug = false;
+$forceRun = false;
+$isBeta = false;
+$isMythTV = true;
 $passwordFromDB = "";
-$quiet = FALSE;
+$quiet = false;
 $schemaVersion = "3";
 $sdStatus = "";
 $usernameFromDB = "";
-$useServiceAPI = FALSE;
+$useServiceAPI = false;
+$useSQLite = false;
+$api = 20141201;
 
 $tz = "UTC";
 date_default_timezone_set($tz);
@@ -53,70 +55,61 @@ function getToken($username, $passwordHash)
 
     $body = json_encode(array("username" => $username, "password" => $passwordHash));
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "getToken: Sending $body\n";
     }
 
-    try
-    {
+    try {
         $response = $client->post("token", array(), $body)->send();
-    } catch (Guzzle\Http\Exception\ClientErrorResponseException $e)
-    {
+    } catch (Guzzle\Http\Exception\ClientErrorResponseException $e) {
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return array(TRUE, "ERROR");
-    } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
-    {
+        return array(true, "ERROR");
+    } catch (Guzzle\Http\Exception\ServerErrorResponseException $e) {
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return array(TRUE, "ERROR");
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
+        return array(true, "ERROR");
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return array(TRUE, "ERROR");
-    } catch (Guzzle\HTTP\Exception\RequestException $e)
-    {
+        return array(true, "ERROR");
+    } catch (Guzzle\HTTP\Exception\RequestException $e) {
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return array(TRUE, "ERROR");
+        return array(true, "ERROR");
 
-    } catch (Exception $e)
-    {
+    } catch (Exception $e) {
         print "getToken:HCF. Uncaught exception.\n";
         $errorReq = $e->getRequest();
         $errorResp = $e->getResponse();
         $errorMessage = $e->getMessage();
         exceptionErrorDump($errorReq, $errorResp, $errorMessage);
 
-        return array(TRUE, "ERROR");
+        return array(true, "ERROR");
     }
 
     $res = array();
     $res = $response->json();
 
-    if (json_last_error() === TRUE)
-    {
+    if (json_last_error() === true) {
         print "JSON decode error:\n";
         var_dump($response);
         exit;
     }
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "\n\n******************************************\n";
         print "Raw headers:\n";
         print $response->getRawHeaders();
@@ -127,9 +120,8 @@ function getToken($username, $passwordHash)
         print "******************************************\n";
     }
 
-    if ($res["code"] == 0)
-    {
-        return array(FALSE, $res["token"]);
+    if ($res["code"] == 0) {
+        return array(false, $res["token"]);
     }
 
     print "Response: {$res["response"]}\n";
@@ -137,7 +129,7 @@ function getToken($username, $passwordHash)
     print "serverID: {$res["serverID"]}\n";
     print "message: {$res["message"]}\n";
 
-    return array(TRUE, "ERROR");
+    return array(true, "ERROR");
 }
 
 function getStatus()
@@ -146,21 +138,17 @@ function getStatus()
     global $token;
     global $client;
 
-    try
-    {
+    try {
         $response = $client->get("status", array("token" => $token), array())->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        if ($e->getCode() != 200)
-        {
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        if ($e->getCode() != 200) {
             return ("ERROR");
         }
     }
 
     $res = $response->json();
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "\n\n******************************************\n";
         print "Raw headers:\n";
         print $response->getRawHeaders();
@@ -183,23 +171,18 @@ function printStatus($sdStatus)
 
     print "\nStatus messages from Schedules Direct:\n";
 
-    if ($sdStatus["code"] == 0)
-    {
+    if ($sdStatus["code"] == 0) {
         $expires = $sdStatus["account"]["expires"];
         $maxHeadends = $sdStatus["account"]["maxLineups"];
 
-        foreach ($sdStatus["account"]["messages"] as $a)
-        {
+        foreach ($sdStatus["account"]["messages"] as $a) {
             print "MessageID: " . $a["messageID"] . " : " . $a["date"] . " : " . $a["message"] . "\n";
         }
 
-        foreach ($sdStatus["systemStatus"] as $a)
-        {
+        foreach ($sdStatus["systemStatus"] as $a) {
             print $a["date"] . " : " . $a["status"] . " : " . $a["message"] . "\n";
         }
-    }
-    else
-    {
+    } else {
         print "Received error response from server!\n";
         print "ServerID: " . $sdStatus["serverID"] . "\n";
         print "Message: " . $sdStatus["message"] . "\n";
@@ -211,30 +194,25 @@ function printStatus($sdStatus)
     print "Last data refresh: " . $sdStatus["lastDataUpdate"] . "\n";
     print "Account expires: $expires\n";
     print "Max number of headends for your account: $maxHeadends\n";
-    //print "Next suggested connect time: $nextConnectTime\n";
 
     $videosourceModifiedArray = array();
 
-    if ($isMythTV === TRUE)
-    {
+    if ($isMythTV === true) {
         $videosourceModifiedJSON = settingSD("localLineupLastModified");
 
-        if ($videosourceModifiedJSON)
-        {
-            $videosourceModifiedArray = json_decode($videosourceModifiedJSON, TRUE);
+        if ($videosourceModifiedJSON) {
+            $videosourceModifiedArray = json_decode($videosourceModifiedJSON, true);
         }
     }
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "isMythTV status is:\n";
         var_dump($isMythTV);
         print "\n\nLineup array is:\n";
         var_dump($sdStatus);
     }
 
-    if (count($sdStatus["lineups"]) == 0)
-    {
+    if (count($sdStatus["lineups"]) == 0) {
         print "\nWARNING: *** No lineups configured at Schedules Direct. ***\n";
 
         return;
@@ -242,135 +220,109 @@ function printStatus($sdStatus)
 
     print "The following lineups are in your account at Schedules Direct:\n\n";
 
-    if ($isMythTV === TRUE)
-    {
-        if ($printFancyTable === TRUE)
-        {
+    if ($isMythTV === true) {
+        if ($printFancyTable === true) {
             $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20, 25, 7)));
-            $lineupData->appendRow(array("Number", "Lineup", "Server modified", "MythTV videosource update",
-                                         "Status"));
-        }
-        else
-        {
+            $lineupData->appendRow(array(
+                "Number",
+                "Lineup",
+                "Server modified",
+                "MythTV videosource update",
+                "Status"
+            ));
+        } else {
             print "Number\tLineup\tServer modified\tMythTV videosource update\tStatus\n";
         }
-    }
-    else
-    {
-        if ($printFancyTable === TRUE)
-        {
+    } else {
+        if ($printFancyTable === true) {
             $lineupData = new Zend\Text\Table\Table(array('columnWidths' => array(6, 20, 20)));
             $lineupData->appendRow(array("Number", "Lineup", "Server modified"));
-        }
-        else
-        {
+        } else {
             print "Number\tLineup\tServer modified\n";
         }
     }
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "Temp printout.\n";
         print $lineupData;
     }
 
-    foreach ($sdStatus["lineups"] as $lineupNumber => $v)
-    {
+    foreach ($sdStatus["lineups"] as $lineupNumber => $v) {
         $lineup = $v["lineup"];
         $serverModified = $v["modified"];
-        if (isset($v["isDeleted"]) === TRUE)
-        {
-            $lineupIsDeleted = TRUE;
-        }
-        else
-        {
-            $lineupIsDeleted = FALSE;
+        if (isset($v["isDeleted"]) === true) {
+            $lineupIsDeleted = true;
+        } else {
+            $lineupIsDeleted = false;
         }
 
-        if ($debug === TRUE)
-        {
+        if ($debug === true) {
             print "Raw lineup:\n";
             var_dump($v);
         }
 
-        if ($isMythTV === TRUE)
-        {
-            if (count($videosourceModifiedArray) != 0)
-            {
-                if (isset($videosourceModifiedArray[$lineup]) === TRUE)
-                {
+        if ($isMythTV === true) {
+            if (count($videosourceModifiedArray) != 0) {
+                if (isset($videosourceModifiedArray[$lineup]) === true) {
                     $mythModified = $videosourceModifiedArray[$lineup];
-                }
-                else
-                {
+                } else {
                     $mythModified = "";
                 }
-            }
-            else
-            {
+            } else {
                 $mythModified = "";
             }
 
-            if ($serverModified > $mythModified)
-            {
-                if ($lineupIsDeleted === FALSE)
-                {
+            if ($serverModified > $mythModified) {
+                if ($lineupIsDeleted === false) {
                     $updatedLineupsToRefresh[$lineup] = $serverModified;
                 }
 
-                if ($printFancyTable)
-                {
-                    if ($lineupIsDeleted === FALSE)
-                    {
-                        $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
-                                                     "Updated"));
-                    }
-                    else
-                    {
-                        $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified,
-                                                     "DELETED"));
+                if ($printFancyTable) {
+                    if ($lineupIsDeleted === false) {
+                        $lineupData->appendRow(array(
+                            "$lineupNumber",
+                            $lineup,
+                            $serverModified,
+                            $mythModified,
+                            "Updated"
+                        ));
+                    } else {
+                        $lineupData->appendRow(array(
+                            "$lineupNumber",
+                            $lineup,
+                            $serverModified,
+                            $mythModified,
+                            "DELETED"
+                        ));
                     }
                     continue;
-                }
-                else
-                {
+                } else {
                     print "$lineupNumber\t$lineup\t$serverModified\n";
                 }
             }
 
-            if ($printFancyTable === TRUE)
-            {
+            if ($printFancyTable === true) {
                 $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified, $mythModified, ""));
-            }
-            else
-            {
+            } else {
                 print "$lineupNumber\t$lineup\t$serverModified\t$mythModified\n";
             }
-        }
-        else
-        {
-            if ($printFancyTable === TRUE)
-            {
+        } else {
+            if ($printFancyTable === true) {
                 $lineupData->appendRow(array("$lineupNumber", $lineup, $serverModified));
-            }
-            else
-            {
+            } else {
                 print "$lineupNumber\t$lineup\t$serverModified\n";
             }
-            if ($lineupIsDeleted === FALSE)
-            {
+            if ($lineupIsDeleted === false) {
                 $updatedLineupsToRefresh[$lineup] = $serverModified;
             }
         }
     }
 
-    if ($printFancyTable === TRUE)
-    {
+    if ($printFancyTable === true) {
         print $lineupData;
     }
 
-    if (count($updatedLineupsToRefresh) != 0)
-    {
+    if (count($updatedLineupsToRefresh) != 0) {
         updateLocalLineupCache($updatedLineupsToRefresh);
     }
 }
@@ -394,26 +346,21 @@ function checkForServiceAPI()
 
     printMSG("Checking for MythTV Service API.");
 
-    try
-    {
+    try {
         $request = $client->get("http://$host:6544/Myth/GetHostName")->send();
-    } catch (Guzzle\Http\Exception\ClientErrorResponseException $e)
-    {
-        return (FALSE);
-    } catch (Guzzle\Http\Exception\ServerErrorResponseException $e)
-    {
-        return (FALSE);
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        return (FALSE);
-    } catch (Exception $e)
-    {
-        return (FALSE);
+    } catch (Guzzle\Http\Exception\ClientErrorResponseException $e) {
+        return (false);
+    } catch (Guzzle\Http\Exception\ServerErrorResponseException $e) {
+        return (false);
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        return (false);
+    } catch (Exception $e) {
+        return (false);
     }
 
     printMSG("Found Service API.");
 
-    return (TRUE);
+    return (true);
 }
 
 function debugMSG($str)
@@ -423,8 +370,7 @@ function debugMSG($str)
 
     $str = date("Y-m-d H:i:s") . ":$str";
 
-    if ($quiet === FALSE)
-    {
+    if ($quiet === false) {
         print "$str\n";
     }
 
@@ -438,23 +384,18 @@ function printMSG($str)
     global $quiet;
     global $printTimeStamp;
 
-    if ($printTimeStamp === TRUE)
-    {
+    if ($printTimeStamp === true) {
         $str = date("Y-m-d H:i:s") . ":$str";
     }
 
-    if ($quiet === FALSE)
-    {
+    if ($quiet === false) {
         print "$str\n";
     }
 
-    if (substr($str, -1) == "\r")
-    {
+    if (substr($str, -1) == "\r") {
         $str = str_replace("\r", "\n", $str);
         fwrite($fh_log, $str); // We don't need a double CR
-    }
-    else
-    {
+    } else {
         fwrite($fh_log, "$str\n");
     }
 
@@ -471,18 +412,14 @@ function setting()
 
     $key = func_get_arg(0);
 
-    if (func_num_args() == 1)
-    {
+    if (func_num_args() == 1) {
         $stmt = $dbh->prepare("SELECT data FROM settings WHERE value = :key");
         $stmt->execute(array("key" => $key));
         $result = $stmt->fetchColumn();
 
-        if ($result === FALSE)
-        {
-            return FALSE;
-        }
-        else
-        {
+        if ($result === false) {
+            return false;
+        } else {
             return $result;
         }
     }
@@ -491,12 +428,9 @@ function setting()
 
     $keyAlreadyExists = setting($key);
 
-    if ($keyAlreadyExists === FALSE)
-    {
+    if ($keyAlreadyExists === false) {
         $stmt = $dbh->prepare("INSERT INTO settings(value,data) VALUES(:key,:value)");
-    }
-    else
-    {
+    } else {
         $stmt = $dbh->prepare("UPDATE settings SET data=:value WHERE value=:key");
         /*
          * This would be a whole lot less obtuse if settings table had two columns:
@@ -517,74 +451,75 @@ function settingSD()
      */
 
     global $dbhSD;
+    global $useSQLite;
 
     $key = func_get_arg(0);
 
-    if (func_num_args() == 1)
-    {
+    if (func_num_args() == 1) {
         $stmt = $dbhSD->prepare("SELECT valueColumn FROM settings WHERE keyColumn = :key");
         $stmt->execute(array("key" => $key));
         $result = $stmt->fetchColumn();
-        if ($result === FALSE)
-        {
-            return FALSE;
-        }
-        else
-        {
+        if ($result === false) {
+            return false;
+        } else {
             return $result;
         }
     }
 
     $value = func_get_arg(1);
 
-    $stmt = $dbhSD->prepare("INSERT INTO settings(keyColumn,valueColumn) VALUES(:key,:value)
+    if ($useSQLite === false) {
+        $stmt = $dbhSD->prepare("INSERT INTO settings(keyColumn,valueColumn) VALUES(:key,:value)
     ON DUPLICATE KEY UPDATE valueColumn=:value");
+        $stmt->execute(array("key" => $key, "value" => $value));
+    } else {
+        $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO settings(keyColumn,valueColumn) VALUES(:key,:value)");
+        $stmt->execute(array("key" => $key, "value" => $value));
 
-    $stmt->execute(array("key" => $key, "value" => $value));
+        /*
+         * If the INSERT failed, then the key already exists, so we need to update it.
+         */
 
+        $stmt = $dbhSD->prepare("UPDATE settings SET valueColumn=:value WHERE keyColumn=:key");
+        $stmt->execute(array("key" => $key, "value" => $value));
+    }
+
+    return;
 }
 
 function getBaseurl($isBeta)
 {
-    if ($isBeta === TRUE)
-    {
+    if ($isBeta === true) {
         # Test server. Things may be broken there.
-        $baseurl = "https://json.schedulesdirect.org/20141201/";
+        $baseurl = "http://ec2-52-2-81-144.compute-1.amazonaws.com/20141201/";
         print "Using beta server.\n";
-        $api = 20141201;
-    }
-    else
-    {
+    } else {
         $baseurl = "https://json.schedulesdirect.org/20141201/";
         print "Using production server.\n";
-        $api = 20141201;
     }
 
-    return array($api, $baseurl);
+    return $baseurl;
 }
 
 function checkForClientUpdate($client)
 {
-    try
-    {
-        $response = $client->get("version/mfdb-json", array(), array())->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        if ($e->getCode() != 200)
-        {
-            return (array(TRUE, "ERROR"));
+    global $baseurl;
+
+    try {
+        $response = $client->get($baseurl . "version/mfdb-json", array(), array())->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        if ($e->getCode() != 200) {
+            return (array(true, "ERROR"));
         }
     }
 
     $res = $response->json();
 
-    if ($res["code"] == 0)
-    {
-        return (array(FALSE, $res["version"]));
+    if ($res["code"] == 0) {
+        return (array(false, $res["version"]));
     }
 
-    if ($res["code"] == 1005)
-    {
+    if ($res["code"] == 1005) {
         print "Got error message from server: unknown client.\n";
 
         return (array(1005, ""));
@@ -597,8 +532,7 @@ function getLoginFromFiles()
     $localFile = file_exists(getenv("HOME") . "/.mythtv/config.xml");
     $xml = "";
 
-    if ($localFile === TRUE)
-    {
+    if ($localFile === true) {
         printMSG("Using database information from ~/.mythtv/config.xml");
         $xml = simplexml_load_file(getenv("HOME") . "/.mythtv/config.xml");
     }
@@ -607,14 +541,12 @@ function getLoginFromFiles()
      * We want to use the file in the local directory first if it exists.
      */
 
-    if ((isset($xml) === FALSE) AND ($etcFile === TRUE))
-    {
+    if ((isset($xml) === false) AND ($etcFile === true)) {
         printMSG("Using database information from /etc/mythtv/config.xml");
         $xml = simplexml_load_file("/etc/mythtv/config.xml");
     }
 
-    if (isset($xml) === FALSE)
-    {
+    if (isset($xml) === false) {
         return (array("NONE", "", "", ""));
     }
 
@@ -622,21 +554,21 @@ function getLoginFromFiles()
      * xml to array.
      */
 
-    $foo = json_decode(json_encode($xml), TRUE);
+    $foo = json_decode(json_encode($xml), true);
 
-    if (count($foo) != 0)
-    {
-        if (isset($foo["Database"]) === TRUE)
-        {
-            return array($foo["Database"]["Host"], $foo["Database"]["DatabaseName"], $foo["Database"]["UserName"],
-                         $foo["Database"]["Password"]);
-        }
-        else
-        {
+    if (count($foo) != 0) {
+        if (isset($foo["Database"]) === true) {
+            return array(
+                $foo["Database"]["Host"],
+                $foo["Database"]["DatabaseName"],
+                $foo["Database"]["UserName"],
+                $foo["Database"]["Password"]
+            );
+        } else {
             printMSG("Fatal: couldn't parse XML to JSON.");
             printMSG("Open ticket with grabber@schedulesdirect.org and send the following:");
             var_dump($foo);
-            printMSG(print_r($foo, TRUE));
+            printMSG(print_r($foo, true));
             exit;
         }
     }
@@ -644,8 +576,7 @@ function getLoginFromFiles()
 
 function checkForOS()
 {
-    if (PHP_OS == "WINNT")
-    {
+    if (PHP_OS == "WINNT") {
         function readline($string)
         {
             echo $string;
@@ -667,8 +598,13 @@ function getMplexID($frequency, $polarization, $modulation, $networkid, $transpo
       networkid=:networkID AND
       transportid=:transportID
       ");
-    $stmt->execute(array("frequency" => $frequency, "polarization" => $polarization, "modulation" => $modulation,
-                         "networkID" => $networkid, "transportID" => $transportid));
+    $stmt->execute(array(
+        "frequency"    => $frequency,
+        "polarization" => $polarization,
+        "modulation"   => $modulation,
+        "networkID"    => $networkid,
+        "transportID"  => $transportid
+    ));
 
     $stmt->fetchColumn();
 }

@@ -21,32 +21,26 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$done = FALSE;
-$skipChannelLogo = FALSE;
-$forceLogoUpdate = FALSE;
+$done = false;
+$skipChannelLogo = false;
+$forceLogoUpdate = false;
 $schedulesDirectLineups = array();
 $username = "";
 $password = "";
 $passwordHash = "";
-$printFancyTable = TRUE;
-$printCountries = FALSE;
-$justExtract = FALSE;
+$printFancyTable = true;
+$printCountries = false;
+$justExtract = false;
 $updatedLineupsToRefresh = array();
-$needToStoreLogin = FALSE;
+$needToStoreLogin = false;
+$resetDatabase = false;
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
 use Guzzle\Http\Client;
 
-list ($api, $baseurl) = getBaseURL($isBeta);
 $channelLogoDirectory = getChannelLogoDirectory();
-
 $agentString = "sd-utility.php utility program API:$api v$scriptVersion/$scriptDate";
-
-$client = new Guzzle\Http\Client($baseurl);
-$client->setUserAgent($agentString);
-
-$availableCountries = getListOfAvailableCountries();
 
 $helpText = <<< eol
 The following options are available:
@@ -68,31 +62,54 @@ The following options are available:
 --skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
 --password=\tSchedules Direct password.
+--reset\t\tReset the database.
 --timezone=\tSet the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:$tz)
 --skipversion\tForce the program to run even if there's a version mismatch between the client and the server.
 --usedb\t\tUse a database to store data, even if you're not running MythTV. (Default: FALSE)
+--usesqlite\tUse a SQLite database to store Schedules Direct data. (Default: FALSE)
 --version\tPrint version information and exit.
 eol;
 
-$longoptions = array("beta", "countries", "debug", "extract", "forcelogo", "forcerun", "help", "host::",
-                     "dbname::", "dbuser::", "dbpassword::", "dbhost::", "dbhostsd::", "logo::", "notfancy", "nomyth",
-                     "skiplogo", "username::", "password::", "skipversion", "timezone::", "usedb", "version");
+$longoptions = array(
+    "beta",
+    "countries",
+    "debug",
+    "extract",
+    "forcelogo",
+    "forcerun",
+    "help",
+    "host::",
+    "dbname::",
+    "dbuser::",
+    "dbpassword::",
+    "dbhost::",
+    "dbhostsd::",
+    "logo::",
+    "notfancy",
+    "nomyth",
+    "skiplogo",
+    "username::",
+    "password::",
+    "reset",
+    "skipversion",
+    "timezone::",
+    "usedb",
+    "usesqlite",
+    "version"
+);
 
 $options = getopt("h::", $longoptions);
-foreach ($options as $k => $v)
-{
+foreach ($options as $k => $v) {
     $k = strtolower($k);
-    switch ($k)
-    {
+    switch ($k) {
         case "beta":
-            $isBeta = TRUE;
-            list ($api, $baseurl) = getBaseURL($isBeta);
+            $isBeta = true;
             break;
         case "countries":
-            $printCountries = TRUE;
+            $printCountries = true;
             break;
         case "debug":
-            $debug = TRUE;
+            $debug = true;
             break;
         case "help":
         case "h":
@@ -116,13 +133,13 @@ foreach ($options as $k => $v)
             $dbHostSchedulesDirectData = $v;
             break;
         case "extract":
-            $justExtract = TRUE;
+            $justExtract = true;
             break;
         case "forcerun":
-            $forceRun = TRUE;
+            $forceRun = true;
             break;
         case "forcelogo":
-            $forceLogoUpdate = TRUE;
+            $forceLogoUpdate = true;
             break;
         case "host":
             $host = $v;
@@ -131,13 +148,13 @@ foreach ($options as $k => $v)
             $channelLogoDirectory = $v;
             break;
         case "nomyth":
-            $isMythTV = FALSE;
+            $isMythTV = false;
             break;
         case "notfancy":
-            $printFancyTable = FALSE;
+            $printFancyTable = false;
             break;
         case "skiplogo":
-            $skipChannelLogo = TRUE;
+            $skipChannelLogo = true;
             break;
         case "username":
             $username = $v;
@@ -146,14 +163,20 @@ foreach ($options as $k => $v)
             $password = $v;
             $passwordHash = sha1($v);
             break;
+        case "reset":
+            $resetDatabase = true;
+            break;
         case "skipversion":
-            $skipVersionCheck = TRUE;
+            $skipVersionCheck = true;
             break;
         case "timezone":
             date_default_timezone_set($v);
             break;
         case "usedb":
-            $dbWithoutMythtv = TRUE;
+            $dbWithoutMythtv = true;
+            break;
+        case "usesqlite":
+            $useSQLite = true;
             break;
         case "version":
             print "$agentString\n\n";
@@ -162,40 +185,40 @@ foreach ($options as $k => $v)
     }
 }
 
-if ($printCountries === TRUE)
-{
+if ($printCountries === true) {
+    $availableCountries = getListOfAvailableCountries();
     printListOfAvailableCountries($printFancyTable);
     exit;
 }
 
-if (($knownToBeBroken === TRUE) AND ($forceRun === FALSE))
-{
+if (($knownToBeBroken === true) AND ($forceRun === false)) {
     print "This version is known to be broken and --forcerun not specified. Exiting.\n";
     exit;
 }
 
-if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === FALSE)
-{
+if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === false) {
     print "Can't determine directory for station logos. Please specify using --logo or use --skiplogo\n";
     exit;
 }
 
+$baseurl = getBaseURL($isBeta);
+
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
+
 print "Using timezone $tz\n";
 print "$agentString\n";
 
-if ($isMythTV === TRUE)
-{
+if ($isMythTV === true) {
     if
     (
-        (isset($dbHost) === FALSE) AND
-        (isset($dbName) === FALSE) AND
-        (isset($dbUser) === FALSE) AND
-        (isset($dbPassword) === FALSE)
-    )
-    {
+        (isset($dbHost) === false) AND
+        (isset($dbName) === false) AND
+        (isset($dbUser) === false) AND
+        (isset($dbPassword) === false)
+    ) {
         list($dbHost, $dbName, $dbUser, $dbPassword) = getLoginFromFiles();
-        if ($dbHost == "NONE")
-        {
+        if ($dbHost == "NONE") {
             $dbUser = "mythtv";
             $dbPassword = "mythtv";
             $dbHost = "localhost";
@@ -205,82 +228,50 @@ if ($isMythTV === TRUE)
     }
 }
 
-if (isset($dbHost) === FALSE)
-{
+if (isset($dbHost) === false) {
     $dbHost = "localhost";
 }
 
-if (isset($dbName) === FALSE)
-{
+if (isset($dbName) === false) {
     $dbName = "mythconverg";
 }
 
-if (isset($dbUser) === FALSE)
-{
+if (isset($dbUser) === false) {
     $dbUser = "mythtv";
 }
 
-if (isset($dbPassword) === FALSE)
-{
+if (isset($dbPassword) === false) {
     $dbPassword = "mythtv";
 }
 
-if (isset($host) === FALSE)
-{
+if (isset($host) === false) {
     $host = "localhost";
 }
 
-if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
-{
-    print "Connecting to Schedules Direct database.\n";
-    try
-    {
-        $dbhSD = new PDO("mysql:host=$dbHostSchedulesDirectData;dbname=schedulesdirect;charset=utf8", "sd", "sd");
-        $dbhSD->exec("SET CHARACTER SET utf8");
+if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
+    printMSG("Connecting to Schedules Direct database.");
+
+    if ($useSQLite === true) {
+        $dbhSD = new PDO("sqlite:schedulesdirect.db");
         $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e)
-    {
-        if ($e->getCode() == 2002)
-        {
-            print "Could not connect to database:\n" . $e->getMessage() . "\n";
-            exit;
-        }
-
-        if ($e->getCode() == 1049)
-        {
-            print "Initial database not created for Schedules Direct tables.\n";
-            print "Please run\nmysql -uroot -p < sd.sql\n";
-            print "Then re-run this script.\n";
-            print "Please check the updated README.md for more information.\n";
-            exit;
-        }
-        else
-        {
-            print "Got error connecting to database.\n";
-            print "Code: " . $e->getCode() . "\n";
-            print "Message: " . $e->getMessage() . "\n";
-            exit;
-        }
-    }
-
-    if ($isMythTV === TRUE)
-    {
-        print "Connecting to MythTV database.\n";
-        try
-        {
-            $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword);
-            $dbh->exec("SET CHARACTER SET utf8");
-            $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e)
-        {
-            if ($e->getCode() == 2002)
-            {
+    } else {
+        try {
+            $dbhSD = new PDO("mysql:host=$dbHostSchedulesDirectData;dbname=schedulesdirect;charset=utf8", "sd", "sd");
+            $dbhSD->exec("SET CHARACTER SET utf8");
+            $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            if ($e->getCode() == 2002) {
                 print "Could not connect to database:\n" . $e->getMessage() . "\n";
-                print "If you're running the grabber as standalone, use --nomyth\n";
                 exit;
             }
-            else
-            {
+
+            if ($e->getCode() == 1049) {
+                print "Initial database not created for Schedules Direct tables.\n";
+                print "Please run\nmysql -uroot -p < sd.sql\n";
+                print "Then re-run this script.\n";
+                print "Please check the updated README.md for more information.\n";
+                exit;
+            } else {
                 print "Got error connecting to database.\n";
                 print "Code: " . $e->getCode() . "\n";
                 print "Message: " . $e->getMessage() . "\n";
@@ -289,42 +280,76 @@ if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
         }
     }
 
-    if ($justExtract === FALSE)
-    {
-        checkDatabase();
+    /*
+     * OK, so we have a connection, but that doesn't mean that there's anything in the database yet.
+     */
+
+    try {
+        $stmt = $dbhSD->prepare("SELECT * FROM settings");
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        if ($e->getCode() == "HY000") {
+            createDatabase($useSQLite);
+        } else {
+            print "Got error connecting to database.\n";
+            print "Code: " . $e->getCode() . "\n";
+            print "Message: " . $e->getMessage() . "\n";
+            exit;
+        }
     }
-    else
-    {
-        if (isset($dbh) === FALSE)
-        {
+
+    if ($resetDatabase === true) {
+        createDatabase($useSQLite);
+    }
+
+    if ($isMythTV === true) {
+        print "Connecting to MythTV database.\n";
+        try {
+            $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword);
+            $dbh->exec("SET CHARACTER SET utf8");
+            $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            if ($e->getCode() == 2002) {
+                print "Could not connect to database:\n" . $e->getMessage() . "\n";
+                print "If you're running the grabber as standalone, use --nomyth\n";
+                exit;
+            } else {
+                print "Got error connecting to database.\n";
+                print "Code: " . $e->getCode() . "\n";
+                print "Message: " . $e->getMessage() . "\n";
+                exit;
+            }
+        }
+    }
+
+    if ($justExtract === true) {
+        if (isset($dbh) === false) {
             print "Don't have dbh. Exiting.\n";
             exit;
         }
 
-        if (isset($dbhSD) === FALSE)
-        {
+        if (isset($dbhSD) === false) {
             print "Don't have dbhSD. Exiting.\n";
             exit;
         }
 
         displayLocalVideoSources();
         $sourceIDtoExtract = readline("Which sourceid do you want to extract:>");
-        if ($sourceIDtoExtract != "")
-        {
+        if ($sourceIDtoExtract != "") {
             extractData($sourceIDtoExtract);
         }
         exit;
     }
+
+    checkForSchemaUpdate($useSQLite);
 }
 
-if ($skipChannelLogo === FALSE)
-{
-    if (file_exists($channelLogoDirectory) === FALSE)
-    {
+if ($skipChannelLogo === false) {
+    if (file_exists($channelLogoDirectory) === false) {
         $result = @mkdir($channelLogoDirectory);
 
-        if ($result === FALSE)
-        {
+        if ($result === false) {
             print "Could not create $channelLogoDirectory\n";
             print "Use --logo to specify directory, or --skiplogo to bypass channel logos.\n";
             exit;
@@ -332,147 +357,115 @@ if ($skipChannelLogo === FALSE)
     }
 }
 
-if ($skipVersionCheck === FALSE)
-{
+if ($skipVersionCheck === false) {
     print "Checking to see if we're running the latest client.\n";
 
     list($hadError, $serverVersion) = checkForClientUpdate($client);
 
-    if ($hadError !== FALSE)
-    {
+    if ($hadError !== false) {
         print "Received error response from server. Exiting.\n";
         exit;
     }
 
-    if ($serverVersion != $scriptVersion)
-    {
+    if ($serverVersion != $scriptVersion) {
         print "***Version mismatch.***\n";
         print "Server version: $serverVersion\n";
         print "Our version: $scriptVersion\n";
-        if ($forceRun === FALSE)
-        {
+        if ($forceRun === false) {
             print "Exiting. Do you need to run 'git pull' to refresh?\n";
             print "Restart script with --skipversion to ignore mismatch.\n";
             exit;
-        }
-        else
-        {
+        } else {
             print "Continuing because of --skipversion.\n";
         }
     }
 }
 
-if ($isMythTV === TRUE)
-{
+if ($isMythTV === true) {
     $useServiceAPI = checkForServiceAPI();
 }
 
-if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
-{
+if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
     $userLoginInformation = settingSD("SchedulesDirectLogin");
 
-    if ($userLoginInformation !== FALSE)
-    {
-        $responseJSON = json_decode($userLoginInformation, TRUE);
+    if ($userLoginInformation !== false) {
+        $responseJSON = json_decode($userLoginInformation, true);
         $usernameFromDB = $responseJSON["username"];
         $passwordFromDB = $responseJSON["password"];
     }
-}
-else
-{
-    if (file_exists("sd.json.conf") === TRUE)
-    {
+} else {
+    if (file_exists("sd.json.conf") === true) {
         $userLoginInformation = file("sd.json.conf");
-        $responseJSON = json_decode($userLoginInformation[0], TRUE);
+        $responseJSON = json_decode($userLoginInformation[0], true);
         $usernameFromDB = $responseJSON["username"];
         $passwordFromDB = $responseJSON["password"];
     }
 }
 
-if ($username == "")
-{
-    if ($usernameFromDB == "")
-    {
+if ($username == "") {
+    if ($usernameFromDB == "") {
         $username = readline("Schedules Direct username:");
-        $needToStoreLogin = TRUE;
-    }
-    else
-    {
+        $needToStoreLogin = true;
+    } else {
         $username = $usernameFromDB;
     }
-}
-else
-{
-    $needToStoreLogin = TRUE;
+} else {
+    $needToStoreLogin = true;
 }
 
-if ($password == "")
-{
-    if ($passwordFromDB == "")
-    {
+if ($password == "") {
+    if ($passwordFromDB == "") {
         $password = readline("Schedules Direct password:");
         $passwordHash = sha1($password);
-        $needToStoreLogin = TRUE;
-    }
-    else
-    {
+        $needToStoreLogin = true;
+    } else {
         $password = $passwordFromDB;
         $passwordHash = sha1($password);
     }
-}
-else
-{
+} else {
     $passwordHash = sha1($password);
-    $needToStoreLogin = TRUE;
+    $needToStoreLogin = true;
 }
 
 print "Logging into Schedules Direct.\n";
 list($hadError, $token) = getToken($username, $passwordHash);
 
-if ($hadError === TRUE)
-{
+if ($hadError === true) {
     printMSG("Got error when attempting to retrieve token from Schedules Direct.");
     printMSG("Check if you entered username/password incorrectly.");
     exit;
 }
 
-if ($needToStoreLogin === TRUE)
-{
+if ($needToStoreLogin === true) {
     $userInformation["username"] = $username;
     $userInformation["password"] = $password;
 
     $credentials = json_encode($userInformation);
 
-    if (($isMythTV === TRUE) OR ($dbWithoutMythtv === TRUE))
-    {
+    if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
         settingSD("SchedulesDirectLogin", $credentials);
 
         $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
     password=:password WHERE xmltvgrabber='schedulesdirect2'");
         $stmt->execute(array("username" => $username, "password" => $password));
-    }
-    else
-    {
+    } else {
         $fh = fopen("sd.json.conf", "w");
         fwrite($fh, "$credentials\n");
         fclose($fh);
     }
 }
 
-while ($done === FALSE)
-{
+while ($done === false) {
     $sdStatus = getStatus();
 
-    if ($sdStatus == "ERROR")
-    {
+    if ($sdStatus == "ERROR") {
         printMSG("Received error from Schedules Direct. Exiting.");
         exit;
     }
 
     printStatus($sdStatus);
 
-    if ($isMythTV === TRUE)
-    {
+    if ($isMythTV === true) {
         displayLocalVideoSources();
     }
 
@@ -484,8 +477,7 @@ while ($done === FALSE)
     print "5 Acknowledge a message\n";
     print "6 Print a channel table for a lineup\n";
 
-    if ($isMythTV === TRUE)
-    {
+    if ($isMythTV === true) {
         print "\nMythTV functions:\n";
         print "A to Add a new videosource to MythTV\n";
         print "D to Delete a videosource in MythTV\n";
@@ -498,8 +490,7 @@ while ($done === FALSE)
 
     $response = strtoupper(readline(">"));
 
-    switch ($response)
-    {
+    switch ($response) {
         case "1":
             $lineup = readline("Lineup to add>");
             directAddLineup($lineup);
@@ -511,10 +502,8 @@ while ($done === FALSE)
             deleteLineupFromSchedulesDirect();
             break;
         case "4":
-            if (count($sdStatus["lineups"]) != 0)
-            {
-                foreach ($sdStatus["lineups"] as $v)
-                {
+            if (count($sdStatus["lineups"]) != 0) {
+                foreach ($sdStatus["lineups"] as $v) {
                     $lineupToRefresh[$v["lineup"]] = 1;
                 }
                 updateLocalLineupCache($lineupToRefresh);
@@ -529,18 +518,17 @@ while ($done === FALSE)
         case "A":
             print "Adding new videosource\n\n";
             $newName = readline("Name:>");
-            if ($newName != "")
-            {
+            if ($newName != "") {
                 $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
                         VALUES(:name,:userid,:password,'schedulesdirect2')");
-                try
-                {
-                    $stmt->execute(array("name"     => $newName, "userid" => $username,
-                                         "password" => $password));
-                } catch (PDOException $e)
-                {
-                    if ($e->getCode() == 23000)
-                    {
+                try {
+                    $stmt->execute(array(
+                        "name"     => $newName,
+                        "userid"   => $username,
+                        "password" => $password
+                    ));
+                } catch (PDOException $e) {
+                    if ($e->getCode() == 23000) {
                         print "\n\n";
                         print "*************************************************************\n";
                         print "\n\n";
@@ -560,8 +548,7 @@ while ($done === FALSE)
             break;
         case "E":
             $sourceIDtoExtract = readline("Which sourceid do you want to extract:>");
-            if ($sourceIDtoExtract != "")
-            {
+            if ($sourceIDtoExtract != "") {
                 extractData($sourceIDtoExtract);
             }
             break;
@@ -572,14 +559,13 @@ while ($done === FALSE)
         case "U":
             list($lineup, $isDeleted) =
                 getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
-            if ($lineup != "" AND $isDeleted === FALSE)
-            {
+            if ($lineup != "" AND $isDeleted === false) {
                 updateChannelTable($lineup);
             }
             break;
         case "Q":
         default:
-            $done = TRUE;
+            $done = true;
             break;
     }
 }
@@ -596,10 +582,9 @@ function updateChannelTable($lineup)
 
     $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid=:lineup");
     $stmt->execute(array("lineup" => $lineup));
-    $sID = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $sourceID = $stmt->fetch(PDO::FETCH_COLUMN);
 
-    if (count($sID) == 0)
-    {
+    if ($sourceID == "") {
         print "ERROR: Can't update channel table; lineup not associated with a videosource.\n";
 
         return;
@@ -607,7 +592,7 @@ function updateChannelTable($lineup)
 
     $stmt = $dbhSD->prepare("SELECT json FROM lineups WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
-    $json = json_decode($stmt->fetchColumn(), TRUE);
+    $json = json_decode($stmt->fetchColumn(), true);
 
     $modified = $json["metadata"]["modified"];
 
@@ -615,126 +600,324 @@ function updateChannelTable($lineup)
 
     $dbh->exec("DROP TABLE IF EXISTS t_channel");
     $dbh->exec("CREATE TABLE t_channel LIKE channel");
-    $dbh->exec("INSERT INTO t_channel (SELECT * FROM channel)");
+    $dbh->exec("INSERT INTO t_channel SELECT * FROM channel");
 
-    foreach ($sID as $sourceID)
-    {
-        if ($json["metadata"]["transport"] == "Antenna")
-        {
-            /*
-             * For antenna lineups, we're not going to delete the existing channel table or dtv_multiplex; we're still
-             * going to use the scan, but use the atsc major and minor to correlate what we've scanned with what's in the
-             * lineup file.
-             */
-            $transport = "Antenna";
-        }
+    if ($json["metadata"]["transport"] == "Antenna") {
+        /*
+         * For antenna lineups, we're not going to delete the existing channel table or dtv_multiplex; we're still
+         * going to use the scan, but use the atsc major and minor to correlate what we've scanned with what's in the
+         * lineup file.
+         */
+        $transport = "Antenna";
+    }
 
-        if ($json["metadata"]["transport"] == "Cable")
-        {
-            if (isset($json["metadata"]["modulation"]) === TRUE)
-            {
-                $transport = "QAM";
-            }
-            else
-            {
-                $transport = "Cable";
-
-                $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
-                $stmt->execute(array("sourceid" => $sourceID));
-            }
-        }
-
-        if ($json["metadata"]["transport"] == "Satellite")
-        {
-            $transport = "Satellite";
+    if ($json["metadata"]["transport"] == "Cable") {
+        if (isset($json["metadata"]["modulation"]) === true) {
+            $transport = "QAM";
+        } else {
+            $transport = "Cable";
 
             $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
             $stmt->execute(array("sourceid" => $sourceID));
         }
+    }
 
-        if ($json["metadata"]["transport"] == "FTA")
-        {
-            $transport = "FTA";
-        }
+    if ($json["metadata"]["transport"] == "Satellite") {
+        $transport = "Satellite";
 
-        if ($json["metadata"]["transport"] == "DVB-S")
-        {
-            $transport = "DVB-S";
-        }
+        $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sourceid");
+        $stmt->execute(array("sourceid" => $sourceID));
+    }
 
-        /*
-         * This whole next part needs to get rewritten.
-         */
+    if ($json["metadata"]["transport"] == "FTA") {
+        $transport = "FTA";
+    }
 
-        if ($transport == "Satellite" OR $transport == "Antenna" OR $transport == "Cable")
-        {
-            $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
+    if ($json["metadata"]["transport"] == "DVB-S") {
+        $transport = "DVB-S";
+    }
+
+    /*
+     * This whole next part needs to get rewritten.
+     */
+
+    if ($transport == "Satellite" OR $transport == "Antenna" OR $transport == "Cable") {
+        $updateChannelTableATSC = $dbh->prepare("UPDATE channel SET channum=:channum,
     xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=:atscMajor AND atsc_minor_chan=:atscMinor");
 
-            $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
+        $updateChannelTableAnalog = $dbh->prepare("UPDATE channel SET channum=:channum,
     xmltvid=:sid, useonairguide=0 WHERE atsc_major_chan=0 AND atsc_minor_chan=0 AND freqID=:freqID");
 
-            foreach ($json["map"] as $mapArray)
-            {
-                $stationID = $mapArray["stationID"];
+        foreach ($json["map"] as $mapArray) {
+            $stationID = $mapArray["stationID"];
 
-                if ($transport == "Antenna")
-                {
-                    if (isset($mapArray["uhfVhf"]) === TRUE)
-                    {
-                        $freqid = $mapArray["uhfVhf"];
-                    }
-                    else
-                    {
-                        $freqid = "";
-                    }
-
-                    if (isset($mapArray["atscMajor"]) === TRUE)
-                    {
-                        $atscMajor = $mapArray["atscMajor"];
-                        $atscMinor = $mapArray["atscMinor"];
-                        $channum = "$atscMajor.$atscMinor";
-
-                        $updateChannelTableATSC->execute(array("channum"   => $channum, "sid" => $stationID,
-                                                               "atscMajor" => $atscMajor,
-                                                               "atscMinor" => $atscMinor));
-                    }
-                    else
-                    {
-                        $channum = $freqid;
-                        $updateChannelTableAnalog->execute(array("channum" => ltrim($channum, "0"), "sid" => $stationID,
-                                                                 "freqID"  => $freqid));
-                    }
+            if ($transport == "Antenna") {
+                if (isset($mapArray["uhfVhf"]) === true) {
+                    $freqid = $mapArray["uhfVhf"];
+                } else {
+                    $freqid = "";
                 }
 
-                if ($transport == "IP")
-                {
-                    /*
-                     * Nothing yet.
-                     */
-                }
+                if (isset($mapArray["atscMajor"]) === true) {
+                    $atscMajor = $mapArray["atscMajor"];
+                    $atscMinor = $mapArray["atscMinor"];
+                    $channum = "$atscMajor.$atscMinor";
 
-                if ($transport == "Cable" OR $transport == "Satellite")
-                {
-                    $channum = $mapArray["channel"];
-                    $stmt = $dbh->prepare(
-                        "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,mplexid,serviceid,atsc_major_chan)
+                    $updateChannelTableATSC->execute(array(
+                        "channum"   => $channum,
+                        "sid"       => $stationID,
+                        "atscMajor" => $atscMajor,
+                        "atscMinor" => $atscMinor
+                    ));
+                } else {
+                    $channum = $freqid;
+                    $updateChannelTableAnalog->execute(array(
+                        "channum" => ltrim($channum, "0"),
+                        "sid"     => $stationID,
+                        "freqID"  => $freqid
+                    ));
+                }
+            }
+
+            if ($transport == "IP") {
+                /*
+                 * Nothing yet.
+                 */
+            }
+
+            if ($transport == "Cable" OR $transport == "Satellite") {
+                $channum = $mapArray["channel"];
+                $stmt = $dbh->prepare(
+                    "INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,mplexid,serviceid,atsc_major_chan)
                          VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,:mplexid,:serviceid,:atsc_major_chan)");
 
-                    try
-                    {
-                        $stmt->execute(array("chanid"          => (int)($sourceID * 1000) + (int)$channum,
-                                             "channum"         => ltrim($channum, "0"),
-                                             "freqid"          => (int)$channum,
-                                             "sourceid"        => $sourceID,
-                                             "xmltvid"         => $stationID,
-                                             "mplexid"         => 32767,
-                                             "serviceid"       => 0,
-                                             "atsc_major_chan" => $channum));
-                    } catch (PDOException $e)
-                    {
-                        if ($e->getCode() == 23000)
-                        {
+                try {
+                    $stmt->execute(array(
+                        "chanid"          => (int)($sourceID * 1000) + (int)$channum,
+                        "channum"         => ltrim($channum, "0"),
+                        "freqid"          => (int)$channum,
+                        "sourceid"        => $sourceID,
+                        "xmltvid"         => $stationID,
+                        "mplexid"         => 32767,
+                        "serviceid"       => 0,
+                        "atsc_major_chan" => $channum
+                    ));
+                } catch (PDOException $e) {
+                    if ($e->getCode() == 23000) {
+                        print "\n\n";
+                        print "*************************************************************\n";
+                        print "\n\n";
+                        print "Error inserting data. Duplicate channel number exists?\n";
+                        print "Send email to grabber@schedulesdirect.org with the following:\n\n";
+                        print "Duplicate channel error.\n";
+                        print "Transport: $transport\n";
+                        print "Lineup: $lineup\n";
+                        print "Channum: $channum\n";
+                        print "stationID: $stationID\n";
+                        print "\n\n";
+                        print "*************************************************************\n";
+                    }
+                }
+
+                $getOriginalRecPriority = $dbh->prepare("SELECT t_channel.chanid,t_channel.recpriority FROM
+                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
+                $getOriginalRecPriority->execute(array("sid" => $sourceID));
+                $originalRecPriorityArray = $getOriginalRecPriority->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                $getOriginalVisibility = $dbh->prepare("SELECT t_channel.chanid,t_channel.visible FROM
+                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
+                $getOriginalVisibility->execute(array("sid" => $sourceID));
+                $originalVisibilityArray = $getOriginalVisibility->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                $updateChannel = $dbh->prepare("UPDATE channel SET recpriority=:rp,
+                    visible=:visible WHERE chanid=:chanid");
+
+                foreach ($originalRecPriorityArray as $chanid => $foo) {
+                    $updateChannel->execute(array(
+                        "rp"      => $originalRecPriorityArray[$chanid],
+                        "visible" => $originalVisibilityArray[$chanid],
+                        "chanid"  => $chanid
+                    ));
+                }
+            }
+        }
+    } else {
+        /*
+         * It's QAM or FTA. We're going to run a match based on what the user had already scanned to avoid the
+         * manual matching step of correlating stationIDs.
+         */
+
+        print "You can:\n";
+        print "1. Use the $transport lineup from SD to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
+        print "2. Use the $transport lineup information and update the database without running a scan.\n";
+        $useScan = readline("Which do you want to do? (1 or 2)>");
+
+        if ($useScan == "") {
+            return;
+        }
+
+        if ($useScan == "2") {
+            $useScan = false;
+        } else {
+            $useScan = true;
+        }
+
+        if ($useScan === true) {
+            if ($transport == "QAM") {
+                $matchType = $json["map"]["matchType"];
+
+                print "Matching $transport scan based on: $matchType\n";
+
+                if ($matchType == "multiplex") {
+                    $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
+                    $stmt->execute();
+                    $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                    $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
+                    $stmt->execute(array("sid" => $sourceID));
+                    $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
+                mplexid=:mplexid AND serviceid=:serviceid");
+
+                    $map = array();
+
+                    foreach ($json["map"] as $foo) {
+                        $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
+                    }
+
+                    foreach ($existingChannelNumbers as $foo) {
+                        $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
+
+                        if (isset($map[$toFind]) === true) {
+                            $updateChannelTableQAM->execute(array(
+                                "stationID" => $map[$toFind],
+                                "mplexid"   => $foo["mplexid"],
+                                "serviceid" => $foo["serviceID"]
+                            ));
+                        }
+                    }
+                }
+
+                if ($matchType == "providerCallsign") {
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE callsign=:providerCallsign");
+                    foreach ($json["map"] as $foo) {
+                        $updateChannelTable->execute(array(
+                            "stationID"        => $foo["stationID"],
+                            "virtualChannel"   => $foo["virtualChannel"],
+                            "providerCallsign" => $foo["providerCallsign"]
+                        ));
+                    }
+                }
+
+                if ($matchType == "channel") {
+                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE channum=:channel");
+                    foreach ($json["map"] as $foo) {
+                        $updateChannelTable->execute(array(
+                            "stationID"      => $foo["stationID"],
+                            "virtualChannel" => $foo["virtualChannel"],
+                            "channum"        => $foo["channel"]
+                        ));
+                    }
+                }
+                print "Done updating QAM scan with stationIDs.\n";
+            }
+        } else {
+            if ($transport == "QAM") {
+                /*
+                 * The user has chosen to not run a QAM scan and just use the values that we're supplying.
+                 * Work-in-progress.
+                 */
+
+                print "Inserting $transport data into tables.\n";
+
+                $dtvMultiplex = array();
+
+                $insertDTVMultiplex = $dbh->prepare
+                ("INSERT INTO dtv_multiplex
+        (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
+        VALUES
+        (:sourceid,:freq,0,'v',:modulation,1,:modulation,'a','UNDEFINED','0.35','atsc')");
+                $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'
+                AND sourceid=:sourceid");
+                $stmt->execute(array("sourceid" => $sourceID));
+                $dtvMultiplex = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+                $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,
+visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
+                     VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid,:channelMajor,
+                     :channelMinor)");
+
+                foreach ($json["map"] as $mapArray) {
+                    $virtualChannel = $mapArray["virtualChannel"]; // "Channel 127"
+
+                    if (isset($mapArray["channel"]) === true) {
+                        $channel = $mapArray["channel"]; // "54-18" or whatever.
+                    } else {
+                        $channel = $virtualChannel;
+                    }
+
+                    switch ($mapArray["modulation"]) {
+                        case "QAM64":
+                            $modulation = "qam_64";
+                            break;
+                        case "QAM256":
+                            $modulation = "qam_256";
+                            break;
+                        default:
+                            print "Unknown modulation: {$mapArray["modulation"]}\n";
+                            exit;
+                    }
+
+                    $frequency = $mapArray["frequencyHz"];
+                    $serviceID = $mapArray["serviceID"];
+                    $stationID = $mapArray["stationID"];
+                    $channelMajor = (int)$mapArray["channelMajor"];
+                    $channelMinor = (int)$mapArray["channelMinor"];
+
+                    /*
+                     * Because multiple programs may end up on a single frequency, we only want to insert once,
+                     * but we want to track the mplexid assigned when we do the insert,
+                     * because that might be used more than once.
+                     */
+                    if (isset($dtvMultiplex[$frequency]) === false) {
+                        $insertDTVMultiplex->execute(array(
+                            "sourceid"   => $sourceID,
+                            "freq"       => $frequency,
+                            "modulation" => $modulation
+                        ));
+                        $dtvMultiplex[$frequency] = $dbh->lastInsertId();
+                    }
+
+                    /*
+                     * In order to insert a unique channel ID, we need to make sure that "39_1" and "39_2" map to two
+                     * different values. Old code resulted in 39_1 -> 39, then 39_2 had a collision because it also
+                     * turned into "39"
+                     */
+
+                    $strippedChannel = (int)str_replace(array("-", "_"), "", $channel);
+
+                    if ($channelMajor > 0) {
+                        $chanid = ($sourceID * 1000) + ($channelMajor * 10) + $channelMinor;
+                    } else {
+                        $chanid = ($sourceID * 1000) + ($strippedChannel * 10) + $serviceID;
+                    }
+
+                    try {
+                        $channelInsert->execute(array(
+                            "chanid"    => $chanid,
+                            "channum"   => $channel,
+                            "freqid"    => $virtualChannel,
+                            "sourceid"  => $sourceID,
+                            "xmltvid"   => $stationID,
+                            "mplexid"   => $dtvMultiplex[$frequency],
+                            "serviceid" => $serviceID,
+                            "atscMajor" => $channelMajor,
+                            "atscMinor" => $channelMinor
+                        ));
+                    } catch (PDOException $e) {
+                        if ($e->getCode() == 23000) {
                             print "\n\n";
                             print "*************************************************************\n";
                             print "\n\n";
@@ -743,279 +926,27 @@ function updateChannelTable($lineup)
                             print "Duplicate channel error.\n";
                             print "Transport: $transport\n";
                             print "Lineup: $lineup\n";
-                            print "Channum: $channum\n";
+                            print "Channum: $channel\n";
+                            print "Virtual: $virtualChannel\n";
                             print "stationID: $stationID\n";
                             print "\n\n";
                             print "*************************************************************\n";
                         }
                     }
-
-                    $getOriginalRecPriority = $dbh->prepare("SELECT t_channel.chanid,t_channel.recpriority FROM
-                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
-                    $getOriginalRecPriority->execute(array("sid" => $sourceID));
-                    $originalRecPriorityArray = $getOriginalRecPriority->fetchAll(PDO::FETCH_KEY_PAIR);
-
-                    $getOriginalVisibility = $dbh->prepare("SELECT t_channel.chanid,t_channel.visible FROM
-                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
-                    $getOriginalVisibility->execute(array("sid" => $sourceID));
-                    $originalVisibilityArray = $getOriginalVisibility->fetchAll(PDO::FETCH_KEY_PAIR);
-
-                    $updateChannel = $dbh->prepare("UPDATE channel SET recpriority=:rp,
-                    visible=:visible WHERE chanid=:chanid");
-
-                    foreach ($originalRecPriorityArray as $chanid => $foo)
-                    {
-                        $updateChannel->execute(array("rp"      => $originalRecPriorityArray[$chanid],
-                                                      "visible" => $originalVisibilityArray[$chanid],
-                                                      "chanid"  => $chanid));
-                    }
                 }
+                print "Done inserting QAM tuning information directly into tables.\n";
             }
         }
-        else
-        {
-            /*
-             * It's QAM or FTA. We're going to run a match based on what the user had already scanned to avoid the
-             * manual matching step of correlating stationIDs.
-             */
 
-            print "You can:\n";
-            print "1. Use the $transport lineup from SD to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
-            print "2. Use the $transport lineup information and update the database without running a scan.\n";
-            $useScan = readline("Which do you want to do? (1 or 2)>");
-
-            if ($useScan == "")
-            {
-                return;
-            }
-
-            if ($useScan == "2")
-            {
-                $useScan = FALSE;
-            }
-            else
-            {
-                $useScan = TRUE;
-            }
-
-            if (count($json["mapping"]) > 1)
-            {
-                /*
-                 * TODO: Work on this some more. Kludgey.
-                 */
-                print "Found more than one $transport mapping for your lineup.\n";
-                foreach ($json["mapping"] as $m)
-                {
-                    print "Mapping: $m\n";
-                }
-                $mapToUse = readline("Which map do you want to use>");
-            }
-            else
-            {
-                $mapToUse = "1";
-            }
-
-            if ($useScan === TRUE)
-            {
-                if ($transport == "QAM")
-                {
-                    $matchType = $json["map"][$mapToUse][0]["matchType"];
-
-                    print "Matching $transport scan based on: $matchType\n";
-
-                    if ($matchType == "multiplex")
-                    {
-                        $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
-                        $stmt->execute();
-                        $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-                        $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
-                        $stmt->execute(array("sid" => $sourceID));
-                        $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                        $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
-                mplexid=:mplexid AND serviceid=:serviceid");
-
-                        $map = array();
-
-                        foreach ($json["map"][$mapToUse] as $foo)
-                        {
-                            $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
-                        }
-
-                        foreach ($existingChannelNumbers as $foo)
-                        {
-                            $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
-
-                            if (isset($map[$toFind]) === TRUE)
-                            {
-                                $updateChannelTableQAM->execute(array("stationID" => $map[$toFind],
-                                                                      "mplexid"   => $foo["mplexid"],
-                                                                      "serviceid" => $foo["serviceID"]));
-                            }
-                        }
-                    }
-
-                    if ($matchType == "providerCallsign")
-                    {
-                        $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
-                    WHERE callsign=:providerCallsign");
-                        foreach ($json["map"][$mapToUse] as $foo)
-                        {
-                            $updateChannelTable->execute(array("stationID"        => $foo["stationID"],
-                                                               "virtualChannel"   => $foo["virtualChannel"],
-                                                               "providerCallsign" => $foo["providerCallsign"]));
-                        }
-                    }
-
-                    if ($matchType == "channel")
-                    {
-                        $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
-                    WHERE channum=:channel");
-                        foreach ($json["map"][$mapToUse] as $foo)
-                        {
-                            $updateChannelTable->execute(array("stationID"      => $foo["stationID"],
-                                                               "virtualChannel" => $foo["virtualChannel"],
-                                                               "channum"        => $foo["channel"]));
-                        }
-                    }
-                    print "Done updating QAM scan with stationIDs.\n";
-                }
-            }
-            else
-            {
-                if ($transport == "QAM")
-                {
-                    /*
-                     * The user has chosen to not run a QAM scan and just use the values that we're supplying.
-                     * Work-in-progress.
-                     */
-
-                    print "Inserting $transport data into tables.\n";
-
-                    $dtvMultiplex = array();
-
-                    $insertDTVMultiplex = $dbh->prepare
-                    ("INSERT INTO dtv_multiplex
-        (sourceid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,mod_sys,rolloff,sistandard)
-        VALUES
-        (:sourceid,:freq,0,'v',:modulation,1,:modulation,'a','UNDEFINED','0.35','atsc')");
-                    $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'
-                AND sourceid=:sourceid");
-                    $stmt->execute(array("sourceid" => $sourceID));
-                    $dtvMultiplex = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-                    $channelInsert = $dbh->prepare("INSERT INTO channel(chanid,channum,freqid,sourceid,xmltvid,tvformat,
-visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
-                     VALUES(:chanid,:channum,:freqid,:sourceid,:xmltvid,'ATSC','1',:mplexid,:serviceid,:atscMajor,
-                     :atscMinor)");
-
-                    foreach ($json["map"][$mapToUse] as $mapArray)
-                    {
-                        $virtualChannel = $mapArray["virtualChannel"]; // "Channel 127"
-
-                        if (isset($mapArray["channel"]) === TRUE)
-                        {
-                            $channel = $mapArray["channel"]; // "54-18" or whatever.
-                        }
-                        else
-                        {
-                            $channel = $virtualChannel;
-                        }
-
-                        switch ($mapArray["modulation"])
-                        {
-                            case "QAM64":
-                                $modulation = "qam_64";
-                                break;
-                            case "QAM256":
-                                $modulation = "qam_256";
-                                break;
-                            default:
-                                print "Unknown modulation: {$mapArray["modulation"]}\n";
-                                exit;
-                        }
-
-                        $frequency = $mapArray["frequencyHz"];
-                        $serviceID = $mapArray["serviceID"];
-                        $stationID = $mapArray["stationID"];
-                        $atscMajor = (int)$mapArray["atscMajor"];
-                        $atscMinor = (int)$mapArray["atscMinor"];
-
-                        /*
-                         * Because multiple programs may end up on a single frequency, we only want to insert once,
-                         * but we want to track the mplexid assigned when we do the insert,
-                         * because that might be used more than once.
-                         */
-                        if (isset($dtvMultiplex[$frequency]) === FALSE)
-                        {
-                            $insertDTVMultiplex->execute(array("sourceid"   => $sourceID,
-                                                               "freq"       => $frequency,
-                                                               "modulation" => $modulation));
-                            $dtvMultiplex[$frequency] = $dbh->lastInsertId();
-                        }
-
-                        /*
-                         * In order to insert a unique channel ID, we need to make sure that "39_1" and "39_2" map to two
-                         * different values. Old code resulted in 39_1 -> 39, then 39_2 had a collision because it also
-                         * turned into "39"
-                         */
-
-                        $strippedChannel = (int)str_replace(array("-", "_"), "", $channel);
-
-                        if ($atscMajor > 0)
-                        {
-                            $chanid = ($sourceID * 1000) + ($atscMajor * 10) + $atscMinor;
-                        }
-                        else
-                        {
-                            $chanid = ($sourceID * 1000) + ($strippedChannel * 10) + $serviceID;
-                        }
-
-                        try
-                        {
-                            $channelInsert->execute(array("chanid"    => $chanid,
-                                                          "channum"   => $channel,
-                                                          "freqid"    => $virtualChannel,
-                                                          "sourceid"  => $sourceID,
-                                                          "xmltvid"   => $stationID,
-                                                          "mplexid"   => $dtvMultiplex[$frequency],
-                                                          "serviceid" => $serviceID,
-                                                          "atscMajor" => $atscMajor,
-                                                          "atscMinor" => $atscMinor));
-                        } catch (PDOException $e)
-                        {
-                            if ($e->getCode() == 23000)
-                            {
-                                print "\n\n";
-                                print "*************************************************************\n";
-                                print "\n\n";
-                                print "Error inserting data. Duplicate channel number exists?\n";
-                                print "Send email to grabber@schedulesdirect.org with the following:\n\n";
-                                print "Duplicate channel error.\n";
-                                print "Transport: $transport\n";
-                                print "Lineup: $lineup\n";
-                                print "Channum: $channel\n";
-                                print "Virtual: $virtualChannel\n";
-                                print "stationID: $stationID\n";
-                                print "\n\n";
-                                print "*************************************************************\n";
-                            }
-                        }
-                    }
-                    print "Done inserting QAM tuning information directly into tables.\n";
-                }
-            }
-
-            if ($transport == "FTA")
-            {
-                $insertDTVMultiplex = $dbh->prepare
-                ("INSERT INTO dtv_multiplex
+        if ($transport == "FTA") {
+            $insertDTVMultiplex = $dbh->prepare
+            ("INSERT INTO dtv_multiplex
         (sourceid,transportid,networkid,frequency,symbolrate,polarity,modulation,visible,constellation,hierarchy,
         mod_sys,rolloff,sistandard)
         VALUES
         (:sourceid,:tid,:nid,:freq,:symbolrate,:polarity,:modulation,1,:constellation,'a','0.35','dvb')");
 
-                $channelInsert = $dbh->prepare("INSERT INTO channel
+            $channelInsert = $dbh->prepare("INSERT INTO channel
                     (chanid,
                     channum,
                     sourceid,
@@ -1033,89 +964,75 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                     :mplexid,
                     :serviceid,
                     )");
-            }
+        }
 
-            foreach ($json["satelliteDetail"] as $satellite)
-            {
-                foreach ($satellite as $entry)
-                {
-                    $transportID = $entry["transportID"];
-                    $networkID = $entry["networkID"];
-                    $frequency = $entry["frequencyMHz"] * 1000;
-                    $symbolrate = $entry["symbolrate"] * 1000;
-                    $polarity = $entry["polarization"];
-                    $modulation = strtolower($entry["modulationSystem"]);
-                    $constellation = strtolower($entry["modulationSystem"]);
-                    $mod_sys = $entry["deliverySystem"];
-                }
+        foreach ($json["satelliteDetail"] as $satellite) {
+            foreach ($satellite as $entry) {
+                $transportID = $entry["transportID"];
+                $networkID = $entry["networkID"];
+                $frequency = $entry["frequencyMHz"] * 1000;
+                $symbolrate = $entry["symbolrate"] * 1000;
+                $polarity = $entry["polarization"];
+                $modulation = strtolower($entry["modulationSystem"]);
+                $constellation = strtolower($entry["modulationSystem"]);
+                $mod_sys = $entry["deliverySystem"];
+            }
+        }
+    }
+
+    /*
+     * Now that we have basic information in the database, we can start filling in other things, like
+     * callsigns, etc.
+     */
+
+    $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
+
+    foreach ($json["stations"] as $stationArray) {
+        $stationID = $stationArray["stationID"];
+        $callsign = $stationArray["callsign"];
+
+        if (array_key_exists("name", $stationArray)) {
+            /*
+             * Not all stations have names, so don't try to insert a name if that field isn't included.
+             */
+            $name = $stationArray["name"];
+        } else {
+            $name = "";
+        }
+
+        if (isset($stationArray["logo"]) === true) {
+            if ($skipChannelLogo === false) {
+                checkForChannelIcon($stationID, $stationArray["logo"]);
             }
         }
 
-        /*
-         * Now that we have basic information in the database, we can start filling in other things, like
-         * callsigns, etc.
-         */
+        $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
+    }
 
-        $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
+    $lineupLastModifiedJSON = settingSD("localLineupLastModified");
+    $lineupLastModifiedArray = array();
 
-        foreach ($json["stations"] as $stationArray)
-        {
-            $stationID = $stationArray["stationID"];
-            $callsign = $stationArray["callsign"];
+    if (count($lineupLastModifiedJSON) != 0) {
+        $lineupLastModifiedArray = json_decode($lineupLastModifiedJSON, true);
+    }
 
-            if (array_key_exists("name", $stationArray))
-            {
-                /*
-                 * Not all stations have names, so don't try to insert a name if that field isn't included.
-                 */
-                $name = $stationArray["name"];
-            }
-            else
-            {
-                $name = "";
-            }
+    $lineupLastModifiedArray[$lineup] = $modified;
 
-            if (array_key_exists("logo", $stationArray))
-            {
-                if ($skipChannelLogo === FALSE)
-                {
-                    checkForChannelIcon($stationID, $stationArray["logo"]);
-                }
-            }
+    settingSD("localLineupLastModified", json_encode($lineupLastModifiedArray));
 
-            $stmt->execute(array("name" => $name, "callsign" => $callsign, "stationID" => $stationID));
-        }
-
-        $lineupLastModifiedJSON = settingSD("localLineupLastModified");
-        $lineupLastModifiedArray = array();
-
-        if (count($lineupLastModifiedJSON) != 0)
-        {
-            $lineupLastModifiedArray = json_decode($lineupLastModifiedJSON, TRUE);
-        }
-
-        $lineupLastModifiedArray[$lineup] = $modified;
-
-        settingSD("localLineupLastModified", json_encode($lineupLastModifiedArray));
-
-        /*
-         * Set the startchan to a non-bogus value.
-         */
-        $getChanNum = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid
+    /*
+     * Set the startchan to a non-bogus value.
+     */
+    $getChanNum = $dbh->prepare("SELECT channum FROM channel WHERE sourceid=:sourceid
     ORDER BY CAST(channum AS SIGNED) LIMIT 1");
 
-        foreach ($sID as $updateSourceID)
-        {
-            $getChanNum->execute(array("sourceid" => $updateSourceID));
-            $result = $getChanNum->fetchColumn();
+    $getChanNum->execute(array("sourceid" => $sourceID));
+    $result = $getChanNum->fetchColumn();
 
-            if ($result != "")
-            {
-                $startChan = $result;
-                $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
-                $setStartChannel->execute(array("sourceid" => $updateSourceID, "startChan" => $startChan));
-            }
-        }
+    if ($result != "") {
+        $startChan = $result;
+        $setStartChannel = $dbh->prepare("UPDATE cardinput SET startchan=:startChan WHERE sourceid=:sourceid");
+        $setStartChannel->execute(array("sourceid" => $sourceID, "startChan" => $startChan));
     }
 
     $dbh->exec("DROP TABLE t_channel");
@@ -1128,21 +1045,19 @@ function linkSchedulesDirectLineup()
 
     $sid = readline("MythTV sourceid:>");
 
-    if ($sid == "")
-    {
+    if ($sid == "") {
         return;
     }
 
     list ($lineup, $isDeleted) = getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
 
-    if (($lineup == "") OR ($isDeleted === TRUE))
-    {
+    if (($lineup == "") OR ($isDeleted === true)) {
         return;
     }
 
     $stmt = $dbhSD->prepare("SELECT json FROM lineups WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
-    $response = json_decode($stmt->fetchColumn(), TRUE);
+    $response = json_decode($stmt->fetchColumn(), true);
 
     if (count($response) == 0) // We've already decoded the JSON.
     {
@@ -1152,10 +1067,9 @@ function linkSchedulesDirectLineup()
         exit;
     }
 
-    if ($response == "[]")
-    {
+    if ($response == "[]") {
         print "Fatal Error in Link SchedulesDirect Lineup.\n";
-        print "Empty JSON for lineup in schedules direct local cache?\n";
+        print "Empty JSON for lineup in Schedules Direct local cache?\n";
         print "lineup:$lineup\n";
         exit;
     }
@@ -1174,17 +1088,15 @@ function printLineup()
 
     list($lineup, $isDeleted) = getLineupFromNumber(strtoupper(readline("Lineup to print (# or lineup):>")));
 
-    if ($lineup == "" OR $isDeleted)
-    {
+    if ($lineup == "" OR $isDeleted) {
         return;
     }
 
     $stmt = $dbhSD->prepare("SELECT json FROM lineups WHERE lineup=:lineup");
     $stmt->execute(array("lineup" => $lineup));
-    $response = json_decode($stmt->fetchColumn(), TRUE);
+    $response = json_decode($stmt->fetchColumn(), true);
 
-    if (!count($response))
-    {
+    if (!count($response)) {
         return;
     }
 
@@ -1193,40 +1105,26 @@ function printLineup()
     $chanMap = array();
     $stationMap = array();
 
-    if ($response["metadata"]["transport"] == "Antenna")
-    {
-        foreach ($response["map"] as $v)
-        {
-            if (isset($v["atscMajor"]) === TRUE)
-            {
+    if ($response["metadata"]["transport"] == "Antenna") {
+        foreach ($response["map"] as $v) {
+            if (isset($v["atscMajor"]) === true) {
                 $chanMap[$v["stationID"]] = "{$v["atscMajor"]}.{$v["atscMinor"]}";
-            }
-            elseif (isset($v["uhfVhf"]) === TRUE)
-            {
+            } elseif (isset($v["uhfVhf"]) === true) {
                 $chanMap[$v["stationID"]] = $v["uhfVhf"];
-            }
-            else
-            {
+            } else {
                 $chanMap[$v["stationID"]] = 0; //Not sure what the correct thing to use here is at this time.
             }
         }
-    }
-    else
-    {
-        foreach ($response["map"] as $v)
-        {
+    } else {
+        foreach ($response["map"] as $v) {
             $chanMap[$v["stationID"]] = $v["channel"];
         }
     }
 
-    foreach ($response["stations"] as $v)
-    {
-        if (isset($v["affiliate"]) === TRUE)
-        {
+    foreach ($response["stations"] as $v) {
+        if (isset($v["affiliate"]) === true) {
             $stationMap[$v["stationID"]] = "{$v["callsign"]} ({$v["affiliate"]})";
-        }
-        else
-        {
+        } else {
             $stationMap[$v["stationID"]] = "{$v["callsign"]}";
         }
     }
@@ -1236,8 +1134,7 @@ function printLineup()
     $stationData = new Zend\Text\Table\Table(array('columnWidths' => array(8, 50, 10)));
     $stationData->appendRow(array("Channel", "Callsign", "stationID"));
 
-    foreach ($chanMap as $stationID => $channel)
-    {
+    foreach ($chanMap as $stationID => $channel) {
         $stationData->appendRow(array((string)$channel, $stationMap[$stationID], (string)$stationID));
     }
 
@@ -1254,65 +1151,52 @@ function addLineupsToSchedulesDirect()
     $sdLineupArray = array();
     $countriesWithOnePostalCode = array();
 
-    foreach ($availableCountries as $region => $foo)
-    {
-        foreach ($foo as $item)
-        {
-            if (isset($item["onePostalCode"]) === TRUE)
-            {
+    foreach ($availableCountries as $region => $foo) {
+        foreach ($foo as $item) {
+            if (isset($item["onePostalCode"]) === true) {
                 $countriesWithOnePostalCode[$item["shortName"]] = $item["postalCodeExample"];
             }
         }
     }
 
-    $done = FALSE;
+    $done = false;
     $country = "";
     $postalCode = "";
 
-    while ($done === FALSE)
-    {
+    while ($done === false) {
         print "Three-character ISO-3166-1 alpha3 country code (? to list available countries):";
         $country = trim(strtoupper(readline(">")));
 
-        if ($country == "")
-        {
+        if ($country == "") {
             return;
         }
 
-        if ($country == "?")
-        {
-            printListOfAvailableCountries(TRUE);
-        }
-        else
-        {
-            $done = TRUE;
+        if ($country == "?") {
+            printListOfAvailableCountries(true);
+        } else {
+            $done = true;
         }
     }
 
-    if (isset($countriesWithOnePostalCode[$country]) === TRUE)
-    {
+    if (isset($countriesWithOnePostalCode[$country]) === true) {
         $postalCode = $countriesWithOnePostalCode[$country];
         print "This country has only one postal code: $postalCode\n";
-    }
-    elseif ($country != "DVB")
-    {
+    } elseif ($country != "DVB") {
         print "Enter postal code:";
         $postalCode = strtoupper(readline(">"));
 
-        if ($postalCode == "")
-        {
+        if ($postalCode == "") {
             return;
         }
     }
 
-    try
-    {
+    try {
         $response = $client->get("headends", array(), array(
             "query"   => array("country" => $country, "postalcode" => $postalCode),
-            "headers" => array("token" => $token)))->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+            "headers" => array("token" => $token)
+        ))->send();
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        $s = json_decode($e->getResponse()->getBody(true), true);
         print "********************************************\n";
         print "\tError response from server:\n";
         print "\tCode: {$s["code"]}\n";
@@ -1325,21 +1209,18 @@ function addLineupsToSchedulesDirect()
 
     $res = $response->json();
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         debugMSG("addLineupsToSchedulesDirect:Response: $response");
-        debugMSG("addLineupsToSchedulesDirect:Response: " . print_r($res, TRUE));
+        debugMSG("addLineupsToSchedulesDirect:Response: " . print_r($res, true));
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
 
     $counter = "0";
 
-    foreach ($res as $details)
-    {
+    foreach ($res as $details) {
         print "\nheadend: {$details["headend"]}\n";
         print "location: {$details["location"]}\n";
-        foreach ($details["lineups"] as $v)
-        {
+        foreach ($details["lineups"] as $v) {
             $counter++;
             $name = $v["name"];
             $lineup = end(explode("/", $v["uri"]));
@@ -1353,22 +1234,17 @@ function addLineupsToSchedulesDirect()
     print "\n\n";
     $lineup = readline("Lineup to add (# or lineup)>");
 
-    if ($lineup == "")
-    {
+    if ($lineup == "") {
         return;
     }
 
-    if (strlen($lineup) < 3)
-    {
+    if (strlen($lineup) < 3) {
         $lineup = $sdLineupArray[$lineup];
-    }
-    else
-    {
+    } else {
         $lineup = strtoupper($lineup);
     }
 
-    if ($lineup != "USA-C-BAND-DEFAULT" AND substr_count($lineup, "-") != 2)
-    {
+    if ($lineup != "USA-C-BAND-DEFAULT" AND substr_count($lineup, "-") != 2) {
         print "Did not see at least two hyphens in lineup; did you enter it correctly?\n";
 
         return;
@@ -1377,12 +1253,10 @@ function addLineupsToSchedulesDirect()
     print "Sending request to server.\n";
     $lineup = str_replace(" ", "", $lineup);
 
-    try
-    {
+    try {
         $response = $client->put("lineups/$lineup", array("token" => $token), array())->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        $s = json_decode($e->getResponse()->getBody(true), true);
         print "********************************************\n";
         print "\tError response from server:\n";
         print "\tCode: {$s["code"]}\n";
@@ -1395,8 +1269,7 @@ function addLineupsToSchedulesDirect()
 
     $res = $response->json();
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         debugMSG("addLineupsToSchedulesDirect:Response:$res");
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
@@ -1410,8 +1283,7 @@ function directAddLineup($lineup)
     global $client;
     global $token;
 
-    if ($lineup != "USA-C-BAND-DEFAULT" AND substr_count($lineup, "-") != 2)
-    {
+    if ($lineup != "USA-C-BAND-DEFAULT" AND substr_count($lineup, "-") != 2) {
         print "Did not see at least two hyphens in lineup; did you enter it correctly?\n";
 
         return;
@@ -1420,12 +1292,10 @@ function directAddLineup($lineup)
     print "Sending request to server.\n";
     $lineup = str_replace(" ", "", $lineup);
 
-    try
-    {
+    try {
         $response = $client->put("lineups/$lineup", array("token" => $token), array())->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        $s = json_decode($e->getResponse()->getBody(true), true);
         print "********************************************\n";
         print "\tError response from server:\n";
         print "\tCode: {$s["code"]}\n";
@@ -1438,8 +1308,7 @@ function directAddLineup($lineup)
 
     $res = $response->json();
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         debugMSG("addLineupsToSchedulesDirect:Response:$res");
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
@@ -1461,17 +1330,14 @@ function deleteLineupFromSchedulesDirect()
 
     list($toDelete,) = getLineupFromNumber(strtoupper(readline("Lineup to Delete (# or lineup):>")));
 
-    if ($toDelete == "")
-    {
+    if ($toDelete == "") {
         return;
     }
 
-    try
-    {
+    try {
         $response = $client->delete("lineups/$toDelete", array("token" => $token), array())->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        $s = json_decode($e->getResponse()->getBody(true), true);
         print "********************************************\n";
         print "\tError response from server:\n";
         print "\tCode: {$s["code"]}\n";
@@ -1484,8 +1350,7 @@ function deleteLineupFromSchedulesDirect()
 
     $res = $response->json();
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         debugMSG("deleteLineupFromSchedulesDirect:Response:$res");
         debugMSG("Raw headers:\n" . $response->getRawHeaders());
     }
@@ -1504,12 +1369,10 @@ function deleteMessageFromSchedulesDirect()
 
     $toDelete = readline("MessageID to acknowledge:>");
 
-    try
-    {
+    try {
         $response = $client->delete("messages/$toDelete", array("token" => $token), array())->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        $s = json_decode($e->getResponse()->getBody(true), true);
         print "********************************************\n";
         print "\tError response from server:\n";
         print "\tCode: {$s["code"]}\n";
@@ -1522,8 +1385,7 @@ function deleteMessageFromSchedulesDirect()
 
     $res = $response->json();
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "\n\n******************************************\n";
         print "Raw headers:\n";
         print $response->getRawHeaders();
@@ -1544,12 +1406,10 @@ function getLineup($lineupToGet)
 
     print "Retrieving lineup $lineupToGet from Schedules Direct.\n";
 
-    try
-    {
+    try {
         $response = $client->get("lineups/$lineupToGet", array("token" => $token), array())->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        $s = json_decode($e->getResponse()->getBody(TRUE), TRUE);
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        $s = json_decode($e->getResponse()->getBody(true), true);
 
         print "********************************************\n";
         print "\tError response from server:\n";
@@ -1561,11 +1421,9 @@ function getLineup($lineupToGet)
         return "";
     }
 
-    try
-    {
+    try {
         $res = $response->json();
-    } catch (Guzzle\Common\Exception\RuntimeException $e)
-    {
+    } catch (Guzzle\Common\Exception\RuntimeException $e) {
         /*
          * Probably couldn't decode the JSON.
          */
@@ -1575,8 +1433,7 @@ function getLineup($lineupToGet)
         return "";
     }
 
-    if ($debug === TRUE)
-    {
+    if ($debug === true) {
         print "\n\n******************************************\n";
         print "Raw headers:\n";
         print $response->getRawHeaders();
@@ -1593,9 +1450,9 @@ function getLineup($lineupToGet)
 function updateLocalLineupCache($updatedLineupsToRefresh)
 {
     global $dbhSD;
+    global $useSQLite;
 
-    if (is_null($dbhSD) === TRUE)
-    {
+    if (is_null($dbhSD) === true) {
         global $argv;
         print "Send the following to grabber@schedulesdirect.org\n";
         print "updateLocalLineupCache->dbhSD is null?\n";
@@ -1605,13 +1462,11 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
 
     print "Checking for updated lineups from Schedules Direct.\n";
 
-    foreach ($updatedLineupsToRefresh as $k => $v)
-    {
+    foreach ($updatedLineupsToRefresh as $k => $v) {
         $res = array();
         $res = getLineup($k);
 
-        if (isset($res["code"]) === TRUE)
-        {
+        if (isset($res["code"]) === true) {
             print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
             print $res["message"] . "\n\n-----\n";
             exit;
@@ -1620,11 +1475,33 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        $stmt = $dbhSD->prepare("INSERT INTO lineups(lineup,json,modified)
+        if ($useSQLite === false) {
+            $stmt = $dbhSD->prepare("INSERT INTO lineups(lineup,json,modified)
         VALUES(:lineup,:json,:modified) ON DUPLICATE KEY UPDATE json=:json,modified=:modified");
 
-        $stmt->execute(array("lineup" => $k, "modified" => $updatedLineupsToRefresh[$k],
-                             "json"   => json_encode($res)));
+            $stmt->execute(array(
+                "lineup"   => $k,
+                "modified" => $updatedLineupsToRefresh[$k],
+                "json"     => json_encode($res)
+            ));
+        } else {
+            $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO lineups(lineup,json,modified)
+        VALUES(:lineup,:json,:modified)");
+
+            $stmt->execute(array(
+                "lineup"   => $k,
+                "modified" => $updatedLineupsToRefresh[$k],
+                "json"     => json_encode($res)
+            ));
+
+            $stmt = $dbhSD->prepare("UPDATE lineups SET json=:json,modified=:modified WHERE lineup=:lineup");
+            $stmt->execute(array(
+                "lineup"   => $k,
+                "modified" => $updatedLineupsToRefresh[$k],
+                "json"     => json_encode($res)
+            ));
+
+        }
 
         unset ($updatedLineupsToRefresh[$k]);
     }
@@ -1633,13 +1510,11 @@ function updateLocalLineupCache($updatedLineupsToRefresh)
 function tempdir()
 {
     $tempfile = tempnam(sys_get_temp_dir(), "mfdb");
-    if (file_exists($tempfile) === TRUE)
-    {
+    if (file_exists($tempfile) === true) {
         unlink($tempfile);
     }
     mkdir($tempfile);
-    if (is_dir($tempfile) === TRUE)
-    {
+    if (is_dir($tempfile) === true) {
         print "tempdir is $tempfile\n";
 
         return $tempfile;
@@ -1654,87 +1529,115 @@ function displayLocalVideoSources()
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (count($result) != 0)
-    {
+    if (count($result) != 0) {
         print "\nMythTV local videosources:\n";
-        foreach ($result as $v)
-        {
+        foreach ($result as $v) {
             print "sourceid: " . $v["sourceid"] . "\tname: " . $v["name"] . "\tSchedules Direct lineup: " .
                 $v["lineupid"] . "\n";
         }
-    }
-    else
-    {
+    } else {
         print "\nWARNING: *** No videosources configured in MythTV. ***\n";
     }
 }
 
-function checkDatabase()
+function createDatabase($useSQLite)
 {
-    global $dbh;
     global $dbhSD;
+    $createBaseTables = false;
 
-    $createBaseTables = FALSE;
+    printMSG("Creating settings table.");
 
-    printMSG("Checking for database upgrades.");
+    if ($useSQLite === true) {
+        printMSG("Creating initial database.");
+        $dbhSD->exec(
+            "CREATE TABLE settings
+          (
+            keyColumn TEXT NOT NULL UNIQUE,
+            valueColumn TEXT NOT NULL
+          )");
+        print "Creating Schedules Direct tables.\n";
+        $dbhSD->exec("CREATE TABLE messages
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    id char(22) NOT NULL UNIQUE, -- Required to ACK a message from the server.
+                    date char(20) DEFAULT NULL,
+                    message varchar(512) DEFAULT NULL,
+                    type char(1) DEFAULT NULL, -- Message type. G-global, S-service status, U-user specific
+                    modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+  )");
+        $dbhSD->exec("CREATE TABLE credits
+                  (
+                    personID INTEGER,
+                    programID varchar(64) NOT NULL,
+                    role varchar(100) DEFAULT NULL
+                  )");
+        $dbhSD->exec("CREATE INDEX programID ON credits (programID)");
+        $dbhSD->exec("CREATE UNIQUE INDEX person_pid_role ON credits (personID,programID,role)");
+        $dbhSD->exec("CREATE TABLE lineups
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    lineup varchar(50) NOT NULL,
+                    modified char(20) DEFAULT '1970-01-01T00:00:00Z',
+                    json TEXT
+                  )");
+        $dbhSD->exec("CREATE UNIQUE INDEX lineup ON lineups (lineup)");
+        $dbhSD->exec("CREATE TABLE people
+                  (
+                    personID INTEGER PRIMARY KEY,
+                    name varchar(128)
+                  )");
+        $dbhSD->exec("CREATE TABLE programs
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    programID varchar(64) NOT NULL UNIQUE,
+                    md5 char(22) NOT NULL,
+                    modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                    json TEXT NOT NULL
+                  )");
+        $dbhSD->exec("CREATE TABLE programGenres
+                  (
+                    programID varchar(64) PRIMARY KEY NOT NULL,
+                    relevance char(1) NOT NULL DEFAULT '0',
+                    genre varchar(30) NOT NULL
+                  )");
+        $dbhSD->exec("CREATE INDEX genre ON programGenres (genre)");
+        $dbhSD->exec("CREATE UNIQUE INDEX pid_relevance ON programGenres (programID,relevance)");
+        $dbhSD->exec("CREATE TABLE programRatings
+                  (
+                    programID varchar(64) PRIMARY KEY NOT NULL,
+                    system varchar(30) NOT NULL,
+                    rating varchar(16) DEFAULT NULL
+                  )");
+        $dbhSD->exec("CREATE TABLE schedules
+                  (
+                    stationID varchar(12) NOT NULL UNIQUE,
+                    md5 char(22) NOT NULL
+                  )");
+        $dbhSD->exec("CREATE INDEX md5 ON schedules (md5)");
+        $dbhSD->exec("CREATE TABLE imageCache
+                  (
+                    row INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    item varchar(128) NOT NULL,
+                    md5 char(22) NOT NULL,
+                    height varchar(128) NOT NULL,
+                    width varchar(128) NOT NULL,
+                    type char(1) NOT NULL -- COMMENT 'L-Channel Logo'
+                  )");
+        $dbhSD->exec("CREATE UNIQUE INDEX id ON imageCache (item,height,width)");
+        $dbhSD->exec("CREATE INDEX type ON imageCache (type)");
+    } else {
+        printMSG("Creating Schedules Direct tables.");
 
-    $stmt = $dbhSD->prepare("DESCRIBE settings");
-    try
-    {
-        $stmt->execute();
-    } catch (PDOException $ex)
-    {
-        if ($ex->getCode() == "42S02")
-        {
-            printMSG("Creating settings table.\n");
-            $stmt = $dbhSD->exec(
-                "CREATE TABLE `settings` (
+        $dbhSD->exec("DROP TABLE IF EXISTS settings,messages,credits,lineups,programs,people,programGenres,
+    programRating,schedules,imageCache");
+
+        $dbhSD->exec(
+            "CREATE TABLE `settings` (
                     `keyColumn` varchar(255) NOT NULL,
                     `valueColumn` varchar(255) NOT NULL,
                     PRIMARY KEY (`keyColumn`),
                     UNIQUE KEY `keyColumn` (`keyColumn`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-
-            //settingSD("SchedulesDirectWithoutMythTV", "TRUE");
-            $createBaseTables = TRUE;
-        }
-    }
-
-    $schemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
-
-    if ($schemaVersion === FALSE)
-    {
-        printMSG("Copying existing data from MythTV");
-
-        $lineups = setting("localLineupLastModified");
-        settingSD("localLineupLastModified", $lineups);
-
-        $login = setting("SchedulesDirectLogin");
-        settingSD("SchedulesDirectLogin", $login);
-
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='schedulesdirectLogin'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLogin'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='localLineupLastModified'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectLastUpdate'");
-        $dbh->exec("DELETE IGNORE FROM settings WHERE value='SchedulesDirectJSONschemaVersion'");
-
-        $createBaseTables = TRUE;
-        $schemaVersion = 1;
-
-        $dbh->exec("DROP TABLE IF EXISTS SDprogramCache,SDcredits,SDlineupCache,SDpeople,SDprogramgenres,
-    SDprogramrating,SDschedule,SDMessages,SDimageCache");
-    }
-    else
-    {
-        printMSG("Schema version is $schemaVersion.");
-    }
-
-    if ($createBaseTables === TRUE)
-    {
-        printMSG("Creating Schedules Direct tables.");
-
-        $dbhSD->exec("DROP TABLE IF EXISTS messages,credits,lineups,people,programGenres,
-    programRating,schedules,imageCache");
 
         $dbhSD->exec("CREATE TABLE `messages` (
 `row` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -1818,8 +1721,6 @@ function checkDatabase()
   UNIQUE KEY `id` (`item`,`height`,`width`),
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-
-        settingSD("SchedulesDirectJSONschemaVersion", "1");
     }
 
     if ($schemaVersion == "1")
@@ -1900,6 +1801,7 @@ function checkForChannelIcon($stationID, $data)
     global $dbhSD;
     global $channelLogoDirectory;
     global $forceLogoUpdate;
+    global $useSQLite;
 
     $a = explode("/", $data["URL"]);
     $iconFileName = end($a);
@@ -1915,8 +1817,7 @@ function checkForChannelIcon($stationID, $data)
 
     $result = $stmt->fetchColumn();
 
-    if ($result === FALSE OR $result != $md5 OR $forceLogoUpdate === TRUE)
-    {
+    if (($result === false) OR ($result != $md5) OR ($forceLogoUpdate === true)) {
         /*
          * We don't already have this icon, or it's different, so it will have to be fetched.
          */
@@ -1925,17 +1826,41 @@ function checkForChannelIcon($stationID, $data)
 
         $success = @file_put_contents("$channelLogoDirectory/$iconFileName", file_get_contents($data["URL"]));
 
-        if ($success === FALSE)
-        {
+        if ($success === false) {
             printMSG("Check permissions: could not write to $channelLogoDirectory\n");
 
             return;
         }
 
-        $updateSDimageCache = $dbhSD->prepare("INSERT INTO imageCache(item,height,width,md5,type)
+        if ($useSQLite === false) {
+            $updateSDimageCache = $dbhSD->prepare("INSERT INTO imageCache(item,height,width,md5,type)
         VALUES(:item,:height,:width,:md5,'L') ON DUPLICATE KEY UPDATE md5=:md5");
-        $updateSDimageCache->execute(array("item" => $iconFileName, "height" => $height, "width" => $width,
-                                           "md5"  => $md5));
+            $updateSDimageCache->execute(array(
+                "item"   => $iconFileName,
+                "height" => $height,
+                "width"  => $width,
+                "md5"    => $md5
+            ));
+        } else {
+            $updateSDimageCache = $dbhSD->prepare("INSERT OR IGNORE INTO imageCache(item,height,width,md5,type)
+        VALUES(:item,:height,:width,:md5,'L')");
+            $updateSDimageCache->execute(array(
+                "item"   => $iconFileName,
+                "height" => $height,
+                "width"  => $width,
+                "md5"    => $md5
+            ));
+
+            $updateSDimageCache = $dbhSD->prepare("UPDATE imageCache SET
+            item=:item,height=:height,width=:width,md5=:md5,type='L' WHERE md5=:md5");
+            $updateSDimageCache->execute(array(
+                "item"   => $iconFileName,
+                "height" => $height,
+                "width"  => $width,
+                "md5"    => $md5
+            ));
+        }
+
         $updateChannelTable->execute(array("icon" => $iconFileName, "stationID" => $stationID));
     }
 }
@@ -2024,28 +1949,19 @@ function getLineupFromNumber($numberOrLineup)
 {
     global $sdStatus;
 
-    if (strlen($numberOrLineup) < 3)
-    {
+    if (strlen($numberOrLineup) < 3) {
         $numberOrLineup = (int)$numberOrLineup;
 
-        if (isset($sdStatus["lineups"][$numberOrLineup]) === FALSE)
-        {
+        if (isset($sdStatus["lineups"][$numberOrLineup]) === false) {
             return array("", "");
-        }
-        else
-        {
-            if (isset($sdStatus["lineups"][$numberOrLineup]["isDeleted"]) === TRUE)
-            {
-                return array($sdStatus["lineups"][$numberOrLineup]["lineup"], TRUE);
-            }
-            else
-            {
-                return array($sdStatus["lineups"][$numberOrLineup]["lineup"], FALSE);
+        } else {
+            if (isset($sdStatus["lineups"][$numberOrLineup]["isDeleted"]) === true) {
+                return array($sdStatus["lineups"][$numberOrLineup]["lineup"], true);
+            } else {
+                return array($sdStatus["lineups"][$numberOrLineup]["lineup"], false);
             }
         }
-    }
-    else
-    {
+    } else {
         return ($numberOrLineup); //We're actually just returning the name of the array.
     }
 }
@@ -2054,13 +1970,10 @@ function getListOfAvailableCountries()
 {
     global $client;
 
-    try
-    {
+    try {
         $response = $client->get("/20141201/available/countries", array(), array())->send();
-    } catch (Guzzle\Http\Exception\BadResponseException $e)
-    {
-        if ($e->getCode() != 200)
-        {
+    } catch (Guzzle\Http\Exception\BadResponseException $e) {
+        if ($e->getCode() != 200) {
             print "Could not download list of countries. Exiting.\n";
             exit;
         }
@@ -2076,46 +1989,43 @@ function printListOfAvailableCountries($fancyTable)
 {
     global $availableCountries;
 
-    foreach ($availableCountries as $region => $data)
-    {
+    foreach ($availableCountries as $region => $data) {
         print "\nRegion:$region\n";
 
         $countryWidth = 0;
-        foreach ($data as $item)
-        {
-            if (strlen($item["fullName"]) > $countryWidth)
-            {
+        foreach ($data as $item) {
+            if (strlen($item["fullName"]) > $countryWidth) {
                 $countryWidth = strlen($item["fullName"]);
             }
         }
 
-        if ($fancyTable === TRUE)
-        {
+        if ($fancyTable === true) {
             $col1 = "Country";
             $col2 = "Three-letter code";
             $col3 = "Example Postal Code";
-            $countryList = new Zend\Text\Table\Table(array('columnWidths' => array($countryWidth + 2, strlen($col2) + 2,
-                                                                                   strlen($col3) + 2)));
+            $countryList = new Zend\Text\Table\Table(array(
+                'columnWidths' => array(
+                    $countryWidth + 2,
+                    strlen($col2) + 2,
+                    strlen($col3) + 2
+                )
+            ));
             $countryList->appendRow(array($col1, $col2, $col3));
 
-            foreach ($data as $item)
-            {
-                if (isset($item["onePostalCode"]) === TRUE)
-                {
-                    $countryList->appendRow(array($item["fullName"], $item["shortName"],
-                                                  $item["postalCodeExample"] . " *"));
-                }
-                else
-                {
+            foreach ($data as $item) {
+                if (isset($item["onePostalCode"]) === true) {
+                    $countryList->appendRow(array(
+                        $item["fullName"],
+                        $item["shortName"],
+                        $item["postalCodeExample"] . " *"
+                    ));
+                } else {
                     $countryList->appendRow(array($item["fullName"], $item["shortName"], $item["postalCodeExample"]));
                 }
             }
             print $countryList;
-        }
-        else
-        {
-            foreach ($data as $item)
-            {
+        } else {
+            foreach ($data as $item) {
                 print "{$item["fullName"]}\n";
             }
         }
@@ -2126,13 +2036,11 @@ function printListOfAvailableCountries($fancyTable)
 
 function getChannelLogoDirectory()
 {
-    if (is_dir(getenv("HOME") . "/.mythtv/channels") === TRUE)
-    {
+    if (is_dir(getenv("HOME") . "/.mythtv/channels") === true) {
         return (getenv("HOME") . "/.mythtv/channels");
     }
 
-    if (is_dir("/home/mythtv/.mythtv/channels") === TRUE)
-    {
+    if (is_dir("/home/mythtv/.mythtv/channels") === true) {
         return ("/home/mythtv/.mythtv/channels");
     }
 
