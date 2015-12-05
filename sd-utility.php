@@ -1796,6 +1796,25 @@ function createDatabase($useSQLite)
     }
 }
 
+function checkForSchemaUpdate($useSQLite)
+{
+    global $dbhSD;
+    global $schemaVersion;
+    printMSG("Checking for schema updates.");
+    $dbSchemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
+    printMSG("Database schema version is $dbSchemaVersion.");
+    if ($dbSchemaVersion == $schemaVersion) {
+        return;
+    }
+    $stmt = $dbhSD->prepare("DESCRIBE settings");
+    try {
+        $stmt->execute();
+    } catch (PDOException $ex) {
+        if ($ex->getCode() == "42S02") {
+        }
+    }
+}
+
 function checkForChannelIcon($stationID, $data)
 {
     global $dbh;
