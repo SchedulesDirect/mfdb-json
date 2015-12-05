@@ -2020,7 +2020,6 @@ function updateStatus()
     printMSG("Last data refresh: {$res["lastDataUpdate"]}");
     printMSG("Account expires: $expires");
     printMSG("Max number of lineups for your account: $maxLineups");
-    //printMSG("Next suggested connect time: $nextConnectTime");
 
     if ($useServiceAPI === true) {
         printMSG("Updating settings via the Services API.");
@@ -2048,9 +2047,9 @@ function updateStatus()
         if (`which mythutil`) {
             exec("mythutil --clearcache"); // Force a clearcache to make sure that everyone is in sync.
         }
-
-        return ("");
     }
+
+    return ("");
 }
 
 ?>

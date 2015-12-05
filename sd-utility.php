@@ -764,7 +764,7 @@ function updateChannelTable($lineup)
 
         if ($useScan === true) {
             if ($transport == "QAM") {
-                $matchType = $json["map"][0]["matchType"];
+                $matchType = $json["map"]["matchType"];
 
                 print "Matching $transport scan based on: $matchType\n";
 
@@ -1000,7 +1000,7 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
             $name = "";
         }
 
-        if (array_key_exists("logo", $stationArray)) {
+        if (isset($stationArray["logo"]) === true) {
             if ($skipChannelLogo === false) {
                 checkForChannelIcon($stationID, $stationArray["logo"]);
             }
@@ -1628,7 +1628,7 @@ function createDatabase($useSQLite)
     } else {
         printMSG("Creating Schedules Direct tables.");
 
-        $dbhSD->exec("DROP TABLE IF EXISTS settings, messages,credits,lineups,programs,people,programGenres,
+        $dbhSD->exec("DROP TABLE IF EXISTS settings,messages,credits,lineups,programs,people,programGenres,
     programRating,schedules,imageCache");
 
         $dbhSD->exec(

@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.28-dev";
-$scriptDate = "2015-10-31";
+$scriptVersion = "0.28";
+$scriptDate = "2015-12-04";
 $knownToBeBroken = false;
 $skipVersionCheck = false;
 
@@ -194,7 +194,6 @@ function printStatus($sdStatus)
     print "Last data refresh: " . $sdStatus["lastDataUpdate"] . "\n";
     print "Account expires: $expires\n";
     print "Max number of headends for your account: $maxHeadends\n";
-    //print "Next suggested connect time: $nextConnectTime\n";
 
     $videosourceModifiedArray = array();
 
