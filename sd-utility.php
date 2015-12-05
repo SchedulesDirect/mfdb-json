@@ -1544,6 +1544,7 @@ function createDatabase($useSQLite)
 {
     global $dbhSD;
     $createBaseTables = false;
+    global $schemaVersion;
 
     printMSG("Creating settings table.");
 
@@ -1723,29 +1724,91 @@ function createDatabase($useSQLite)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
     }
 
-    settingSD("SchedulesDirectJSONschemaVersion", "3");
+    if ($schemaVersion == "1") {
+        $dbhSD->exec("ALTER TABLE people ADD INDEX(name)");
+        settingSD("SchedulesDirectJSONschemaVersion", "2");
+    }
+
+    if ($schemaVersion == "2") {
+        try {
+            $dbhSD->exec("RENAME TABLE SDMessages TO messages");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("RENAME TABLE SDcredits TO credits");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("RENAME TABLE SDimageCache TO imageCache");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("RENAME TABLE SDlineupCache TO lineups");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("RENAME TABLE SDpeople TO people");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("RENAME TABLE SDprogramCache TO programs");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("RENAME TABLE SDprogramgenres TO programGenres");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("RENAME TABLE SDprogramrating TO programRatings");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("RENAME TABLE SDschedule TO schedules");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("ALTER TABLE schedules ADD column date CHAR(10) NOT NULL");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("ALTER TABLE schedules DROP KEY sid");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        try {
+            $dbhSD->exec("ALTER TABLE schedules ADD UNIQUE KEY station_date (stationID,date)");
+        } catch (PDOException $ex) {
+            //do nothing
+        }
+        settingSD("SchedulesDirectJSONschemaVersion", "3");
+    }
 }
 
 function checkForSchemaUpdate($useSQLite)
 {
     global $dbhSD;
     global $schemaVersion;
-
     printMSG("Checking for schema updates.");
-
     $dbSchemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
     printMSG("Database schema version is $dbSchemaVersion.");
-
     if ($dbSchemaVersion == $schemaVersion) {
         return;
     }
-
     $stmt = $dbhSD->prepare("DESCRIBE settings");
     try {
         $stmt->execute();
     } catch (PDOException $ex) {
         if ($ex->getCode() == "42S02") {
-
         }
     }
 }
