@@ -77,14 +77,6 @@ php composer.phar install
 
 ###Create the tables for SchedulesDirect
 
-**NOTE**: If you're unsure of what password you have for your MythTV database, because it was configured by an installer like Mythbuntu, please do the following:
-
-```
-cat /etc/mythtv/config.xml
-```
-
-In the "Database" section will be the password which was auto-generated; make note of it, because you will need it when running the following command:
-
 ```
 mysql -uroot -p < sd.sql
 ```
