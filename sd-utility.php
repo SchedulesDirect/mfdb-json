@@ -34,6 +34,7 @@ $justExtract = false;
 $updatedLineupsToRefresh = array();
 $needToStoreLogin = false;
 $resetDatabase = false;
+$useServiceAPI = false;
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -519,32 +520,34 @@ while ($done === false) {
             print "Adding new videosource\n\n";
             $newName = readline("Name:>");
             if ($newName != "") {
-                $request = $client->post("http://$host:6544/Channel/AddVideoSource")
-                    ->setPostField("Grabber", "schedulesdirect-json")
-                    ->setPostField("SourceName", $newName)
-                    ->setPostField("UserId", $username)
-                    ->setPostField("Password", $password);
+                if ($useServiceAPI === true) {
+                    $request = $client->post("http://$host:6544/Channel/AddVideoSource")
+                        ->setPostField("Grabber", "schedulesdirect-json")
+                        ->setPostField("SourceName", $newName)
+                        ->setPostField("UserId", $username)
+                        ->setPostField("Password", $password);
 
-                $response = $request->send();
-
-/*                $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
+                    $response = $request->send();
+                } else {
+                    $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
                         VALUES(:name,:userid,:password,'schedulesdirect-json')");
-                try {
-                    $stmt->execute(array(
-                        "name"     => $newName,
-                        "userid"   => $username,
-                        "password" => $password
-                    ));
-                } catch (PDOException $e) {
-                    if ($e->getCode() == 23000) {
-                        print "\n\n";
-                        print "*************************************************************\n";
-                        print "\n\n";
-                        print "Duplicate video source name.\n";
-                        print "\n\n";
-                        print "*************************************************************\n";
+                    try {
+                        $stmt->execute(array(
+                            "name"     => $newName,
+                            "userid"   => $username,
+                            "password" => $password
+                        ));
+                    } catch (PDOException $e) {
+                        if ($e->getCode() == 23000) {
+                            print "\n\n";
+                            print "*************************************************************\n";
+                            print "\n\n";
+                            print "Duplicate video source name.\n";
+                            print "\n\n";
+                            print "*************************************************************\n";
+                        }
                     }
-                }*/
+                }
             }
             break;
         case "D":
