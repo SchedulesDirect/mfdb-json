@@ -83,9 +83,11 @@ php composer.phar install
 cat /etc/mythtv/config.xml
 ```
 
-In the "Database" section will be the password which was auto-generated.
+In the "Database" section will be the password which was auto-generated; make note of it, because you will need it when running the following command:
 
+```
 mysql -uroot -p < sd.sql
+```
 
 #Configuration
 ##MythTV
