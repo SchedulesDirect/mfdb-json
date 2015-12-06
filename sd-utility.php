@@ -312,7 +312,7 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
         $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    if ($resetDatabase === true) {
+    if ($resetDatabase === true OR count($result) == 0) {
         createDatabase($useSQLite);
     }
 
