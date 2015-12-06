@@ -56,7 +56,7 @@ populate MythTV data.
 Install the prerequisites:
 
 ###Ubuntu
-sudo apt-get install git php5-cli php5-mysql php5-curl curl
+sudo apt-get install git php5-cli php5-mysql php5-curl curl -y
 
 ###Fedora
 yum -y install git curl curl-devel libcurl libcurl-devel php-common
@@ -77,7 +77,9 @@ php composer.phar install
 
 ###Create the tables for SchedulesDirect
 
+```
 mysql -uroot -p < sd.sql
+```
 
 #Configuration
 ##MythTV
