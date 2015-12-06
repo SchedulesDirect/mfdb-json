@@ -1745,6 +1745,8 @@ function createDatabase($useSQLite)
   UNIQUE KEY `id` (`item`,`height`,`width`),
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
+        settingSD("SchedulesDirectJSONschemaVersion", "3");
     }
 
     if ($schemaVersion == "1") {
