@@ -261,8 +261,8 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
             $dbhSD->exec("SET CHARACTER SET utf8");
             $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            switch ($e->getCode())
-            {
+            print "code is " . $e->getCode() . "\n";
+            switch ($e->getCode()) {
                 case 2002:
                     print "Could not connect to database:\n" . $e->getMessage() . "\n";
                     exit;
@@ -277,7 +277,8 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
                 case "42S02":
                     print "Creating initial database.\n";
                     createDatabase($useSQLite);
-                    $dbhSD = new PDO("mysql:host=$dbHostSchedulesDirectData;dbname=schedulesdirect;charset=utf8", "sd", "sd");
+                    $dbhSD = new PDO("mysql:host=$dbHostSchedulesDirectData;dbname=schedulesdirect;charset=utf8", "sd",
+                        "sd");
                     $dbhSD->exec("SET CHARACTER SET utf8");
                     $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     break;
