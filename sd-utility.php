@@ -519,8 +519,16 @@ while ($done === false) {
             print "Adding new videosource\n\n";
             $newName = readline("Name:>");
             if ($newName != "") {
-                $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
-                        VALUES(:name,:userid,:password,'schedulesdirect2')");
+                $request = $client->post("http://$host:6544/Channel/AddVideoSource")
+                    ->setPostField("Grabber", "schedulesdirect-json")
+                    ->setPostField("SourceName", $newName)
+                    ->setPostField("UserId", $username)
+                    ->setPostField("Password", $password);
+
+                $response = $request->send();
+
+/*                $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
+                        VALUES(:name,:userid,:password,'schedulesdirect-json')");
                 try {
                     $stmt->execute(array(
                         "name"     => $newName,
@@ -536,7 +544,7 @@ while ($done === false) {
                         print "\n\n";
                         print "*************************************************************\n";
                     }
-                }
+                }*/
             }
             break;
         case "D":
