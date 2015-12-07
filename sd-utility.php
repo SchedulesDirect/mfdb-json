@@ -1166,13 +1166,11 @@ function linkSchedulesDirectLineup()
 
         $res = $response->json();
 
-        foreach ($res as $item)
-        {
+        $request = $client->post("http://$host:6544/Channel/UpdateVideoSource")
+            ->setPostField("SourceID", $res["VideoSource"]["Id"])
+            ->setPostField("LineupId", $lineup);
 
-        }
-
-
-
+        $response = $request->send();
     } else {
         $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:lineup WHERE sourceid=:sid");
         $stmt->execute(array("lineup" => $lineup, "sid" => $sid));
