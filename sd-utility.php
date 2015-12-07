@@ -576,10 +576,16 @@ while ($done === false) {
             break;
         case "D":
             $toDelete = readline("Delete sourceid:>");
-            $stmt = $dbh->prepare("DELETE FROM videosource WHERE sourceid=:sid");
-            $stmt->execute(array("sid" => $toDelete));
-            $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sid");
-            $stmt->execute(array("sid" => $toDelete));
+            if ($useServiceAPI === true) {
+                $request = $client->post("http://$host:6544/Channel/RemoveVideoSource")
+                    ->setPostField("SourceID", $toDelete);
+                $response = $request->send();
+            } else {
+                $stmt = $dbh->prepare("DELETE FROM videosource WHERE sourceid=:sid");
+                $stmt->execute(array("sid" => $toDelete));
+                $stmt = $dbh->prepare("DELETE FROM channel WHERE sourceid=:sid");
+                $stmt->execute(array("sid" => $toDelete));
+            }
             break;
         case "E":
             $sourceIDtoExtract = readline("Which sourceid do you want to extract:>");
