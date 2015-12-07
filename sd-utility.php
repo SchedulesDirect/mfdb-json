@@ -492,16 +492,16 @@ while ($done === false) {
 
     if ($isMythTV === true) {
         print "\nMythTV functions:\n";
-        print "Videosource functions\n-----------------\n";
+        print "Videosource functions\n---------------------\n";
         print "A to Add a new videosource to MythTV\n";
         print "D to Delete a videosource in MythTV\n";
         print "L to Link a videosource to a lineup at Schedules Direct\n";
         print "U to Update a videosource by downloading from Schedules Direct\n";
 
-        print "Capture card functions\n---------------------\n";
+        print "Capture card functions\n----------------------\n";
         print "C to Connect a capture card input to a videosource\n";
 
-        print "Miscellaneous\n-----------------\n";
+        print "Miscellaneous\n-------------\n";
         print "E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct\n";
     }
 
@@ -568,6 +568,8 @@ while ($done === false) {
                     }
                 }
             }
+            break;
+        case "C":
             break;
         case "D":
             $toDelete = readline("Delete sourceid:>");
