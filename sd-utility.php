@@ -544,12 +544,13 @@ while ($done === false) {
                         ->setPostField("Grabber", "schedulesdirect-json")
                         ->setPostField("SourceName", $newName)
                         ->setPostField("UserId", $username)
+                        ->setPostField("FreqTable", "default")
                         ->setPostField("Password", $password);
 
                     $response = $request->send();
                 } else {
-                    $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,password,xmltvgrabber)
-                        VALUES(:name,:userid,:password,'schedulesdirect-json')");
+                    $stmt = $dbh->prepare("INSERT INTO videosource(name,userid,freqtable,password,xmltvgrabber)
+                        VALUES(:name,:userid,'default',:password,'schedulesdirect-json')");
                     try {
                         $stmt->execute(array(
                             "name"     => $newName,
