@@ -618,12 +618,39 @@ function updateChannelTable($lineup)
     global $dbh;
     global $dbhSD;
     global $skipChannelLogo;
+    global $useServiceAPI;
+    global $client;
+    global $host;
 
     $transport = "";
 
-    $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid=:lineup");
-    $stmt->execute(array("lineup" => $lineup));
-    $sourceID = $stmt->fetch(PDO::FETCH_COLUMN);
+    if ($useServiceAPI === true) {
+        try {
+            $response = $client->get("http://$host:6544/Channel/GetVideoSourceList", array(), array(
+                "headers" => array("Accept" => "application/json")
+            ))->send();
+        } catch (Guzzle\Http\Exception\BadResponseException $e) {
+            $s = json_decode($e->getResponse()->getBody(true), true);
+
+            print "********************************************\n";
+            print "\tError response from server:\n";
+            print "\tCode: {$s["code"]}\n";
+            print "\tMessage: {$s["message"]}\n";
+            print "\tServer: {$s["serverID"]}\n";
+            print "********************************************\n";
+
+            return "";
+        }
+
+        $res = $response->json();
+        var_dump($res);
+
+
+    } else {
+        $stmt = $dbh->prepare("SELECT sourceid FROM videosource WHERE lineupid=:lineup");
+        $stmt->execute(array("lineup" => $lineup));
+        $sourceID = $stmt->fetch(PDO::FETCH_COLUMN);
+    }
 
     if ($sourceID == "") {
         print "ERROR: Can't update channel table; lineup not associated with a videosource.\n";
@@ -1120,9 +1147,6 @@ function linkSchedulesDirectLineup()
 
     if ($useServiceAPI === true) {
         try {
-//            $response = $client->get("http://$host:6544/Channel/GetVideoSource?SourceID=$sid", array(), array())
-//                ->send();
-
             $response = $client->get("http://$host:6544/Channel/GetVideoSource", array(), array(
                 "query"   => array("SourceID" => $sid),
                 "headers" => array("Accept" => "application/json")
