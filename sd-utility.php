@@ -1165,7 +1165,13 @@ function linkSchedulesDirectLineup()
         }
 
         $res = $response->json();
-        var_dump($res);
+
+        foreach ($res as $item)
+        {
+
+        }
+
+
 
     } else {
         $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:lineup WHERE sourceid=:sid");
