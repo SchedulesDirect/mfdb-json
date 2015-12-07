@@ -498,10 +498,10 @@ while ($done === false) {
         print "L to Link a videosource to a lineup at Schedules Direct\n";
         print "U to Update a videosource by downloading from Schedules Direct\n";
 
-        print "Capture card functions\n----------------------\n";
+        print "\n\nCapture card functions\n----------------------\n";
         print "C to Connect a capture card input to a videosource\n";
 
-        print "Miscellaneous\n-------------\n";
+        print "\n\nMiscellaneous\n-------------\n";
         print "E to Extract Antenna / QAM / DVB scan from MythTV to send to Schedules Direct\n";
     }
 
