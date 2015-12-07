@@ -457,9 +457,9 @@ if ($needToStoreLogin === true) {
 
     if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
         settingSD("SchedulesDirectLogin", $credentials);
-
+        // We need to check and see if there are any lineups in the database yet before running an update.
         $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
-    password=:password WHERE xmltvgrabber='schedulesdirect2'");
+    password=:password WHERE xmltvgrabber='schedulesdirect-json'");
         $stmt->execute(array("username" => $username, "password" => $password));
     } else {
         $fh = fopen("sd.json.conf", "w");
@@ -516,6 +516,7 @@ while ($done === false) {
             break;
         case "4":
             if (count($sdStatus["lineups"]) != 0) {
+                $lineupToRefresh = array();
                 foreach ($sdStatus["lineups"] as $v) {
                     $lineupToRefresh[$v["lineup"]] = 1;
                 }
@@ -1065,6 +1066,9 @@ function linkSchedulesDirectLineup()
 {
     global $dbh;
     global $dbhSD;
+    global $useServiceAPI;
+    global $client;
+    global $host;
 
     $sid = readline("MythTV sourceid:>");
 
@@ -1097,8 +1101,37 @@ function linkSchedulesDirectLineup()
         exit;
     }
 
-    $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:lineup WHERE sourceid=:sid");
-    $stmt->execute(array("lineup" => $lineup, "sid" => $sid));
+    if ($useServiceAPI === true) {
+        try {
+//            $response = $client->get("http://$host:6544/Channel/GetVideoSource?SourceID=$sid", array(), array())
+//                ->send();
+
+            $response = $client->get("http://$host:6544/Channel/GetVideoSource", array(), array(
+                "query"   => array("SourceID" => $sid),
+                "headers" => array("Accept" => "application/json")
+            ))->send();
+        } catch (Guzzle\Http\Exception\BadResponseException $e) {
+            $s = json_decode($e->getResponse()->getBody(true), true);
+
+            print "********************************************\n";
+            print "\tError response from server:\n";
+            print "\tCode: {$s["code"]}\n";
+            print "\tMessage: {$s["message"]}\n";
+            print "\tServer: {$s["serverID"]}\n";
+            print "********************************************\n";
+
+            return "";
+        }
+
+        $res = $response->json();
+        var_dump($res);
+
+    } else {
+        $stmt = $dbh->prepare("UPDATE videosource SET lineupid=:lineup WHERE sourceid=:sid");
+        $stmt->execute(array("lineup" => $lineup, "sid" => $sid));
+    }
+
+    return "";
 }
 
 function printLineup()
@@ -1547,7 +1580,7 @@ function tempdir()
 function displayLocalVideoSources()
 {
     global $dbh;
-
+    // Use the service API if possible.
     $stmt = $dbh->prepare("SELECT sourceid,name,lineupid FROM videosource ORDER BY sourceid");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
