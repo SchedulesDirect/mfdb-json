@@ -257,10 +257,13 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
         $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } else {
         try {
+            print "Going to connect.\n";
             $dbhSD = new PDO("mysql:host=$dbHostSchedulesDirectData;dbname=schedulesdirect;charset=utf8", "sd", "sd");
             $dbhSD->exec("SET CHARACTER SET utf8");
             $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
+            print "code is " . $e->getCode() . "\n";
+            print "message is " . $e->getMessage() . "\n";
             switch ($e->getCode()) {
                 case 2002:
                     print "Could not connect to database:\n" . $e->getMessage() . "\n";
