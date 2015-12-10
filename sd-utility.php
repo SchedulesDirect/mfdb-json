@@ -292,11 +292,14 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
      * OK, so we have a connection, but that doesn't mean that there's anything in the database yet.
      */
 
+    print "Got connection. Pulling settings.\n";
     try {
         $stmt = $dbhSD->prepare("SELECT * FROM settings");
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
+        print "code is " . $e->getCode() . "\n";
+        print "message is " . $e->getMessage() . "\n";
         switch ($e->getCode()) {
             case "42S02":
             case "HY000":
