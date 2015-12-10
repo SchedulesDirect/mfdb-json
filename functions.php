@@ -18,10 +18,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-$scriptVersion = "0.28";
-$scriptDate = "2015-12-04";
+$scriptVersion = "0.28-dev";
+$scriptDate = "2015-12-10";
 $knownToBeBroken = false;
-$skipVersionCheck = false;
+$skipVersionCheck = true;
 
 $dbName = null;
 $dbUser = null;
