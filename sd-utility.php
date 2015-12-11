@@ -293,6 +293,7 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
      */
 
     print "Got connection. Pulling settings.\n";
+
     try {
         $stmt = $dbhSD->prepare("SELECT * FROM settings");
         $stmt->execute();
