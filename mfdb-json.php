@@ -366,7 +366,7 @@ if ($isMythTV === true) {
     if ($station == "") {
         printMSG("Retrieving list of channels to download.");
 
-        $stmt = $dbh->prepare("SELECT sourceID FROM videosource WHERE xmltvgrabber='schedulesdirect2'");
+        $stmt = $dbh->prepare("SELECT sourceID FROM videosource WHERE xmltvgrabber='schedulesdirect-json'");
         $stmt->execute();
         $sources = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
