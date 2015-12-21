@@ -39,7 +39,6 @@ $maxProgramsToGet = 2000;
 $permanentDownloadFailure = array();
 $printTimeStamp = true;
 $scheduleJSON = array();
-$skipVersionCheck = false;
 $station = "";
 $stationIDs = array();
 $useScheduleFile = false;
