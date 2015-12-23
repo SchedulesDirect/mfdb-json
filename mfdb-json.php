@@ -325,13 +325,6 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
             printMSG("Did you run the sd-utility.php program yet?");
             exit;
         }
-
-        /*
-         * MythTV uses an auto-increment field for the person number, SD doesn't. We'll need to cross-reference later.
-         */
-        $getPeople = $dbh->prepare("SELECT name,person FROM people");
-        $getPeople->execute();
-        $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
     } else {
         if (file_exists("sd.json.conf") === true) {
             $userLoginInformation = file("sd.json.conf");
@@ -1159,10 +1152,17 @@ function insertSchedule()
 {
     global $dbh;
     global $dbhSD;
-    global $peopleCacheMyth;
     global $debug;
     global $errorWarning;
     global $scheduleJSON;
+
+    /*
+     * MythTV uses an auto-increment field for the person number, SD doesn't.
+     */
+
+    $getPeople = $dbh->prepare("SELECT name,person FROM people");
+    $getPeople->execute();
+    $peopleCacheMyth = $getPeople->fetchAll(PDO::FETCH_KEY_PAIR);
 
     $insertPersonMyth = $dbh->prepare("INSERT INTO people(name) VALUES(:name)");
 
@@ -1399,6 +1399,10 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         }
 
                         $name = $credit["name"];
+
+                        if (strpos($name, "Jorge D") !== false) {
+                            print "Stop here.\n"; // Debug
+                        }
 
                         if (isset($credit["personId"]) === false) {
                             if ($skipPersonID === false) {
