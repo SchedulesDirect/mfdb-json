@@ -1043,8 +1043,9 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
             VALUES (:programID,:md5,:json)
             ON DUPLICATE KEY UPDATE md5=:md5, json=:json");
 
-    $insertPersonSD = $dbhSD->prepare("INSERT INTO people(personID,name) VALUES(:personID, :name)");
-    $updatePersonSD = $dbhSD->prepare("UPDATE people SET name=:name WHERE personID=:personID");
+    $upsertPersonSD = $dbhSD->prepare("INSERT INTO people(personID, name)
+            VALUES(:personID, :name)
+            ON DUPLICATE KEY UPDATE name=:name");
 
     $insertCreditSD = $dbhSD->prepare("INSERT INTO credits(personID,programID,role)
     VALUES(:personID,:pid,:role)");
@@ -1120,20 +1121,38 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
                 "md5"       => $md5,
                 "json"      => json_encode($v)
             ));
+
+            foreach (array("cast", "crew") as $toProcess) {
+                if (isset($v[$toProcess]) === true) {
+                    foreach ($v[$toProcess] as $person) {
+                        $personID = $person["personId"];
+                        $name = $person["name"];
+
+                        if (isset($peopleCacheSD[$personID]) === false) {
+                            $upsertPersonSD->execute(array("personID" => $personID, "name" => $name));
+                            $peopleCacheSD[$personID] = $name;
+                        } else {
+                            if ($peopleCacheSD[$personID] != $name) {
+                                $upsertPersonSD->execute(array("personID" => $personID, "name" => $name));
+                            }
+                        }
+                    }
+                }
+            }
+
+            $dbhSD->commit();
         }
 
-        $dbhSD->commit();
-    }
+        if ($debug === false) {
+            // unlink($jsonFileToProcess); don't delete for now.
+        }
 
-    if ($debug === false) {
-        // unlink($jsonFileToProcess); don't delete for now.
-    }
+        if ($debug === false) {
+            // rmdir("$dlProgramTempDir"); don't delete for now.
+        }
 
-    if ($debug === false) {
-        // rmdir("$dlProgramTempDir"); don't delete for now.
+        printMSG("Completed local database program updates.");
     }
-
-    printMSG("Completed local database program updates.");
 }
 
 function insertSchedule()

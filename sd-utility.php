@@ -1777,8 +1777,10 @@ function createDatabase($useSQLite)
         $dbhSD->exec("CREATE TABLE `people` (
   `personID` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '',
-  PRIMARY KEY (`personID`),
-  KEY `name` (`name`)
+  `nameID` mediumint(8) unsigned DEFAULT NULL,
+  UNIQUE KEY `personID` (`personID`),
+  KEY `name` (`name`),
+  KEY `nameID` (`nameID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
         $dbhSD->exec("CREATE TABLE `programs` (
@@ -1828,15 +1830,35 @@ function createDatabase($useSQLite)
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 
-        settingSD("SchedulesDirectJSONschemaVersion", "3");
+        settingSD("SchedulesDirectJSONschemaVersion", "4");
+    }
+}
+
+function checkForSchemaUpdate($useSQLite)
+{
+    global $dbhSD;
+    global $schemaVersion;
+    printMSG("Checking for schema updates.");
+    $dbSchemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
+    printMSG("Database schema version is $dbSchemaVersion.");
+    if ($dbSchemaVersion == $schemaVersion) {
+        return;
     }
 
-    if ($schemaVersion == "1") {
+    $stmt = $dbhSD->prepare("DESCRIBE settings");
+    try {
+        $stmt->execute();
+    } catch (PDOException $ex) {
+        if ($ex->getCode() == "42S02") {
+        }
+    }
+
+    if ($dbSchemaVersion == "1") {
         $dbhSD->exec("ALTER TABLE people ADD INDEX(name)");
         settingSD("SchedulesDirectJSONschemaVersion", "2");
     }
 
-    if ($schemaVersion == "2") {
+    if ($dbSchemaVersion == "2") {
         try {
             $dbhSD->exec("RENAME TABLE SDMessages TO messages");
         } catch (PDOException $ex) {
@@ -1899,24 +1921,13 @@ function createDatabase($useSQLite)
         }
         settingSD("SchedulesDirectJSONschemaVersion", "3");
     }
-}
 
-function checkForSchemaUpdate($useSQLite)
-{
-    global $dbhSD;
-    global $schemaVersion;
-    printMSG("Checking for schema updates.");
-    $dbSchemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
-    printMSG("Database schema version is $dbSchemaVersion.");
-    if ($dbSchemaVersion == $schemaVersion) {
-        return;
-    }
-    $stmt = $dbhSD->prepare("DESCRIBE settings");
-    try {
-        $stmt->execute();
-    } catch (PDOException $ex) {
-        if ($ex->getCode() == "42S02") {
-        }
+    if ($dbSchemaVersion == "3") {
+        $dbhSD->exec("ALTER TABLE people DROP PRIMARY KEY");
+        $dbhSD->exec("ALTER TABLE people ADD UNIQUE KEY(personID)");
+        $dbhSD->exec("ALTER TABLE people ADD COLUMN nameID mediumint unsigned");
+        $dbhSD->exec("ALTER TABLE people ADD INDEX(nameID)");
+        settingSD("SchedulesDirectJSONschemaVersion", "4");
     }
 }
 
