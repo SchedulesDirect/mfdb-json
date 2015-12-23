@@ -35,6 +35,8 @@ $updatedLineupsToRefresh = array();
 $needToStoreLogin = false;
 $resetDatabase = false;
 $useServiceAPI = false;
+$usernameFromDB = "";
+$passwordFromDB = "";
 
 require_once "vendor/autoload.php";
 require_once "functions.php";

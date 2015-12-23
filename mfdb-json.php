@@ -1947,6 +1947,8 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
 
 function tempdir($type)
 {
+    $tempfile = "";
+
     if ($type == "programs") {
         $tempfile = tempnam(sys_get_temp_dir(), "mfdb_programs_");
     }
@@ -1958,9 +1960,14 @@ function tempdir($type)
     if (file_exists($tempfile) === true) {
         unlink($tempfile);
     }
+
     mkdir($tempfile);
+
     if (is_dir($tempfile) === true) {
         return $tempfile;
+    } else {
+        debugMSG("Could not generate directory:$tempfile");
+        exit;
     }
 }
 
