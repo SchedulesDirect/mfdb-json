@@ -1132,9 +1132,9 @@ function updateLocalProgramCache(array $jsonProgramsToRetrieve)
                     }
                 }
             }
-
-            $dbhSD->commit();
         }
+
+        $dbhSD->commit();
 
         if ($debug === false) {
             // unlink($jsonFileToProcess); don't delete for now.
