@@ -232,26 +232,6 @@ if ($isMythTV === true) {
     }
 }
 
-if (isset($dbHost) === false) {
-    $dbHost = "localhost";
-}
-
-if (isset($dbName) === false) {
-    $dbName = "mythconverg";
-}
-
-if (isset($dbUser) === false) {
-    $dbUser = "mythtv";
-}
-
-if (isset($dbPassword) === false) {
-    $dbPassword = "mythtv";
-}
-
-if (isset($host) === false) {
-    $host = "localhost";
-}
-
 if (($isMythTV === true) OR ($dbWithoutMythTV === true)) {
     printMSG("Connecting to Schedules Direct database.");
 
