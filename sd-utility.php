@@ -152,6 +152,7 @@ foreach ($options as $k => $v) {
             break;
         case "nomyth":
             $isMythTV = false;
+            $dbWithoutMythTV = true;
             break;
         case "notfancy":
             $printFancyTable = false;
@@ -176,7 +177,7 @@ foreach ($options as $k => $v) {
             date_default_timezone_set($v);
             break;
         case "usedb":
-            $dbWithoutMythtv = true;
+            $dbWithoutMythTV = true;
             break;
         case "usesqlite":
             $useSQLite = true;
@@ -251,7 +252,7 @@ if (isset($host) === false) {
     $host = "localhost";
 }
 
-if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
+if (($isMythTV === true) OR ($dbWithoutMythTV === true)) {
     printMSG("Connecting to Schedules Direct database.");
 
     if ($useSQLite === true) {
@@ -402,7 +403,7 @@ if ($isMythTV === true) {
     $useServiceAPI = checkForServiceAPI();
 }
 
-if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
+if (($isMythTV === true) OR ($dbWithoutMythTV === true)) {
     $userLoginInformation = settingSD("SchedulesDirectLogin");
 
     if ($userLoginInformation !== false) {
@@ -459,7 +460,7 @@ if ($needToStoreLogin === true) {
 
     $credentials = json_encode($userInformation);
 
-    if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
+    if (($isMythTV === true) OR ($dbWithoutMythTV === true)) {
         settingSD("SchedulesDirectLogin", $credentials);
         // We need to check and see if there are any lineups in the database yet before running an update.
         $stmt = $dbh->prepare("UPDATE videosource SET userid=:username,
