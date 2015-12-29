@@ -377,11 +377,19 @@ if ($isMythTV === true) {
         $stationIDs[] = $station;
     }
 } else {
+    $valid = false;
+
     if ((file_exists("sd.json.stations.conf") === true) AND ($useScheduleFile === true)) {
         $stationIDs = file("sd.json.stations.conf");
-    } elseif ($station != "") {
+        $valid = true;
+    }
+
+    if ($station != "") {
         $stationIDs[] = $station;
-    } elseif ($useProgramFile === false) {
+        $valid = true;
+    }
+
+    if ($valid === false) {
         printMSG("Nothing to do: did not find file sd.json.stations.conf or no station to retrieve passed as parameter.");
         exit;
     }
