@@ -40,6 +40,7 @@ $usernameFromDB = "";
 $useServiceAPI = false;
 $useSQLite = false;
 $api = 20141201;
+$noDB = false;
 
 $tz = "UTC";
 date_default_timezone_set($tz);

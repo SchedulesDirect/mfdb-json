@@ -61,6 +61,7 @@ The following options are available:
 --help\t\t(this text)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
 --logo=\t\tDirectory where channel logos are stored (Default: $channelLogoDirectory)
+--nodb\t\tThe scripts won't store anything in databases and just become fetchers. (Default: FALSE)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
 --skiplogo\tDon't download channel logos.
 --username=\tSchedules Direct username.
@@ -153,6 +154,12 @@ foreach ($options as $k => $v) {
         case "nomyth":
             $isMythTV = false;
             $dbWithoutMythTV = true;
+            break;
+        case "nodb":
+            $noDB = true; // Just become a fancy wget
+            $isMythTV = false;
+            $skipChannelLogo = true;
+            $dbWithoutMythTV = false;
             break;
         case "notfancy":
             $printFancyTable = false;

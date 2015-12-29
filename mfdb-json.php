@@ -64,6 +64,7 @@ The following options are available:
 --forcedownload\tForce download of schedules. (Default: FALSE)
 --forcerun\tContinue to run even if we're known to be broken. (Default: FALSE)
 --host=\t\tIP address of the MythTV backend. (Default: localhost)
+--nodb\t\tThe scripts won't store anything in databases and just become fetchers. (Default: FALSE)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
     Must specify --schedule and/or --program
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
@@ -141,6 +142,12 @@ foreach ($options as $k => $v) {
             break;
         case "forcerun":
             $forceRun = true;
+            break;
+        case "nodb":
+            $noDB = true; // Just become a fancy wget
+            $isMythTV = false;
+            $skipChannelLogo = true;
+            $dbWithoutMythTV = false;
             break;
         case "nomyth":
             $isMythTV = false;
@@ -238,26 +245,6 @@ if ($isMythTV === true) {
     }
 }
 
-if (isset($dbHost) === false) {
-    $dbHost = "localhost";
-}
-
-if (isset($dbName) === false) {
-    $dbName = "mythconverg";
-}
-
-if (isset($dbUser) === false) {
-    $dbUser = "mythtv";
-}
-
-if (isset($dbPassword) === false) {
-    $dbPassword = "mythtv";
-}
-
-if (isset($host) === false) {
-    $host = "localhost";
-}
-
 if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
     printMSG("Connecting to Schedules Direct database.");
     try {
@@ -284,58 +271,58 @@ if (($isMythTV === true) OR ($dbWithoutMythtv === true)) {
             exit;
         }
     }
+}
 
-    if ($isMythTV === true) {
-        printMSG("Connecting to MythTV database.");
-        try {
-            $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword);
-            $dbh->exec("SET CHARACTER SET utf8");
-            $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e) {
-            if ($e->getCode() == 2002) {
-                printMSG("Could not connect to database:\n" . $e->getMessage());
-                printMSG("If you're running the grabber as standalone, use --nomyth");
-                exit;
-            } else {
-                printMSG("Got error connecting to database.");
-                printMSG("Code: " . $e->getCode());
-                printMSG("Message: " . $e->getMessage());
-                exit;
-            }
-        }
-
-        $dbSchedulesDirectJSONschemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
-        if ($schemaVersion != $dbSchedulesDirectJSONschemaVersion) {
-            printMSG("FATAL: Schema version mismatch.");
-            printMSG("This code is: $schemaVersion but the database is $dbSchedulesDirectJSONschemaVersion");
-            printMSG("Did you run the sd-utility.php program yet?");
+if ($isMythTV === true) {
+    printMSG("Connecting to MythTV database.");
+    try {
+        $dbh = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword);
+        $dbh->exec("SET CHARACTER SET utf8");
+        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+        if ($e->getCode() == 2002) {
+            printMSG("Could not connect to database:\n" . $e->getMessage());
+            printMSG("If you're running the grabber as standalone, use --nomyth");
             exit;
-        }
-
-        $useServiceAPI = checkForServiceAPI();
-
-        $userLoginInformation = settingSD("SchedulesDirectLogin");
-
-        if ($userLoginInformation !== false) {
-            $responseJSON = json_decode($userLoginInformation, true);
-            $usernameFromDB = $responseJSON["username"];
-            $passwordFromDB = $responseJSON["password"];
         } else {
-            printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
-            printMSG("Did you run the sd-utility.php program yet?");
+            printMSG("Got error connecting to database.");
+            printMSG("Code: " . $e->getCode());
+            printMSG("Message: " . $e->getMessage());
             exit;
         }
+    }
+
+    $dbSchedulesDirectJSONschemaVersion = settingSD("SchedulesDirectJSONschemaVersion");
+    if ($schemaVersion != $dbSchedulesDirectJSONschemaVersion) {
+        printMSG("FATAL: Schema version mismatch.");
+        printMSG("This code is: $schemaVersion but the database is $dbSchedulesDirectJSONschemaVersion");
+        printMSG("Did you run the sd-utility.php program yet?");
+        exit;
+    }
+
+    $useServiceAPI = checkForServiceAPI();
+
+    $userLoginInformation = settingSD("SchedulesDirectLogin");
+
+    if ($userLoginInformation !== false) {
+        $responseJSON = json_decode($userLoginInformation, true);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
     } else {
-        if (file_exists("sd.json.conf") === true) {
-            $userLoginInformation = file("sd.json.conf");
-            $responseJSON = json_decode($userLoginInformation[0], true);
-            $usernameFromDB = $responseJSON["username"];
-            $passwordFromDB = $responseJSON["password"];
-        } else {
-            printMSG("FATAL: Could not read Schedules Direct login information from sd.json.conf file.");
-            printMSG("Did you run the sd-utility.php program yet?");
-            exit;
-        }
+        printMSG("FATAL: Could not read Schedules Direct login information from settings table.");
+        printMSG("Did you run the sd-utility.php program yet?");
+        exit;
+    }
+} else {
+    if (file_exists("sd.json.conf") === true) {
+        $userLoginInformation = file("sd.json.conf");
+        $responseJSON = json_decode($userLoginInformation[0], true);
+        $usernameFromDB = $responseJSON["username"];
+        $passwordFromDB = $responseJSON["password"];
+    } else {
+        printMSG("FATAL: Could not read Schedules Direct login information from sd.json.conf file.");
+        printMSG("Did you run the sd-utility.php program yet?");
+        exit;
     }
 }
 
