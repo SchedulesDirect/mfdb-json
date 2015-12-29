@@ -568,7 +568,9 @@ function getSchedules($stationIDsToFetch)
         var_dump($requestArray);
     }
 
-    if ($forceDownload === false OR $noDB === false) {
+    if ($noDB === true OR $forceDownload === true) {
+        $schedulesToFetch = $requestArray;
+    } else {
         printMSG("Determining if there are updated schedules.");
 
         $errorCount = 0;
@@ -680,8 +682,6 @@ function getSchedules($stationIDsToFetch)
                 $schedulesToFetch[] = array("stationID" => "$stationID", "date" => $bar);
             }
         }
-    } else {
-        $schedulesToFetch = $requestArray;
     }
 
     if ($debug === true) {
