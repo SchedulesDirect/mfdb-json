@@ -90,6 +90,7 @@ $longoptions = array(
     "dbhostsd::",
     "logo::",
     "notfancy",
+    "nodb",
     "nomyth",
     "skiplogo",
     "username::",

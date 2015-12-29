@@ -91,6 +91,7 @@ $longoptions = array(
     "dbhost::",
     "forcedownload",
     "forcerun",
+    "nodb",
     "nomyth",
     "max::",
     "program",
