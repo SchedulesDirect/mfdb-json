@@ -525,7 +525,7 @@ function getSchedules($stationIDsToFetch)
     global $scheduleJSON;
     global $daysToRetrieve;
     global $todayDate;
-    global $nodb;
+    global $noDB;
 
     $arrayProgramsToRetrieveFromSchedulesDirect = array();
     $requestArray = array();
@@ -568,7 +568,7 @@ function getSchedules($stationIDsToFetch)
         var_dump($requestArray);
     }
 
-    if ($forceDownload === false OR $nodb === false) {
+    if ($forceDownload === false OR $noDB === false) {
         printMSG("Determining if there are updated schedules.");
 
         $errorCount = 0;
@@ -770,7 +770,7 @@ function getSchedules($stationIDsToFetch)
 
     file_put_contents("$dlSchedTempDir/schedule.json", $schedules);
 
-    if ($nodb === true) {
+    if ($noDB === true) {
         return "";
     }
 
