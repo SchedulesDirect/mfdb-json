@@ -444,7 +444,9 @@ if ($token != "ERROR" AND $response != "ERROR") {
             $jsonProgramsToRetrieve = array_merge($jsonProgramsToRetrieve, $foo);
         }
 
-        fetchPrograms($jsonProgramsToRetrieve);
+        if ($jsonProgramsToRetrieve != "DONE") {
+            fetchPrograms($jsonProgramsToRetrieve);
+        }
     }
 } else {
     debugMSG("Error connecting to Schedules Direct.");
@@ -771,7 +773,7 @@ function getSchedules($stationIDsToFetch)
     file_put_contents("$dlSchedTempDir/schedule.json", $schedules);
 
     if ($noDB === true) {
-        return "";
+        return "DONE";
     }
 
     $updateLocalMD5 = $dbhSD->prepare("INSERT INTO schedules(stationID, date, md5) VALUES(:sid, :date, :md5)
