@@ -525,6 +525,7 @@ function getSchedules($stationIDsToFetch)
     global $scheduleJSON;
     global $daysToRetrieve;
     global $todayDate;
+    global $nodb;
 
     $arrayProgramsToRetrieveFromSchedulesDirect = array();
     $requestArray = array();
@@ -549,8 +550,6 @@ function getSchedules($stationIDsToFetch)
         return ("");
     }
 
-    //$stationIDsToFetch = array("11670");
-
     foreach (range(0, ($daysToRetrieve - 1)) as $j) {
         $dateArray[] = date("Y-m-d", strtotime("$todayDate + $j days"));
     }
@@ -569,7 +568,7 @@ function getSchedules($stationIDsToFetch)
         var_dump($requestArray);
     }
 
-    if ($forceDownload === false) {
+    if ($forceDownload === false OR $nodb === false) {
         printMSG("Determining if there are updated schedules.");
 
         $errorCount = 0;
@@ -770,6 +769,10 @@ function getSchedules($stationIDsToFetch)
     printMSG("Writing to $dlSchedTempDir/schedule.json");
 
     file_put_contents("$dlSchedTempDir/schedule.json", $schedules);
+
+    if ($nodb === true) {
+        return "";
+    }
 
     $updateLocalMD5 = $dbhSD->prepare("INSERT INTO schedules(stationID, date, md5) VALUES(:sid, :date, :md5)
     ON DUPLICATE KEY UPDATE md5=:md5");
