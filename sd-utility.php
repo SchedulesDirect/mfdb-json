@@ -1618,10 +1618,33 @@ function tempdir()
 function displayLocalVideoSources()
 {
     global $dbh;
-    // Use the service API if possible.
-    $stmt = $dbh->prepare("SELECT sourceid,name,lineupid FROM videosource ORDER BY sourceid");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    global $useServiceAPI;
+    global $client;
+    global $host;
+
+    $result = array();
+
+//    if ($useServiceAPI === true) {
+//        try {
+//            $response = $client->get("http://$host:6544/Channel/GetVideoSource", array(), array(
+//                "query"   => array("SourceID" => $sid),
+//                "headers" => array("Accept" => "application/json")
+//            ))->send();
+//        } catch (Guzzle\Http\Exception\BadResponseException $e) {
+//            $s = json_decode($e->getResponse()->getBody(true), true);
+//
+//            print "********************************************\n";
+//            print "\tError response from server:\n";
+//            print "\tCode: {$s["code"]}\n";
+//            print "\tMessage: {$s["message"]}\n";
+//            print "\tServer: {$s["serverID"]}\n";
+//            print "********************************************\n";
+//        }
+//    } else {
+        $stmt = $dbh->prepare("SELECT sourceid,name,lineupid FROM videosource ORDER BY sourceid");
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//    }
 
     if (count($result) != 0) {
         print "\nMythTV local videosources:\n";
