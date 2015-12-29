@@ -148,6 +148,7 @@ foreach ($options as $k => $v) {
             $isMythTV = false;
             $skipChannelLogo = true;
             $dbWithoutMythTV = false;
+            $useScheduleFile = true;
             break;
         case "nomyth":
             $isMythTV = false;
