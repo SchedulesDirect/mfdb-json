@@ -1193,7 +1193,7 @@ function printLineup($lineupArray)
         if (isset($lineupArray[$lineup]) === true) {
             $fetchedLineup = $lineupArray[$lineup];
         } else {
-            print "No lineups in cache; have you refreshed the local lineup cache?\n";
+            print "\n\n*** No lineups in cache; have you refreshed the local lineup cache? ***\n";
 
             return;
         }
@@ -1204,7 +1204,7 @@ function printLineup($lineupArray)
     }
 
     if (count($fetchedLineup) == 0) {
-        print "No lineup in database; have you refreshed the local lineup cache?\n";
+        print "\n\n*** No lineup in database; have you refreshed the local lineup cache? ***\n";
 
         return;
     }
