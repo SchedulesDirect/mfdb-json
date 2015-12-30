@@ -198,6 +198,11 @@ foreach ($options as $k => $v) {
     }
 }
 
+$baseurl = getBaseURL($isBeta);
+
+$client = new Guzzle\Http\Client($baseurl);
+$client->setUserAgent($agentString);
+
 if ($printCountries === true) {
     printListOfAvailableCountries($printFancyTable);
     exit;
@@ -212,11 +217,6 @@ if ($channelLogoDirectory == "UNKNOWN" AND $skipChannelLogo === false) {
     print "Can't determine directory for station logos. Please specify using --logo or use --skiplogo\n";
     exit;
 }
-
-$baseurl = getBaseURL($isBeta);
-
-$client = new Guzzle\Http\Client($baseurl);
-$client->setUserAgent($agentString);
 
 print "Using timezone $tz\n";
 print "$agentString\n";
