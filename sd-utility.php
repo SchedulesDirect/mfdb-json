@@ -37,6 +37,7 @@ $resetDatabase = false;
 $useServiceAPI = false;
 $usernameFromDB = "";
 $passwordFromDB = "";
+$lineupArray = array();
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -479,7 +480,13 @@ while ($done === false) {
     print "1 Add a known lineupID to your account at Schedules Direct\n";
     print "2 Search for a lineup to add to your account at Schedules Direct\n";
     print "3 Delete a lineup from your account at Schedules Direct\n";
-    print "4 Refresh the local lineup cache\n";
+
+    if ($noDB === false) {
+        print "4 Refresh the local lineup cache\n";
+    } else {
+        print "4 --nodb enabled\n";
+    }
+
     print "5 Acknowledge a message\n";
     print "6 Print a channel table for a lineup\n";
 
@@ -515,18 +522,18 @@ while ($done === false) {
             break;
         case "4":
             if (count($sdStatus["lineups"]) != 0) {
-                $lineupToRefresh = array();
+                $lineupsToRefresh = array();
                 foreach ($sdStatus["lineups"] as $v) {
-                    $lineupToRefresh[$v["lineup"]] = 1;
+                    $lineupsToRefresh[$v["lineup"]] = 1;
                 }
-                storeLocalLineup($lineupToRefresh);
+                storeLocalLineup($lineupsToRefresh);
             }
             break;
         case "5":
             deleteMessageFromSchedulesDirect();
             break;
         case "6":
-            printLineup();
+            printLineup($lineupArray);
             break;
         case "A":
             print "Adding new videosource\n\n";
@@ -1172,9 +1179,10 @@ function linkSchedulesDirectLineup()
     return "";
 }
 
-function printLineup()
+function printLineup($lineupArray)
 {
     global $dbhSD;
+    global $noDB;
 
     /*
      * First we want to get the lineup that we're interested in.
@@ -1186,11 +1194,15 @@ function printLineup()
         return;
     }
 
-    $stmt = $dbhSD->prepare("SELECT json FROM lineups WHERE lineup=:lineup");
-    $stmt->execute(array("lineup" => $lineup));
-    $response = json_decode($stmt->fetchColumn(), true);
+    if ($noDB === false) {
+        $stmt = $dbhSD->prepare("SELECT json FROM lineups WHERE lineup=:lineup");
+        $stmt->execute(array("lineup" => $lineup));
+        $fetchedLineup = json_decode($stmt->fetchColumn(), true);
+    } else {
+        $fetchedLineup = $lineupArray[$lineup];
+    }
 
-    if (!count($response)) {
+    if (!count($fetchedLineup)) {
         return;
     }
 
@@ -1199,8 +1211,8 @@ function printLineup()
     $chanMap = array();
     $stationMap = array();
 
-    if ($response["metadata"]["transport"] == "Antenna") {
-        foreach ($response["map"] as $v) {
+    if ($fetchedLineup["metadata"]["transport"] == "Antenna") {
+        foreach ($fetchedLineup["map"] as $v) {
             if (isset($v["atscMajor"]) === true) {
                 $chanMap[$v["stationID"]] = "{$v["atscMajor"]}.{$v["atscMinor"]}";
             } elseif (isset($v["uhfVhf"]) === true) {
@@ -1210,12 +1222,12 @@ function printLineup()
             }
         }
     } else {
-        foreach ($response["map"] as $v) {
+        foreach ($fetchedLineup["map"] as $v) {
             $chanMap[$v["stationID"]] = $v["channel"];
         }
     }
 
-    foreach ($response["stations"] as $v) {
+    foreach ($fetchedLineup["stations"] as $v) {
         if (isset($v["affiliate"]) === true) {
             $stationMap[$v["stationID"]] = "{$v["callsign"]} ({$v["affiliate"]})";
         } else {
@@ -1546,6 +1558,7 @@ function storeLocalLineup($updatedLineupsToRefresh)
     global $dbhSD;
     global $useSQLite;
     global $noDB;
+    global $lineupArray;
 
     if (($noDB === false) AND (is_null($dbhSD) === true)) {
         global $argv;
@@ -1597,10 +1610,8 @@ function storeLocalLineup($updatedLineupsToRefresh)
                     "json"     => json_encode($fetchedLineup)
                 ));
             }
-        } else {
-            var_dump($fetchedLineup); // Temp
         }
-
+        $lineupArray[$lineupToGet] = $fetchedLineup;
         unset ($updatedLineupsToRefresh[$lineupToGet]);
     }
 }
