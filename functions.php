@@ -167,6 +167,7 @@ function printStatus($sdStatus)
 {
     global $updatedLineupsToRefresh;
     global $isMythTV;
+    global $noDB;
     global $debug;
     global $printFancyTable;
 
@@ -323,7 +324,7 @@ function printStatus($sdStatus)
         print $lineupData;
     }
 
-    if (count($updatedLineupsToRefresh) != 0) {
+    if (count($updatedLineupsToRefresh) != 0 AND $noDB === false) {
         updateLocalLineupCache($updatedLineupsToRefresh);
     }
 }

@@ -30,7 +30,7 @@ This file describes API 20141201.
 - Full support for United States, Canada, Great Britain.
 - See http://forums.schedulesdirect.org/viewtopic.php?f=8&t=2586 for the
   complete list of countries with data.
-- Self-hosted data, so not dependent on Tribune's XML servers.
+- Self-hosted data, so not dependent on Gracenote's XML servers.
 
 If the two scripts are called with the **--nomyth** parameter, then certain
 functionality changes.  Rather than reading username and password from the
@@ -117,8 +117,7 @@ MythTV database.
 You can run it with **--help** to see the various options.
 
 ```
-Using beta server.
-sd-utility.php utility program API:20141201 v0.25/2015-02-28
+sd-utility.php utility program API:20141201 v0.28-dev/2015-12-14
 
 The following options are available:
 --beta          Use beta server. (Default: FALSE)
@@ -135,13 +134,16 @@ The following options are available:
 --help          (this text)
 --host=         IP address of the MythTV backend. (Default: localhost)
 --logo=         Directory where channel logos are stored (Default: /home/rkulagow/.mythtv/channels)
+--nodb          The scripts won't store anything in databases and just become fetchers. (Default: FALSE)
 --nomyth        Don't execute any MythTV specific functions. (Default: FALSE)
 --skiplogo      Don't download channel logos.
 --username=     Schedules Direct username.
 --password=     Schedules Direct password.
+--reset         Reset the database.
 --timezone=     Set the timezone for log file timestamps. See http://www.php.net/manual/en/timezones.php (Default:UTC)
 --skipversion   Force the program to run even if there's a version mismatch between the client and the server.
 --usedb         Use a database to store data, even if you're not running MythTV. (Default: FALSE)
+--usesqlite     Use a SQLite database to store Schedules Direct data. (Default: FALSE)
 --version       Print version information and exit.
 ```
 
