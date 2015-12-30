@@ -1202,7 +1202,7 @@ function printLineup($lineupArray)
         $fetchedLineup = $lineupArray[$lineup];
     }
 
-    if (!count($fetchedLineup)) {
+    if (count($fetchedLineup) == 0) {
         return;
     }
 
