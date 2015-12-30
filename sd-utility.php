@@ -519,7 +519,7 @@ while ($done === false) {
                 foreach ($sdStatus["lineups"] as $v) {
                     $lineupToRefresh[$v["lineup"]] = 1;
                 }
-                updateLocalLineupCache($lineupToRefresh);
+                storeLocalLineup($lineupToRefresh);
             }
             break;
         case "5":
@@ -1541,63 +1541,67 @@ function getLineup($lineupToGet)
     return $res;
 }
 
-function updateLocalLineupCache($updatedLineupsToRefresh)
+function storeLocalLineup($updatedLineupsToRefresh)
 {
     global $dbhSD;
     global $useSQLite;
+    global $noDB;
 
-    if (is_null($dbhSD) === true) {
+    if (($noDB === true) AND (is_null($dbhSD) === true)) {
         global $argv;
         print "Send the following to grabber@schedulesdirect.org\n";
-        print "updateLocalLineupCache->dbhSD is null?\n";
+        print "storeLocalLine->dbhSD is null and noDB is false?\n";
         var_dump($argv);
         exit;
     }
 
     print "Checking for updated lineups from Schedules Direct.\n";
 
-    foreach ($updatedLineupsToRefresh as $k => $v) {
-        $res = array();
-        $res = getLineup($k);
+    foreach ($updatedLineupsToRefresh as $lineupToGet => $v) {
+        $fetchedLineup = array();
+        $fetchedLineup = getLineup($lineupToGet);
 
-        if (isset($res["code"]) === true) {
+        if (isset($fetchedLineup["code"]) === true) {
             print "\n\n-----\nERROR: Bad response from Schedules Direct.\n";
-            print $res["message"] . "\n\n-----\n";
+            print $fetchedLineup["message"] . "\n\n-----\n";
             exit;
         }
 
         /*
          * Store a copy of the data that we just downloaded into the cache.
          */
-        if ($useSQLite === false) {
-            $stmt = $dbhSD->prepare("INSERT INTO lineups(lineup,json,modified)
+        if ($noDB === false) {
+            if ($useSQLite === false) {
+                $stmt = $dbhSD->prepare("INSERT INTO lineups(lineup,json,modified)
         VALUES(:lineup,:json,:modified) ON DUPLICATE KEY UPDATE json=:json,modified=:modified");
 
-            $stmt->execute(array(
-                "lineup"   => $k,
-                "modified" => $updatedLineupsToRefresh[$k],
-                "json"     => json_encode($res)
-            ));
-        } else {
-            $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO lineups(lineup,json,modified)
+                $stmt->execute(array(
+                    "lineup"   => $lineupToGet,
+                    "modified" => $updatedLineupsToRefresh[$lineupToGet],
+                    "json"     => json_encode($fetchedLineup)
+                ));
+            } else {
+                $stmt = $dbhSD->prepare("INSERT OR IGNORE INTO lineups(lineup,json,modified)
         VALUES(:lineup,:json,:modified)");
 
-            $stmt->execute(array(
-                "lineup"   => $k,
-                "modified" => $updatedLineupsToRefresh[$k],
-                "json"     => json_encode($res)
-            ));
+                $stmt->execute(array(
+                    "lineup"   => $lineupToGet,
+                    "modified" => $updatedLineupsToRefresh[$lineupToGet],
+                    "json"     => json_encode($fetchedLineup)
+                ));
 
-            $stmt = $dbhSD->prepare("UPDATE lineups SET json=:json,modified=:modified WHERE lineup=:lineup");
-            $stmt->execute(array(
-                "lineup"   => $k,
-                "modified" => $updatedLineupsToRefresh[$k],
-                "json"     => json_encode($res)
-            ));
-
+                $stmt = $dbhSD->prepare("UPDATE lineups SET json=:json,modified=:modified WHERE lineup=:lineup");
+                $stmt->execute(array(
+                    "lineup"   => $lineupToGet,
+                    "modified" => $updatedLineupsToRefresh[$lineupToGet],
+                    "json"     => json_encode($fetchedLineup)
+                ));
+            }
+        } else {
+            var_dump($fetchedLineup); // Temp
         }
 
-        unset ($updatedLineupsToRefresh[$k]);
+        unset ($updatedLineupsToRefresh[$lineupToGet]);
     }
 }
 
@@ -1641,9 +1645,9 @@ function displayLocalVideoSources()
 //            print "********************************************\n";
 //        }
 //    } else {
-        $stmt = $dbh->prepare("SELECT sourceid,name,lineupid FROM videosource ORDER BY sourceid");
-        $stmt->execute();
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $dbh->prepare("SELECT sourceid,name,lineupid FROM videosource ORDER BY sourceid");
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 //    }
 
     if (count($result) != 0) {

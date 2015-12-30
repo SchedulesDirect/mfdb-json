@@ -325,7 +325,7 @@ function printStatus($sdStatus)
     }
 
     if (count($updatedLineupsToRefresh) != 0 AND $noDB === false) {
-        updateLocalLineupCache($updatedLineupsToRefresh);
+        storeLocalLineup($updatedLineupsToRefresh);
     }
 }
 
