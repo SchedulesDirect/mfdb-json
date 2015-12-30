@@ -1254,13 +1254,12 @@ function addLineupsToSchedulesDirect()
 {
     global $client;
     global $token;
-    global $availableCountries;
     global $debug;
 
     $sdLineupArray = array();
     $countriesWithOnePostalCode = array();
 
-    foreach ($availableCountries as $region => $foo) {
+    foreach (getListOfAvailableCountries() as $region => $foo) {
         foreach ($foo as $item) {
             if (isset($item["onePostalCode"]) === true) {
                 $countriesWithOnePostalCode[$item["shortName"]] = $item["postalCodeExample"];
