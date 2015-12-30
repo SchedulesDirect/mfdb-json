@@ -1547,7 +1547,7 @@ function storeLocalLineup($updatedLineupsToRefresh)
     global $useSQLite;
     global $noDB;
 
-    if (($noDB === true) AND (is_null($dbhSD) === true)) {
+    if (($noDB === false) AND (is_null($dbhSD) === true)) {
         global $argv;
         print "Send the following to grabber@schedulesdirect.org\n";
         print "storeLocalLine->dbhSD is null and noDB is false?\n";
