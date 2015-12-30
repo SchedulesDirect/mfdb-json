@@ -199,7 +199,6 @@ foreach ($options as $k => $v) {
 }
 
 if ($printCountries === true) {
-    $availableCountries = getListOfAvailableCountries();
     printListOfAvailableCountries($printFancyTable);
     exit;
 }
@@ -2152,9 +2151,7 @@ function getListOfAvailableCountries()
 
 function printListOfAvailableCountries($fancyTable)
 {
-    global $availableCountries;
-
-    foreach ($availableCountries as $region => $data) {
+    foreach (getListOfAvailableCountries() as $region => $data) {
         print "\nRegion:$region\n";
 
         $countryWidth = 0;
