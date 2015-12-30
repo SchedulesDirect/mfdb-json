@@ -480,13 +480,7 @@ while ($done === false) {
     print "1 Add a known lineupID to your account at Schedules Direct\n";
     print "2 Search for a lineup to add to your account at Schedules Direct\n";
     print "3 Delete a lineup from your account at Schedules Direct\n";
-
-    if ($noDB === false) {
-        print "4 Refresh the local lineup cache\n";
-    } else {
-        print "4 --nodb enabled\n";
-    }
-
+    print "4 Refresh the local lineup cache\n";
     print "5 Acknowledge a message\n";
     print "6 Print a channel table for a lineup\n";
 
@@ -1191,18 +1185,27 @@ function printLineup($lineupArray)
     list($lineup, $isDeleted) = getLineupFromNumber(strtoupper(readline("Lineup to print (# or lineup):>")));
 
     if ($lineup == "" OR $isDeleted) {
+
         return;
     }
 
-    if ($noDB === false) {
+    if ($noDB === true) {
+        if (isset($lineupArray[$lineup]) === true) {
+            $fetchedLineup = $lineupArray[$lineup];
+        } else {
+            print "No lineups in cache; have you refreshed the local lineup cache?\n";
+
+            return;
+        }
+    } else {
         $stmt = $dbhSD->prepare("SELECT json FROM lineups WHERE lineup=:lineup");
         $stmt->execute(array("lineup" => $lineup));
         $fetchedLineup = json_decode($stmt->fetchColumn(), true);
-    } else {
-        $fetchedLineup = $lineupArray[$lineup];
     }
 
     if (count($fetchedLineup) == 0) {
+        print "No lineup in database; have you refreshed the local lineup cache?\n";
+
         return;
     }
 
