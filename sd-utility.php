@@ -864,12 +864,12 @@ function updateChannelTable($lineup)
             }
 
             if ($matchType == "providerCallsign") {
-                $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
-                    WHERE callsign=:providerCallsign");
+                $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
+                  callsign=:providerCallsign");
                 foreach ($json["map"] as $channel) {
                     $updateChannelTable->execute(array(
                         "stationID"        => $channel["stationID"],
-                        "virtualChannel"   => $channel["virtualChannel"],
+//                        "virtualChannel"   => $channel["virtualChannel"],
                         "providerCallsign" => $channel["providerCallsign"]
                     ));
                 }
