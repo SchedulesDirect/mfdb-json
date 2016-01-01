@@ -608,11 +608,12 @@ while ($done === false) {
             $sid = readline("MythTV sourceid:>");
 
             if ($sid == "") {
-                return;
+                break;
             }
 
-            $stmt = $dbh->prepare("UPDATE videosource SET xmltvgrabber='schedulesdirect-json' WHERE sourceid=:sid");
-            $stmt->execute(array("sid" => $sid));
+            $stmt = $dbh->prepare("UPDATE videosource SET xmltvgrabber='schedulesdirect-json',userid=:user,
+            password=:password WHERE sourceid=:sid");
+            $stmt->execute(array("sid" => $sid, "user" => $username, "password" => $password));
 
             break;
         case "Q":
