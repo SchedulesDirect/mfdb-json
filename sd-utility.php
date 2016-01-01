@@ -38,6 +38,7 @@ $useServiceAPI = false;
 $usernameFromDB = "";
 $passwordFromDB = "";
 $lineupArray = array();
+$localLineupCacheRefreshed = false;
 
 require_once "vendor/autoload.php";
 require_once "functions.php";
@@ -489,7 +490,7 @@ while ($done === false) {
         print "A to Add a new videosource to MythTV\n";
         print "D to Delete a videosource in MythTV\n";
         print "L to Link a videosource to a lineup at Schedules Direct\n";
-        print "U to Update a videosource by downloading from Schedules Direct\n";
+        print "U to Update a videosource using the local lineup cache\n";
 
         print "\n\nCapture card functions\n----------------------\n";
         print "C to Connect a capture card input to a videosource\n";
@@ -520,6 +521,7 @@ while ($done === false) {
                     $lineupsToRefresh[$v["lineup"]] = 1;
                 }
                 storeLocalLineup($lineupsToRefresh);
+                $localLineupCacheRefreshed = true;
             }
             break;
         case "5":
@@ -591,6 +593,10 @@ while ($done === false) {
             linkSchedulesDirectLineup();
             break;
         case "U":
+            if ($localLineupCacheRefreshed === false) {
+                print "*** Refresh local lineup cache first! ***\n";
+                break;
+            }
             list($lineup, $isDeleted) =
                 getLineupFromNumber(strtoupper(readline("Schedules Direct lineup (# or lineup):>")));
             if ($lineup != "" AND $isDeleted === false) {
@@ -869,7 +875,7 @@ function updateChannelTable($lineup)
                 foreach ($json["map"] as $channel) {
                     $updateChannelTable->execute(array(
                         "stationID"        => $channel["stationID"],
-//                        "virtualChannel"   => $channel["virtualChannel"],
+                        //                        "virtualChannel"   => $channel["virtualChannel"],
                         "providerCallsign" => $channel["providerCallsign"]
                     ));
                 }
