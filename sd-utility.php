@@ -809,7 +809,7 @@ function updateChannelTable($lineup)
          */
 
         print "You can:\n";
-        print "1. Use the $transport lineup from SD to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
+        print "1. Use the $transport lineup from Schedules Direct to populate stationIDs/xmltvids after having run a mythtv-setup channel scan.\n";
         print "2. Use the $transport lineup information and update the database without running a scan.\n";
         $useScan = readline("Which do you want to do? (1 or 2)>");
 
@@ -824,67 +824,66 @@ function updateChannelTable($lineup)
         }
 
         if ($useScan === true) {
-            if ($transport == "QAM") {
-                $matchType = $json["map"]["matchType"];
+            $matchType = $json["map"]["matchType"];
 
-                print "Matching $transport scan based on: $matchType\n";
+            print "Matching $transport scan based on: $matchType\n";
 
-                if ($matchType == "multiplex") {
-                    $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
-                    $stmt->execute();
-                    $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+            if ($matchType == "multiplex") {
+                $stmt = $dbh->prepare("SELECT mplexid, frequency FROM dtv_multiplex WHERE modulation='qam_256'");
+                $stmt->execute();
+                $qamFrequencies = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-                    $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
-                    $stmt->execute(array("sid" => $sourceID));
-                    $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $stmt = $dbh->prepare("SELECT * FROM channel WHERE sourceid=:sid");
+                $stmt->execute(array("sid" => $sourceID));
+                $existingChannelNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                    $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
+                $updateChannelTableQAM = $dbh->prepare("UPDATE channel SET xmltvid=:stationID WHERE
                 mplexid=:mplexid AND serviceid=:serviceid");
 
-                    $map = array();
+                $map = array();
 
-                    foreach ($json["map"] as $foo) {
-                        $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
-                    }
-
-                    foreach ($existingChannelNumbers as $foo) {
-                        $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
-
-                        if (isset($map[$toFind]) === true) {
-                            $updateChannelTableQAM->execute(array(
-                                "stationID" => $map[$toFind],
-                                "mplexid"   => $foo["mplexid"],
-                                "serviceid" => $foo["serviceID"]
-                            ));
-                        }
-                    }
+                foreach ($json["map"] as $foo) {
+                    $map["{$foo["frequency"]}-{$foo["serviceID"]}"] = $foo["stationID"];
                 }
 
-                if ($matchType == "providerCallsign") {
-                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
-                    WHERE callsign=:providerCallsign");
-                    foreach ($json["map"] as $foo) {
-                        $updateChannelTable->execute(array(
-                            "stationID"        => $foo["stationID"],
-                            "virtualChannel"   => $foo["virtualChannel"],
-                            "providerCallsign" => $foo["providerCallsign"]
+                foreach ($existingChannelNumbers as $foo) {
+                    $toFind = "{$qamFrequencies[$foo["mplexid"]]}-{$foo["serviceid"]}";
+
+                    if (isset($map[$toFind]) === true) {
+                        $updateChannelTableQAM->execute(array(
+                            "stationID" => $map[$toFind],
+                            "mplexid"   => $foo["mplexid"],
+                            "serviceid" => $foo["serviceID"]
                         ));
                     }
                 }
-
-                if ($matchType == "channel") {
-                    $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
-                    WHERE channum=:channel");
-                    foreach ($json["map"] as $foo) {
-                        $updateChannelTable->execute(array(
-                            "stationID"      => $foo["stationID"],
-                            "virtualChannel" => $foo["virtualChannel"],
-                            "channum"        => $foo["channel"]
-                        ));
-                    }
-                }
-                print "Done updating QAM scan with stationIDs.\n";
             }
+
+            if ($matchType == "providerCallsign") {
+                $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE callsign=:providerCallsign");
+                foreach ($json["map"] as $foo) {
+                    $updateChannelTable->execute(array(
+                        "stationID"        => $foo["stationID"],
+                        "virtualChannel"   => $foo["virtualChannel"],
+                        "providerCallsign" => $foo["providerCallsign"]
+                    ));
+                }
+            }
+
+            if ($matchType == "channel") {
+                $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
+                    WHERE channum=:channel");
+                foreach ($json["map"] as $foo) {
+                    $updateChannelTable->execute(array(
+                        "stationID"      => $foo["stationID"],
+                        "virtualChannel" => $foo["virtualChannel"],
+                        "channum"        => $foo["channel"]
+                    ));
+                }
+            }
+            print "Done updating QAM scan with stationIDs.\n";
+
         } else {
             if ($transport == "QAM") {
                 /*
