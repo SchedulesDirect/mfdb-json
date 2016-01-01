@@ -791,12 +791,12 @@ function updateChannelTable($lineup)
                 }
 
                 $getOriginalRecPriority = $dbh->prepare("SELECT t_channel.chanid,t_channel.recpriority FROM
-                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
+                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid AND t_channel.sourceid=:sid");
                 $getOriginalRecPriority->execute(array("sid" => $sourceID));
                 $originalRecPriorityArray = $getOriginalRecPriority->fetchAll(PDO::FETCH_KEY_PAIR);
 
                 $getOriginalVisibility = $dbh->prepare("SELECT t_channel.chanid,t_channel.visible FROM
-                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid and t_channel.sourceid=:sid");
+                    t_channel INNER JOIN channel WHERE channel.xmltvid=t_channel.xmltvid AND t_channel.sourceid=:sid");
                 $getOriginalVisibility->execute(array("sid" => $sourceID));
                 $originalVisibilityArray = $getOriginalVisibility->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -892,8 +892,8 @@ function updateChannelTable($lineup)
                     ));
                 }
             }
-            print "Done updating QAM scan with stationIDs.\n";
 
+            print "Done updating channel table with stationIDs.\n";
         } else {
             if ($transport == "QAM") {
                 /*
@@ -1034,18 +1034,19 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
                     :mplexid,
                     :serviceid,
                     )");
-        }
 
-        foreach ($json["satelliteDetail"] as $satellite) {
-            foreach ($satellite as $entry) {
-                $transportID = $entry["transportID"];
-                $networkID = $entry["networkID"];
-                $frequency = $entry["frequencyMHz"] * 1000;
-                $symbolrate = $entry["symbolrate"] * 1000;
-                $polarity = $entry["polarization"];
-                $modulation = strtolower($entry["modulationSystem"]);
-                $constellation = strtolower($entry["modulationSystem"]);
-                $mod_sys = $entry["deliverySystem"];
+
+            foreach ($json["satelliteDetail"] as $satellite) {
+                foreach ($satellite as $entry) {
+                    $transportID = $entry["transportID"];
+                    $networkID = $entry["networkID"];
+                    $frequency = $entry["frequencyMHz"] * 1000;
+                    $symbolrate = $entry["symbolrate"] * 1000;
+                    $polarity = $entry["polarization"];
+                    $modulation = strtolower($entry["modulationSystem"]);
+                    $constellation = strtolower($entry["modulationSystem"]);
+                    $mod_sys = $entry["deliverySystem"];
+                }
             }
         }
     }
