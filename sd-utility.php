@@ -1069,7 +1069,7 @@ visible,mplexid,serviceid,atsc_major_chan,atsc_minor_chan)
      * callsigns, etc.
      */
 
-    $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign WHERE xmltvid=:stationID");
+    $stmt = $dbh->prepare("UPDATE channel SET name=:name, callsign=:callsign,useonairguide=0 WHERE xmltvid=:stationID");
 
     foreach ($json["stations"] as $stationArray) {
         $stationID = $stationArray["stationID"];
