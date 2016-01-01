@@ -594,7 +594,7 @@ while ($done === false) {
             break;
         case "U":
             if ($localLineupCacheRefreshed === false) {
-                print "*** Refresh local lineup cache first! ***\n";
+                print "\n\n*** Refresh local lineup cache first! ***\n\n";
                 break;
             }
             list($lineup, $isDeleted) =
