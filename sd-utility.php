@@ -491,6 +491,7 @@ while ($done === false) {
         print "D to Delete a videosource in MythTV\n";
         print "L to Link a videosource to a lineup at Schedules Direct\n";
         print "U to Update a videosource using the local lineup cache\n";
+        print "V to update videosource table to use Schedules Direct JSON service\n";
 
         print "\n\nCapture card functions\n----------------------\n";
         print "C to Connect a capture card input to a videosource\n";
@@ -602,6 +603,17 @@ while ($done === false) {
             if ($lineup != "" AND $isDeleted === false) {
                 updateChannelTable($lineup);
             }
+            break;
+        case "V":
+            $sid = readline("MythTV sourceid:>");
+
+            if ($sid == "") {
+                return;
+            }
+
+            $stmt = $dbh->prepare("UPDATE videosource SET xmltvgrabber='schedulesdirect-json' WHERE sourceid=:sid");
+            $stmt->execute(array("sid" => $sid));
+
             break;
         case "Q":
         default:
