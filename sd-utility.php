@@ -698,6 +698,10 @@ function updateChannelTable($lineup)
         $transport = "DVB-S";
     }
 
+    if ($json["metadata"]["transport"] == "DVB-C") {
+        $transport = "DVB-C";
+    }
+
     /*
      * This whole next part needs to get rewritten.
      */
