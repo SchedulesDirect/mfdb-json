@@ -828,7 +828,7 @@ function updateChannelTable($lineup)
         }
 
         if ($useScan === true) {
-            $matchType = $json["map"]["matchType"];
+            $matchType = $json["map"][0]["matchType"];
 
             print "Matching $transport scan based on: $matchType\n";
 
@@ -866,11 +866,11 @@ function updateChannelTable($lineup)
             if ($matchType == "providerCallsign") {
                 $updateChannelTable = $dbh->prepare("UPDATE channel SET xmltvid=:stationID,freqid=:virtualChannel
                     WHERE callsign=:providerCallsign");
-                foreach ($json["map"] as $foo) {
+                foreach ($json["map"] as $channel) {
                     $updateChannelTable->execute(array(
-                        "stationID"        => $foo["stationID"],
-                        "virtualChannel"   => $foo["virtualChannel"],
-                        "providerCallsign" => $foo["providerCallsign"]
+                        "stationID"        => $channel["stationID"],
+                        "virtualChannel"   => $channel["virtualChannel"],
+                        "providerCallsign" => $channel["providerCallsign"]
                     ));
                 }
             }
