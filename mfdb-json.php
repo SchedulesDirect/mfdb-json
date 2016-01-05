@@ -1792,6 +1792,9 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     var_dump($programJSON);
                 }
             } else {
+                /*
+                 * If we have valid S / E, then generate a syndicated episode number based off of that.
+                 */
                 try {
                     $insertSchedule->execute(array(
                         "chanid"                  => $chanID,
