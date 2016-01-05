@@ -1795,6 +1795,11 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                 /*
                  * If we have valid S / E, then generate a syndicated episode number based off of that.
                  */
+
+                if ($season != 0 AND $episode != 0) {
+                    $syndicatedEpisodeNumber = "S" . substr("00$season", -2) . "E" . substr("000$episode", -3);
+                }
+
                 try {
                     $insertSchedule->execute(array(
                         "chanid"                  => $chanID,
