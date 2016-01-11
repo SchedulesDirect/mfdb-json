@@ -298,6 +298,13 @@ if (($isMythTV === true) OR ($dbWithoutMythTV === true)) {
             case "HY000":
                 createDatabase($useSQLite);
                 break;
+            case 1049:
+                print "Initial database not created for Schedules Direct tables.\n";
+                print "Please run\nmysql -uroot -p < sd.sql\n";
+                print "Then re-run this script.\n";
+                print "Please check the updated README.md for more information.\n";
+                exit;
+                break;
             default:
                 print "Got error connecting to database.\n";
                 print "Code: " . $e->getCode() . "\n";
