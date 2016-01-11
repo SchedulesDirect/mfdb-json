@@ -273,6 +273,11 @@ if (($isMythTV === true) OR ($dbWithoutMythTV === true)) {
                     $dbhSD->exec("SET CHARACTER SET utf8");
                     $dbhSD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     break;
+                default:
+                    print "Caught some other code.\n";
+                    print $e->getCode() . "\n";
+                    print $e->getMessage() . "\n";
+                    exit;
             }
         }
     }
