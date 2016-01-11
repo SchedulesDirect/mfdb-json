@@ -258,6 +258,7 @@ if (($isMythTV === true) OR ($dbWithoutMythTV === true)) {
                     print "Could not connect to database:\n" . $e->getMessage() . "\n";
                     exit;
                     break;
+                case 1045:
                 case 1049:
                     print "Initial database not created for Schedules Direct tables.\n";
                     print "Please run\nmysql -uroot -p < sd.sql\n";
