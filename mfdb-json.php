@@ -67,6 +67,7 @@ The following options are available:
 --nodb\t\tThe scripts won't store anything in databases and just become fetchers. (Default: FALSE)
 --nomyth\tDon't execute any MythTV specific functions. (Default: FALSE)
     Must specify --schedule and/or --program
+--notime\tDon't print a timestamp for logs; assumes your system logger is adding a timestamp. (Default: FALSE)
 --max=\t\tMaximum number of programs to retrieve per request. (Default:$maxProgramsToGet)
 --program\tDownload programs based on programIDs in sd.json.programs.conf file.
 --purge=\tPurge cached data. Specify schedules or programs. **NOTE** use for troubleshooting only!
@@ -93,6 +94,7 @@ $longoptions = array(
     "forcerun",
     "nodb",
     "nomyth",
+    "notime",
     "max::",
     "program",
     "purge::",
@@ -153,6 +155,9 @@ foreach ($options as $k => $v) {
             break;
         case "nomyth":
             $isMythTV = false;
+            break;
+        case "notime":
+            $printTimeStamp = false;
             break;
         case "max":
             $maxProgramsToGet = $v;

@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 $scriptVersion = "0.28-dev";
-$scriptDate = "2015-12-14";
+$scriptDate = "2016-02-19";
 $knownToBeBroken = false;
 $skipVersionCheck = true;
 
