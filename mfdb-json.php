@@ -1406,11 +1406,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         }
 
                         $name = $credit["name"];
-
-                        if (strpos($name, "Jorge D") !== false) {
-                            print "Stop here.\n"; // Debug
-                        }
-
+                        
                         if (isset($credit["personId"]) === false) {
                             if ($skipPersonID === false) {
                                 printMSG("$programID does not have a personId.");
@@ -1792,9 +1788,16 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         "episode"                 => $episode
                     ));
                 } catch (PDOException $e) {
-                    print "Exception: " . $e->getMessage();
-                    $debug = true;
-                    var_dump($programJSON);
+                    if ($e->getCode() == 23000) {
+                        /*
+                         * Gracenote has been including duplicates in the raw JSON; ticket has been opened.
+                         */
+                        print "Duplicate entry for $chanID-$programStartTimeMyth Upstream issue as of 2016-05-09.\n";
+                    } else {
+                        print "Exception: " . $e->getMessage();
+                        $debug = true;
+                        var_dump($programJSON);
+                    }
                 }
             } else {
                 /*
@@ -1839,9 +1842,16 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         "videoprop"               => $videoProperties
                     ));
                 } catch (PDOException $e) {
-                    print "Exception: " . $e->getMessage();
-                    $debug = true;
-                    var_dump($programJSON);
+                    if ($e->getCode() == 23000) {
+                        /*
+                         * Gracenote has been including duplicates in the raw JSON; ticket has been opened.
+                         */
+                        print "Duplicate entry for $chanID-$programStartTimeMyth Upstream issue as of 2016-05-09.\n";
+                    } else {
+                        print "Exception: " . $e->getMessage();
+                        $debug = true;
+                        var_dump($programJSON);
+                    }
                 }
             }
 
