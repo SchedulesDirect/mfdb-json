@@ -1795,6 +1795,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         print "Duplicate entry for $chanID-$programStartTimeMyth Upstream issue as of 2016-05-09.\n";
                     } else {
                         print "Exception: " . $e->getMessage();
+                        print "Code: " . $e->getCode() . "\n\n";
                         $debug = true;
                         var_dump($programJSON);
                     }
@@ -1849,6 +1850,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         print "Duplicate entry for $chanID-$programStartTimeMyth Upstream issue as of 2016-05-09.\n";
                     } else {
                         print "Exception: " . $e->getMessage();
+                        print "Code: " . $e->getCode() . "\n\n";
                         $debug = true;
                         var_dump($programJSON);
                     }
