@@ -706,7 +706,7 @@ function getSchedules($stationIDsToFetch)
 
     $errorCount = 0;
     $maxAttempts = 4;
-    $timeout = 60;
+    $timeout = 120;
     $response = null;
 
     do {
