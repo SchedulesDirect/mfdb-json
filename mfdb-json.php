@@ -1743,10 +1743,19 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         ));
                         $relevance++;
                     } catch (PDOException $e) {
-                        print "Exception: " . $e->getMessage();
-                        print "Code: " . $e->getCode();
-                        var_dump($programJSON);
-                        $tt = fgets(STDIN);
+                        if ($e->getCode() == 23000) {
+                            /*
+                             * Gracenote has been including duplicates in the raw JSON; ticket has been opened.
+                             */
+                            print "Duplicate entry for genre $genre in $chanID-$programStartTimeMyth Upstream issue";
+                            print "as of 2016-05-09.\n";
+                        } else {
+                            print "Exception inserting genre.\n\n";
+                            print "Exception: " . $e->getMessage() . "\n\n";
+                            print "Code: " . $e->getCode() . "\n\n";
+                            var_dump($programJSON);
+                            $tt = fgets(STDIN);
+                        }
                     }
                 }
             }
@@ -1794,7 +1803,8 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                          */
                         print "Duplicate entry for $chanID-$programStartTimeMyth Upstream issue as of 2016-05-09.\n";
                     } else {
-                        print "Exception: " . $e->getMessage();
+                        print "Exception inserting schedule, schema > 1318.\n";
+                        print "Exception: " . $e->getMessage() . "\n\n";
                         print "Code: " . $e->getCode() . "\n\n";
                         var_dump($e->getCode());
                         $debug = true;
@@ -1850,6 +1860,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                          */
                         print "Duplicate entry for $chanID-$programStartTimeMyth Upstream issue as of 2016-05-09.\n";
                     } else {
+                        print "Exception inserting schedule, schema < 1318.\n";
                         print "Exception: " . $e->getMessage();
                         print "Code: " . $e->getCode() . "\n\n";
                         var_dump($e->getCode());
