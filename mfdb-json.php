@@ -582,7 +582,7 @@ function getSchedules($stationIDsToFetch)
 
         $errorCount = 0;
         $maxAttempts = 4;
-        $timeout = 60;
+        $timeout = 120;
         $response = null;
 
         do {
@@ -1406,7 +1406,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                         }
 
                         $name = $credit["name"];
-                        
+
                         if (isset($credit["personId"]) === false) {
                             if ($skipPersonID === false) {
                                 printMSG("$programID does not have a personId.");
