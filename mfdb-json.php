@@ -1796,6 +1796,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     } else {
                         print "Exception: " . $e->getMessage();
                         print "Code: " . $e->getCode() . "\n\n";
+                        var_dump($e->getCode());
                         $debug = true;
                         var_dump($programJSON);
                     }
@@ -1851,6 +1852,7 @@ WHERE visible = 1 AND xmltvid != '' AND xmltvid > 0 ORDER BY xmltvid");
                     } else {
                         print "Exception: " . $e->getMessage();
                         print "Code: " . $e->getCode() . "\n\n";
+                        var_dump($e->getCode());
                         $debug = true;
                         var_dump($programJSON);
                     }
